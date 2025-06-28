@@ -1,0 +1,606 @@
+/* Private Room Upgrade Styles */
+
+/* Room Options Container */
+.room-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.room-option-card {
+  display: flex;
+  background: var(--bg-light);
+  border: 2px solid var(--border-light);
+  border-radius: 15px;
+  padding: 25px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.room-option-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px var(--shadow-primary-light);
+}
+
+.room-option-card.room-selected {
+  border-color: var(--primary);
+  background: linear-gradient(
+    135deg,
+    var(--bg-light),
+    rgba(184, 149, 106, 0.1)
+  );
+  box-shadow: 0 8px 20px var(--shadow-primary-light);
+}
+
+.room-option-card.room-selected:hover {
+  transform: translateY(-2px);
+}
+
+.room-option-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.room-option-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Radio Button Styling */
+.radio-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.room-radio {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-light);
+  border-radius: 50%;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  background: var(--bg-light);
+}
+
+.room-radio:hover {
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+.room-radio:checked {
+  border-color: var(--primary);
+  background: var(--primary);
+  box-shadow: 0 0 0 3px rgba(184, 149, 106, 0.2);
+}
+
+.room-radio:checked::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+}
+
+.radio-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+/* Option Info Styling */
+.option-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.option-info i {
+  font-size: 2rem;
+  color: var(--primary);
+  transition: all 0.3s ease;
+}
+
+.room-option-card.room-selected .option-info i {
+  color: var(--primary);
+  text-shadow: 0 0 10px rgba(184, 149, 106, 0.3);
+}
+
+.option-info h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.room-option-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+  min-width: 0; /* Allow flex items to shrink below their content size */
+}
+
+.room-description {
+  flex: 1;
+  min-width: 0; /* Allow this to shrink and wrap text */
+  max-width: calc(100% - 120px); /* Reserve space for price section */
+}
+
+.room-description p {
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.room-description ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 15px 0;
+}
+
+.room-description li {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 4px 0;
+  position: relative;
+  padding-left: 20px;
+}
+
+.room-description li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--success-primary);
+  font-weight: bold;
+}
+
+.room-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+  min-width: 140px;
+  white-space: nowrap;
+}
+
+.price-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.price-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--price-green);
+}
+
+/* Legacy upgrade styles for backward compatibility */
+.upgrade-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.upgrade-card {
+  display: flex;
+  background: var(--bg-light);
+  border: 2px solid var(--border-light);
+  border-radius: 15px;
+  padding: 25px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+  width: 100%;
+}
+
+.upgrade-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px var(--shadow-primary-light);
+}
+
+.upgrade-card.upgrade-selected {
+  border-color: var(--primary);
+  background: linear-gradient(
+    135deg,
+    var(--bg-light),
+    rgba(184, 149, 106, 0.1)
+  );
+  box-shadow: 0 8px 20px var(--shadow-primary-light);
+}
+
+.upgrade-card.upgrade-selected:hover {
+  transform: translateY(-2px);
+}
+
+.upgrade-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.upgrade-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.upgrade-header i {
+  font-size: 2rem;
+  color: var(--primary);
+}
+
+.upgrade-header h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.upgrade-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.upgrade-description p {
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.upgrade-description ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.upgrade-description li {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 4px 0;
+  position: relative;
+  padding-left: 20px;
+}
+
+.upgrade-description li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--success-primary);
+  font-weight: bold;
+}
+
+.upgrade-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+/* Add-ons Section Styles */
+.addons-section {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-top: 40px;
+  padding-top: 20px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.section-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.section-header h1 i {
+  color: var(--primary);
+}
+
+.section-header .section-description {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Navigation buttons handled by Navigation.css */
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .room-option-card {
+    /* Removed min-width constraint for responsive behavior */
+  }
+}
+
+@media (max-width: 768px) {
+  .room-option-card {
+    min-width: unset; /* Remove min-width constraint on mobile */
+  }
+
+  .room-option-details,
+  .upgrade-details {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .room-price,
+  .upgrade-price {
+    align-items: flex-start;
+    width: auto;
+    min-width: auto;
+  }
+
+  .room-description {
+    max-width: 100%; /* Allow full width on mobile */
+  }
+
+  .room-options-container {
+    gap: 15px;
+  }
+
+  .room-option-card,
+  .upgrade-card {
+    padding: 20px;
+  }
+
+  .room-option-header {
+    gap: 15px;
+  }
+
+  /* Mobile navigation button styles handled by Navigation.css */
+
+  .roommate-preferences {
+    gap: 12px;
+    margin-top: 15px;
+  }
+
+  .roommate-option-label {
+    font-size: 0.85rem;
+    gap: 10px;
+  }
+
+  .roommate-radio {
+    width: 14px;
+    height: 14px;
+  }
+
+  .roommate-radio:checked::after {
+    width: 5px;
+    height: 5px;
+  }
+
+  .roommate-name-input {
+    margin-left: 24px;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    max-width: 250px;
+  }
+
+  .roommate-help-text {
+    margin-left: 24px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .roommate-help-text i {
+    font-size: 0.8rem;
+  }
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 480px) {
+  .room-option-card {
+    min-width: unset; /* Remove min-width constraint on mobile */
+    padding: 15px;
+  }
+
+  .room-option-header,
+  .upgrade-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .option-info h3,
+  .upgrade-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .option-info i,
+  .upgrade-header i {
+    font-size: 1.5rem;
+  }
+
+  .room-radio {
+    width: 18px;
+    height: 18px;
+  }
+
+  .room-radio:checked::after {
+    width: 6px;
+    height: 6px;
+  }
+
+  /* Enhanced mobile navigation styling handled by Navigation.css */
+}
+
+/* Roommate Preferences Styling */
+.roommate-preferences {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.roommate-option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.roommate-option-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  transition: color 0.3s ease;
+  max-width: 100%;
+  width: 100%;
+}
+
+.roommate-option-label:hover {
+  color: var(--text-primary);
+}
+
+.roommate-radio {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-light);
+  border-radius: 50%;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  background: white;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.roommate-radio:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(184, 149, 106, 0.1);
+}
+
+.roommate-radio:checked {
+  border-color: var(--primary);
+  background: var(--primary);
+  box-shadow: 0 0 0 2px rgba(184, 149, 106, 0.2);
+}
+
+.roommate-radio:checked::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: white;
+}
+
+.radio-checkmark {
+  /* This span is not needed anymore with the custom radio styling */
+  display: none;
+}
+
+.option-text {
+  font-weight: 500;
+  line-height: 1.5;
+  flex: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+}
+
+.roommate-name-input {
+  margin-left: 28px;
+  padding: 10px 12px;
+  border: 2px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: white;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+}
+
+.roommate-name-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(184, 149, 106, 0.1);
+}
+
+.roommate-name-input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.roommate-help-text {
+  margin-left: 28px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(184, 149, 106, 0.05);
+  border: 1px solid rgba(184, 149, 106, 0.15);
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: calc(100% - 28px);
+}
+
+.roommate-help-text i {
+  color: var(--primary);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}

@@ -1,0 +1,139 @@
+/* Passport Gate Styles - aligned with app patterns */
+
+.passport-gate {
+  background: var(--white-95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px var(--shadow-dark);
+  overflow: hidden;
+  padding-top: clamp(16px, 3vw, 28px);
+  padding-bottom: clamp(16px, 3vw, 28px);
+  margin-bottom: 2rem;
+}
+
+.passport-gate h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.passport-gate p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0 0 1.25rem 0;
+}
+
+/* Align title and subtitle with form fields */
+.passport-gate > h2,
+.passport-gate > p {
+  padding-left: clamp(12px, 4vw, 20px);
+  padding-right: clamp(12px, 4vw, 20px);
+}
+
+.passport-form {
+  padding-left: clamp(12px, 4vw, 20px);
+  padding-right: clamp(12px, 4vw, 20px);
+}
+
+.passport-form .form-row {
+  margin-bottom: 18px;
+}
+
+.passport-form .form-row label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.passport-form .field-note {
+  display: block;
+  margin-top: 4px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* Ensure date inputs match global input styling */
+.passport-form input[type="text"],
+.passport-form input[type="date"] {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid var(--border-light);
+  border-radius: 10px;
+  font-size: 1rem;
+  background-color: white;
+  color: var(--text-primary);
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+}
+
+.passport-form input[type="text"]:focus,
+.passport-form input[type="date"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-primary);
+}
+
+.passport-form input[type="text"]:hover,
+.passport-form input[type="date"]:hover {
+  border-color: var(--primary-light);
+}
+
+.passport-form input[type="text"]:disabled,
+.passport-form input[type="date"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-light);
+}
+
+.passport-form .form-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.form-error {
+  background: var(--error-bg);
+  border: 2px solid var(--error-border);
+  color: var(--error-dark);
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin: 8px 0 12px 0;
+  font-weight: 500;
+}
+
+.form-success {
+  background: var(--success-bg);
+  border: 2px solid var(--success-border);
+  color: var(--success-dark);
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin: 8px 0 12px 0;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .passport-gate h2 {
+    font-size: 1.4rem;
+  }
+
+  .passport-gate p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .passport-gate h2 {
+    font-size: 1.3rem;
+  }
+
+  .passport-form .form-row {
+    margin-bottom: 16px;
+  }
+}

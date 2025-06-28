@@ -1,0 +1,58 @@
+/* Header */
+.header {
+  text-align: center;
+  padding: 40px 0;
+  background: var(--white-95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px var(--shadow-dark);
+}
+
+.superset {
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  opacity: 0.8;
+}
+
+.header-content h1 i {
+  color: var(--primary);
+  margin-right: 15px;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .superset {
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+  }
+
+  .header-content h1 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .superset {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .header-content h1 {
+    font-size: 1.8rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+}

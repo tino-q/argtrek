@@ -1,0 +1,212 @@
+.payment-summary {
+  background: white;
+  border-radius: 10px;
+  padding: clamp(16px, 4vw, 24px);
+  box-shadow: 0 2px 8px var(--shadow-dark);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.payment-summary__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payment-summary__header:hover {
+  opacity: 0.8;
+}
+
+.payment-summary__header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-summary__title {
+  color: var(--text-primary);
+  font-size: clamp(1.1rem, 2.5vw, 1.25rem);
+  font-weight: 600;
+  margin: 0;
+}
+
+.payment-summary__status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.payment-summary__status--paid {
+  background: var(--success-bg);
+  color: var(--success-dark);
+  border: 1px solid var(--success-border);
+}
+
+.payment-summary__status--pending {
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  border: 1px solid var(--warning-border-light);
+}
+
+.payment-summary__info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.payment-summary__info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payment-summary__info-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.payment-summary__info-value {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.payment-summary__breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.payment-summary__payment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.payment-summary__payment-item--completed {
+  background: var(--success-bg);
+  border: 1px solid var(--success-border);
+}
+
+.payment-summary__payment-item--pending {
+  background: var(--bg-light);
+  border: 1px solid var(--border-light);
+}
+
+.payment-summary__payment-content {
+  flex: 1;
+}
+
+.payment-summary__payment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.payment-summary__payment-title {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.payment-summary__payment-check {
+  color: var(--success-dark);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.payment-summary__payment-status {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.payment-summary__payment-amount {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.payment-summary__payment-amount--single {
+  text-align: right;
+}
+
+.payment-summary__amount-primary {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.payment-summary__amount-secondary {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.payment-summary__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: var(--primary-bg);
+  border: 2px solid var(--primary-border);
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.payment-summary__total-label {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.payment-summary__total-amount {
+  color: var(--primary-dark);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.payment-summary__credit-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border-light);
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.payment-summary__credit-icon {
+  color: var(--warning-icon);
+  font-size: 0.875rem;
+}
+
+.payment-summary__credit-text {
+  color: var(--warning-text);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.payment-summary__chevron {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  transition: transform 0.2s ease;
+  user-select: none;
+}
+
+.payment-summary__chevron--expanded {
+  transform: rotate(180deg);
+}

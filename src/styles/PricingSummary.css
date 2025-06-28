@@ -1,0 +1,106 @@
+/* Price Summary */
+.price-summary {
+  background: linear-gradient(135deg, var(--text-primary), var(--text-muted));
+  color: white;
+  padding: 40px;
+  margin-bottom: 40px 0;
+  margin-top: 1rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(45, 55, 72, 0.3);
+}
+
+.price-summary h2 {
+  color: white;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.summary-content {
+  margin: 0 auto;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 1rem;
+}
+
+.activity-row {
+  padding: 8px 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.activity-row small {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+}
+
+.summary-row.subtotal {
+  font-weight: 600;
+  font-size: 1.1rem;
+  /* margin-top: 15px; */
+  /* padding: 15px 0; */
+  /* border-top: 1px solid rgba(255, 255, 255, 0.3); */
+}
+
+.summary-row.total {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--primary-cream);
+  /* margin-top: 15px; */
+  /* padding-top: 20px; */
+  /* border-top: 1px solid rgba(255, 255, 255, 0.3); */
+  border-bottom: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .price-summary {
+    padding: 25px 20px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .price-summary {
+    /* No additional margins needed - takes full width */
+  }
+}
+
+.summary-row.total {
+  font-size: 0.7rem;
+}
+
+.summary-row.subtotal {
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 0.8rem;
+}
+
+.summary-row {
+  font-size: 0.7rem;
+}
+
+.installments {
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Cooking Class Note */
+.cooking-class-note {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.cooking-class-note p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cooking-class-note a {
+  color: white;
+  text-decoration: underline;
+}

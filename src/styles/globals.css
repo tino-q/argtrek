@@ -1,0 +1,379 @@
+/* Argentina Color Palette */
+:root {
+  /* Primary Theme - Argentine Celeste (Flag Blue) */
+  --primary: #75aadb; /* celeste - Argentine flag blue */
+  --primary-rgb: 117, 170, 219; /* primary color as RGB values */
+  --primary-dark: #5a8bc4; /* darker celeste */
+  --primary-darker: #4a73a1; /* deepest blue */
+  --primary-light: #8fc3e8; /* lighter celeste */
+  --primary-lighter: #e3f2fd; /* very light blue */
+  --primary-cream: #f8fcff; /* almost white with blue tint */
+  --primary-bg: #eff6ff; /* blue-50 - light blue background */
+  --primary-border: #93c5fd; /* blue-300 - light blue border */
+  --primary-medium: #75aadb; /* celeste */
+  --primary-selected: #e3f2fd; /* light selection blue */
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--primary),
+    var(--primary-dark)
+  );
+  --gradient-background: linear-gradient(
+    135deg,
+    var(--primary-light),
+    var(--primary-medium)
+  );
+  --gradient-selected: linear-gradient(
+    135deg,
+    var(--primary-lighter),
+    var(--primary-selected)
+  );
+  --gradient-hover: linear-gradient(
+    135deg,
+    var(--primary-dark),
+    var(--primary-darker)
+  );
+
+  /* Shadows & Transparency */
+  --shadow-primary: rgba(117, 170, 219, 0.3); /* celeste with opacity */
+  --shadow-primary-light: rgba(117, 170, 219, 0.2);
+  --shadow-primary-strong: rgba(117, 170, 219, 0.4);
+  --bg-primary-transparent: rgba(117, 170, 219, 0.2);
+  --focus-primary: rgba(117, 170, 219, 0.1);
+
+  /* Text Colors - Stone */
+  --text-primary: #1c1917; /* stone-900 */
+  --text-secondary: #78716c; /* stone-500 */
+  --text-muted: #57534e; /* stone-600 */
+  --border-light: #e7e5e4; /* stone-200 */
+  --bg-light: #fafaf9; /* stone-50 */
+  --white-95: rgba(255, 255, 255, 0.95);
+  --white-20: rgba(255, 255, 255, 0.2);
+  --white-30: rgba(255, 255, 255, 0.3);
+  --white-40: rgba(255, 255, 255, 0.4);
+  --shadow-dark: rgba(0, 0, 0, 0.1);
+  --shadow-dark-20: rgba(0, 0, 0, 0.2);
+
+  /* Success - Emerald */
+  --price-green: #10b981; /* emerald-500 */
+
+  /* Warning - Orange */
+  --warning-bg: #fff7ed; /* orange-50 */
+  --warning-primary: #ea580c; /* orange-600 */
+  --warning-border: #fb923c; /* orange-400 */
+  --warning-border-light: #fdba74; /* orange-300 - light orange border */
+  --warning-icon: #ea580c; /* orange-600 */
+  --warning-text: #9a3412; /* orange-800 */
+
+  /* Error - Red */
+  --error-primary: #ef4444; /* red-500 */
+  --error-dark: #dc2626; /* red-600 */
+  --error-focus: rgba(239, 68, 68, 0.1); /* red-500 with opacity */
+
+  /* Success colors */
+  --success-primary: #10b981; /* emerald-500 */
+  --success-dark: #059669; /* emerald-600 */
+  --success-bg: #f0fdf4; /* emerald-50 - light green background */
+  --success-border: #86efac; /* emerald-300 - light green border */
+
+  /* Error backgrounds */
+  --error-bg: #fef2f2; /* red-50 - light red background */
+  --error-border: #fca5a5; /* red-300 - light red border */
+}
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  word-break: keep-all; /* Prevents words from breaking */
+}
+
+html {
+  min-width: 375px;
+  /* Prevents layout from resizing below 375px - page becomes static */
+}
+
+/* Global form element styling to prevent dark mode interference */
+input,
+select,
+textarea,
+button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+body {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--gradient-background);
+  min-height: 100vh;
+  min-width: 375px;
+  margin: 0;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  left: 0;
+  /* top is set dynamically via JavaScript to preserve scroll position */
+}
+
+/* ===========================================
+   MASTER WIDTH SYSTEM - SINGLE SOURCE OF TRUTH
+   ========================================== */
+
+/* 
+   STANDARD WIDTH: 900px for ALL content
+   This ensures perfect alignment of header, footer, and all form content
+*/
+
+/* Master Container - THE ONLY width constraint for the entire app */
+.container {
+  /* width: 100%; */
+  /* max-width: 1200px; */
+  margin-top: 1rem;
+}
+
+/* App root div - Responsive with proper margins and max-width */
+#root > div {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 100px);
+}
+
+/* Shared responsive container class for consistent layout */
+.responsive-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 100px);
+}
+
+/* Shared animation classes for Header and Footer */
+.slide-in-animation {
+  position: relative;
+  animation: slideInFadeUp 0.8s ease-out;
+}
+
+.slide-in-animation::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 2px;
+  opacity: 0.3;
+  animation: indicatorPulse 2s ease-in-out infinite;
+}
+
+@keyframes slideInFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes indicatorPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translateX(-50%) scaleX(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(-50%) scaleX(1.2);
+  }
+}
+
+/* Responsive padding adjustments */
+@media (max-width: 768px) {
+  .container {
+    /* padding: 0 15px; */
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    /* padding: 0 10px; */
+  }
+}
+
+@media (max-width: 375px) {
+  .container {
+    /* padding: 0 10px; */
+  }
+}
+
+/* Base Form Styles */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid var(--border-light);
+  border-radius: 10px;
+  font-size: 1rem;
+  background-color: white;
+  color: var(--text-primary);
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-primary);
+}
+
+/* Base Checkbox Styles */
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border: 2px solid var(--border-light);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+input[type="checkbox"]:hover {
+  border-color: var(--primary);
+}
+
+/* Global Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+  font-family: inherit;
+  box-shadow: 0 2px 8px var(--shadow-dark);
+}
+
+.btn-primary {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 4px 12px var(--shadow-primary-light);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--gradient-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--shadow-primary);
+}
+
+.btn-primary:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--shadow-primary);
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--text-secondary);
+  border: 2px solid var(--border-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--primary-lighter);
+  color: var(--text-primary);
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary:active {
+  transform: translateY(-1px);
+  background: var(--primary-selected);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Button Responsive Styles */
+@media (max-width: 768px) {
+  .btn {
+    padding: 14px 20px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn {
+    padding: 12px 18px;
+    font-size: 0.9rem;
+    gap: 6px;
+  }
+}
+
+/* WhatsApp Links */
+.whatsapp-link {
+  color: #25d366;
+  text-decoration: underline;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.whatsapp-link:hover {
+  color: #128c7e;
+  text-decoration: underline;
+  transform: translateY(-1px);
+}
+
+.fa-info-circle {
+  margin-right: 0.31rem;
+}

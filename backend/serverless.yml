@@ -1,0 +1,60 @@
+service: trekform-backend
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+  timeout: 30
+  memorySize: 512
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:BatchGetItem
+        - dynamodb:BatchWriteItem
+      Resource:
+        - "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/ArgTripCache"
+        - "arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/ArgTripCache/*"
+
+plugins:
+  - serverless-esbuild
+
+functions:
+  api:
+    handler: src/index.handler
+    events:
+      - http:
+          path: /
+          method: ANY
+          cors:
+            origins:
+              - http://localhost:5173
+              - https://argtrip.sonsolesstays.com
+            headers:
+              - Content-Type
+              - Authorization
+              - X-Requested-With
+            allowCredentials: true
+
+custom:
+  esbuild:
+    bundle: true
+    minify: true
+    sourcemap: false
+    target: "node20"
+    format: "cjs"
+    exclude:
+      - "@types/*"
+    external:
+      - "aws-sdk"
+    packager: npm
+    packagerOptions:
+      scripts: false

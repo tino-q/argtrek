@@ -1,0 +1,234 @@
+/* Activity Selection Styles */
+
+/* Activities Container */
+.activities-container {
+  /* Use standardized container for activities layout */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Activity Card Base */
+.activity-card {
+  display: flex;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  min-height: 280px;
+}
+
+.activity-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.activity-card.activity-selected {
+  border-color: var(--primary);
+  background: linear-gradient(135deg, #ffffff, rgba(184, 149, 106, 0.05));
+  box-shadow: 0 4px 15px rgba(184, 149, 106, 0.2);
+}
+
+/* Image Section */
+.activity-image {
+  flex: 0 0 280px;
+  position: relative;
+  overflow: hidden;
+}
+
+.activity-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.3s ease;
+  min-height: 280px;
+}
+
+.activity-card:hover .activity-image img {
+  transform: scale(1.03);
+}
+
+/* Image Overlay for Gallery */
+.image-overlay-hint {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  /* transform: translate(-50%, -50%); */
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
+.activity-image:hover .image-overlay-hint {
+  opacity: 1;
+}
+
+/* Content Section */
+.activity-content {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Header with Checkbox, Icon, and Title */
+.activity-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.activity-header input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.activity-header i {
+  font-size: 1.5rem;
+  color: var(--primary);
+  margin-top: 1px;
+  min-width: 24px;
+}
+
+.activity-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Activity Details */
+.activity-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.activity-details .location {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.activity-details .date {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.activity-details .description {
+  margin: 8px 0;
+  flex-grow: 1;
+}
+
+.activity-details .description-line {
+  color: #4b5563;
+  font-size: 0.85rem;
+  margin: 0;
+  /* font-style: italic; */
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  margin-bottom: 4px;
+}
+
+.activity-details .description-line:last-child {
+  margin-bottom: 0;
+}
+
+.activity-details .price {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #059669;
+  margin: 16px 0 0 0;
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .activities-container {
+    gap: 20px;
+  }
+
+  .activity-card {
+    flex-direction: column;
+  }
+
+  .activity-image {
+    flex: 0 0 200px;
+    width: 100%;
+  }
+
+  .activity-content {
+    padding: 20px;
+  }
+
+  .activity-header {
+    margin-bottom: 12px;
+  }
+
+  .activity-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .activity-details .price {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .activity-card {
+    min-height: 360px;
+  }
+
+  .activity-image {
+    flex: 0 0 180px;
+  }
+
+  .activity-content {
+    padding: 16px;
+  }
+
+  .activity-header h3 {
+    font-size: 1rem;
+  }
+
+  .activity-details .description-line {
+    font-size: 0.8rem;
+  }
+}
+
+.activity-subtitles {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-top: 2px;
+  margin-bottom: 8px;
+  font-weight: 400;
+  line-height: 1.3;
+}

@@ -1,0 +1,36 @@
+[
+  {
+    "location": "Buenos Aires",
+    "period": "arrival",
+    "hotelName": "Hotel in Buenos Aires",
+    "address": "",
+    "nights": [
+      "Check in 22 Nov - Check out 24 Nov"
+    ]
+  },
+  {
+    "location": "Bariloche",
+    "hotelName": "Hotel in Bariloche",
+    "address": "",
+    "nights": [
+      "Check in 24 Nov - Check out 27 Nov"
+    ]
+  },
+  {
+    "location": "Mendoza",
+    "hotelName": "Hotel in Mendoza",
+    "address": "",
+    "nights": [
+      "Check in 27 Nov - Check out 29 Nov"
+    ]
+  },
+  {
+    "location": "Buenos Aires",
+    "period": "departure",
+    "hotelName": "Hotel in Buenos Aires",
+    "address": "",
+    "nights": [
+      "Check in 29 Nov - Check out 30 Nov"
+    ]
+  }
+]

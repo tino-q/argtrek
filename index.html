@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- <script type="text/javascript">
+      window.didomiConfig = {
+        app: {
+          essentialPurposes: [],
+          vendors: {
+            iab: {},
+          },
+        },
+      };
+
+      (function () {
+        (function (e, i, o) {
+          var n = document.createElement("link");
+          n.rel = "preconnect";
+          n.as = "script";
+          var t = document.createElement("link");
+          t.rel = "dns-prefetch";
+          t.as = "script";
+          var r = document.createElement("script");
+          r.id = "spcloader";
+          r.type = "text/javascript";
+          r["async"] = true;
+          r.charset = "utf-8";
+          window.didomiConfig = window.didomiConfig || {};
+          window.didomiConfig.sdkPath =
+            window.didomiConfig.sdkPath ||
+            o ||
+            "https://sdk.staging.privacy-center.org/";
+          const d = window.didomiConfig.sdkPath;
+          var a = d + e + "/loader.js?target_type=notice&target=" + i;
+          if (window.didomiConfig && window.didomiConfig.user) {
+            var c = window.didomiConfig.user;
+            var s = c.country;
+            var f = c.region;
+            if (s) {
+              a = a + "&country=" + s;
+              if (f) {
+                a = a + "&region=" + f;
+              }
+            }
+          }
+          n.href = d;
+          t.href = d;
+          r.src = a;
+          var m = document.getElementsByTagName("script")[0];
+          m.parentNode.insertBefore(n, m);
+          m.parentNode.insertBefore(t, m);
+          m.parentNode.insertBefore(r, m);
+        })("79edeeb9-6cf1-4740-b85e-d848f81170a1", "zrMT7kLJ");
+      })();
+    </script> -->
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/src/assets/arg.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ARG TRIP</title>
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <!-- Single Page Apps for GitHub Pages -->
+    <!-- This script checks to see if a redirect is present in the query string,
+         converts it back into the correct url and adds it to the
+         browser's history using window.history.replaceState(...) -->
+    <script type="text/javascript">
+      (function (l) {
+        if (l.search[1] === "/") {
+          var decoded = l.search
+            .slice(1)
+            .split("&")
+            .map(function (s) {
+              return s.replace(/~and~/g, "&");
+            })
+            .join("?");
+          window.history.replaceState(
+            null,
+            null,
+            l.pathname.slice(0, -1) + decoded + l.hash
+          );
+        }
+      })(window.location);
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

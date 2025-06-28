@@ -1,0 +1,143 @@
+/* Luggage Gate Styles - harmonious with PassportGate */
+
+.luggage-gate {
+  background: var(--white-95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px var(--shadow-dark);
+  overflow: hidden;
+  padding-top: clamp(16px, 3vw, 28px);
+  padding-bottom: clamp(16px, 3vw, 28px);
+  margin-bottom: 2rem;
+}
+
+.luggage-gate h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.luggage-gate p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0 0 1.25rem 0;
+}
+
+.luggage-gate > h2,
+.luggage-gate > p {
+  padding-left: clamp(12px, 4vw, 20px);
+  padding-right: clamp(12px, 4vw, 20px);
+}
+
+.luggage-form {
+  padding-left: clamp(12px, 4vw, 20px);
+  padding-right: clamp(12px, 4vw, 20px);
+}
+
+.flights-list {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+/* Mobile-first: stack content vertically */
+.flight-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.flight-row:hover {
+  border-color: var(--primary-light);
+  box-shadow: 0 4px 10px var(--shadow-light);
+}
+
+.flight-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+
+.flight-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+}
+
+.flight-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.flight-price {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.subtotal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding: 14px 12px;
+  border-top: 2px dashed var(--border-light);
+  font-size: 1.05rem;
+}
+
+.subtotal-amount {
+  font-weight: 700;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Reuse existing .form-error and buttons from global styles */
+
+/* Responsive adjustments */
+/* Wide screens: align in a row */
+@media (min-width: 768px) {
+  .luggage-gate h2 {
+    font-size: 1.4rem;
+  }
+
+  .flights-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .flight-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    flex: 1;
+    min-width: 250px;
+  }
+
+  .flight-info {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .luggage-gate h2 {
+    font-size: 1.3rem;
+  }
+}

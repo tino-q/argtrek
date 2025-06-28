@@ -1,0 +1,509 @@
+// RSVP Data Utility
+// Centralized access to RSVP data with proper field mapping and validation
+
+import { FORM_FIELDS } from "./config.js";
+
+/**
+ * RSVP Field Name Constants
+ * These match the exact column names from the Google Sheets backend
+ */
+export const RSVP_FIELDS = {
+  // Personal Information
+  TRAVELER_NAME: "name",
+  PLUS_ONE_NAME: "plus1",
+  EMAIL: "email",
+  PASSWORD: "PASSWORD",
+
+  // Pricing
+  PACK_PRICE: "PACKPRICE",
+  PRIVATE_ROOM_UPGRADE: "PRIVATEROOM",
+
+  // Trip Configuration
+  TRIP_OPTION: "option",
+  PARTY_SIZE: "party",
+  COMMENTS: "comments",
+  EMAIL2: "email2",
+
+  // Accommodation Dates
+  NOV_22: "22Nov_BSAS",
+  NOV_23: "23Nov_BSAS",
+  NOV_24: "24Nov_BARI",
+  NOV_25: "25Nov_BARI",
+  NOV_26: "26Nov_BARI",
+  NOV_27: "27Nov_MDZ",
+  NOV_28: "28Nov_MDZ",
+  NOV_29: "29Nov_BSAS",
+
+  // Flights
+  FLIGHT_AEP_BRC: "AEP-BRC",
+  FLIGHT_BRC_MDZ: "BRC-MDZ",
+  FLIGHT_MDZ_AEP: "MDZ-AEP",
+
+  // USD to EUR Exchange Rate
+  USD_TO_EUR_EXCHANGE_RATE: "USD_TO_EUR_EXCHANGE_RATE",
+};
+
+const aepBrc = {
+  code: "JA3047",
+  airline: "JetSMART Argentina",
+  route: "Buenos Aires - Bariloche",
+  departure: {
+    airport: "AEP",
+    city: "Buenos Aires",
+    name: "Jorge Newbery Airfield",
+    time: "11:15",
+  },
+  arrival: {
+    airport: "BRC",
+    city: "Bariloche",
+    name: "Bariloche Airport",
+    time: "13:45",
+  },
+  date: "Nov 24",
+  duration: "2h 30m",
+  aircraft: "Airbus A320",
+};
+
+const mdzAep = {
+  code: "JA3073",
+  airline: "JetSMART Argentina",
+  route: "Mendoza - Buenos Aires",
+  departure: {
+    airport: "MDZ",
+    city: "Mendoza",
+    name: "Governor Francisco Gabrielli International Airport",
+    time: "13:00",
+  },
+  arrival: {
+    airport: "AEP",
+    city: "Buenos Aires",
+    name: "Jorge Newbery Airfield",
+    time: "15:00",
+  },
+  date: "Nov 29",
+  duration: "2h 00m",
+  aircraft: "Airbus A320",
+};
+
+const brcMdz = {
+  code: "JA3725",
+  airline: "JetSMART Argentina",
+  route: "Bariloche - Mendoza",
+  departure: {
+    airport: "BRC",
+    city: "Bariloche",
+    name: "Bariloche Airport",
+    time: "10:15",
+  },
+  arrival: {
+    airport: "MDZ",
+    city: "Mendoza",
+    name: "Governor Francisco Gabrielli International Airport",
+    time: "12:15",
+  },
+  date: "Nov 27",
+  duration: "2h 00m",
+  aircraft: "Airbus A320",
+};
+
+/**
+ * Helper function to format field names to date strings
+ * @param {string[]} fields - Array of field names (e.g. ["22Nov", "23Nov"])
+ * @returns {string[]} - Array of formatted date strings (e.g. ["Nov 22", "Nov 23"])
+ */
+const formatFieldsToNights = (fields) => {
+  const dates = fields.map((field) =>
+    Number(field.split("_")[0].replace("Nov", ""))
+  );
+
+  const [first] = dates;
+  const last = dates[dates.length - 1];
+
+  return [`Check in ${first} Nov - Check out ${last + 1} Nov`];
+};
+
+/**
+ * Get traveler's primary name from RSVP data
+ */
+export const getTravelerName = (rsvpData, formData) => {
+  if (!rsvpData) {
+    return "Name not found";
+  }
+
+  if (
+    formData &&
+    formData[FORM_FIELDS.FIRST_NAME] &&
+    formData[FORM_FIELDS.LAST_NAME]
+  ) {
+    return `${formData[FORM_FIELDS.FIRST_NAME]} ${formData[FORM_FIELDS.LAST_NAME]}`;
+  }
+
+  const name = rsvpData[RSVP_FIELDS.TRAVELER_NAME];
+  return name || "Name not found";
+};
+
+/**
+ * Get plus one's name from RSVP data
+ */
+export const getPlusOneName = (rsvpData) => {
+  if (!rsvpData) {
+    return null;
+  }
+
+  const plusOneName = rsvpData[RSVP_FIELDS.PLUS_ONE_NAME];
+  return plusOneName && plusOneName.trim() ? plusOneName : null;
+};
+
+/**
+ * Get email address from RSVP data
+ */
+export const getEmail = (rsvpData) => {
+  if (!rsvpData) {
+    return "Email not found";
+  }
+
+  const email = rsvpData[RSVP_FIELDS.EMAIL];
+  return email || "Email not found";
+};
+
+/**
+ * Get base trip price from RSVP data
+ */
+export const getBasePrice = (rsvpData) => {
+  if (!rsvpData) {
+    return 0;
+  }
+
+  const price = rsvpData[RSVP_FIELDS.PACK_PRICE];
+  return parseFloat(price) || 0;
+};
+
+/**
+ * Get private room upgrade price from RSVP data
+ */
+export const getPrivateRoomUpgradePrice = (rsvpData) => {
+  if (!rsvpData) {
+    return 0;
+  }
+
+  const price = rsvpData[RSVP_FIELDS.PRIVATE_ROOM_UPGRADE];
+  return parseFloat(price) || 0;
+};
+
+/**
+ * Check if traveler is traveling solo
+ */
+export const isSoloTraveler = (rsvpData) => {
+  if (!rsvpData) {
+    return false;
+  }
+
+  // Check if party size is 1 or if plus1 is empty/null
+  const partySize = rsvpData[RSVP_FIELDS.PARTY_SIZE];
+  const plusOne = rsvpData[RSVP_FIELDS.PLUS_ONE_NAME];
+
+  return partySize === 1 || !plusOne || plusOne.trim() === "";
+};
+
+/**
+ * Check if traveler has a plus one
+ */
+export const hasPlusOne = (rsvpData) => {
+  return !isSoloTraveler(rsvpData) && getPlusOneName(rsvpData) !== null;
+};
+
+/**
+ * Get accommodation nights for a specific location
+ */
+export const getAccommodationNights = (rsvpData, location) => {
+  if (!rsvpData) {
+    return [];
+  }
+
+  const nightMappings = {
+    "buenos-aires-arrival": [RSVP_FIELDS.NOV_22, RSVP_FIELDS.NOV_23],
+    bariloche: [RSVP_FIELDS.NOV_24, RSVP_FIELDS.NOV_25, RSVP_FIELDS.NOV_26],
+    mendoza: [RSVP_FIELDS.NOV_27, RSVP_FIELDS.NOV_28],
+    "buenos-aires-departure": [RSVP_FIELDS.NOV_29],
+  };
+
+  const nightFields = nightMappings[location] || [];
+  return nightFields.filter((field) => rsvpData[field] === true);
+};
+
+/**
+ * Get all included accommodations with their nights
+ */
+export const getIncludedAccommodations = (rsvpData) => {
+  if (!rsvpData) {
+    return [];
+  }
+
+  const accommodations = [];
+
+  // Buenos Aires - Arrival (Nov 22-23)
+  const buenosAiresArrival = getAccommodationNights(
+    rsvpData,
+    "buenos-aires-arrival"
+  );
+  if (buenosAiresArrival.length > 0) {
+    accommodations.push({
+      location: "Buenos Aires",
+      period: "arrival",
+      hotelName: "Hotel in Buenos Aires",
+      address: "",
+      nights: formatFieldsToNights(buenosAiresArrival),
+    });
+  }
+
+  // Bariloche (Nov 24-26)
+  const bariloche = getAccommodationNights(rsvpData, "bariloche");
+  if (bariloche.length > 0) {
+    accommodations.push({
+      location: "Bariloche",
+      hotelName: "Hotel in Bariloche",
+      address: "",
+      nights: formatFieldsToNights(bariloche),
+    });
+  }
+
+  // Mendoza (Nov 27-28)
+  const mendoza = getAccommodationNights(rsvpData, "mendoza");
+  if (mendoza.length > 0) {
+    accommodations.push({
+      location: "Mendoza",
+      hotelName: "Hotel in Mendoza",
+      address: "",
+      nights: formatFieldsToNights(mendoza),
+    });
+  }
+
+  // Buenos Aires - Departure (Nov 29)
+  const buenosAiresDeparture = getAccommodationNights(
+    rsvpData,
+    "buenos-aires-departure"
+  );
+  if (buenosAiresDeparture.length > 0) {
+    accommodations.push({
+      location: "Buenos Aires",
+      period: "departure",
+      hotelName: "Hotel in Buenos Aires",
+      address: "",
+      nights: formatFieldsToNights(buenosAiresDeparture),
+    });
+  }
+
+  return accommodations;
+};
+
+/**
+ * Get all excluded accommodations with their nights
+ */
+export const getExcludedAccommodations = (rsvpData) => {
+  if (!rsvpData) {
+    return [];
+  }
+
+  const accommodations = [];
+
+  // Buenos Aires - Arrival (Nov 22-23)
+  const buenosAiresArrivalFields = [RSVP_FIELDS.NOV_22, RSVP_FIELDS.NOV_23];
+
+  const buenosAiresArrivalExcluded = buenosAiresArrivalFields.filter(
+    (field) => rsvpData[field] === false
+  );
+
+  if (buenosAiresArrivalExcluded.length > 0) {
+    const baArrivalAccommodation = {
+      location: "Buenos Aires",
+      period: "arrival",
+      hotelName: "Hotel in Buenos Aires",
+      address: "",
+      nights: formatFieldsToNights(buenosAiresArrivalExcluded),
+    };
+    accommodations.push(baArrivalAccommodation);
+  }
+
+  // Bariloche (Nov 24-26)
+  const barilocheFields = [
+    RSVP_FIELDS.NOV_24,
+    RSVP_FIELDS.NOV_25,
+    RSVP_FIELDS.NOV_26,
+  ];
+
+  const barilocheExcluded = barilocheFields.filter(
+    (field) => rsvpData[field] === false
+  );
+
+  if (barilocheExcluded.length > 0) {
+    const barilocheAccommodation = {
+      location: "Bariloche",
+      hotelName: "Hotel in Bariloche",
+      address: "",
+      nights: formatFieldsToNights(barilocheExcluded),
+    };
+    accommodations.push(barilocheAccommodation);
+  }
+
+  // Mendoza (Nov 27-28)
+  const mendozaFields = [RSVP_FIELDS.NOV_27, RSVP_FIELDS.NOV_28];
+
+  const mendozaExcluded = mendozaFields.filter(
+    (field) => rsvpData[field] === false
+  );
+
+  if (mendozaExcluded.length > 0) {
+    const mendozaAccommodation = {
+      location: "Mendoza",
+      hotelName: "Hotel in Mendoza",
+      address: "",
+      nights: formatFieldsToNights(mendozaExcluded),
+    };
+    accommodations.push(mendozaAccommodation);
+  }
+
+  // Buenos Aires - Departure (Nov 29)
+  if (rsvpData[RSVP_FIELDS.NOV_29] === false) {
+    const baDepartureAccommodation = {
+      location: "Buenos Aires",
+      period: "departure",
+      hotelName: "Hotel in Buenos Aires",
+      address: "",
+      nights: ["Nov 29"],
+    };
+    accommodations.push(baDepartureAccommodation);
+  }
+
+  return accommodations;
+};
+
+/**
+ * Get included flights
+ */
+export const getIncludedFlights = (rsvpData) => {
+  if (!rsvpData) {
+    return [];
+  }
+
+  const flights = [];
+
+  if (rsvpData[RSVP_FIELDS.FLIGHT_AEP_BRC]) {
+    flights.push(aepBrc);
+  }
+
+  if (rsvpData[RSVP_FIELDS.FLIGHT_BRC_MDZ]) {
+    flights.push(brcMdz);
+  }
+
+  if (rsvpData[RSVP_FIELDS.FLIGHT_MDZ_AEP]) {
+    flights.push(mdzAep);
+  }
+
+  return flights;
+};
+
+/**
+ * Get excluded flights
+ */
+export const getExcludedFlights = (rsvpData) => {
+  if (!rsvpData) {
+    return [];
+  }
+
+  const flights = [];
+
+  if (rsvpData[RSVP_FIELDS.FLIGHT_AEP_BRC] === false) {
+    flights.push(aepBrc);
+  }
+
+  if (rsvpData[RSVP_FIELDS.FLIGHT_BRC_MDZ] === false) {
+    flights.push(brcMdz);
+  }
+
+  if (rsvpData[RSVP_FIELDS.FLIGHT_MDZ_AEP] === false) {
+    flights.push(mdzAep);
+  }
+
+  return flights;
+};
+
+/**
+ * Split traveler name into first name and last name
+ */
+export const splitTravelerName = (rsvpData, formData) => {
+  const fullName = getTravelerName(rsvpData, formData);
+
+  if (!fullName || fullName === "Name not found") {
+    return { firstName: "", lastName: "" };
+  }
+
+  const nameParts = fullName.trim().split(" ");
+
+  if (nameParts.length === 1) {
+    return { firstName: nameParts[0], lastName: "" };
+  }
+
+  // First part is first name, rest is last name
+  const [firstName] = nameParts;
+  const lastName = nameParts.slice(1).join(" ");
+
+  return { firstName, lastName };
+};
+
+/**
+ * Get all personal information in one object
+ */
+export const getPersonalInfo = (rsvpData, formData) => {
+  const { firstName, lastName } = splitTravelerName(rsvpData, formData);
+
+  return {
+    name: getTravelerName(rsvpData, formData),
+    firstName,
+    lastName,
+    plusOneName: getPlusOneName(rsvpData),
+    email: getEmail(rsvpData),
+    isSolo: isSoloTraveler(rsvpData),
+    hasPlusOne: hasPlusOne(rsvpData),
+    phoneNumber: "", // Not available in RSVP data, will be empty initially
+  };
+};
+
+/**
+ * Get all pricing information in one object
+ */
+export const getPricingInfo = (rsvpData) => {
+  return {
+    basePrice: getBasePrice(rsvpData),
+    privateRoomUpgrade: getPrivateRoomUpgradePrice(rsvpData),
+  };
+};
+
+/**
+ * Get complete trip itinerary
+ */
+export const getTripItinerary = (rsvpData) => {
+  return {
+    accommodations: getIncludedAccommodations(rsvpData),
+    flights: getIncludedFlights(rsvpData),
+  };
+};
+
+/**
+ * Get excluded trip services
+ */
+export const getExcludedTripServices = (rsvpData) => {
+  return {
+    accommodations: getExcludedAccommodations(rsvpData),
+    flights: getExcludedFlights(rsvpData),
+  };
+};
+
+/**
+ * Get USD to EUR exchange rate from RSVP data with fallback to default
+ */
+export const getUSDToEURExchangeRate = (rsvpData) => {
+  if (!rsvpData || !rsvpData[RSVP_FIELDS.USD_TO_EUR_EXCHANGE_RATE]) {
+    return 0.86;
+  }
+  return rsvpData[RSVP_FIELDS.USD_TO_EUR_EXCHANGE_RATE];
+};
