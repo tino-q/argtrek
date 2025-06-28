@@ -450,7 +450,7 @@ input[type="email"]:focus {
 /* WhatsApp Links */
 .whatsapp-link {
   color: #25d366;
-  text-decoration: none;
+  text-decoration: underline;
   font-weight: 500;
   transition: all 0.3s ease;
   display: inline-flex;
@@ -460,7 +460,7 @@ input[type="email"]:focus {
 
 .whatsapp-link:hover {
   color: #128c7e;
-  text-decoration: none;
+  text-decoration: underline;
   transform: translateY(-1px);
 }
 
@@ -481,7 +481,7 @@ input[type="email"]:focus {
 .contact-info .whatsapp-link {
   color: white;
   opacity: 0.9;
-  text-decoration: none;
+  text-decoration: underline;
   font-weight: 400;
   display: inline-flex;
   align-items: center;
@@ -492,7 +492,7 @@ input[type="email"]:focus {
 .contact-info .whatsapp-link:hover {
   opacity: 1;
   color: white;
-  text-decoration: none;
+  text-decoration: underline;
   transform: translateY(-1px);
 }
 
