@@ -16,6 +16,7 @@ const paymentMethodOptions = document.querySelectorAll(
   'input[name="paymentMethod"]'
 );
 const argentineCitizenCheckbox = document.getElementById("argentineCitizen");
+const bankingDetails = document.getElementById("bankingDetails");
 
 // Price display elements
 const baseCostElement = document.getElementById("baseCost");
@@ -226,12 +227,11 @@ function handleAccommodationChange() {
   if (selectedAccommodation && selectedAccommodation.value === "0") {
     // Shared room selected - show roommate field
     roommateGroup.style.display = "block";
-    roommateInput.setAttribute("required", "required");
+    roommateInput.required = true;
 
-    // Smooth animation
+    // Add animation
     roommateGroup.style.opacity = "0";
     roommateGroup.style.transform = "translateY(-10px)";
-
     setTimeout(() => {
       roommateGroup.style.transition = "all 0.3s ease";
       roommateGroup.style.opacity = "1";
@@ -240,11 +240,39 @@ function handleAccommodationChange() {
   } else {
     // Private room selected - hide roommate field
     roommateGroup.style.display = "none";
-    roommateInput.removeAttribute("required");
+    roommateInput.required = false;
     roommateInput.value = "";
   }
 
-  calculatePrices();
+  // Recalculate prices
+  calculatePricesWithAnimation();
+}
+
+// Handle payment method change (show/hide banking details)
+function handlePaymentMethodChange() {
+  const selectedPaymentMethod = document.querySelector(
+    'input[name="paymentMethod"]:checked'
+  );
+
+  if (selectedPaymentMethod && selectedPaymentMethod.value === "bank") {
+    // Bank transfer selected - show banking details
+    bankingDetails.style.display = "block";
+
+    // Add animation
+    bankingDetails.style.opacity = "0";
+    bankingDetails.style.transform = "translateY(-10px)";
+    setTimeout(() => {
+      bankingDetails.style.transition = "all 0.3s ease";
+      bankingDetails.style.opacity = "1";
+      bankingDetails.style.transform = "translateY(0)";
+    }, 10);
+  } else {
+    // Credit card selected - hide banking details
+    bankingDetails.style.display = "none";
+  }
+
+  // Recalculate prices for processing fee
+  calculatePricesWithAnimation();
 }
 
 // Add smooth animations to form interactions
@@ -629,7 +657,10 @@ function init() {
   });
 
   paymentMethodOptions.forEach((option) => {
-    option.addEventListener("change", calculatePricesWithAnimation);
+    option.addEventListener("change", function () {
+      handlePaymentMethodChange();
+      calculatePricesWithAnimation();
+    });
   });
 
   // Argentine citizenship checkbox

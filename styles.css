@@ -694,6 +694,154 @@ input[type="checkbox"] {
   font-weight: bold;
 }
 
+/* Banking Details */
+.banking-info {
+  background: var(--bg-light);
+  border: 2px solid var(--border-light);
+  border-radius: 15px;
+  padding: 25px;
+  margin-top: 20px;
+}
+
+.banking-info h3 {
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.banking-info h3 i {
+  color: var(--primary-beige);
+}
+
+.bank-details {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-light);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row .label {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.detail-row .value {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-family: "Courier New", monospace;
+  font-size: 0.9rem;
+}
+
+.transfer-instructions {
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.transfer-instructions h4 {
+  color: var(--warning-text);
+  font-size: 1rem;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.transfer-instructions h4 i {
+  color: var(--warning-icon);
+}
+
+.transfer-instructions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.transfer-instructions li {
+  color: var(--warning-text);
+  margin-bottom: 8px;
+  position: relative;
+  padding-left: 20px;
+  font-size: 0.9rem;
+}
+
+.transfer-instructions li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--warning-icon);
+  font-weight: bold;
+}
+
+.revolut-recommendation {
+  background: var(--gradient-primary);
+  border-radius: 10px;
+  padding: 20px;
+  color: white;
+}
+
+.revolut-highlight {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.revolut-highlight i {
+  font-size: 1.5rem;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.revolut-highlight h4 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.revolut-highlight p {
+  margin-bottom: 12px;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.revolut-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  background: var(--white-20);
+  border-radius: 6px;
+  transition: background 0.3s ease;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.revolut-link:hover {
+  background: var(--white-30);
+  text-decoration: none;
+}
+
 /* Price Summary */
 .price-summary {
   background: linear-gradient(135deg, var(--text-primary), var(--text-muted));
