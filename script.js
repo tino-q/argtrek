@@ -449,6 +449,45 @@ function showNotification(message, type = "info") {
   }, 5000);
 }
 
+// Make activity cards clickable
+function makeActivityCardsClickable() {
+  const activityCards = document.querySelectorAll(".activity-card");
+
+  activityCards.forEach((card) => {
+    // Add cursor pointer to indicate clickability
+    card.style.cursor = "pointer";
+
+    card.addEventListener("click", function (e) {
+      // Don't trigger if clicking directly on the checkbox or label
+      if (e.target.type === "checkbox" || e.target.tagName === "LABEL") {
+        return;
+      }
+
+      const checkbox = card.querySelector('input[type="checkbox"]');
+      if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+
+        // Trigger the change event to update animations and calculations
+        checkbox.dispatchEvent(new Event("change"));
+      }
+    });
+
+    // Add hover effect
+    card.addEventListener("mouseenter", function () {
+      if (!this.querySelector('input[type="checkbox"]').checked) {
+        this.style.transform = "translateY(-2px)";
+        this.style.transition = "all 0.2s ease";
+      }
+    });
+
+    card.addEventListener("mouseleave", function () {
+      if (!this.querySelector('input[type="checkbox"]').checked) {
+        this.style.transform = "translateY(0)";
+      }
+    });
+  });
+}
+
 // Initialize the application
 function init() {
   // Add dynamic styles
@@ -481,6 +520,9 @@ function init() {
 
   // Add form animations
   addFormAnimations();
+
+  // Make activity cards clickable
+  makeActivityCardsClickable();
 
   // Initial calculation
   calculatePrices();

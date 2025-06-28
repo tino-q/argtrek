@@ -509,12 +509,28 @@ input[type="email"]:focus {
   border-radius: 15px;
   padding: 25px;
   transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
 }
 
 .activity-card:hover {
   border-color: var(--primary-beige);
   transform: translateY(-3px);
   box-shadow: 0 10px 25px var(--shadow-beige-light);
+}
+
+.activity-card.activity-selected {
+  border-color: var(--primary-beige);
+  background: linear-gradient(
+    135deg,
+    var(--bg-light),
+    rgba(184, 149, 106, 0.1)
+  );
+  box-shadow: 0 8px 20px var(--shadow-beige-light);
+}
+
+.activity-card.activity-selected:hover {
+  transform: translateY(-2px);
 }
 
 .activity-header {
@@ -564,6 +580,7 @@ input[type="email"]:focus {
   display: flex;
   align-items: center;
   gap: 10px;
+  pointer-events: none;
 }
 
 input[type="checkbox"] {
@@ -571,6 +588,7 @@ input[type="checkbox"] {
   height: 20px;
   accent-color: var(--primary-beige);
   cursor: pointer;
+  pointer-events: auto;
 }
 
 .toggle-label {
@@ -578,6 +596,7 @@ input[type="checkbox"] {
   color: var(--text-primary);
   cursor: pointer;
   margin: 0;
+  pointer-events: auto;
 }
 
 /* Payment Warning */
