@@ -267,10 +267,42 @@ body {
   color: var(--text-secondary);
   font-size: 0.9rem;
   margin-bottom: 20px;
-  padding: 15px;
-  background: var(--bg-light);
-  border-radius: 8px;
-  border-left: 4px solid var(--primary-beige);
+  line-height: 1.5;
+  padding: 0 5px;
+}
+
+/* Trip Option Warning */
+.trip-option-warning {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: var(--primary-beige-cream);
+  border: 2px solid var(--primary-beige-light);
+  border-radius: 10px;
+  margin-bottom: 25px;
+}
+
+.trip-option-warning i {
+  color: var(--primary-beige);
+  font-size: 1.3rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.trip-option-warning p {
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.trip-option-warning p:last-child {
+  margin-bottom: 0;
+}
+
+.trip-option-warning strong {
+  color: var(--primary-beige-dark);
+  font-weight: 600;
 }
 
 input[type="text"],
