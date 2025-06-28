@@ -460,21 +460,32 @@ input[type="email"]:focus {
 
 .whatsapp-link:hover {
   color: #128c7e;
-  text-decoration: underline;
+  text-decoration: none;
+  transform: translateY(-1px);
 }
 
 .whatsapp-link i {
-  font-size: 1rem;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.contact-info .whatsapp-link i {
+  font-size: 0.9rem;
+  opacity: 0.7;
 }
 
 .contact-info .whatsapp-link {
   color: white;
   opacity: 0.9;
+  text-decoration: none;
+  font-weight: 400;
 }
 
 .contact-info .whatsapp-link:hover {
   opacity: 1;
   color: white;
+  text-decoration: none;
+  transform: translateY(-1px);
 }
 
 /* Activities Grid */
