@@ -671,6 +671,17 @@ input[type="checkbox"] {
   font-size: 1rem;
 }
 
+.activity-row {
+  padding: 8px 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.activity-row small {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+}
+
 .summary-row.subtotal {
   font-weight: 600;
   font-size: 1.1rem;

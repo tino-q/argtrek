@@ -19,7 +19,7 @@ const paymentMethodOptions = document.querySelectorAll(
 // Price display elements
 const baseCostElement = document.getElementById("baseCost");
 const accommodationCostElement = document.getElementById("accommodationCost");
-const activitiesCostElement = document.getElementById("activitiesCost");
+const activitiesSection = document.getElementById("activitiesSection");
 const subtotalElement = document.getElementById("subtotal");
 const processingFeeRow = document.getElementById("processingFeeRow");
 const processingFeeElement = document.getElementById("processingFee");
@@ -36,6 +36,25 @@ const prices = {
   rafting: 75,
   creditCardFeeRate: 0.04,
   installmentRate: 0.35,
+};
+
+// Activity information
+const activities = {
+  horseback: {
+    name: "Horse Back Riding",
+    price: 45,
+    location: "Mendoza",
+  },
+  cooking: {
+    name: "Empanadas Cooking Class",
+    price: 140,
+    location: "Mendoza",
+  },
+  rafting: {
+    name: "Rafting Adventure",
+    price: 75,
+    location: "Bariloche",
+  },
 };
 
 // Calculate and update prices
@@ -60,10 +79,16 @@ function calculatePrices() {
     accommodationCost = parseInt(selectedAccommodation.value);
   }
 
-  // Get activities cost
+  // Get activities cost and details
+  let selectedActivities = [];
   activityCheckboxes.forEach((checkbox) => {
     if (checkbox.checked) {
-      activitiesCost += parseInt(checkbox.value);
+      const activityId = checkbox.id;
+      const activity = activities[activityId];
+      if (activity) {
+        selectedActivities.push(activity);
+        activitiesCost += activity.price;
+      }
     }
   });
 
@@ -98,7 +123,7 @@ function calculatePrices() {
   updatePriceDisplay(
     baseCost,
     accommodationCost,
-    activitiesCost,
+    selectedActivities,
     subtotal,
     processingFee,
     totalAmount,
@@ -110,7 +135,7 @@ function calculatePrices() {
 function updatePriceDisplay(
   baseCost,
   accommodationCost,
-  activitiesCost,
+  selectedActivities,
   subtotal,
   processingFee,
   totalAmount,
@@ -119,8 +144,10 @@ function updatePriceDisplay(
   baseCostElement.textContent = `$${baseCost.toLocaleString()}`;
   accommodationCostElement.textContent =
     accommodationCost > 0 ? `$${accommodationCost.toLocaleString()}` : "$0";
-  activitiesCostElement.textContent =
-    activitiesCost > 0 ? `$${activitiesCost.toLocaleString()}` : "$0";
+
+  // Update activities section
+  updateActivitiesSection(selectedActivities);
+
   subtotalElement.textContent = `$${subtotal.toLocaleString()}`;
   totalAmountElement.textContent = `$${totalAmount.toLocaleString()}`;
   dueNowElement.textContent = `$${dueNow.toLocaleString()}`;
@@ -131,6 +158,33 @@ function updatePriceDisplay(
     processingFeeElement.textContent = `$${processingFee.toLocaleString()}`;
   } else {
     processingFeeRow.style.display = "none";
+  }
+}
+
+// Update activities section with selected activities
+function updateActivitiesSection(selectedActivities) {
+  activitiesSection.innerHTML = "";
+
+  if (selectedActivities.length === 0) {
+    // Show placeholder when no activities are selected
+    const noActivityRow = document.createElement("div");
+    noActivityRow.className = "summary-row";
+    noActivityRow.innerHTML = `
+      <span>Optional Activities:</span>
+      <span>$0</span>
+    `;
+    activitiesSection.appendChild(noActivityRow);
+  } else {
+    // Show each selected activity
+    selectedActivities.forEach((activity) => {
+      const activityRow = document.createElement("div");
+      activityRow.className = "summary-row activity-row";
+      activityRow.innerHTML = `
+        <span>${activity.name} <small>(${activity.location})</small></span>
+        <span>$${activity.price.toLocaleString()}</span>
+      `;
+      activitiesSection.appendChild(activityRow);
+    });
   }
 }
 
@@ -253,11 +307,16 @@ function animatePriceUpdate() {
   const priceElements = [
     baseCostElement,
     accommodationCostElement,
-    activitiesCostElement,
     subtotalElement,
     totalAmountElement,
     dueNowElement,
   ];
+
+  // Add activity elements to animation
+  const activityElements = activitiesSection.querySelectorAll(
+    ".activity-row span:last-child"
+  );
+  priceElements.push(...activityElements);
 
   priceElements.forEach((element) => {
     element.classList.add("price-highlight");
