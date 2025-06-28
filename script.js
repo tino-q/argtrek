@@ -552,8 +552,8 @@ function makeCheckboxOptionClickable() {
 
   if (checkboxOption) {
     checkboxOption.addEventListener("click", function (e) {
-      // Don't trigger if clicking directly on the checkbox or label
-      if (e.target.type === "checkbox" || e.target.tagName === "LABEL") {
+      // Only prevent if clicking directly on the checkbox itself
+      if (e.target.type === "checkbox") {
         return;
       }
 

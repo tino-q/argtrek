@@ -623,12 +623,14 @@ input[type="checkbox"] {
   accent-color: var(--primary-beige);
   cursor: pointer;
   margin-top: 2px;
+  pointer-events: auto;
 }
 
 .checkbox-label {
   flex: 1;
   cursor: pointer;
   margin: 0;
+  pointer-events: none;
 }
 
 .checkbox-label strong {
@@ -641,8 +643,9 @@ input[type="checkbox"] {
 .checkbox-label .help-text {
   color: var(--text-muted);
   font-size: 0.9rem;
-  margin: 0;
+  margin: 8px 0 0 0;
   line-height: 1.4;
+  padding-left: 0;
 }
 
 /* Payment Warning */
