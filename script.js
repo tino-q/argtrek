@@ -18,6 +18,7 @@ const paymentMethodOptions = document.querySelectorAll(
 
 // Price display elements
 const baseCostElement = document.getElementById("baseCost");
+const accommodationRow = document.getElementById("accommodationRow");
 const accommodationCostElement = document.getElementById("accommodationCost");
 const activitiesSection = document.getElementById("activitiesSection");
 const subtotalElement = document.getElementById("subtotal");
@@ -142,8 +143,14 @@ function updatePriceDisplay(
   dueNow
 ) {
   baseCostElement.textContent = `$${baseCost.toLocaleString()}`;
-  accommodationCostElement.textContent =
-    accommodationCost > 0 ? `$${accommodationCost.toLocaleString()}` : "$0";
+
+  // Show/hide accommodation upgrade row
+  if (accommodationCost > 0) {
+    accommodationRow.style.display = "flex";
+    accommodationCostElement.textContent = `$${accommodationCost.toLocaleString()}`;
+  } else {
+    accommodationRow.style.display = "none";
+  }
 
   // Update activities section
   updateActivitiesSection(selectedActivities);
@@ -306,11 +313,15 @@ function addDynamicStyles() {
 function animatePriceUpdate() {
   const priceElements = [
     baseCostElement,
-    accommodationCostElement,
     subtotalElement,
     totalAmountElement,
     dueNowElement,
   ];
+
+  // Add accommodation element if visible
+  if (accommodationRow.style.display !== "none") {
+    priceElements.push(accommodationCostElement);
+  }
 
   // Add activity elements to animation
   const activityElements = activitiesSection.querySelectorAll(
