@@ -15,6 +15,7 @@ const paymentScheduleOptions = document.querySelectorAll(
 const paymentMethodOptions = document.querySelectorAll(
   'input[name="paymentMethod"]'
 );
+const argentineCitizenCheckbox = document.getElementById("argentineCitizen");
 
 // Price display elements
 const baseCostElement = document.getElementById("baseCost");
@@ -22,6 +23,8 @@ const accommodationRow = document.getElementById("accommodationRow");
 const accommodationCostElement = document.getElementById("accommodationCost");
 const activitiesSection = document.getElementById("activitiesSection");
 const subtotalElement = document.getElementById("subtotal");
+const vatRow = document.getElementById("vatRow");
+const vatAmountElement = document.getElementById("vatAmount");
 const processingFeeRow = document.getElementById("processingFeeRow");
 const processingFeeElement = document.getElementById("processingFee");
 const totalAmountElement = document.getElementById("totalAmount");
@@ -37,6 +40,7 @@ const prices = {
   rafting: 75,
   creditCardFeeRate: 0.04,
   installmentRate: 0.35,
+  vatRate: 0.21,
 };
 
 // Activity information
@@ -96,17 +100,24 @@ function calculatePrices() {
   // Calculate subtotal
   const subtotal = baseCost + accommodationCost + activitiesCost;
 
+  // Calculate VAT if Argentine citizen
+  let vatAmount = 0;
+  if (argentineCitizenCheckbox && argentineCitizenCheckbox.checked) {
+    vatAmount = Math.round(subtotal * prices.vatRate);
+  }
+
   // Calculate processing fee if credit card is selected
   let processingFee = 0;
   const selectedPaymentMethod = document.querySelector(
     'input[name="paymentMethod"]:checked'
   );
   if (selectedPaymentMethod && selectedPaymentMethod.value === "credit") {
-    processingFee = Math.round(subtotal * prices.creditCardFeeRate);
+    const baseForProcessing = subtotal + vatAmount;
+    processingFee = Math.round(baseForProcessing * prices.creditCardFeeRate);
   }
 
   // Calculate total amount
-  const totalAmount = subtotal + processingFee;
+  const totalAmount = subtotal + vatAmount + processingFee;
 
   // Calculate amount due now based on payment schedule
   let dueNow = totalAmount;
@@ -126,6 +137,7 @@ function calculatePrices() {
     accommodationCost,
     selectedActivities,
     subtotal,
+    vatAmount,
     processingFee,
     totalAmount,
     dueNow
@@ -138,6 +150,7 @@ function updatePriceDisplay(
   accommodationCost,
   selectedActivities,
   subtotal,
+  vatAmount,
   processingFee,
   totalAmount,
   dueNow
@@ -156,8 +169,14 @@ function updatePriceDisplay(
   updateActivitiesSection(selectedActivities);
 
   subtotalElement.textContent = `$${subtotal.toLocaleString()}`;
-  totalAmountElement.textContent = `$${totalAmount.toLocaleString()}`;
-  dueNowElement.textContent = `$${dueNow.toLocaleString()}`;
+
+  // Show/hide VAT row
+  if (vatAmount > 0) {
+    vatRow.style.display = "flex";
+    vatAmountElement.textContent = `$${vatAmount.toLocaleString()}`;
+  } else {
+    vatRow.style.display = "none";
+  }
 
   // Show/hide processing fee row
   if (processingFee > 0) {
@@ -166,6 +185,9 @@ function updatePriceDisplay(
   } else {
     processingFeeRow.style.display = "none";
   }
+
+  totalAmountElement.textContent = `$${totalAmount.toLocaleString()}`;
+  dueNowElement.textContent = `$${dueNow.toLocaleString()}`;
 }
 
 // Update activities section with selected activities
@@ -321,6 +343,11 @@ function animatePriceUpdate() {
   // Add accommodation element if visible
   if (accommodationRow.style.display !== "none") {
     priceElements.push(accommodationCostElement);
+  }
+
+  // Add VAT element if visible
+  if (vatRow.style.display !== "none") {
+    priceElements.push(vatAmountElement);
   }
 
   // Add activity elements to animation
@@ -519,6 +546,26 @@ function showNotification(message, type = "info") {
   }, 5000);
 }
 
+// Make checkbox option clickable
+function makeCheckboxOptionClickable() {
+  const checkboxOption = document.querySelector(".checkbox-option");
+
+  if (checkboxOption) {
+    checkboxOption.addEventListener("click", function (e) {
+      // Don't trigger if clicking directly on the checkbox or label
+      if (e.target.type === "checkbox" || e.target.tagName === "LABEL") {
+        return;
+      }
+
+      const checkbox = this.querySelector('input[type="checkbox"]');
+      if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+        checkbox.dispatchEvent(new Event("change"));
+      }
+    });
+  }
+}
+
 // Make activity cards clickable
 function makeActivityCardsClickable() {
   const activityCards = document.querySelectorAll(".activity-card");
@@ -585,6 +632,23 @@ function init() {
     option.addEventListener("change", calculatePricesWithAnimation);
   });
 
+  // Argentine citizenship checkbox
+  if (argentineCitizenCheckbox) {
+    argentineCitizenCheckbox.addEventListener("change", function () {
+      calculatePricesWithAnimation();
+
+      // Add visual feedback
+      const checkboxOption = this.closest(".checkbox-option");
+      if (this.checked) {
+        checkboxOption.style.borderColor = "var(--primary-beige)";
+        checkboxOption.style.backgroundColor = "rgba(184, 149, 106, 0.1)";
+      } else {
+        checkboxOption.style.borderColor = "var(--border-light)";
+        checkboxOption.style.backgroundColor = "var(--bg-light)";
+      }
+    });
+  }
+
   // Form submission
   form.addEventListener("submit", handleFormSubmit);
 
@@ -593,6 +657,9 @@ function init() {
 
   // Make activity cards clickable
   makeActivityCardsClickable();
+
+  // Make checkbox option clickable
+  makeCheckboxOptionClickable();
 
   // Initial calculation
   calculatePrices();

@@ -460,6 +460,23 @@
               </div>
             </div>
           </div>
+
+          <div class="form-group">
+            <div class="checkbox-option">
+              <input
+                type="checkbox"
+                id="argentineCitizen"
+                name="argentineCitizen"
+                value="vat"
+              />
+              <label for="argentineCitizen" class="checkbox-label">
+                <strong>I have Argentine citizenship</strong>
+                <p class="help-text">
+                  Argentine citizens are subject to 21% VAT on all services
+                </p>
+              </label>
+            </div>
+          </div>
         </section>
 
         <!-- Price Summary -->
@@ -484,6 +501,10 @@
             <div class="summary-row subtotal">
               <span>Subtotal:</span>
               <span id="subtotal">$0</span>
+            </div>
+            <div class="summary-row" id="vatRow" style="display: none">
+              <span>VAT (21%):</span>
+              <span id="vatAmount">$0</span>
             </div>
             <div
               class="summary-row"
