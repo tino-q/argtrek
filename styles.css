@@ -1,14 +1,14 @@
-/* Color Palette Variables */
+/* Tailwind CSS Color Palette */
 :root {
-  /* Beige Palette */
-  --primary-beige: #b8956a;
-  --primary-beige-dark: #a68a5b;
-  --primary-beige-darker: #9b7e54;
-  --primary-beige-light: #d4a574;
-  --primary-beige-lighter: #f5f1e8;
-  --primary-beige-cream: #f0e7d6;
-  --primary-beige-medium: #c19a6b;
-  --primary-beige-selected: #eee6d8;
+  /* Primary Theme - Amber */
+  --primary-beige: #f59e0b; /* amber-500 */
+  --primary-beige-dark: #d97706; /* amber-600 */
+  --primary-beige-darker: #b45309; /* amber-700 */
+  --primary-beige-light: #fbbf24; /* amber-400 */
+  --primary-beige-lighter: #fef3c7; /* amber-100 */
+  --primary-beige-cream: #fffbeb; /* amber-50 */
+  --primary-beige-medium: #f59e0b; /* amber-500 */
+  --primary-beige-selected: #fef3c7; /* amber-100 */
 
   /* Gradients */
   --gradient-primary: linear-gradient(
@@ -33,18 +33,18 @@
   );
 
   /* Shadows & Transparency */
-  --shadow-beige: rgba(184, 149, 106, 0.3);
-  --shadow-beige-light: rgba(184, 149, 106, 0.2);
-  --shadow-beige-strong: rgba(184, 149, 106, 0.4);
-  --bg-beige-transparent: rgba(184, 149, 106, 0.2);
-  --focus-beige: rgba(184, 149, 106, 0.1);
+  --shadow-beige: rgba(245, 158, 11, 0.3); /* amber-500 with opacity */
+  --shadow-beige-light: rgba(245, 158, 11, 0.2);
+  --shadow-beige-strong: rgba(245, 158, 11, 0.4);
+  --bg-beige-transparent: rgba(245, 158, 11, 0.2);
+  --focus-beige: rgba(245, 158, 11, 0.1);
 
-  /* Standard Colors */
-  --text-primary: #2d3748;
-  --text-secondary: #718096;
-  --text-muted: #4a5568;
-  --border-light: #e2e8f0;
-  --bg-light: #f7fafc;
+  /* Text Colors - Stone */
+  --text-primary: #1c1917; /* stone-900 */
+  --text-secondary: #78716c; /* stone-500 */
+  --text-muted: #57534e; /* stone-600 */
+  --border-light: #e7e5e4; /* stone-200 */
+  --bg-light: #fafaf9; /* stone-50 */
   --white-95: rgba(255, 255, 255, 0.95);
   --white-20: rgba(255, 255, 255, 0.2);
   --white-30: rgba(255, 255, 255, 0.3);
@@ -52,23 +52,23 @@
   --shadow-dark: rgba(0, 0, 0, 0.1);
   --shadow-dark-20: rgba(0, 0, 0, 0.2);
 
-  /* Green for pricing */
-  --price-green: #38a169;
+  /* Success - Emerald */
+  --price-green: #10b981; /* emerald-500 */
 
-  /* Warning colors */
-  --warning-bg: #fef5e7;
-  --warning-border: #f6ad55;
-  --warning-icon: #ed8936;
-  --warning-text: #744210;
+  /* Warning - Orange */
+  --warning-bg: #fff7ed; /* orange-50 */
+  --warning-border: #fb923c; /* orange-400 */
+  --warning-icon: #ea580c; /* orange-600 */
+  --warning-text: #9a3412; /* orange-800 */
 
-  /* Error colors */
-  --error-primary: #e53e3e;
-  --error-dark: #c53030;
-  --error-focus: rgba(229, 62, 62, 0.1);
+  /* Error - Red */
+  --error-primary: #ef4444; /* red-500 */
+  --error-dark: #dc2626; /* red-600 */
+  --error-focus: rgba(239, 68, 68, 0.1); /* red-500 with opacity */
 
   /* Success colors */
-  --success-primary: #38a169;
-  --success-dark: #2f855a;
+  --success-primary: #10b981; /* emerald-500 */
+  --success-dark: #059669; /* emerald-600 */
 }
 
 /* Reset and Base Styles */
