@@ -1,0 +1,496 @@
+// DOM Elements
+const form = document.getElementById("tripForm");
+const tripOptions = document.querySelectorAll('input[name="tripOption"]');
+const accommodationOptions = document.querySelectorAll(
+  'input[name="accommodation"]'
+);
+const roommateGroup = document.getElementById("roommateGroup");
+const roommateInput = document.getElementById("roommate");
+const activityCheckboxes = document.querySelectorAll(
+  'input[name="activities"]'
+);
+const paymentScheduleOptions = document.querySelectorAll(
+  'input[name="paymentSchedule"]'
+);
+const paymentMethodOptions = document.querySelectorAll(
+  'input[name="paymentMethod"]'
+);
+
+// Price display elements
+const baseCostElement = document.getElementById("baseCost");
+const accommodationCostElement = document.getElementById("accommodationCost");
+const activitiesCostElement = document.getElementById("activitiesCost");
+const subtotalElement = document.getElementById("subtotal");
+const processingFeeRow = document.getElementById("processingFeeRow");
+const processingFeeElement = document.getElementById("processingFee");
+const totalAmountElement = document.getElementById("totalAmount");
+const dueNowElement = document.getElementById("dueNow");
+
+// Price calculation object
+const prices = {
+  tripOption1: 2250,
+  tripOption2: 2600,
+  privateRoom: 300,
+  horseback: 45,
+  cooking: 140,
+  rafting: 75,
+  creditCardFeeRate: 0.04,
+  installmentRate: 0.35,
+};
+
+// Calculate and update prices
+function calculatePrices() {
+  let baseCost = 0;
+  let accommodationCost = 0;
+  let activitiesCost = 0;
+
+  // Get base trip cost
+  const selectedTripOption = document.querySelector(
+    'input[name="tripOption"]:checked'
+  );
+  if (selectedTripOption) {
+    baseCost = parseInt(selectedTripOption.value);
+  }
+
+  // Get accommodation cost
+  const selectedAccommodation = document.querySelector(
+    'input[name="accommodation"]:checked'
+  );
+  if (selectedAccommodation) {
+    accommodationCost = parseInt(selectedAccommodation.value);
+  }
+
+  // Get activities cost
+  activityCheckboxes.forEach((checkbox) => {
+    if (checkbox.checked) {
+      activitiesCost += parseInt(checkbox.value);
+    }
+  });
+
+  // Calculate subtotal
+  const subtotal = baseCost + accommodationCost + activitiesCost;
+
+  // Calculate processing fee if credit card is selected
+  let processingFee = 0;
+  const selectedPaymentMethod = document.querySelector(
+    'input[name="paymentMethod"]:checked'
+  );
+  if (selectedPaymentMethod && selectedPaymentMethod.value === "credit") {
+    processingFee = Math.round(subtotal * prices.creditCardFeeRate);
+  }
+
+  // Calculate total amount
+  const totalAmount = subtotal + processingFee;
+
+  // Calculate amount due now based on payment schedule
+  let dueNow = totalAmount;
+  const selectedPaymentSchedule = document.querySelector(
+    'input[name="paymentSchedule"]:checked'
+  );
+  if (
+    selectedPaymentSchedule &&
+    selectedPaymentSchedule.value === "installments"
+  ) {
+    dueNow = Math.round(totalAmount * prices.installmentRate);
+  }
+
+  // Update display
+  updatePriceDisplay(
+    baseCost,
+    accommodationCost,
+    activitiesCost,
+    subtotal,
+    processingFee,
+    totalAmount,
+    dueNow
+  );
+}
+
+// Update price display elements
+function updatePriceDisplay(
+  baseCost,
+  accommodationCost,
+  activitiesCost,
+  subtotal,
+  processingFee,
+  totalAmount,
+  dueNow
+) {
+  baseCostElement.textContent = `$${baseCost.toLocaleString()}`;
+  accommodationCostElement.textContent =
+    accommodationCost > 0 ? `$${accommodationCost.toLocaleString()}` : "$0";
+  activitiesCostElement.textContent =
+    activitiesCost > 0 ? `$${activitiesCost.toLocaleString()}` : "$0";
+  subtotalElement.textContent = `$${subtotal.toLocaleString()}`;
+  totalAmountElement.textContent = `$${totalAmount.toLocaleString()}`;
+  dueNowElement.textContent = `$${dueNow.toLocaleString()}`;
+
+  // Show/hide processing fee row
+  if (processingFee > 0) {
+    processingFeeRow.style.display = "flex";
+    processingFeeElement.textContent = `$${processingFee.toLocaleString()}`;
+  } else {
+    processingFeeRow.style.display = "none";
+  }
+}
+
+// Handle accommodation selection
+function handleAccommodationChange() {
+  const selectedAccommodation = document.querySelector(
+    'input[name="accommodation"]:checked'
+  );
+
+  if (selectedAccommodation && selectedAccommodation.value === "0") {
+    // Shared room selected - show roommate field
+    roommateGroup.style.display = "block";
+    roommateInput.setAttribute("required", "required");
+
+    // Smooth animation
+    roommateGroup.style.opacity = "0";
+    roommateGroup.style.transform = "translateY(-10px)";
+
+    setTimeout(() => {
+      roommateGroup.style.transition = "all 0.3s ease";
+      roommateGroup.style.opacity = "1";
+      roommateGroup.style.transform = "translateY(0)";
+    }, 10);
+  } else {
+    // Private room selected - hide roommate field
+    roommateGroup.style.display = "none";
+    roommateInput.removeAttribute("required");
+    roommateInput.value = "";
+  }
+
+  calculatePrices();
+}
+
+// Add smooth animations to form interactions
+function addFormAnimations() {
+  // Add animation to radio options when selected
+  const radioOptions = document.querySelectorAll(
+    '.radio-option input[type="radio"]'
+  );
+  radioOptions.forEach((radio) => {
+    radio.addEventListener("change", function () {
+      // Remove animation class from all options in the same group
+      const groupName = this.name;
+      const groupOptions = document.querySelectorAll(
+        `input[name="${groupName}"]`
+      );
+      groupOptions.forEach((option) => {
+        option.closest(".radio-option").classList.remove("selected-animation");
+      });
+
+      // Add animation to selected option
+      this.closest(".radio-option").classList.add("selected-animation");
+
+      setTimeout(() => {
+        this.closest(".radio-option").classList.remove("selected-animation");
+      }, 300);
+    });
+  });
+
+  // Add animation to activity cards when toggled
+  activityCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+      const card = this.closest(".activity-card");
+      if (this.checked) {
+        card.classList.add("activity-selected");
+      } else {
+        card.classList.remove("activity-selected");
+      }
+    });
+  });
+}
+
+// Add CSS for animations
+function addDynamicStyles() {
+  const style = document.createElement("style");
+  style.textContent = `
+        .selected-animation {
+            animation: selectPulse 0.3s ease;
+        }
+        
+        @keyframes selectPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        .activity-selected {
+            background: var(--gradient-selected) !important;
+            border-color: var(--primary-beige) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--shadow-beige);
+        }
+        
+        .activity-selected .activity-header i {
+            color: var(--primary-beige-dark) !important;
+            animation: bounce 0.5s ease;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-5px); }
+            80% { transform: translateY(-2px); }
+        }
+        
+        .price-highlight {
+            animation: priceUpdate 0.5s ease;
+        }
+        
+        @keyframes priceUpdate {
+            0% { transform: scale(1); color: inherit; }
+            50% { transform: scale(1.05); color: var(--primary-beige); }
+            100% { transform: scale(1); color: inherit; }
+        }
+    `;
+  document.head.appendChild(style);
+}
+
+// Animate price updates
+function animatePriceUpdate() {
+  const priceElements = [
+    baseCostElement,
+    accommodationCostElement,
+    activitiesCostElement,
+    subtotalElement,
+    totalAmountElement,
+    dueNowElement,
+  ];
+
+  priceElements.forEach((element) => {
+    element.classList.add("price-highlight");
+    setTimeout(() => {
+      element.classList.remove("price-highlight");
+    }, 500);
+  });
+}
+
+// Enhanced calculate prices with animation
+function calculatePricesWithAnimation() {
+  calculatePrices();
+  animatePriceUpdate();
+}
+
+// Form validation with better UX
+function validateForm() {
+  const requiredFields = form.querySelectorAll("[required]");
+  let isValid = true;
+  let firstInvalidField = null;
+
+  requiredFields.forEach((field) => {
+    const value =
+      field.type === "radio" || field.type === "checkbox"
+        ? document.querySelector(`input[name="${field.name}"]:checked`)
+        : field.value.trim();
+
+    if (!value) {
+      isValid = false;
+      if (!firstInvalidField) {
+        firstInvalidField = field;
+      }
+
+      // Add error styling
+      if (field.type === "radio") {
+        const radioGroup = field.closest(".form-group");
+        radioGroup.classList.add("error");
+      } else {
+        field.classList.add("error");
+      }
+    } else {
+      // Remove error styling
+      if (field.type === "radio") {
+        const radioGroup = field.closest(".form-group");
+        radioGroup.classList.remove("error");
+      } else {
+        field.classList.remove("error");
+      }
+    }
+  });
+
+  return { isValid, firstInvalidField };
+}
+
+// Add error styles
+function addErrorStyles() {
+  const style = document.createElement("style");
+  style.textContent = `
+        .error input,
+        .error .radio-option label {
+            border-color: var(--error-primary) !important;
+            box-shadow: 0 0 0 3px var(--error-focus) !important;
+        }
+        
+        .error::after {
+            content: "This field is required";
+            color: var(--error-primary);
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .form-success {
+            background: linear-gradient(135deg, var(--success-primary), var(--success-dark));
+            transform: scale(1.02);
+        }
+    `;
+  document.head.appendChild(style);
+}
+
+// Handle form submission
+function handleFormSubmit(event) {
+  event.preventDefault();
+
+  const validation = validateForm();
+
+  if (!validation.isValid) {
+    // Scroll to first invalid field
+    if (validation.firstInvalidField) {
+      validation.firstInvalidField.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+
+    // Show error message
+    showNotification("Please fill in all required fields", "error");
+    return;
+  }
+
+  // Simulate form processing
+  const submitBtn = document.querySelector(".submit-btn");
+  const originalText = submitBtn.innerHTML;
+
+  submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+  submitBtn.disabled = true;
+  submitBtn.classList.add("form-success");
+
+  setTimeout(() => {
+    submitBtn.innerHTML = '<i class="fas fa-check"></i> Configuration Saved!';
+    showNotification(
+      "Your trip configuration has been saved successfully!",
+      "success"
+    );
+
+    setTimeout(() => {
+      submitBtn.innerHTML = originalText;
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("form-success");
+    }, 3000);
+  }, 2000);
+}
+
+// Show notification
+function showNotification(message, type = "info") {
+  const notification = document.createElement("div");
+  notification.className = `notification notification-${type}`;
+  notification.innerHTML = `
+        <i class="fas fa-${type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : "info-circle"}"></i>
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; font-size: 1.2rem; cursor: pointer; margin-left: auto;">×</button>
+    `;
+
+  // Add notification styles if not already added
+  if (!document.querySelector("#notification-styles")) {
+    const style = document.createElement("style");
+    style.id = "notification-styles";
+    style.textContent = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 10px;
+                color: white;
+                font-weight: 500;
+                z-index: 1000;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                max-width: 400px;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                animation: slideIn 0.3s ease;
+            }
+            
+            .notification-success {
+                background: linear-gradient(135deg, var(--success-primary), var(--success-dark));
+            }
+            
+            .notification-error {
+                background: linear-gradient(135deg, var(--error-primary), var(--error-dark));
+            }
+            
+            .notification-info {
+                background: var(--gradient-primary);
+            }
+            
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        `;
+    document.head.appendChild(style);
+  }
+
+  document.body.appendChild(notification);
+
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove();
+    }
+  }, 5000);
+}
+
+// Initialize the application
+function init() {
+  // Add dynamic styles
+  addDynamicStyles();
+  addErrorStyles();
+
+  // Add event listeners
+  tripOptions.forEach((option) => {
+    option.addEventListener("change", calculatePricesWithAnimation);
+  });
+
+  accommodationOptions.forEach((option) => {
+    option.addEventListener("change", handleAccommodationChange);
+  });
+
+  activityCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", calculatePricesWithAnimation);
+  });
+
+  paymentScheduleOptions.forEach((option) => {
+    option.addEventListener("change", calculatePricesWithAnimation);
+  });
+
+  paymentMethodOptions.forEach((option) => {
+    option.addEventListener("change", calculatePricesWithAnimation);
+  });
+
+  // Form submission
+  form.addEventListener("submit", handleFormSubmit);
+
+  // Add form animations
+  addFormAnimations();
+
+  // Initial calculation
+  calculatePrices();
+
+  console.log("Argentina Trip Form initialized successfully! 🏔️");
+}
+
+// Start the application when DOM is loaded
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}

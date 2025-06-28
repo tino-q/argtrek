@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Argentina Trip - Optionals & Payment</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <h1><i class="fas fa-mountain"></i> Argentina Trip</h1>
+          <p class="subtitle">Optionals & Payment Configuration</p>
+        </div>
+      </header>
+
+      <!-- Welcome Section -->
+      <section class="welcome-section">
+        <div class="welcome-content">
+          <h2>Welcome to Your Argentina Adventure!</h2>
+          <p>
+            We're excited that you want to join us on this incredible journey
+            through Argentina!
+          </p>
+
+          <div class="info-cards">
+            <div class="info-card">
+              <i class="fas fa-map-marked-alt"></i>
+              <h3>Full Itinerary</h3>
+              <a
+                href="https://docs.google.com/presentation/d/164WBfbVElZFp-EVOFWNsplV9U8s5IltaFy4t9rmcpO4/edit?usp=sharing"
+                target="_blank"
+                class="btn-link"
+              >
+                View Details <i class="fas fa-external-link-alt"></i>
+              </a>
+            </div>
+
+            <div class="info-card">
+              <i class="fas fa-phone"></i>
+              <h3>Need Help?</h3>
+              <div class="contact-info">
+                <p><strong>Nati:</strong> (469) 612-2335</p>
+                <p><strong>Facu:</strong> (650) 512-6902</p>
+                <p><strong>Madi:</strong> +34 689 20 01 62</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Form -->
+      <form id="tripForm" class="trip-form">
+        <!-- Personal Information -->
+        <section class="form-section">
+          <h2><i class="fas fa-user"></i> Personal Information</h2>
+          <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+          <div class="form-group">
+            <label for="fullName">Full Name *</label>
+            <input
+              type="text"
+              id="fullName"
+              name="fullName"
+              placeholder="Exactly as it appears on your travel ID"
+              required
+            />
+          </div>
+        </section>
+
+        <!-- Trip Configuration -->
+        <section class="form-section">
+          <h2><i class="fas fa-route"></i> Trip Configuration</h2>
+
+          <div class="form-group">
+            <label class="section-label">Choose Your Trip Option *</label>
+            <p class="help-text">
+              We recommend selecting the shorter version if you're unsure.
+              Extensions may be available later but rates are not guaranteed.
+            </p>
+
+            <div class="radio-group">
+              <div class="radio-option">
+                <input
+                  type="radio"
+                  id="option1"
+                  name="tripOption"
+                  value="2250"
+                  required
+                />
+                <label for="option1">
+                  <div class="option-content">
+                    <h3>Option 1</h3>
+                    <p class="price">$2,250 USD</p>
+                    <p class="description">
+                      Shorter version - Perfect for first-time visitors
+                    </p>
+                  </div>
+                </label>
+              </div>
+
+              <div class="radio-option">
+                <input
+                  type="radio"
+                  id="option2"
+                  name="tripOption"
+                  value="2600"
+                  required
+                />
+                <label for="option2">
+                  <div class="option-content">
+                    <h3>Option 2</h3>
+                    <p class="price">$2,600 USD</p>
+                    <p class="description">
+                      Extended version - More cities and experiences
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="section-label">Accommodation Preference *</label>
+
+            <div class="radio-group">
+              <div class="radio-option">
+                <input
+                  type="radio"
+                  id="privateRoom"
+                  name="accommodation"
+                  value="300"
+                  required
+                />
+                <label for="privateRoom">
+                  <div class="option-content">
+                    <h3>Private Room</h3>
+                    <p class="price">+$300 USD</p>
+                    <p class="description">
+                      $100 each for Buenos Aires, Mendoza & Bariloche
+                    </p>
+                  </div>
+                </label>
+              </div>
+
+              <div class="radio-option">
+                <input
+                  type="radio"
+                  id="sharedRoom"
+                  name="accommodation"
+                  value="0"
+                  required
+                />
+                <label for="sharedRoom">
+                  <div class="option-content">
+                    <h3>Shared Room</h3>
+                    <p class="price">Included</p>
+                    <p class="description">Share with another participant</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" id="roommateGroup" style="display: none">
+            <label for="roommate">Roommate Name</label>
+            <input
+              type="text"
+              id="roommate"
+              name="roommate"
+              placeholder="Name of the person you're sharing with"
+            />
+          </div>
+        </section>
+
+        <!-- Optional Activities -->
+        <section class="form-section">
+          <h2><i class="fas fa-hiking"></i> Optional Activities</h2>
+          <p class="section-description">
+            Enhance your trip with these amazing experiences!
+          </p>
+
+          <div class="activities-grid">
+            <div class="activity-card">
+              <div class="activity-header">
+                <i class="fas fa-horse"></i>
+                <h3>Horse Back Riding</h3>
+              </div>
+              <div class="activity-details">
+                <p class="location">Mendoza</p>
+                <p class="date">November 27th - Afternoon</p>
+                <p class="price">$45 USD</p>
+              </div>
+              <div class="activity-toggle">
+                <input
+                  type="checkbox"
+                  id="horseback"
+                  name="activities"
+                  value="45"
+                />
+                <label for="horseback" class="toggle-label">Add to Trip</label>
+              </div>
+            </div>
+
+            <div class="activity-card">
+              <div class="activity-header">
+                <i class="fas fa-utensils"></i>
+                <h3>Empanadas Cooking Class</h3>
+              </div>
+              <div class="activity-details">
+                <p class="location">Mendoza</p>
+                <p class="date">November 28th - Midday</p>
+                <p class="description">3-course menu with wine pairing</p>
+                <p class="price">$140 USD</p>
+              </div>
+              <div class="activity-toggle">
+                <input
+                  type="checkbox"
+                  id="cooking"
+                  name="activities"
+                  value="140"
+                />
+                <label for="cooking" class="toggle-label">Add to Trip</label>
+              </div>
+            </div>
+
+            <div class="activity-card">
+              <div class="activity-header">
+                <i class="fas fa-water"></i>
+                <h3>Rafting Adventure</h3>
+              </div>
+              <div class="activity-details">
+                <p class="location">Bariloche</p>
+                <p class="date">November 26th - All Day</p>
+                <p class="price">$75 USD</p>
+              </div>
+              <div class="activity-toggle">
+                <input
+                  type="checkbox"
+                  id="rafting"
+                  name="activities"
+                  value="75"
+                />
+                <label for="rafting" class="toggle-label">Add to Trip</label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Payment Options -->
+        <section class="form-section">
+          <h2><i class="fas fa-credit-card"></i> Payment Configuration</h2>
+
+          <div class="payment-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+              <h3>Important Payment Information</h3>
+              <ul>
+                <li>All rates are <strong>non-refundable</strong></li>
+                <li>Unregistering impacts prices for all participants</li>
+                <li>Your spot is transferable to another person</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="section-label">Payment Schedule *</label>
+
+            <div class="radio-group">
+              <div class="radio-option">
+                <input
+                  type="radio"
+                  id="fullPayment"
+                  name="paymentSchedule"
+                  value="full"
+                  required
+                />
+                <label for="fullPayment">
+                  <div class="option-content">
+                    <h3>Single Payment</h3>
+                    <p class="description">Pay 100% now</p>
+                  </div>
+                </label>
+              </div>
+
+              <div class="radio-option">
+                <input
+                  type="radio"
+                  id="installments"
+                  name="paymentSchedule"
+                  value="installments"
+                  required
+                />
+                <label for="installments">
+                  <div class="option-content">
+                    <h3>2 Installments</h3>
+                    <p class="description">
+                      35% now, remainder due September 15th
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="section-label">Payment Method *</label>
+
+            <div class="radio-group">
+              <div class="radio-option">
+                <input
+                  type="radio"
+                  id="creditCard"
+                  name="paymentMethod"
+                  value="credit"
+                  required
+                />
+                <label for="creditCard">
+                  <div class="option-content">
+                    <h3>Credit Card</h3>
+                    <p class="price">+4% processing fee</p>
+                    <p class="description">Secure payment link sent to email</p>
+                  </div>
+                </label>
+              </div>
+
+              <div class="radio-option">
+                <input
+                  type="radio"
+                  id="bankTransfer"
+                  name="paymentMethod"
+                  value="bank"
+                  required
+                />
+                <label for="bankTransfer">
+                  <div class="option-content">
+                    <h3>Bank Transfer</h3>
+                    <p class="price">No additional fees</p>
+                    <p class="description">
+                      Revolut recommended for free transfers
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Price Summary -->
+        <section class="price-summary">
+          <h2><i class="fas fa-calculator"></i> Price Summary</h2>
+          <div class="summary-content">
+            <div class="summary-row">
+              <span>Base Trip Cost:</span>
+              <span id="baseCost">$0</span>
+            </div>
+            <div class="summary-row">
+              <span>Accommodation Upgrade:</span>
+              <span id="accommodationCost">$0</span>
+            </div>
+            <div class="summary-row">
+              <span>Optional Activities:</span>
+              <span id="activitiesCost">$0</span>
+            </div>
+            <div class="summary-row subtotal">
+              <span>Subtotal:</span>
+              <span id="subtotal">$0</span>
+            </div>
+            <div
+              class="summary-row"
+              id="processingFeeRow"
+              style="display: none"
+            >
+              <span>Processing Fee (4%):</span>
+              <span id="processingFee">$0</span>
+            </div>
+            <div class="summary-row total">
+              <span>Total Amount:</span>
+              <span id="totalAmount">$0</span>
+            </div>
+            <div class="payment-amount" id="paymentAmount">
+              <span>Amount Due Now:</span>
+              <span id="dueNow">$0</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button type="submit" class="submit-btn">
+            <i class="fas fa-paper-plane"></i>
+            Configure My Trip
+          </button>
+          <p class="submit-note">
+            Your configuration will be saved. Payment processing comes next!
+          </p>
+        </div>
+      </form>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
