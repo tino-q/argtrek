@@ -213,7 +213,15 @@ function App() {
           >
             cursor
           </a>{" "}
-          by <span className="author-name">tinoq</span>
+          by{" "}
+          <a
+            href="https://www.linkedin.com/in/martin-queija-5271b899"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="author-name"
+          >
+            tinoq
+          </a>
           <span className="footer-emoji">🇦🇷</span>
         </p>
       </footer>
