@@ -107,7 +107,7 @@
 
 .action-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 25px 50px var(--shadow-beige-light);
+  box-shadow: 0 25px 50px var(--shadow-primary-light);
 }
 
 .card-icon {
@@ -163,12 +163,12 @@
 .action-button.primary {
   background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 4px 15px var(--shadow-beige);
+  box-shadow: 0 4px 15px var(--shadow-primary);
 }
 
 .action-button.primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px var(--shadow-beige-strong);
+  box-shadow: 0 8px 25px var(--shadow-primary-strong);
   background: var(--gradient-hover);
 }
 

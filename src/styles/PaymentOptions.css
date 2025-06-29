@@ -123,7 +123,7 @@
   background: var(--primary);
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px var(--shadow-beige-light);
+  box-shadow: 0 2px 8px var(--shadow-primary-light);
 }
 
 .copy-btn:active {

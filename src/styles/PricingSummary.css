@@ -57,7 +57,7 @@
 }
 
 .payment-amount {
-  background: var(--bg-beige-transparent);
+  background: var(--bg-primary-transparent);
   padding: 20px;
   border-radius: 12px;
   margin-top: 20px;

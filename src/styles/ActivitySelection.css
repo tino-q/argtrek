@@ -20,7 +20,7 @@
 .activity-card:hover {
   border-color: var(--primary);
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px var(--shadow-beige-light);
+  box-shadow: 0 10px 25px var(--shadow-primary-light);
 }
 
 .activity-card.activity-selected {
@@ -30,7 +30,7 @@
     var(--bg-light),
     rgba(184, 149, 106, 0.1)
   );
-  box-shadow: 0 8px 20px var(--shadow-beige-light);
+  box-shadow: 0 8px 20px var(--shadow-primary-light);
 }
 
 .activity-card.activity-selected:hover {

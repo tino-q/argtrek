@@ -50,7 +50,7 @@ export const useAnimations = () => {
         if (label) {
           label.addEventListener("mouseenter", () => {
             label.style.transform = "translateY(-2px)";
-            label.style.boxShadow = "0 8px 25px var(--shadow-beige-light)";
+            label.style.boxShadow = "0 8px 25px var(--shadow-primary-light)";
             label.style.transition =
               "transform 0.3s ease, box-shadow 0.3s ease";
           });
@@ -69,14 +69,14 @@ export const useAnimations = () => {
       activityCards.forEach((card) => {
         card.addEventListener("mouseenter", () => {
           card.style.transform = "translateY(-5px)";
-          card.style.boxShadow = "0 15px 35px var(--shadow-beige-strong)";
+          card.style.boxShadow = "0 15px 35px var(--shadow-primary-strong)";
           card.style.transition = "transform 0.3s ease, box-shadow 0.3s ease";
         });
 
         card.addEventListener("mouseleave", () => {
           if (!card.classList.contains("activity-selected")) {
             card.style.transform = "translateY(0)";
-            card.style.boxShadow = "0 10px 25px var(--shadow-beige-light)";
+            card.style.boxShadow = "0 10px 25px var(--shadow-primary-light)";
           }
         });
       });
@@ -117,7 +117,7 @@ export const useAnimations = () => {
 
         input.addEventListener("focus", () => {
           input.style.borderColor = "var(--primary)";
-          input.style.boxShadow = "0 0 0 2px var(--focus-beige)";
+          input.style.boxShadow = "0 0 0 2px var(--focus-primary)";
           input.style.transition =
             "border-color 0.3s ease, box-shadow 0.3s ease";
         });
