@@ -1,0 +1,97 @@
+import { FORM_FIELDS } from "../../utils/config";
+
+const ACTIVITIES = [
+  {
+    id: "horseback",
+    icon: "fas fa-horse",
+    name: "Horse Back Riding",
+    location: "Mendoza",
+    date: "November 27th - Afternoon",
+    price: 45,
+    description: "",
+  },
+  {
+    id: "cooking",
+    icon: "fas fa-utensils",
+    name: "Empanadas Cooking Class",
+    location: "Mendoza",
+    date: "November 28th - Midday",
+    price: 140,
+    description: "3-course menu with wine pairing",
+  },
+  {
+    id: "rafting",
+    icon: "fas fa-water",
+    name: "Rafting Adventure",
+    location: "Bariloche",
+    date: "November 26th - All Day",
+    price: 75,
+    description: "",
+  },
+];
+
+const ActivitySelection = ({ formData, updateArrayField }) => {
+  const selectedActivities = formData[FORM_FIELDS.ACTIVITIES] || [];
+
+  const handleActivityToggle = (activity, isSelected) => {
+    updateArrayField(FORM_FIELDS.ACTIVITIES, activity, isSelected);
+  };
+
+  return (
+    <section className="form-section">
+      <h2>
+        <i className="fas fa-hiking"></i> Optional Activities
+      </h2>
+      <p className="section-description">
+        Enhance your trip with these amazing experiences!
+      </p>
+
+      <div className="activities-grid">
+        {ACTIVITIES.map((activity) => {
+          const isSelected = selectedActivities.some(
+            (selected) => selected.id === activity.id
+          );
+
+          return (
+            <div
+              key={activity.id}
+              className={`activity-card ${isSelected ? "activity-selected" : ""}`}
+            >
+              <div className="activity-header">
+                <i className={activity.icon}></i>
+                <h3>{activity.name}</h3>
+              </div>
+
+              <div className="activity-details">
+                <p className="location">{activity.location}</p>
+                <p className="date">{activity.date}</p>
+                {activity.description && (
+                  <p className="description">{activity.description}</p>
+                )}
+                <p className="price">${activity.price} USD</p>
+              </div>
+
+              <div className="activity-toggle">
+                <input
+                  type="checkbox"
+                  id={activity.id}
+                  name="activities"
+                  value={activity.price}
+                  checked={isSelected}
+                  onChange={(e) =>
+                    handleActivityToggle(activity, e.target.checked)
+                  }
+                />
+                <label htmlFor={activity.id} className="toggle-label">
+                  Add to Trip
+                </label>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+};
+
+export default ActivitySelection;
