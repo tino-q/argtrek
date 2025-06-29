@@ -241,7 +241,16 @@ const PaymentOptions = ({ formData, updateFormData }) => {
 
       {/* Argentine Citizen Checkbox */}
       <div className="form-group">
-        <div className="checkbox-option">
+        <div
+          className="checkbox-option"
+          onClick={() =>
+            updateFormData(
+              FORM_FIELDS.ARGENTINE_CITIZEN,
+              !formData[FORM_FIELDS.ARGENTINE_CITIZEN]
+            )
+          }
+          style={{ cursor: "pointer" }}
+        >
           <input
             type="checkbox"
             id="argentineCitizen"
@@ -250,8 +259,13 @@ const PaymentOptions = ({ formData, updateFormData }) => {
             onChange={(e) =>
               updateFormData(FORM_FIELDS.ARGENTINE_CITIZEN, e.target.checked)
             }
+            style={{ pointerEvents: "none" }}
           />
-          <label htmlFor="argentineCitizen" className="checkbox-label">
+          <label
+            htmlFor="argentineCitizen"
+            className="checkbox-label"
+            style={{ pointerEvents: "none" }}
+          >
             <strong>I have Argentine citizenship</strong>
             <p className="help-text">
               Argentine citizens are subject to 21% VAT on all services

@@ -183,21 +183,23 @@ function App() {
 
         <PricingSummary pricing={pricing} formData={formData} />
 
-        <button
-          type="submit"
-          className={`submit-btn ${isSubmitting ? "form-success" : ""}`}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <i className="fas fa-spinner fa-spin"></i> Processing...
-            </>
-          ) : (
-            <>
-              <i className="fas fa-save"></i> Save Configuration
-            </>
-          )}
-        </button>
+        <div className="form-actions">
+          <button
+            type="submit"
+            className={`submit-btn ${isSubmitting ? "form-success" : ""}`}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <i className="fas fa-spinner fa-spin"></i> Processing...
+              </>
+            ) : (
+              <>
+                <i className="fas fa-save"></i> Save Configuration
+              </>
+            )}
+          </button>
+        </div>
       </form>
 
       <NotificationContainer notifications={notifications} />

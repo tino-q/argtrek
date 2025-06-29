@@ -56,8 +56,18 @@ const ActivitySelection = ({ formData, updateArrayField }) => {
             <div
               key={activity.id}
               className={`activity-card ${isSelected ? "activity-selected" : ""}`}
+              onClick={() => handleActivityToggle(activity, !isSelected)}
+              style={{ cursor: "pointer" }}
             >
               <div className="activity-header">
+                <input
+                  type="checkbox"
+                  id={activity.id}
+                  name="activities"
+                  checked={isSelected}
+                  onChange={() => {}} // Handled by card click
+                  style={{ pointerEvents: "none", marginRight: "12px" }}
+                />
                 <i className={activity.icon}></i>
                 <h3>{activity.name}</h3>
               </div>
@@ -69,22 +79,6 @@ const ActivitySelection = ({ formData, updateArrayField }) => {
                   <p className="description">{activity.description}</p>
                 )}
                 <p className="price">${activity.price} USD</p>
-              </div>
-
-              <div className="activity-toggle">
-                <input
-                  type="checkbox"
-                  id={activity.id}
-                  name="activities"
-                  value={activity.price}
-                  checked={isSelected}
-                  onChange={(e) =>
-                    handleActivityToggle(activity, e.target.checked)
-                  }
-                />
-                <label htmlFor={activity.id} className="toggle-label">
-                  Add to Trip
-                </label>
               </div>
             </div>
           );
