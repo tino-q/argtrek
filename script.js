@@ -479,7 +479,7 @@ function handleFormSubmit(event) {
     }
 
     // Show error message
-    showNotification("Please fill in all required fields", "error");
+    showError("Please fill in all required fields");
     return;
   }
 
@@ -493,10 +493,7 @@ function handleFormSubmit(event) {
 
   setTimeout(() => {
     submitBtn.innerHTML = '<i class="fas fa-check"></i> Configuration Saved!';
-    showNotification(
-      "Your trip configuration has been saved successfully!",
-      "success"
-    );
+    showSuccess("Your trip configuration has been saved successfully!");
 
     setTimeout(() => {
       submitBtn.innerHTML = originalText;
@@ -504,74 +501,6 @@ function handleFormSubmit(event) {
       submitBtn.classList.remove("form-success");
     }, 3000);
   }, 2000);
-}
-
-// Show notification
-function showNotification(message, type = "info") {
-  const notification = document.createElement("div");
-  notification.className = `notification notification-${type}`;
-  notification.innerHTML = `
-        <i class="fas fa-${type === "success" ? "check-circle" : type === "error" ? "exclamation-circle" : "info-circle"}"></i>
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; font-size: 1.2rem; cursor: pointer; margin-left: auto;">×</button>
-    `;
-
-  // Add notification styles if not already added
-  if (!document.querySelector("#notification-styles")) {
-    const style = document.createElement("style");
-    style.id = "notification-styles";
-    style.textContent = `
-            .notification {
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 10px;
-                color: white;
-                font-weight: 500;
-                z-index: 1000;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                max-width: 400px;
-                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-                animation: slideIn 0.3s ease;
-            }
-            
-            .notification-success {
-                background: linear-gradient(135deg, var(--success-primary), var(--success-dark));
-            }
-            
-            .notification-error {
-                background: linear-gradient(135deg, var(--error-primary), var(--error-dark));
-            }
-            
-            .notification-info {
-                background: var(--gradient-primary);
-            }
-            
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-        `;
-    document.head.appendChild(style);
-  }
-
-  document.body.appendChild(notification);
-
-  // Auto remove after 5 seconds
-  setTimeout(() => {
-    if (notification.parentElement) {
-      notification.remove();
-    }
-  }, 5000);
 }
 
 // Make checkbox option clickable
@@ -696,85 +625,6 @@ function init() {
   calculatePrices();
 
   console.log("Argentina Trip Form initialized successfully! 🏔️");
-}
-
-// Copy to clipboard function with better mobile support
-function copyToClipboard(text, button) {
-  // Function to show success feedback
-  function showSuccessFeedback() {
-    const originalContent = button.innerHTML;
-    button.innerHTML = '<i class="fas fa-check"></i>';
-    button.classList.add("copied");
-
-    // Show notification
-    showNotification("Copied to clipboard!", "success");
-
-    // Reset button after 2 seconds
-    setTimeout(() => {
-      button.innerHTML = originalContent;
-      button.classList.remove("copied");
-    }, 2000);
-  }
-
-  // Function to show error feedback
-  function showErrorFeedback() {
-    showNotification("Copy failed. Please copy manually.", "error");
-  }
-
-  // Try modern Clipboard API first (works on HTTPS and modern browsers)
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        showSuccessFeedback();
-      })
-      .catch((err) => {
-        console.error("Clipboard API failed:", err);
-        tryFallbackMethod();
-      });
-  } else {
-    // Use fallback method for older browsers or non-secure contexts
-    tryFallbackMethod();
-  }
-
-  function tryFallbackMethod() {
-    try {
-      // Create a temporary textarea element
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-
-      // Style the textarea to be invisible but still selectable
-      textArea.style.position = "fixed";
-      textArea.style.left = "-9999px";
-      textArea.style.top = "-9999px";
-      textArea.style.opacity = "0";
-      textArea.style.pointerEvents = "none";
-      textArea.style.zIndex = "-1";
-
-      // Add to DOM
-      document.body.appendChild(textArea);
-
-      // Select and copy
-      textArea.focus();
-      textArea.select();
-      textArea.setSelectionRange(0, 99999); // For mobile devices
-
-      // Try to copy
-      const successful = document.execCommand("copy");
-
-      // Remove from DOM
-      document.body.removeChild(textArea);
-
-      if (successful) {
-        showSuccessFeedback();
-      } else {
-        showErrorFeedback();
-      }
-    } catch (err) {
-      console.error("Fallback copy method failed:", err);
-      showErrorFeedback();
-    }
-  }
 }
 
 // Start the application when DOM is loaded
