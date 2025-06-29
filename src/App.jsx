@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { usePricing } from "./hooks/usePricing";
 import { useNotifications } from "./hooks/useNotifications";
 import { useAnimations, injectAnimationStyles } from "./hooks/useAnimations";
+import { useFormSubmission } from "./hooks/useFormSubmission";
 import { FORM_FIELDS } from "./utils/config";
 
 // Styles are now imported in main.jsx via main.css
@@ -34,16 +35,15 @@ function App() {
     [FORM_FIELDS.ARGENTINE_CITIZEN]: false,
   });
 
-  // Form submission state
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   // Form reference for validation feedback
   const formRef = useRef(null);
 
   // Custom hooks
   const pricing = usePricing(formData);
-  const { notifications, showSuccess, showError } = useNotifications();
+  const { notifications, showSuccess, showError, removeNotification } =
+    useNotifications();
   const { pulseElement, shakeElement } = useAnimations();
+  const { submitForm, isSubmitting } = useFormSubmission();
 
   // Initialize animations when component mounts
   useEffect(() => {
@@ -134,23 +134,18 @@ function App() {
       return;
     }
 
-    setIsSubmitting(true);
+    // Submit form using the hook
+    const result = await submitForm(formData);
 
-    try {
-      // Simulate form processing
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      showSuccess("Your trip configuration has been saved successfully!");
+    if (result.success) {
+      showSuccess(result.message, result.options);
 
       // Add success animation to form
       if (formRef.current) {
         pulseElement(formRef.current);
       }
-
-      console.log("Form submitted:", { formData, pricing });
-    } catch {
-      showError("Failed to save configuration. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      showError(result.message, result.options);
     }
   };
 
@@ -201,7 +196,10 @@ function App() {
         </div>
       </form>
 
-      <NotificationContainer notifications={notifications} />
+      <NotificationContainer
+        notifications={notifications}
+        onRemove={removeNotification}
+      />
     </div>
   );
 }

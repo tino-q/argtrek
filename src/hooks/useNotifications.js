@@ -15,6 +15,7 @@ export const useNotifications = () => {
         timestamp: Date.now(),
         autoClose: options.autoClose !== false, // Default to true
         duration: options.duration || 4000,
+        customClass: options.customClass || "",
       };
 
       setNotifications((prev) => [...prev, notification]);
@@ -22,7 +23,9 @@ export const useNotifications = () => {
       // Auto-remove if enabled
       if (notification.autoClose) {
         setTimeout(() => {
-          removeNotification(notification.id);
+          setNotifications((prevNotifications) =>
+            prevNotifications.filter((n) => n.id !== notification.id)
+          );
         }, notification.duration);
       }
 

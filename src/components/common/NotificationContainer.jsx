@@ -3,7 +3,7 @@
 
 import { getNotificationIcon } from "../../hooks/useNotifications";
 
-const NotificationContainer = ({ notifications }) => {
+const NotificationContainer = ({ notifications, onRemove }) => {
   if (!notifications || notifications.length === 0) {
     return null;
   }
@@ -13,16 +13,14 @@ const NotificationContainer = ({ notifications }) => {
       {notifications.map((notification) => (
         <div
           key={notification.id}
-          className={`notification notification-${notification.type} show`}
+          className={`notification notification-${notification.type} ${notification.customClass || ""} show`}
         >
           <div className="notification-content">
             <i className={getNotificationIcon(notification.type)}></i>
             <span>{notification.message}</span>
             <button
               className="notification-close"
-              onClick={() => {
-                /* Will be handled by parent */
-              }}
+              onClick={() => onRemove && onRemove(notification.id)}
               aria-label="Close notification"
             >
               <i className="fas fa-times"></i>
