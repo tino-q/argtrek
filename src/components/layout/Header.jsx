@@ -6,9 +6,9 @@ const Header = () => {
     <header className="header">
       <div className="header-content">
         <h1>
-          <i className="fas fa-mountain"></i> Argentina Trip
+          <i className="fas fa-mountain"></i> Argentina Trek
         </h1>
-        <p className="subtitle">Optionals & Payment Configuration</p>
+        <p className="subtitle">November 2025</p>
       </div>
     </header>
   );

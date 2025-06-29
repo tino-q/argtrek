@@ -1,35 +1,35 @@
 /* Tailwind CSS Color Palette */
 :root {
   /* Primary Theme - Amber */
-  --primary-beige: #f59e0b; /* amber-500 */
-  --primary-beige-dark: #d97706; /* amber-600 */
-  --primary-beige-darker: #b45309; /* amber-700 */
-  --primary-beige-light: #fbbf24; /* amber-400 */
-  --primary-beige-lighter: #fef3c7; /* amber-100 */
-  --primary-beige-cream: #fffbeb; /* amber-50 */
-  --primary-beige-medium: #f59e0b; /* amber-500 */
-  --primary-beige-selected: #fef3c7; /* amber-100 */
+  --primary: #f59e0b; /* amber-500 */
+  --primary-dark: #d97706; /* amber-600 */
+  --primary-darker: #b45309; /* amber-700 */
+  --primary-light: #fbbf24; /* amber-400 */
+  --primary-lighter: #fef3c7; /* amber-100 */
+  --primary-cream: #fffbeb; /* amber-50 */
+  --primary-medium: #f59e0b; /* amber-500 */
+  --primary-selected: #fef3c7; /* amber-100 */
 
   /* Gradients */
   --gradient-primary: linear-gradient(
     135deg,
-    var(--primary-beige),
-    var(--primary-beige-dark)
+    var(--primary),
+    var(--primary-dark)
   );
   --gradient-background: linear-gradient(
     135deg,
-    var(--primary-beige-light),
-    var(--primary-beige-medium)
+    var(--primary-light),
+    var(--primary-medium)
   );
   --gradient-selected: linear-gradient(
     135deg,
-    var(--primary-beige-lighter),
-    var(--primary-beige-selected)
+    var(--primary-lighter),
+    var(--primary-selected)
   );
   --gradient-hover: linear-gradient(
     135deg,
-    var(--primary-beige-dark),
-    var(--primary-beige-darker)
+    var(--primary-dark),
+    var(--primary-darker)
   );
 
   /* Shadows & Transparency */
@@ -132,7 +132,7 @@ body {
 }
 
 .header-content h1 i {
-  color: var(--primary-beige);
+  color: var(--primary);
   margin-right: 15px;
 }
 
@@ -320,7 +320,7 @@ body {
 }
 
 .form-section h2 i {
-  color: var(--primary-beige);
+  color: var(--primary);
   font-size: 1.5rem;
 }
 
@@ -361,14 +361,14 @@ body {
   display: flex;
   gap: 12px;
   padding: 16px;
-  background: var(--primary-beige-cream);
-  border: 2px solid var(--primary-beige-light);
+  background: var(--primary-cream);
+  border: 2px solid var(--primary-light);
   border-radius: 10px;
   margin-bottom: 25px;
 }
 
 .trip-option-warning i {
-  color: var(--primary-beige);
+  color: var(--primary);
   font-size: 1.3rem;
   margin-top: 2px;
   flex-shrink: 0;
@@ -386,7 +386,7 @@ body {
 }
 
 .trip-option-warning strong {
-  color: var(--primary-beige-dark);
+  color: var(--primary-dark);
   font-weight: 600;
 }
 
@@ -407,7 +407,7 @@ input[type="email"] {
 input[type="text"]:focus,
 input[type="email"]:focus {
   outline: none;
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--focus-beige);
 }
 
@@ -446,14 +446,14 @@ input[type="email"]:focus {
 }
 
 .radio-option label:hover {
-  border-color: var(--primary-beige);
-  background: var(--primary-beige-lighter);
+  border-color: var(--primary);
+  background: var(--primary-lighter);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px var(--shadow-beige-light);
 }
 
 .radio-option input[type="radio"]:checked + label {
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
   background: var(--gradient-selected);
   box-shadow: 0 5px 15px var(--shadow-beige);
 }
@@ -474,7 +474,7 @@ input[type="email"]:focus {
 .option-content .price {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--primary-beige);
+  color: var(--primary);
   margin-bottom: 8px;
 }
 
@@ -501,7 +501,7 @@ input[type="email"]:focus {
 .detail-section h4 {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--primary-beige);
+  color: var(--primary);
   margin-bottom: 6px;
   display: flex;
   align-items: center;
@@ -534,7 +534,7 @@ input[type="email"]:focus {
   content: "•";
   position: absolute;
   left: 0;
-  color: var(--primary-beige);
+  color: var(--primary);
   font-weight: bold;
   font-size: 0.8rem;
 }
@@ -548,18 +548,18 @@ input[type="email"]:focus {
   font-size: 0.85rem;
   color: var(--text-primary);
   font-weight: 600;
-  background: var(--primary-beige-lighter);
+  background: var(--primary-lighter);
   padding: 6px 10px;
   border-radius: 4px;
   margin: 0;
-  border-left: 3px solid var(--primary-beige);
+  border-left: 3px solid var(--primary);
 }
 
 .recommended-badge {
   background: linear-gradient(
     135deg,
-    var(--primary-beige),
-    var(--primary-beige-dark)
+    var(--primary),
+    var(--primary-dark)
   );
   color: white;
   padding: 6px 12px;
@@ -644,13 +644,13 @@ input[type="email"]:focus {
 }
 
 .activity-card:hover {
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
   transform: translateY(-3px);
   box-shadow: 0 10px 25px var(--shadow-beige-light);
 }
 
 .activity-card.activity-selected {
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
   background: linear-gradient(
     135deg,
     var(--bg-light),
@@ -672,7 +672,7 @@ input[type="email"]:focus {
 
 .activity-header i {
   font-size: 2rem;
-  color: var(--primary-beige);
+  color: var(--primary);
 }
 
 .activity-header h3 {
@@ -683,7 +683,7 @@ input[type="email"]:focus {
 
 .activity-details .location {
   font-weight: 600;
-  color: var(--primary-beige);
+  color: var(--primary);
   margin-bottom: 5px;
 }
 
@@ -726,8 +726,8 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked {
-  background-color: var(--primary-beige);
-  border-color: var(--primary-beige);
+  background-color: var(--primary);
+  border-color: var(--primary);
 }
 
 input[type="checkbox"]:checked::after {
@@ -742,7 +742,7 @@ input[type="checkbox"]:checked::after {
 }
 
 input[type="checkbox"]:hover {
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
 }
 
 .toggle-label {
@@ -767,7 +767,7 @@ input[type="checkbox"]:hover {
 }
 
 .checkbox-option:hover {
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
   box-shadow: 0 5px 15px var(--shadow-beige-light);
 }
 
@@ -785,8 +785,8 @@ input[type="checkbox"]:hover {
 }
 
 .checkbox-option input[type="checkbox"]:checked {
-  background-color: var(--primary-beige);
-  border-color: var(--primary-beige);
+  background-color: var(--primary);
+  border-color: var(--primary);
 }
 
 .checkbox-option input[type="checkbox"]:checked::after {
@@ -801,7 +801,7 @@ input[type="checkbox"]:hover {
 }
 
 .checkbox-option input[type="checkbox"]:hover {
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
 }
 
 .checkbox-label {
@@ -891,7 +891,7 @@ input[type="checkbox"]:hover {
 }
 
 .banking-info h3 i {
-  color: var(--primary-beige);
+  color: var(--primary);
 }
 
 .bank-details {
@@ -934,8 +934,8 @@ input[type="checkbox"]:hover {
 }
 
 .copy-btn {
-  background: var(--primary-beige-lighter);
-  border: 1px solid var(--primary-beige);
+  background: var(--primary-lighter);
+  border: 1px solid var(--primary);
   border-radius: 6px;
   padding: 6px 8px;
   cursor: pointer;
@@ -945,11 +945,11 @@ input[type="checkbox"]:hover {
   justify-content: center;
   min-width: 32px;
   height: 32px;
-  color: var(--primary-beige-dark);
+  color: var(--primary-dark);
 }
 
 .copy-btn:hover {
-  background: var(--primary-beige);
+  background: var(--primary);
   color: white;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px var(--shadow-beige-light);
@@ -957,7 +957,7 @@ input[type="checkbox"]:hover {
 
 .copy-btn:active {
   transform: translateY(0);
-  background: var(--primary-beige-dark);
+  background: var(--primary-dark);
 }
 
 .copy-btn i {
@@ -1118,7 +1118,7 @@ input[type="checkbox"]:hover {
 .summary-row.total {
   font-weight: 700;
   font-size: 1.3rem;
-  color: var(--primary-beige-cream);
+  color: var(--primary-cream);
   margin-top: 15px;
   padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.3);

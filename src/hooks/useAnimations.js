@@ -116,7 +116,7 @@ export const useAnimations = () => {
         });
 
         input.addEventListener("focus", () => {
-          input.style.borderColor = "var(--primary-beige)";
+          input.style.borderColor = "var(--primary)";
           input.style.boxShadow = "0 0 0 2px var(--focus-beige)";
           input.style.transition =
             "border-color 0.3s ease, box-shadow 0.3s ease";
@@ -255,8 +255,8 @@ export const injectAnimationStyles = () => {
       width: 20px;
       height: 20px;
       margin: -10px 0 0 -10px;
-      border: 2px solid var(--primary-beige-light);
-      border-top: 2px solid var(--primary-beige);
+      border: 2px solid var(--primary-light);
+      border-top: 2px solid var(--primary);
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }

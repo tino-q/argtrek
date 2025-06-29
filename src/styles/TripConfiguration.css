@@ -5,14 +5,14 @@
   display: flex;
   gap: 12px;
   padding: 16px;
-  background: var(--primary-beige-cream);
-  border: 2px solid var(--primary-beige-light);
+  background: var(--primary-cream);
+  border: 2px solid var(--primary-light);
   border-radius: 10px;
   margin-bottom: 25px;
 }
 
 .trip-option-warning i {
-  color: var(--primary-beige);
+  color: var(--primary);
   font-size: 1.3rem;
   margin-top: 2px;
   flex-shrink: 0;
@@ -30,7 +30,7 @@
 }
 
 .trip-option-warning strong {
-  color: var(--primary-beige-dark);
+  color: var(--primary-dark);
   font-weight: 600;
 }
 
@@ -51,7 +51,7 @@
 .detail-section h4 {
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--primary-beige);
+  color: var(--primary);
   margin-bottom: 6px;
   display: flex;
   align-items: center;
@@ -84,7 +84,7 @@
   content: "•";
   position: absolute;
   left: 0;
-  color: var(--primary-beige);
+  color: var(--primary);
   font-weight: bold;
   font-size: 0.8rem;
 }
@@ -98,19 +98,15 @@
   font-size: 0.85rem;
   color: var(--text-primary);
   font-weight: 600;
-  background: var(--primary-beige-lighter);
+  background: var(--primary-lighter);
   padding: 6px 10px;
   border-radius: 4px;
   margin: 0;
-  border-left: 3px solid var(--primary-beige);
+  border-left: 3px solid var(--primary);
 }
 
 .recommended-badge {
-  background: linear-gradient(
-    135deg,
-    var(--primary-beige),
-    var(--primary-beige-dark)
-  );
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: white;
   padding: 6px 12px;
   border-radius: 20px;

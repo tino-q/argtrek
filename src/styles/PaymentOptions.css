@@ -62,7 +62,7 @@
 }
 
 .banking-info h3 i {
-  color: var(--primary-beige);
+  color: var(--primary);
 }
 
 .bank-details {
@@ -105,8 +105,8 @@
 }
 
 .copy-btn {
-  background: var(--primary-beige-lighter);
-  border: 1px solid var(--primary-beige);
+  background: var(--primary-lighter);
+  border: 1px solid var(--primary);
   border-radius: 6px;
   padding: 6px 8px;
   cursor: pointer;
@@ -116,11 +116,11 @@
   justify-content: center;
   min-width: 32px;
   height: 32px;
-  color: var(--primary-beige-dark);
+  color: var(--primary-dark);
 }
 
 .copy-btn:hover {
-  background: var(--primary-beige);
+  background: var(--primary);
   color: white;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px var(--shadow-beige-light);
@@ -128,7 +128,7 @@
 
 .copy-btn:active {
   transform: translateY(0);
-  background: var(--primary-beige-dark);
+  background: var(--primary-dark);
 }
 
 .copy-btn i {

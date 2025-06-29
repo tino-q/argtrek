@@ -77,18 +77,18 @@ export const TRIP_OPTIONS = [
 // Contact Information
 export const CONTACTS = [
   {
-    name: "Madi (Trip Organizer)",
-    phone: "+34 689 20 01 62",
+    name: "Madi (Travel Coordinator)",
+    phone: "+34 (689) 200 162",
     whatsapp: "https://wa.me/34689200162",
   },
   {
     name: "Nati",
-    phone: "+1 (469) 612-2335",
+    phone: "+1 (469) 612 2335",
     whatsapp: "https://wa.me/14696122335",
   },
   {
     name: "Facu",
-    phone: "+1 (650) 512-6902",
+    phone: "+1 (650) 512 6902",
     whatsapp: "https://wa.me/16505126902",
   },
 ];

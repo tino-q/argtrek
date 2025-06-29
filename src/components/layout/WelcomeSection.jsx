@@ -2,38 +2,88 @@
 // Migrated from original index.html welcome section
 
 import { CONTACTS } from "../../utils/config";
+import barilocheImage from "../../assets/bariloche-rafting.png";
+import buenosAiresImage from "../../assets/buenos-aires.png";
+import mendozaImage from "../../assets/mendoza.png";
 
 const WelcomeSection = () => {
-  return (
-    <section className="welcome-section">
-      <div className="welcome-content">
-        <h2>Welcome to Your Argentina Adventure!</h2>
-        <p>
-          We're excited that you want to join us on this incredible journey
-          through Argentina!
-        </p>
+  const destinations = [
+    {
+      name: "Bariloche",
+      description: "Adventure & Rafting",
+      image: barilocheImage,
+    },
+    {
+      name: "Buenos Aires",
+      description: "Culture & Tango",
+      image: buenosAiresImage,
+    },
+    {
+      name: "Mendoza",
+      description: "Wine & Mountains",
+      image: mendozaImage,
+    },
+  ];
 
-        <div className="info-cards">
-          <div className="info-card">
+  return (
+    <section className="welcome-hero">
+      {/* Main Hero Content */}
+      <div className="hero-content">
+        <div className="hero-text">
+          <h1 className="hero-title">Welcome to Your Argentina Adventure!</h1>
+          <p className="hero-subtitle">
+            We're excited that you want to join us on this incredible journey
+            through Argentina's most breathtaking destinations!
+          </p>
+        </div>
+
+        {/* Destination Images */}
+        <div className="destinations-stack">
+          {destinations.map((destination, index) => (
+            <div key={index} className="destination-card">
+              <div className="destination-image">
+                <img src={destination.image} alt={destination.name} />
+                <div className="destination-overlay">
+                  <h3>{destination.name}</h3>
+                  <p>{destination.description}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Action Cards */}
+      <div className="action-cards">
+        <div className="action-card itinerary-card">
+          <div className="card-icon">
             <i className="fas fa-map-marked-alt"></i>
-            <h3>Full Itinerary</h3>
+          </div>
+          <div className="card-content">
+            <h3>Explore the Full Itinerary</h3>
+            <p>Discover every detail of your Argentina adventure</p>
             <a
               href="https://docs.google.com/presentation/d/164WBfbVElZFp-EVOFWNsplV9U8s5IltaFy4t9rmcpO4/edit?usp=sharing"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-link"
+              className="action-button primary"
             >
               View Details <i className="fas fa-external-link-alt"></i>
             </a>
           </div>
+        </div>
 
-          <div className="info-card">
-            <i className="fas fa-phone"></i>
-            <h3>Need Help?</h3>
-            <div className="contacts-list">
+        <div className="action-card contact-card">
+          <div className="card-icon">
+            <i className="fas fa-headset"></i>
+          </div>
+          <div className="card-content">
+            <h3>Need Assistance?</h3>
+            <p>Our team is here to help with any questions</p>
+            <div className="contacts-grid">
               {CONTACTS.map((contact, index) => (
-                <div key={index} className="contact-item">
-                  <div className="contact-details">
+                <div key={index} className="contact-row">
+                  <div className="contact-info">
                     <span className="contact-name">{contact.name}</span>
                     <span className="contact-phone">{contact.phone}</span>
                   </div>
@@ -41,7 +91,7 @@ const WelcomeSection = () => {
                     href={contact.whatsapp}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="whatsapp-button"
+                    className="whatsapp-btn"
                     title={`Message ${contact.name} on WhatsApp`}
                   >
                     <i className="fab fa-whatsapp"></i>

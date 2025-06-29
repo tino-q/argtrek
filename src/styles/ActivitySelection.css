@@ -18,13 +18,13 @@
 }
 
 .activity-card:hover {
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
   transform: translateY(-3px);
   box-shadow: 0 10px 25px var(--shadow-beige-light);
 }
 
 .activity-card.activity-selected {
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
   background: linear-gradient(
     135deg,
     var(--bg-light),
@@ -46,7 +46,7 @@
 
 .activity-header i {
   font-size: 2rem;
-  color: var(--primary-beige);
+  color: var(--primary);
 }
 
 .activity-header h3 {
@@ -57,7 +57,7 @@
 
 .activity-details .location {
   font-weight: 600;
-  color: var(--primary-beige);
+  color: var(--primary);
   margin-bottom: 5px;
 }
 

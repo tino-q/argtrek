@@ -26,7 +26,7 @@
 }
 
 .form-section h2 i {
-  color: var(--primary-beige);
+  color: var(--primary);
   font-size: 1.5rem;
 }
 
@@ -97,14 +97,14 @@
 }
 
 .radio-option label:hover {
-  border-color: var(--primary-beige);
-  background: var(--primary-beige-lighter);
+  border-color: var(--primary);
+  background: var(--primary-lighter);
   transform: translateY(-2px);
   box-shadow: 0 5px 15px var(--shadow-beige-light);
 }
 
 .radio-option input[type="radio"]:checked + label {
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
   background: var(--gradient-selected);
   box-shadow: 0 5px 15px var(--shadow-beige);
 }
@@ -125,7 +125,7 @@
 .option-content .price {
   font-size: 1rem;
   font-weight: 700;
-  color: var(--primary-beige);
+  color: var(--primary);
   margin-bottom: 8px;
 }
 
@@ -149,7 +149,7 @@
 }
 
 .checkbox-option:hover {
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
   box-shadow: 0 5px 15px var(--shadow-beige-light);
 }
 
@@ -167,8 +167,8 @@
 }
 
 .checkbox-option input[type="checkbox"]:checked {
-  background-color: var(--primary-beige);
-  border-color: var(--primary-beige);
+  background-color: var(--primary);
+  border-color: var(--primary);
 }
 
 .checkbox-option input[type="checkbox"]:checked::after {
@@ -183,7 +183,7 @@
 }
 
 .checkbox-option input[type="checkbox"]:hover {
-  border-color: var(--primary-beige);
+  border-color: var(--primary);
 }
 
 .checkbox-label {
