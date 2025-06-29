@@ -90,11 +90,16 @@ body {
   color: var(--text-primary);
   background: var(--gradient-background);
   min-height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px 0;
 }
 
 .container {
+  width: 100%;
   max-width: 900px;
-  margin: 0 auto;
   padding: 20px;
 }
 
