@@ -1,0 +1,207 @@
+/* Welcome Section */
+.welcome-section {
+  background: var(--white-95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px;
+  margin-bottom: 40px;
+  box-shadow: 0 20px 40px var(--shadow-dark);
+}
+
+.welcome-content h2 {
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.welcome-content > p {
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-bottom: 30px;
+}
+
+.info-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+}
+
+.info-card {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 25px;
+  border-radius: 15px;
+  text-align: center;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px var(--shadow-beige-strong);
+}
+
+.info-card i {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  opacity: 0.9;
+}
+
+.info-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  background: var(--white-20);
+  border-radius: 8px;
+  transition: background 0.3s ease;
+  font-weight: 500;
+}
+
+.btn-link:hover {
+  background: var(--white-30);
+}
+
+.contact-info p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
+
+/* Modern Contact List Styling */
+.contacts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.contact-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--white-20);
+  padding: 10px 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.contact-item:hover {
+  background: var(--white-30);
+}
+
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.contact-name {
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  line-height: 1.3;
+}
+
+.contact-phone {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  font-weight: 400;
+}
+
+.whatsapp-button {
+  background: #25d366;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.whatsapp-button:hover {
+  background: #20b954;
+  transform: scale(1.05);
+}
+
+.whatsapp-button i {
+  font-size: 16px;
+  transform: translateX(0.5px);
+}
+
+.contact-info .whatsapp-link i {
+  font-size: 0.9rem;
+  opacity: 0.7;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.contact-info .whatsapp-link {
+  color: white;
+  opacity: 0.9;
+  text-decoration: underline;
+  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+}
+
+.contact-info .whatsapp-link:hover {
+  opacity: 1;
+  color: white;
+  text-decoration: underline;
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .info-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-section {
+    padding: 25px 20px;
+  }
+
+  .contact-item {
+    padding: 8px 12px;
+  }
+
+  .contact-name {
+    font-size: 0.85rem;
+  }
+
+  .contact-phone {
+    font-size: 0.75rem;
+  }
+
+  .whatsapp-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .whatsapp-button i {
+    font-size: 14px;
+    transform: translateX(0.5px);
+  }
+}

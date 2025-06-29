@@ -1,0 +1,20 @@
+/* Main CSS file - imports all component-specific styles */
+
+/* Global styles */
+@import "./globals.css";
+
+/* Layout components */
+@import "./Header.css";
+@import "./WelcomeSection.css";
+@import "./PricingSummary.css";
+
+/* Form components */
+@import "./Form.css";
+@import "./PersonalInfo.css";
+@import "./TripConfiguration.css";
+@import "./AccommodationSelector.css";
+@import "./ActivitySelection.css";
+@import "./PaymentOptions.css";
+
+/* Common components */
+@import "./NotificationContainer.css";

@@ -30,19 +30,23 @@ const WelcomeSection = () => {
           <div className="info-card">
             <i className="fas fa-phone"></i>
             <h3>Need Help?</h3>
-            <div className="contact-info">
+            <div className="contacts-list">
               {CONTACTS.map((contact, index) => (
-                <p key={index}>
-                  <strong>{contact.name}:</strong>
+                <div key={index} className="contact-item">
+                  <div className="contact-details">
+                    <span className="contact-name">{contact.name}</span>
+                    <span className="contact-phone">{contact.phone}</span>
+                  </div>
                   <a
                     href={contact.whatsapp}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="whatsapp-link"
+                    className="whatsapp-button"
+                    title={`Message ${contact.name} on WhatsApp`}
                   >
-                    {contact.phone} <i className="fab fa-whatsapp"></i>
+                    <i className="fab fa-whatsapp"></i>
                   </a>
-                </p>
+                </div>
               ))}
             </div>
           </div>

@@ -1,0 +1,76 @@
+/* Price Summary */
+.price-summary {
+  background: linear-gradient(135deg, var(--text-primary), var(--text-muted));
+  color: white;
+  padding: 40px;
+  margin: 40px 0;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(45, 55, 72, 0.3);
+}
+
+.price-summary h2 {
+  color: white;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.summary-content {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  font-size: 1rem;
+}
+
+.activity-row {
+  padding: 8px 0;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.activity-row small {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+}
+
+.summary-row.subtotal {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-top: 15px;
+  padding: 15px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.summary-row.total {
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--primary-beige-cream);
+  margin-top: 15px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  border-bottom: none;
+}
+
+.payment-amount {
+  background: var(--bg-beige-transparent);
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .price-summary {
+    padding: 25px 20px;
+  }
+}

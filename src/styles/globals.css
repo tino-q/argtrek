@@ -1,0 +1,192 @@
+/* Tailwind CSS Color Palette */
+:root {
+  /* Primary Theme - Amber */
+  --primary-beige: #f59e0b; /* amber-500 */
+  --primary-beige-dark: #d97706; /* amber-600 */
+  --primary-beige-darker: #b45309; /* amber-700 */
+  --primary-beige-light: #fbbf24; /* amber-400 */
+  --primary-beige-lighter: #fef3c7; /* amber-100 */
+  --primary-beige-cream: #fffbeb; /* amber-50 */
+  --primary-beige-medium: #f59e0b; /* amber-500 */
+  --primary-beige-selected: #fef3c7; /* amber-100 */
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(
+    135deg,
+    var(--primary-beige),
+    var(--primary-beige-dark)
+  );
+  --gradient-background: linear-gradient(
+    135deg,
+    var(--primary-beige-light),
+    var(--primary-beige-medium)
+  );
+  --gradient-selected: linear-gradient(
+    135deg,
+    var(--primary-beige-lighter),
+    var(--primary-beige-selected)
+  );
+  --gradient-hover: linear-gradient(
+    135deg,
+    var(--primary-beige-dark),
+    var(--primary-beige-darker)
+  );
+
+  /* Shadows & Transparency */
+  --shadow-beige: rgba(245, 158, 11, 0.3); /* amber-500 with opacity */
+  --shadow-beige-light: rgba(245, 158, 11, 0.2);
+  --shadow-beige-strong: rgba(245, 158, 11, 0.4);
+  --bg-beige-transparent: rgba(245, 158, 11, 0.2);
+  --focus-beige: rgba(245, 158, 11, 0.1);
+
+  /* Text Colors - Stone */
+  --text-primary: #1c1917; /* stone-900 */
+  --text-secondary: #78716c; /* stone-500 */
+  --text-muted: #57534e; /* stone-600 */
+  --border-light: #e7e5e4; /* stone-200 */
+  --bg-light: #fafaf9; /* stone-50 */
+  --white-95: rgba(255, 255, 255, 0.95);
+  --white-20: rgba(255, 255, 255, 0.2);
+  --white-30: rgba(255, 255, 255, 0.3);
+  --white-40: rgba(255, 255, 255, 0.4);
+  --shadow-dark: rgba(0, 0, 0, 0.1);
+  --shadow-dark-20: rgba(0, 0, 0, 0.2);
+
+  /* Success - Emerald */
+  --price-green: #10b981; /* emerald-500 */
+
+  /* Warning - Orange */
+  --warning-bg: #fff7ed; /* orange-50 */
+  --warning-border: #fb923c; /* orange-400 */
+  --warning-icon: #ea580c; /* orange-600 */
+  --warning-text: #9a3412; /* orange-800 */
+
+  /* Error - Red */
+  --error-primary: #ef4444; /* red-500 */
+  --error-dark: #dc2626; /* red-600 */
+  --error-focus: rgba(239, 68, 68, 0.1); /* red-500 with opacity */
+
+  /* Success colors */
+  --success-primary: #10b981; /* emerald-500 */
+  --success-dark: #059669; /* emerald-600 */
+}
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Global form element styling to prevent dark mode interference */
+input,
+select,
+textarea,
+button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+body {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--gradient-background);
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 900px;
+  padding: 20px;
+}
+
+/* Base Form Styles */
+input[type="text"],
+input[type="email"] {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid var(--border-light);
+  border-radius: 10px;
+  font-size: 1rem;
+  background-color: white;
+  color: var(--text-primary);
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus {
+  outline: none;
+  border-color: var(--primary-beige);
+  box-shadow: 0 0 0 3px var(--focus-beige);
+}
+
+/* Base Checkbox Styles */
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border: 2px solid var(--border-light);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+input[type="checkbox"]:checked {
+  background-color: var(--primary-beige);
+  border-color: var(--primary-beige);
+}
+
+input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+input[type="checkbox"]:hover {
+  border-color: var(--primary-beige);
+}
+
+/* WhatsApp Links */
+.whatsapp-link {
+  color: #25d366;
+  text-decoration: underline;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.whatsapp-link:hover {
+  color: #128c7e;
+  text-decoration: underline;
+  transform: translateY(-1px);
+}
+
+.whatsapp-link i {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  vertical-align: middle;
+  line-height: 1;
+}

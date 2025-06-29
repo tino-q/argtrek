@@ -1,0 +1,103 @@
+/* Activity Selection Styles */
+
+/* Activities Grid */
+.activities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.activity-card {
+  background: var(--bg-light);
+  border: 2px solid var(--border-light);
+  border-radius: 15px;
+  padding: 25px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.activity-card:hover {
+  border-color: var(--primary-beige);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px var(--shadow-beige-light);
+}
+
+.activity-card.activity-selected {
+  border-color: var(--primary-beige);
+  background: linear-gradient(
+    135deg,
+    var(--bg-light),
+    rgba(184, 149, 106, 0.1)
+  );
+  box-shadow: 0 8px 20px var(--shadow-beige-light);
+}
+
+.activity-card.activity-selected:hover {
+  transform: translateY(-2px);
+}
+
+.activity-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.activity-header i {
+  font-size: 2rem;
+  color: var(--primary-beige);
+}
+
+.activity-header h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.activity-details .location {
+  font-weight: 600;
+  color: var(--primary-beige);
+  margin-bottom: 5px;
+}
+
+.activity-details .date {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.activity-details .description {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.activity-details .price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--price-green);
+  margin-bottom: 15px;
+}
+
+.activity-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toggle-label {
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  margin: 0;
+  pointer-events: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .activities-grid {
+    grid-template-columns: 1fr;
+  }
+}

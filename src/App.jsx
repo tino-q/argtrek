@@ -7,8 +7,7 @@ import { useNotifications } from "./hooks/useNotifications";
 import { useAnimations, injectAnimationStyles } from "./hooks/useAnimations";
 import { FORM_FIELDS } from "./utils/config";
 
-// Import styles
-import "./styles.css";
+// Styles are now imported in main.jsx via main.css
 
 // Import components (we'll create these next)
 import Header from "./components/layout/Header";
