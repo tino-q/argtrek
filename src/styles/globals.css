@@ -7,6 +7,8 @@
   --primary-light: #8fc3e8; /* lighter celeste */
   --primary-lighter: #e3f2fd; /* very light blue */
   --primary-cream: #f8fcff; /* almost white with blue tint */
+  --primary-bg: #eff6ff; /* blue-50 - light blue background */
+  --primary-border: #93c5fd; /* blue-300 - light blue border */
   --primary-medium: #75aadb; /* celeste */
   --primary-selected: #e3f2fd; /* light selection blue */
 
@@ -58,6 +60,7 @@
   /* Warning - Orange */
   --warning-bg: #fff7ed; /* orange-50 */
   --warning-border: #fb923c; /* orange-400 */
+  --warning-border-light: #fdba74; /* orange-300 - light orange border */
   --warning-icon: #ea580c; /* orange-600 */
   --warning-text: #9a3412; /* orange-800 */
 
@@ -69,6 +72,12 @@
   /* Success colors */
   --success-primary: #10b981; /* emerald-500 */
   --success-dark: #059669; /* emerald-600 */
+  --success-bg: #f0fdf4; /* emerald-50 - light green background */
+  --success-border: #86efac; /* emerald-300 - light green border */
+
+  /* Error backgrounds */
+  --error-bg: #fef2f2; /* red-50 - light red background */
+  --error-border: #fca5a5; /* red-300 - light red border */
 }
 
 /* Reset and Base Styles */
@@ -189,4 +198,90 @@ input[type="checkbox"]:hover {
   opacity: 0.8;
   vertical-align: middle;
   line-height: 1;
+}
+
+/* Footer Styles */
+.app-footer {
+  margin-top: 60px;
+  padding: 30px 0;
+  text-align: center;
+  border-top: 1px solid var(--border-light);
+  background: linear-gradient(135deg, var(--white-95) 0%, var(--white-40) 100%);
+  backdrop-filter: blur(10px);
+  border-radius: 15px 15px 0 0;
+}
+
+.app-footer p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.footer-emoji {
+  font-size: 1.1rem;
+  margin: 0 8px;
+  display: inline-block;
+  animation: footerPulse 3s ease-in-out infinite;
+}
+
+.cursor-link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.cursor-link:hover {
+  color: var(--primary-dark);
+  background: var(--focus-primary);
+  transform: translateY(-1px);
+}
+
+.author-name {
+  color: var(--text-primary);
+  font-weight: 700;
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primary-dark) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  padding: 0 2px;
+}
+
+/* Footer animation */
+@keyframes footerPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Mobile footer adjustments */
+@media (max-width: 768px) {
+  .app-footer {
+    margin-top: 40px;
+    padding: 20px 0;
+  }
+
+  .app-footer p {
+    font-size: 0.85rem;
+  }
+
+  .footer-emoji {
+    font-size: 1rem;
+    margin: 0 6px;
+  }
 }

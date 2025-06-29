@@ -200,6 +200,23 @@ function App() {
         notifications={notifications}
         onRemove={removeNotification}
       />
+
+      <footer className="app-footer">
+        <p>
+          <span className="footer-emoji">✨</span>
+          vibe coded with{" "}
+          <a
+            href="https://cursor.sh"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cursor-link"
+          >
+            cursor
+          </a>{" "}
+          by <span className="author-name">tinoq</span>
+          <span className="footer-emoji">🇦🇷</span>
+        </p>
+      </footer>
     </div>
   );
 }
