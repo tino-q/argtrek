@@ -1,4 +1,7 @@
 import { FORM_FIELDS } from "../../utils/config";
+import horsebackImage from "../../assets/horseback-riding-mendoza.png";
+import empanadasImage from "../../assets/empanadas.png";
+import raftingImage from "../../assets/bariloche-rafting.png";
 
 const ACTIVITIES = [
   {
@@ -9,6 +12,7 @@ const ACTIVITIES = [
     date: "November 27th - Afternoon",
     price: 45,
     description: "",
+    image: horsebackImage,
   },
   {
     id: "cooking",
@@ -18,6 +22,7 @@ const ACTIVITIES = [
     date: "November 28th - Midday",
     price: 140,
     description: "3-course menu with wine pairing",
+    image: empanadasImage,
   },
   {
     id: "rafting",
@@ -27,6 +32,7 @@ const ACTIVITIES = [
     date: "November 26th - All Day",
     price: 75,
     description: "",
+    image: raftingImage,
   },
 ];
 
@@ -46,7 +52,7 @@ const ActivitySelection = ({ formData, updateArrayField }) => {
         Enhance your trip with these amazing experiences!
       </p>
 
-      <div className="activities-grid">
+      <div className="activities-container">
         {ACTIVITIES.map((activity) => {
           const isSelected = selectedActivities.some(
             (selected) => selected.id === activity.id
@@ -59,26 +65,32 @@ const ActivitySelection = ({ formData, updateArrayField }) => {
               onClick={() => handleActivityToggle(activity, !isSelected)}
               style={{ cursor: "pointer" }}
             >
-              <div className="activity-header">
-                <input
-                  type="checkbox"
-                  id={activity.id}
-                  name="activities"
-                  checked={isSelected}
-                  onChange={() => {}} // Handled by card click
-                  style={{ pointerEvents: "none", marginRight: "12px" }}
-                />
-                <i className={activity.icon}></i>
-                <h3>{activity.name}</h3>
+              <div className="activity-image">
+                <img src={activity.image} alt={activity.name} />
               </div>
 
-              <div className="activity-details">
-                <p className="location">{activity.location}</p>
-                <p className="date">{activity.date}</p>
-                {activity.description && (
-                  <p className="description">{activity.description}</p>
-                )}
-                <p className="price">${activity.price} USD</p>
+              <div className="activity-content">
+                <div className="activity-header">
+                  <input
+                    type="checkbox"
+                    id={activity.id}
+                    name="activities"
+                    checked={isSelected}
+                    onChange={() => {}} // Handled by card click
+                    style={{ pointerEvents: "none", marginRight: "12px" }}
+                  />
+                  <i className={activity.icon}></i>
+                  <h3>{activity.name}</h3>
+                </div>
+
+                <div className="activity-details">
+                  <p className="location">{activity.location}</p>
+                  <p className="date">{activity.date}</p>
+                  {activity.description && (
+                    <p className="description">{activity.description}</p>
+                  )}
+                  <p className="price">${activity.price} USD</p>
+                </div>
               </div>
             </div>
           );
