@@ -6,6 +6,8 @@
 /* Layout components */
 @import "./Header.css";
 @import "./WelcomeSection.css";
+@import "./EmailLogin.css";
+@import "./RSVPDisplay.css";
 @import "./PricingSummary.css";
 
 /* Form components */

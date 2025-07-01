@@ -1,6 +1,6 @@
 /**
  * Google Apps Script for Argentina Trip Form
- * Handles POST requests and saves data to Google Sheets
+ * Handles POST requests for form submissions and GET requests for RSVP lookup
  *
  * Google Apps Script globals: ContentService, SpreadsheetApp
  */
@@ -9,6 +9,7 @@
 
 // Configuration
 const SHEET_NAME = "Trip Registrations";
+const RSVP_SHEET_NAME = "Sheet1"; // Name of the sheet containing RSVP data
 const PRICING = {
   tripOption1: 2250,
   tripOption2: 2600,
@@ -20,6 +21,53 @@ const PRICING = {
   installmentRate: 0.35,
   vatRate: 0.21,
 };
+
+/**
+ * Handle GET requests for RSVP lookup
+ */
+// eslint-disable-next-line no-unused-vars
+function doGet(e) {
+  try {
+    // Get email parameter from query string
+    const email = e.parameter.email;
+
+    if (!email) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: "Email parameter is required",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Look up RSVP data
+    const rsvpResult = lookupRSVP(email);
+
+    if (rsvpResult.success) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: true,
+          data: rsvpResult.data,
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    } else {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: rsvpResult.error,
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+  } catch (error) {
+    console.error("Error processing GET request:", error);
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: "Internal server error: " + error.message,
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
 
 /**
  * Main function to handle POST requests

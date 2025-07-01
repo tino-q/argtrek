@@ -1,152 +1,87 @@
 // Main Trip Form React App
-// Migrated from original index.html and JavaScript modules
+// Refactored for RSVP confirmation + add-ons selection + payment processing
 
 import { useState, useRef, useEffect } from "react";
-import { usePricing } from "./hooks/usePricing";
 import { useNotifications } from "./hooks/useNotifications";
 import { useAnimations, injectAnimationStyles } from "./hooks/useAnimations";
-import { useFormSubmission } from "./hooks/useFormSubmission";
-import { FORM_FIELDS } from "./utils/config";
 
-// Styles are now imported in main.jsx via main.css
-
-// Import components (we'll create these next)
+// Import components
 import Header from "./components/layout/Header";
 import WelcomeSection from "./components/layout/WelcomeSection";
-import PersonalInfo from "./components/form/PersonalInfo";
-import TripConfiguration from "./components/form/TripConfiguration";
-import AccommodationSelector from "./components/form/AccommodationSelector";
-import ActivitySelection from "./components/form/ActivitySelection";
-import PaymentOptions from "./components/form/PaymentOptions";
-import PricingSummary from "./components/layout/PricingSummary";
+import EmailLogin from "./components/auth/EmailLogin";
+import RSVPDisplay from "./components/display/RSVPDisplay";
 import NotificationContainer from "./components/common/NotificationContainer";
 
 function App() {
-  // Form state
-  const [formData, setFormData] = useState({
-    [FORM_FIELDS.EMAIL]: "",
-    [FORM_FIELDS.FULL_NAME]: "",
-    [FORM_FIELDS.TRIP_OPTION]: "",
-    [FORM_FIELDS.ACCOMMODATION]: "0", // Default to shared room
-    [FORM_FIELDS.ROOMMATE]: "",
-    [FORM_FIELDS.ACTIVITIES]: [],
-    [FORM_FIELDS.PAYMENT_SCHEDULE]: "full",
-    [FORM_FIELDS.PAYMENT_METHOD]: "credit",
-    [FORM_FIELDS.ARGENTINE_CITIZEN]: false,
-  });
+  // Application state
+  const [currentStep, setCurrentStep] = useState("login"); // "login", "rsvp", "addons", "payment"
+  const [userRSVP, setUserRSVP] = useState(null);
 
   // Form reference for validation feedback
   const formRef = useRef(null);
 
   // Custom hooks
-  const pricing = usePricing(formData);
   const { notifications, showSuccess, showError, removeNotification } =
     useNotifications();
-  const { pulseElement, shakeElement } = useAnimations();
-  const { submitForm, isSubmitting } = useFormSubmission();
+  const { _pulseElement, _shakeElement } = useAnimations();
 
   // Initialize animations when component mounts
   useEffect(() => {
     injectAnimationStyles();
   }, []);
 
-  // Update form data
-  const updateFormData = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  // Handle email and password login submission
+  const handleEmailLogin = async (email, password) => {
+    try {
+      // Make GET request to RSVP Apps Script
+      const RSVP_SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycbwDS4eNkjF_ESiThcPyJUDxsJw7H2twEUVoHjjSzX_ZfPSugbReLiLUg22R11bCgJJFSw/exec";
 
-  // Update array field (for activities)
-  const updateArrayField = (field, item, isSelected) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: isSelected
-        ? [...prev[field], item]
-        : prev[field].filter((existing) => existing !== item),
-    }));
-  };
-
-  // Enhanced form validation with animations
-  const validateForm = () => {
-    const errors = [];
-
-    // Check email
-    if (!formData[FORM_FIELDS.EMAIL]) {
-      errors.push("Email is required");
-      const emailInput = document.getElementById("email");
-      if (emailInput) {
-        shakeElement(emailInput);
-        emailInput.focus();
-      }
-    }
-
-    // Check full name
-    if (!formData[FORM_FIELDS.FULL_NAME]) {
-      errors.push("Full name is required");
-      const nameInput = document.getElementById("fullName");
-      if (nameInput && errors.length === 1) {
-        shakeElement(nameInput);
-        nameInput.focus();
-      }
-    }
-
-    // Check trip option
-    if (!formData[FORM_FIELDS.TRIP_OPTION]) {
-      errors.push("Please select a trip option");
-      const tripSection = document.querySelector(
-        '[data-section="trip-config"]'
+      const response = await fetch(
+        `${RSVP_SCRIPT_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
+        {
+          method: "GET",
+        }
       );
-      if (tripSection && errors.length === 1) {
-        shakeElement(tripSection);
-        tripSection.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
 
-    // Check roommate for shared accommodation
-    if (
-      formData[FORM_FIELDS.ACCOMMODATION] === "0" &&
-      !formData[FORM_FIELDS.ROOMMATE]
-    ) {
-      errors.push("Please specify your roommate for shared accommodation");
-      const roommateInput = document.getElementById("roommate");
-      if (roommateInput && errors.length === 1) {
-        shakeElement(roommateInput);
-        roommateInput.focus();
-      }
-    }
+      const result = await response.json();
 
-    return {
-      isValid: errors.length === 0,
-      errors,
-    };
+      if (result.error) {
+        // Handle specific error types
+        if (
+          result.error.includes("password") ||
+          result.error.includes("Invalid password")
+        ) {
+          showError(
+            "Invalid password. Please check your password and try again."
+          );
+        } else if (
+          result.error.includes("email") ||
+          result.error.includes("Email not found")
+        ) {
+          showError(
+            "Email not found. Please check your email address and try again."
+          );
+        } else {
+          showError(result.error);
+        }
+      } else {
+        // Valid RSVP found - store data and move to RSVP display
+        setUserRSVP(result.data);
+        setCurrentStep("rsvp");
+        showSuccess("Trip details retrieved successfully!");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      showError(
+        "Failed to retrieve trip details. Please check your internet connection and try again."
+      );
+    }
   };
 
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const validation = validateForm();
-
-    if (!validation.isValid) {
-      showError(validation.errors[0]);
-      return;
-    }
-
-    // Submit form using the hook
-    const result = await submitForm(formData);
-
-    if (result.success) {
-      showSuccess(result.message, result.options);
-
-      // Add success animation to form
-      if (formRef.current) {
-        pulseElement(formRef.current);
-      }
-    } else {
-      showError(result.message, result.options);
-    }
+  // Handle continuing to add-ons from RSVP display
+  const handleContinueToAddons = () => {
+    setCurrentStep("addons");
   };
 
   return (
@@ -155,50 +90,37 @@ function App() {
 
       <WelcomeSection />
 
-      <form ref={formRef} className="trip-form" onSubmit={handleSubmit}>
-        <PersonalInfo formData={formData} updateFormData={updateFormData} />
+      <div ref={formRef} className="trip-form">
+        {currentStep === "login" && (
+          <EmailLogin onEmailSubmit={handleEmailLogin} />
+        )}
 
-        <TripConfiguration
-          formData={formData}
-          updateFormData={updateFormData}
-        />
+        {/* RSVP Display Step */}
+        {currentStep === "rsvp" && userRSVP && (
+          <RSVPDisplay
+            rsvpData={userRSVP}
+            onContinue={handleContinueToAddons}
+          />
+        )}
 
-        <AccommodationSelector
-          formData={formData}
-          updateFormData={updateFormData}
-        />
+        {currentStep === "addons" && (
+          <div className="form-section">
+            <h2>Optional Add-ons</h2>
+            <p>Activity selection will appear here...</p>
+          </div>
+        )}
 
-        <ActivitySelection
-          formData={formData}
-          updateArrayField={updateArrayField}
-        />
-
-        <PaymentOptions formData={formData} updateFormData={updateFormData} />
-
-        <PricingSummary pricing={pricing} formData={formData} />
-
-        <div className="form-actions">
-          <button
-            type="submit"
-            className={`submit-btn ${isSubmitting ? "form-success" : ""}`}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <i className="fas fa-spinner fa-spin"></i> Processing...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-save"></i> Save Configuration
-              </>
-            )}
-          </button>
-        </div>
-      </form>
+        {currentStep === "payment" && (
+          <div className="form-section">
+            <h2>Payment Configuration</h2>
+            <p>Payment options will appear here...</p>
+          </div>
+        )}
+      </div>
 
       <NotificationContainer
         notifications={notifications}
-        onRemove={removeNotification}
+        removeNotification={removeNotification}
       />
 
       <footer className="app-footer">
