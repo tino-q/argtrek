@@ -75,6 +75,7 @@ function App() {
             "JA3725 BRC MDZ": true,
             "JA3073 MDZ AEP": true,
             "Are you traveling solo or with a plus one?": "Solo",
+            "VALIJA DESPACHADA": 69,
           };
 
           console.log("🚀 DEVELOPMENT BYPASS - Mock User Data:");
