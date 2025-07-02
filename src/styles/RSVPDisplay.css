@@ -106,6 +106,16 @@
   margin: 2rem 0;
 }
 
+.luggage-addon-section h3 {
+  margin: 0 0 1.5rem 0;
+  color: var(--text-dark);
+  font-size: 1.3rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .luggage-addon-card {
   display: flex;
   align-items: center;
@@ -115,6 +125,7 @@
   background: #fafafa;
   transition: all 0.3s ease;
   gap: 16px;
+  margin-bottom: 16px;
 }
 
 .luggage-addon-card:hover {
@@ -193,6 +204,39 @@
   font-size: 0.9rem;
   color: #28a745;
   font-weight: 500;
+}
+
+/* Carry-on luggage (included) styling */
+.luggage-addon-card.included {
+  background: #f0f9f0;
+  border-color: #28a745;
+  opacity: 1;
+}
+
+.luggage-addon-card.disabled {
+  cursor: not-allowed !important;
+}
+
+.luggage-addon-card.disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: #f0f9f0;
+  border-color: #28a745;
+}
+
+.luggage-icon.carry-on {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.luggage-price.included .price-amount {
+  color: #28a745;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.luggage-checkbox input[type="checkbox"]:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .service-icon {

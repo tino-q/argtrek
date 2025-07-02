@@ -255,9 +255,38 @@ const RSVPDisplay = ({
         </div>
       </div>
 
-      {/* Checked Luggage Addon */}
-      {checkedLuggagePrice && (
-        <div className="luggage-addon-section">
+      {/* Luggage Options */}
+      <div className="luggage-addon-section">
+        <h3>
+          <i className="fas fa-suitcase"></i> Luggage Options
+        </h3>
+
+        {/* Carry-on Luggage - Always included */}
+        <div className="luggage-addon-card included disabled">
+          <div className="luggage-checkbox">
+            <input
+              type="checkbox"
+              checked={true}
+              disabled={true}
+              style={{ pointerEvents: "none" }}
+            />
+          </div>
+          <div className="luggage-icon carry-on">
+            <i className="fas fa-carry-on"></i>
+          </div>
+          <div className="luggage-details">
+            <div className="luggage-title">Carry-on Luggage</div>
+            <div className="luggage-description">
+              Personal item + carry-on bag (max 10kg)
+            </div>
+          </div>
+          <div className="luggage-price included">
+            <span className="price-amount">Included</span>
+          </div>
+        </div>
+
+        {/* Checked Luggage - Optional addon */}
+        {checkedLuggagePrice && (
           <div
             className={`luggage-addon-card ${isLuggageSelected ? "selected" : ""}`}
             onClick={handleLuggageToggle}
@@ -277,7 +306,7 @@ const RSVPDisplay = ({
             <div className="luggage-details">
               <div className="luggage-title">Checked Luggage</div>
               <div className="luggage-description">
-                Add checked luggage to all your flights
+                Add checked luggage to all your flights (max 23kg)
               </div>
             </div>
             <div className="luggage-price">
@@ -285,8 +314,8 @@ const RSVPDisplay = ({
               <span className="price-currency">USD</span>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Show excluded services if requested */}
       {showAllDetails && excludedServices.length > 0 && (
