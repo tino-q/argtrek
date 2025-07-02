@@ -16,6 +16,7 @@
 @import url("./styles/NotificationContainer.css");
 @import url("./styles/ImageCarousel.css");
 @import url("./styles/SafeSubmitButton.css");
+@import url("./styles/Navigation.css");
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;

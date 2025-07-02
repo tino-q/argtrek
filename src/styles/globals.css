@@ -394,37 +394,16 @@ input[type="checkbox"]:hover {
 }
 
 .welcome-actions {
-  text-align: center;
+  width: 100%;
+  max-width: 600px;
 }
 
-.welcome-continue-btn {
-  font-size: 1.1rem;
-  padding: 18px 32px;
-  border: none;
-  border-radius: 12px;
-  background: var(--gradient-primary);
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px var(--shadow-primary);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.welcome-continue-btn:hover {
-  background: var(--gradient-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--shadow-primary-strong);
-}
-
-.welcome-continue-btn:active {
-  transform: translateY(0);
-}
-
-.welcome-continue-btn i {
-  font-size: 1rem;
+/* Welcome navigation specific styling */
+.welcome-navigation .form-actions {
+  background: transparent;
+  border-top: none;
+  padding: 20px 0;
+  margin-top: 20px;
 }
 
 @media (max-width: 768px) {
@@ -433,8 +412,8 @@ input[type="checkbox"]:hover {
     margin: 20px 0;
   }
 
-  .welcome-continue-btn {
-    font-size: 1rem;
-    padding: 16px 28px;
+  .welcome-navigation .form-actions {
+    padding: 15px 0;
+    margin-top: 15px;
   }
 }

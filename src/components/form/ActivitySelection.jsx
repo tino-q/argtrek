@@ -4,8 +4,9 @@ import raftingImage from "../../assets/bariloche-rafting.png";
 import ImageCarousel from "../common/ImageCarousel";
 
 // Import all horseback images
-import horseback1 from "../../assets/horseback-riding/horseback-riding-mendoza.png";
-import horseback2 from "../../assets/horseback-riding/horseback-riding-mendoza-2.png";
+import horseback1 from "../../assets/horseback-riding/horseback-riding-mendoza.jpeg";
+import horseback2 from "../../assets/horseback-riding/horseback-riding-mendoza-2.jpeg";
+import horseback3 from "../../assets/horseback-riding/horseback-riding-mendoza-3.jpeg";
 
 // Import all rafting images
 import rafting1 from "../../assets/rafting/rafting1.jpeg";
@@ -26,7 +27,7 @@ import empanadas1 from "../../assets/empanadas/empanadas.png";
 import empanadas2 from "../../assets/empanadas/empanadas-2.png";
 
 // Array of all horseback images
-const HORSEBACK_IMAGES = [horseback1, horseback2];
+const HORSEBACK_IMAGES = [horseback1, horseback2, horseback3];
 
 // Array of all rafting images
 const RAFTING_IMAGES = [

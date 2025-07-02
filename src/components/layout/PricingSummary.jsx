@@ -35,13 +35,16 @@ const PricingSummary = ({ pricing, formData, rsvpData }) => {
 
   const vatAmount = getVATAmount();
 
-  // Calculate processing fee on subtotal + VAT
+  // Calculate intermediate subtotal (subtotal + VAT)
+  const intermediateSubtotal = pricing.subtotal + vatAmount;
+
+  // Calculate processing fee on intermediate subtotal (subtotal + VAT)
   const processingFee = hasProcessingFee
-    ? Math.round((pricing.subtotal + vatAmount) * 0.04)
+    ? Math.round(intermediateSubtotal * 0.04)
     : 0;
 
   // Calculate final total
-  const finalTotal = pricing.subtotal + vatAmount + processingFee;
+  const finalTotal = intermediateSubtotal + processingFee;
 
   // Calculate amount due now
   const amountDueNow = isInstallmentPlan
@@ -63,9 +66,12 @@ const PricingSummary = ({ pricing, formData, rsvpData }) => {
 
         {/* Accommodation Upgrade */}
         {hasAccommodationUpgrade && (
-          <div className="summary-row">
+          <div className="summary-row activity-row">
             <span>Private Room Upgrade:</span>
-            <span>{formatCurrency(pricing.accommodationPrice)}</span>
+            <span>
+              {formatCurrency(pricing.accommodationPrice)}
+              <small> (optional)</small>
+            </span>
           </div>
         )}
 
@@ -93,8 +99,16 @@ const PricingSummary = ({ pricing, formData, rsvpData }) => {
         {/* VAT (Argentine Citizens) */}
         {hasVAT && (
           <div className="summary-row">
-            <span>VAT (21%):</span>
+            <span>VAT (21%) on accommodation:</span>
             <span>{formatCurrency(vatAmount)}</span>
+          </div>
+        )}
+
+        {/* Intermediate Subtotal (when VAT is applied) */}
+        {hasVAT && (
+          <div className="summary-row subtotal">
+            <span>Subtotal (incl. VAT):</span>
+            <span>{formatCurrency(intermediateSubtotal)}</span>
           </div>
         )}
 

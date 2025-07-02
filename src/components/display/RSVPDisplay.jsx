@@ -7,6 +7,7 @@ const RSVPDisplay = ({
   onLogout,
   formData,
   updateArrayField,
+  hideNavigation = false,
 }) => {
   const [showAllDetails, setShowAllDetails] = useState(false);
 
@@ -430,15 +431,17 @@ const RSVPDisplay = ({
         </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="form-actions">
-        <button type="button" className="btn-secondary" onClick={onLogout}>
-          <i className="fas fa-sign-out-alt"></i> Log Out
-        </button>
-        <button type="button" className="submit-btn" onClick={onContinue}>
-          <i className="fas fa-arrow-right"></i> Continue to Add-ons
-        </button>
-      </div>
+      {/* Navigation Buttons - Only show if hideNavigation is false */}
+      {!hideNavigation && (
+        <div className="form-actions">
+          <button type="button" className="btn-secondary" onClick={onLogout}>
+            <i className="fas fa-arrow-left"></i> Go Back
+          </button>
+          <button type="button" className="submit-btn" onClick={onContinue}>
+            <i className="fas fa-arrow-right"></i> Continue to Add-ons
+          </button>
+        </div>
+      )}
     </section>
   );
 };

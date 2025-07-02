@@ -19,6 +19,7 @@ import PaymentOptions from "./components/form/PaymentOptions";
 import PricingSummary from "./components/layout/PricingSummary";
 import NotificationContainer from "./components/common/NotificationContainer";
 import SafeSubmitButton from "./components/common/SafeSubmitButton";
+import Navigation from "./components/common/Navigation";
 import Footer from "./components/layout/Footer";
 
 function App() {
@@ -26,7 +27,6 @@ function App() {
   const [currentStep, setCurrentStep] = useState("login"); // "login", "welcome", "rsvp", "addons", "payment"
   const [userRSVP, setUserRSVP] = useState(null);
   const [formData, setFormData] = useState({});
-  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Form reference for validation feedback
   const formRef = useRef(null);
@@ -43,26 +43,11 @@ function App() {
     injectAnimationStyles();
   }, []);
 
-  // Transition helper function
-  const transitionToWelcome = (userData, successMessage) => {
-    setIsTransitioning(true);
-
-    setTimeout(() => {
-      setUserRSVP(userData);
-      setCurrentStep("welcome");
-      setIsTransitioning(false);
-      showSuccess(successMessage);
-
-      // Scroll to top of page
-      setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: "instant" });
-      }, 100);
-    }, 1000); // 1 second transition
-  };
-
-  // Handle continuing from welcome to RSVP
-  const handleContinueToRSVP = () => {
-    setCurrentStep("rsvp");
+  // Handle successful login
+  const handleLoginSuccess = (userData, successMessage) => {
+    setUserRSVP(userData);
+    setCurrentStep("welcome");
+    showSuccess(successMessage);
 
     // Scroll to top of page
     setTimeout(() => {
@@ -90,7 +75,7 @@ function App() {
               "dev@test.com",
             "PACK PRICE": 2250,
             "PRIVATE ROOM UPGRADE": 350,
-            "IVA ALOJ": 0,
+            "IVA ALOJ": 120,
             "22 NOV": false,
             "23 NOV": false,
             "24 NOV": false,
@@ -111,7 +96,7 @@ function App() {
           console.table(mockUserData);
           console.log("==========================================");
 
-          transitionToWelcome(
+          handleLoginSuccess(
             mockUserData,
             "Development user logged in successfully!"
           );
@@ -159,10 +144,7 @@ function App() {
         console.log("Raw JSON Data:", JSON.stringify(result.data, null, 2));
         console.log("===============================================");
 
-        transitionToWelcome(
-          result.data,
-          "Trip details retrieved successfully!"
-        );
+        handleLoginSuccess(result.data, "Trip details retrieved successfully!");
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -201,44 +183,44 @@ function App() {
     });
   };
 
-  // Handle continuing to add-ons from RSVP display
-  const handleContinueToAddons = () => {
+  // Navigation helpers with scroll
+  const navigateToStep = (step) => {
+    setCurrentStep(step);
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }, 100);
+  };
+
+  // Centralized navigation handlers
+  const handleWelcomeBack = () => {
+    navigateToStep("login");
+  };
+
+  const handleWelcomeForward = () => {
+    navigateToStep("rsvp");
+  };
+
+  const handleRSVPBack = () => {
+    navigateToStep("welcome");
+  };
+
+  const handleRSVPForward = () => {
     // Extract base trip price and accommodation upgrade price from RSVP data
     if (userRSVP) {
       const updates = {};
 
-      // Extract trip price
-      const priceField = Object.keys(userRSVP).find(
-        (key) =>
-          key.toLowerCase().includes("pack price") ||
-          key.toLowerCase().includes("total price") ||
-          key.toLowerCase().includes("package price") ||
-          key.toLowerCase().includes("trip option price") ||
-          key.toLowerCase().includes("price")
-      );
-
-      if (priceField && userRSVP[priceField]) {
-        const price = parseFloat(userRSVP[priceField]);
-        if (!isNaN(price)) {
-          updates.tripOption = price;
-        }
+      // Extract pack price
+      if (userRSVP["PACK PRICE"]) {
+        updates[FORM_FIELDS.TRIP_OPTION] = userRSVP["PACK PRICE"].toString();
       }
 
       // Extract accommodation upgrade price
-      const accommodationPriceField = Object.keys(userRSVP).find(
-        (key) => key.toUpperCase() === "PRIVATE ROOM UPGRADE"
-      );
-
-      if (accommodationPriceField && userRSVP[accommodationPriceField]) {
-        const accommodationPrice = parseFloat(
-          userRSVP[accommodationPriceField]
-        );
-        if (!isNaN(accommodationPrice)) {
-          updates[FORM_FIELDS.ACCOMMODATION_UPGRADE_PRICE] = accommodationPrice;
-        }
+      if (userRSVP["PRIVATE ROOM UPGRADE"]) {
+        updates[FORM_FIELDS.ACCOMMODATION_UPGRADE_PRICE] =
+          userRSVP["PRIVATE ROOM UPGRADE"];
       }
 
-      // Update form data with extracted values
+      // Apply updates if any
       if (Object.keys(updates).length > 0) {
         setFormData((prev) => ({
           ...prev,
@@ -246,28 +228,24 @@ function App() {
         }));
       }
     }
-    setCurrentStep("addons");
-
-    // Scroll to top of page
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }, 100);
+    navigateToStep("addons");
   };
 
-  // Handle continuing to payment from add-ons
-  const handleContinueToPayment = () => {
-    setCurrentStep("payment");
+  const handleAddonsBack = () => {
+    navigateToStep("rsvp");
+  };
 
-    // Scroll to top of page
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }, 100);
+  const handleAddonsForward = () => {
+    navigateToStep("payment");
+  };
+
+  const handlePaymentBack = () => {
+    navigateToStep("addons");
   };
 
   // Check if user is a solo traveler (no plus one)
   const isSoloTraveler = () => {
     if (!userRSVP) return false;
-
     return userRSVP["Are you traveling solo or with a plus one?"] === "Solo";
   };
 
@@ -318,7 +296,7 @@ function App() {
     }
   };
 
-  // Handle logout
+  // Handle logout - goes back to login and clears all data
   const handleLogout = () => {
     setCurrentStep("login");
     setUserRSVP(null);
@@ -333,74 +311,56 @@ function App() {
     }, 100);
   };
 
-  // Navigation helpers with scroll
-  const goBackToRSVP = () => {
-    setCurrentStep("rsvp");
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }, 100);
-  };
-
-  const goBackToAddons = () => {
-    setCurrentStep("addons");
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }, 100);
-  };
-
   return (
     <div className="container">
       <Header />
 
       {/* Show WelcomeSection only in the dedicated welcome step */}
-      {currentStep === "welcome" && !isTransitioning && <WelcomeSection />}
+      {currentStep === "welcome" && <WelcomeSection onLogout={handleLogout} />}
 
       <div ref={formRef} className="trip-form">
-        {/* Transition Screen */}
-        {isTransitioning && (
-          <div className="transition-screen">
-            <div className="transition-content">
-              <div className="spinner-container">
-                <i className="fas fa-spinner fa-spin fa-3x"></i>
-              </div>
-              <h3>Loading your trip details...</h3>
-              <p>Please wait while we prepare your information</p>
-            </div>
-          </div>
-        )}
-
         {/* Login Step */}
-        {currentStep === "login" && !isTransitioning && (
+        {currentStep === "login" && (
           <EmailLogin onEmailSubmit={handleEmailLogin} />
         )}
 
         {/* Welcome Step - Dedicated step for welcome information */}
-        {currentStep === "welcome" && !isTransitioning && (
+        {currentStep === "welcome" && (
           <div className="welcome-step">
             <div className="welcome-actions">
-              <button
-                type="button"
-                className="submit-btn welcome-continue-btn"
-                onClick={handleContinueToRSVP}
-              >
-                <i className="fas fa-arrow-right"></i> Continue to Trip Details
-              </button>
+              <Navigation
+                onBack={handleWelcomeBack}
+                onForward={handleWelcomeForward}
+                backText="Back to Login"
+                forwardText="Continue to Trip Details"
+                forwardIcon="fas fa-arrow-right"
+                className="welcome-navigation"
+              />
             </div>
           </div>
         )}
 
         {/* RSVP Display Step */}
-        {currentStep === "rsvp" && userRSVP && !isTransitioning && (
-          <RSVPDisplay
-            rsvpData={userRSVP}
-            onContinue={handleContinueToAddons}
-            onLogout={handleLogout}
-            formData={formData}
-            updateArrayField={updateArrayField}
-          />
+        {currentStep === "rsvp" && userRSVP && (
+          <>
+            <RSVPDisplay
+              rsvpData={userRSVP}
+              onContinue={handleRSVPForward}
+              onLogout={handleLogout}
+              formData={formData}
+              updateArrayField={updateArrayField}
+              hideNavigation={true} // Hide the built-in navigation
+            />
+            <Navigation
+              onBack={handleRSVPBack}
+              onForward={handleRSVPForward}
+              backText="Back to Welcome"
+              forwardText="Continue to Add-ons"
+            />
+          </>
         )}
 
-        {currentStep === "addons" && !isTransitioning && (
+        {currentStep === "addons" && (
           <div className="addons-section">
             <ActivitySelection
               formData={formData}
@@ -415,26 +375,16 @@ function App() {
               />
             )}
 
-            <div className="form-actions">
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={goBackToRSVP}
-              >
-                <i className="fas fa-arrow-left"></i> Back to RSVP
-              </button>
-              <button
-                type="button"
-                className="submit-btn"
-                onClick={handleContinueToPayment}
-              >
-                <i className="fas fa-arrow-right"></i> Continue to Payment
-              </button>
-            </div>
+            <Navigation
+              onBack={handleAddonsBack}
+              onForward={handleAddonsForward}
+              backText="Back to Trip Details"
+              forwardText="Continue to Payment"
+            />
           </div>
         )}
 
-        {currentStep === "payment" && !isTransitioning && (
+        {currentStep === "payment" && (
           <div className="payment-section">
             <PaymentOptions
               formData={formData}
@@ -448,27 +398,26 @@ function App() {
               rsvpData={userRSVP}
             />
 
-            <div className="form-actions">
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={goBackToAddons}
-              >
-                <i className="fas fa-arrow-left"></i> Back to Add-ons
-              </button>
-              <SafeSubmitButton
-                onSubmit={handleSubmitForm}
-                isLoading={isSubmitting}
-                disabled={
-                  !formData[FORM_FIELDS.PAYMENT_SCHEDULE] ||
-                  !formData[FORM_FIELDS.PAYMENT_METHOD]
-                }
-                confirmText="You can only submit once, sure?"
-                confirmDuration={3000}
-              >
-                <i className="fas fa-check"></i> Complete Registration
-              </SafeSubmitButton>
-            </div>
+            <Navigation
+              onBack={handlePaymentBack}
+              onForward={null}
+              backText="Back to Add-ons"
+              showForward={false}
+              forwardComponent={
+                <SafeSubmitButton
+                  onSubmit={handleSubmitForm}
+                  isLoading={isSubmitting}
+                  disabled={
+                    !formData[FORM_FIELDS.PAYMENT_SCHEDULE] ||
+                    !formData[FORM_FIELDS.PAYMENT_METHOD]
+                  }
+                  confirmText="You can only submit once, sure?"
+                  confirmDuration={3000}
+                >
+                  <i className="fas fa-check"></i> Complete Registration
+                </SafeSubmitButton>
+              }
+            />
           </div>
         )}
       </div>

@@ -21,7 +21,6 @@
   user-select: none;
   width: 100%;
   max-width: 100%;
-  min-width: 550px; /* Ensure consistent width for all cards */
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -385,7 +384,7 @@
 /* Responsive Design */
 @media (max-width: 900px) {
   .room-option-card {
-    min-width: 450px; /* Smaller min-width for medium screens */
+    /* Removed min-width constraint for responsive behavior */
   }
 }
 
