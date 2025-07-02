@@ -101,51 +101,98 @@
   opacity: 0.7;
 }
 
-.service-item.addon {
-  border: 2px solid #e5e5e5;
-  transition: all 0.3s ease;
-  background: #fafafa;
+/* Luggage addon styling */
+.luggage-addon-section {
+  margin: 2rem 0;
 }
 
-.service-item.addon:hover {
+.luggage-addon-card {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  border: 2px solid #e5e5e5;
+  border-radius: 12px;
+  background: #fafafa;
+  transition: all 0.3s ease;
+  gap: 16px;
+}
+
+.luggage-addon-card:hover {
   border-color: var(--primary);
   background: #fff;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.service-item.addon.selected {
+.luggage-addon-card.selected {
   border-color: var(--primary);
   background: rgba(var(--primary-rgb), 0.05);
 }
 
-.service-item.addon .service-details {
+.luggage-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.luggage-checkbox input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--primary);
+}
+
+.luggage-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primary-dark) 100%
+  );
+  border-radius: 12px;
+  color: white;
+}
+
+.luggage-icon i {
+  font-size: 2rem;
+}
+
+.luggage-details {
   flex: 1;
 }
 
-.service-item.addon .service-description {
-  color: #666;
-  font-size: 0.9rem;
-  margin: 4px 0;
-}
-
-.service-item.addon .service-price {
+.luggage-title {
+  font-size: 1.2rem;
   font-weight: 600;
-  color: var(--primary);
-  font-size: 1.1rem;
-  margin-top: 8px;
+  color: var(--text-dark);
+  margin-bottom: 4px;
 }
 
-.service-item.addon .service-checkbox {
+.luggage-description {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.luggage-price {
   display: flex;
-  align-items: center;
-  margin-left: 16px;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
 }
 
-.service-item.addon .service-checkbox input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--primary);
+.luggage-price .price-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #28a745;
+  line-height: 1;
+}
+
+.luggage-price .price-currency {
+  font-size: 0.9rem;
+  color: #28a745;
+  font-weight: 500;
 }
 
 .service-icon {
@@ -329,12 +376,30 @@
     gap: 0.75rem;
   }
 
-  .service-item.addon {
+  .luggage-addon-card {
     padding: 16px;
+    gap: 12px;
   }
 
-  .service-item.addon .service-checkbox {
-    margin-left: 12px;
+  .luggage-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .luggage-icon i {
+    font-size: 1.6rem;
+  }
+
+  .luggage-title {
+    font-size: 1.1rem;
+  }
+
+  .luggage-description {
+    font-size: 0.9rem;
+  }
+
+  .luggage-price .price-amount {
+    font-size: 1.3rem;
   }
 }
 
@@ -468,6 +533,22 @@
     gap: 12px;
     padding: 20px 15px 35px 15px;
     margin-top: 20px;
+  }
+
+  .luggage-addon-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .luggage-addon-card .luggage-checkbox {
+    order: -1;
+    align-self: flex-end;
+  }
+
+  .luggage-addon-card .luggage-price {
+    align-self: flex-end;
+    margin-top: -10px;
   }
 }
 
