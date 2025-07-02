@@ -224,6 +224,10 @@
   border-color: #28a745;
 }
 
+.luggage-icon.personal-item {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
 .luggage-icon.carry-on {
   background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
 }

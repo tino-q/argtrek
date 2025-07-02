@@ -74,6 +74,31 @@ export const TRIP_OPTIONS = [
   },
 ];
 
+// Luggage Configuration
+export const LUGGAGE = {
+  personalItem: {
+    name: "Personal Item",
+    description: "Small backpack or purse",
+    maxWeight: "8kg",
+    icon: "fas fa-backpack",
+    included: true,
+  },
+  carryOn: {
+    name: "Carry-on Luggage",
+    description: "Small suitcase or bag",
+    maxWeight: "10kg",
+    icon: "fas fa-carry-on",
+    included: true,
+  },
+  checked: {
+    name: "Checked Luggage",
+    description: "Add checked luggage to all your flights",
+    maxWeight: "23kg",
+    icon: "fas fa-suitcase-rolling",
+    included: false,
+  },
+};
+
 // Contact Information
 export const CONTACTS = [
   {

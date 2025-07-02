@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LUGGAGE } from "../../utils/config";
 
 const RSVPDisplay = ({
   rsvpData,
@@ -261,6 +262,31 @@ const RSVPDisplay = ({
           <i className="fas fa-suitcase"></i> Luggage Options
         </h3>
 
+        {/* Personal Item - Always included */}
+        <div className="luggage-addon-card included disabled">
+          <div className="luggage-checkbox">
+            <input
+              type="checkbox"
+              checked={true}
+              disabled={true}
+              style={{ pointerEvents: "none" }}
+            />
+          </div>
+          <div className="luggage-icon personal-item">
+            <i className={LUGGAGE.personalItem.icon}></i>
+          </div>
+          <div className="luggage-details">
+            <div className="luggage-title">{LUGGAGE.personalItem.name}</div>
+            <div className="luggage-description">
+              {LUGGAGE.personalItem.description} (max{" "}
+              {LUGGAGE.personalItem.maxWeight})
+            </div>
+          </div>
+          <div className="luggage-price included">
+            <span className="price-amount">Included</span>
+          </div>
+        </div>
+
         {/* Carry-on Luggage - Always included */}
         <div className="luggage-addon-card included disabled">
           <div className="luggage-checkbox">
@@ -272,12 +298,12 @@ const RSVPDisplay = ({
             />
           </div>
           <div className="luggage-icon carry-on">
-            <i className="fas fa-carry-on"></i>
+            <i className={LUGGAGE.carryOn.icon}></i>
           </div>
           <div className="luggage-details">
-            <div className="luggage-title">Carry-on Luggage</div>
+            <div className="luggage-title">{LUGGAGE.carryOn.name}</div>
             <div className="luggage-description">
-              Personal item + carry-on bag (max 10kg)
+              {LUGGAGE.carryOn.description} (max {LUGGAGE.carryOn.maxWeight})
             </div>
           </div>
           <div className="luggage-price included">
@@ -301,12 +327,12 @@ const RSVPDisplay = ({
               />
             </div>
             <div className="luggage-icon">
-              <i className="fas fa-suitcase-rolling"></i>
+              <i className={LUGGAGE.checked.icon}></i>
             </div>
             <div className="luggage-details">
-              <div className="luggage-title">Checked Luggage</div>
+              <div className="luggage-title">{LUGGAGE.checked.name}</div>
               <div className="luggage-description">
-                Add checked luggage to all your flights (max 23kg)
+                {LUGGAGE.checked.description} (max {LUGGAGE.checked.maxWeight})
               </div>
             </div>
             <div className="luggage-price">
