@@ -5,7 +5,8 @@ import { useState, useRef, useEffect } from "react";
 import { useNotifications } from "./hooks/useNotifications";
 import { useAnimations, injectAnimationStyles } from "./hooks/useAnimations";
 import { usePricing } from "./hooks/usePricing";
-import { FORM_FIELDS, CONTACTS } from "./utils/config";
+import { useFormSubmission } from "./hooks/useFormSubmission";
+import { FORM_FIELDS } from "./utils/config";
 
 // Import components
 import Header from "./components/layout/Header";
@@ -17,6 +18,8 @@ import PrivateRoomUpgrade from "./components/form/PrivateRoomUpgrade";
 import PaymentOptions from "./components/form/PaymentOptions";
 import PricingSummary from "./components/layout/PricingSummary";
 import NotificationContainer from "./components/common/NotificationContainer";
+import SafeSubmitButton from "./components/common/SafeSubmitButton";
+import Footer from "./components/layout/Footer";
 
 function App() {
   // Application state
@@ -32,6 +35,7 @@ function App() {
     useNotifications();
   const { _pulseElement, _shakeElement } = useAnimations();
   const pricing = usePricing(formData);
+  const { submitForm, isSubmitting } = useFormSubmission();
 
   // Initialize animations when component mounts
   useEffect(() => {
@@ -41,6 +45,57 @@ function App() {
   // Handle email and password login submission
   const handleEmailLogin = async (email, password) => {
     try {
+      // Development bypass for localhost and local networks
+      const hostname = window.location.hostname;
+      if (
+        hostname === "localhost" ||
+        hostname === "127.0.0.1" ||
+        hostname.startsWith("192.")
+      ) {
+        if (email === "dev@test.com" && password === "dev123") {
+          const mockUserData = {
+            "Please write your name exactly as it appears on the ID you'll be traveling with.":
+              "Development User",
+            "If traveling with plus one - Please write the name exactly as it appears on the ID of your plus one.":
+              "",
+            "Email (for all trip-related updates and communications)":
+              "dev@test.com",
+            "PACK PRICE": 2250,
+            "PRIVATE ROOM UPGRADE": 350,
+            "IVA ALOJ": 0,
+            "22 NOV": true,
+            "23 NOV": true,
+            "24 NOV": true,
+            "25 NOV": true,
+            "26 NOV": true,
+            "27 NOV": true,
+            "28 NOV": true,
+            "29 NOV": false,
+            "JA3045 AEP - BRC": true,
+            "JA3725 BRC MDZ": true,
+            "JA3073 MDZ AEP": true,
+            "Are you traveling solo or with a plus one?": "Solo",
+          };
+
+          console.log("🚀 DEVELOPMENT BYPASS - Mock User Data:");
+          console.log("==========================================");
+          console.table(mockUserData);
+          console.log("==========================================");
+
+          setUserRSVP(mockUserData);
+          setCurrentStep("rsvp");
+          showSuccess("Development user logged in successfully!");
+
+          setTimeout(() => {
+            formRef.current?.scrollIntoView({
+              behavior: "instant",
+              block: "start",
+            });
+          }, 100);
+          return;
+        }
+      }
+
       // Make GET request to RSVP Apps Script
       const RSVP_SCRIPT_URL =
         "https://script.google.com/macros/s/AKfycbwDS4eNkjF_ESiThcPyJUDxsJw7H2twEUVoHjjSzX_ZfPSugbReLiLUg22R11bCgJJFSw/exec";
@@ -75,7 +130,12 @@ function App() {
         }
       } else {
         // Valid RSVP found - store data and move to RSVP display
-        console.log(result.data);
+        console.log("✅ USER LOGIN SUCCESS - Complete RSVP Payload:");
+        console.log("===============================================");
+        console.table(result.data);
+        console.log("Raw JSON Data:", JSON.stringify(result.data, null, 2));
+        console.log("===============================================");
+
         setUserRSVP(result.data);
         setCurrentStep("rsvp");
         showSuccess("Trip details retrieved successfully!");
@@ -83,7 +143,7 @@ function App() {
         // Scroll to form area
         setTimeout(() => {
           formRef.current?.scrollIntoView({
-            behavior: "smooth",
+            behavior: "instant",
             block: "start",
           });
         }, 100);
@@ -175,7 +235,7 @@ function App() {
     // Scroll to form area
     setTimeout(() => {
       formRef.current?.scrollIntoView({
-        behavior: "smooth",
+        behavior: "instant",
         block: "start",
       });
     }, 100);
@@ -188,7 +248,7 @@ function App() {
     // Scroll to form area
     setTimeout(() => {
       formRef.current?.scrollIntoView({
-        behavior: "smooth",
+        behavior: "instant",
         block: "start",
       });
     }, 100);
@@ -201,12 +261,69 @@ function App() {
     return userRSVP["Are you traveling solo or with a plus one?"] === "Solo";
   };
 
+  // Handle form submission
+  const handleSubmitForm = async () => {
+    try {
+      // Validate required fields
+      if (!formData[FORM_FIELDS.PAYMENT_SCHEDULE]) {
+        showError("Please select a payment schedule.");
+        return;
+      }
+
+      if (!formData[FORM_FIELDS.PAYMENT_METHOD]) {
+        showError("Please select a payment method.");
+        return;
+      }
+
+      // Add user info from RSVP data to form data
+      const submissionData = {
+        ...formData,
+        [FORM_FIELDS.EMAIL]: userRSVP
+          ? userRSVP["Email (for all trip-related updates and communications)"]
+          : "",
+        [FORM_FIELDS.FULL_NAME]: userRSVP
+          ? userRSVP[
+              "Please write your name exactly as it appears on the ID you'll be traveling with."
+            ]
+          : "",
+      };
+
+      console.log("🚀 SUBMITTING FORM DATA:");
+      console.log("========================");
+      console.table(submissionData);
+      console.log("Raw form data:", JSON.stringify(submissionData, null, 2));
+      console.log("========================");
+
+      const result = await submitForm(submissionData);
+
+      if (result.success) {
+        showSuccess(result.message, result.options);
+        // Could redirect or show success state here
+      } else {
+        showError(result.message, result.options);
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      showError("An unexpected error occurred. Please try again.");
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    setCurrentStep("login");
+    setUserRSVP(null);
+    setFormData({});
+    showSuccess(
+      "Logged out successfully. You can now login with different credentials."
+    );
+  };
+
   // Navigation helpers with scroll
   const goBackToRSVP = () => {
     setCurrentStep("rsvp");
     setTimeout(() => {
       formRef.current?.scrollIntoView({
-        behavior: "smooth",
+        behavior: "instant",
         block: "start",
       });
     }, 100);
@@ -216,7 +333,7 @@ function App() {
     setCurrentStep("addons");
     setTimeout(() => {
       formRef.current?.scrollIntoView({
-        behavior: "smooth",
+        behavior: "instant",
         block: "start",
       });
     }, 100);
@@ -238,6 +355,9 @@ function App() {
           <RSVPDisplay
             rsvpData={userRSVP}
             onContinue={handleContinueToAddons}
+            onLogout={handleLogout}
+            formData={formData}
+            updateArrayField={updateArrayField}
           />
         )}
 
@@ -297,13 +417,18 @@ function App() {
               >
                 <i className="fas fa-arrow-left"></i> Back to Add-ons
               </button>
-              <button
-                type="button"
-                className="submit-btn"
-                // onClick={handleSubmitForm}
+              <SafeSubmitButton
+                onSubmit={handleSubmitForm}
+                isLoading={isSubmitting}
+                disabled={
+                  !formData[FORM_FIELDS.PAYMENT_SCHEDULE] ||
+                  !formData[FORM_FIELDS.PAYMENT_METHOD]
+                }
+                confirmText="You can only submit once, sure?"
+                confirmDuration={3000}
               >
                 <i className="fas fa-check"></i> Complete Registration
-              </button>
+              </SafeSubmitButton>
             </div>
           </div>
         )}
@@ -314,46 +439,7 @@ function App() {
         removeNotification={removeNotification}
       />
 
-      <footer className="app-footer">
-        <div className="footer-help">
-          <p>
-            Need help? Reach out to{" "}
-            <a
-              href={
-                CONTACTS.find((contact) => contact.name.includes("Maddie"))
-                  ?.whatsapp
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              className="whatsapp-link"
-            >
-              Maddie anytime on WhatsApp <i className="fab fa-whatsapp"></i>
-            </a>
-          </p>
-        </div>
-        <p>
-          <span className="footer-emoji">✨</span>
-          vibe coded with{" "}
-          <a
-            href="https://cursor.sh"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="cursor-link"
-          >
-            cursor
-          </a>{" "}
-          by{" "}
-          <a
-            href="https://www.linkedin.com/in/martin-queija-5271b899"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="author-name"
-          >
-            tinoq
-          </a>
-          <span className="footer-emoji">🇦🇷</span>
-        </p>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -101,6 +101,53 @@
   opacity: 0.7;
 }
 
+.service-item.addon {
+  border: 2px solid #e5e5e5;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.service-item.addon:hover {
+  border-color: var(--primary);
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.service-item.addon.selected {
+  border-color: var(--primary);
+  background: rgba(var(--primary-rgb), 0.05);
+}
+
+.service-item.addon .service-details {
+  flex: 1;
+}
+
+.service-item.addon .service-description {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 4px 0;
+}
+
+.service-item.addon .service-price {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: 1.1rem;
+  margin-top: 8px;
+}
+
+.service-item.addon .service-checkbox {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
+}
+
+.service-item.addon .service-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary);
+}
+
 .service-icon {
   display: flex;
   align-items: center;
@@ -281,6 +328,14 @@
     flex-direction: column;
     gap: 0.75rem;
   }
+
+  .service-item.addon {
+    padding: 16px;
+  }
+
+  .service-item.addon .service-checkbox {
+    margin-left: 12px;
+  }
 }
 
 /* Service Details Content */
@@ -288,6 +343,10 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.pack-price-section {
+  margin-bottom: 2rem; /* Add spacing between price and confirmed services */
 }
 
 .pack-price-card {
@@ -327,13 +386,89 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-/* Form Actions - Ensure centering for RSVP Display */
+/* Additional form-actions styling for RSVPDisplay to ensure consistency */
 .form-section .form-actions {
-  display: flex !important;
-  justify-content: center !important;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  width: 100%;
-  flex-direction: column;
+  gap: 20px;
+  margin-top: 30px;
+  padding: 30px 40px 40px 40px;
+  border-top: 1px solid var(--border-light);
+  background: var(--bg-light);
+  text-align: left; /* Override the center alignment from Form.css */
+}
+
+/* Ensure btn-secondary styling is available in RSVPDisplay */
+.form-section .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: var(--bg-light);
+  color: var(--text-secondary);
+  border: 2px solid var(--border-light);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.form-section .btn-secondary:hover {
+  background: var(--border-light);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+/* Responsive behavior to match other form-actions sections */
+@media (max-width: 768px) {
+  .form-section .form-actions {
+    flex-direction: column;
+    gap: 15px;
+    padding: 25px 20px 40px 20px;
+    margin-top: 25px;
+  }
+
+  .form-section .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 15px 20px;
+    font-size: 0.95rem;
+    order: 2; /* Put logout button below continue button on mobile */
+  }
+
+  .form-section .submit-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 15px 20px;
+    font-size: 1rem;
+    order: 1; /* Keep continue button at top on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .form-section .btn-secondary {
+    padding: 14px 18px;
+    font-size: 0.9rem;
+    gap: 8px;
+    min-height: 44px; /* Ensure touch-friendly button size */
+  }
+
+  .form-section .submit-btn {
+    padding: 14px 18px;
+    font-size: 0.95rem;
+    gap: 8px;
+    min-height: 44px; /* Ensure touch-friendly button size */
+  }
+
+  .form-section .form-actions {
+    gap: 12px;
+    padding: 20px 15px 35px 15px;
+    margin-top: 20px;
+  }
 }
 
 /* Responsive pack price layout */

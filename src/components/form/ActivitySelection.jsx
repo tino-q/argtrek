@@ -1,7 +1,51 @@
+import { useState } from "react";
 import { FORM_FIELDS } from "../../utils/config";
-import horsebackImage from "../../assets/horseback-riding-mendoza.png";
-import empanadasImage from "../../assets/empanadas.png";
 import raftingImage from "../../assets/bariloche-rafting.png";
+import ImageCarousel from "../common/ImageCarousel";
+
+// Import all horseback images
+import horseback1 from "../../assets/horseback-riding/horseback-riding-mendoza.png";
+import horseback2 from "../../assets/horseback-riding/horseback-riding-mendoza-2.png";
+
+// Import all rafting images
+import rafting1 from "../../assets/rafting/rafting1.jpeg";
+import rafting2 from "../../assets/rafting/rafting2.jpeg";
+import rafting3 from "../../assets/rafting/rafting3.jpeg";
+import rafting4 from "../../assets/rafting/rafting4.jpeg";
+import rafting5 from "../../assets/rafting/rafting5.jpeg";
+import rafting6 from "../../assets/rafting/rafting6.jpeg";
+import rafting7 from "../../assets/rafting/rafting7.jpeg";
+import rafting8 from "../../assets/rafting/rafting8.jpeg";
+import rafting9 from "../../assets/rafting/rafting9.jpeg";
+import rafting10 from "../../assets/rafting/rafting10.jpeg";
+import rafting11 from "../../assets/rafting/rafting11.jpeg";
+import rafting12 from "../../assets/rafting/rafting12.jpeg";
+
+// Import all empanadas images
+import empanadas1 from "../../assets/empanadas/empanadas.png";
+import empanadas2 from "../../assets/empanadas/empanadas-2.png";
+
+// Array of all horseback images
+const HORSEBACK_IMAGES = [horseback1, horseback2];
+
+// Array of all rafting images
+const RAFTING_IMAGES = [
+  rafting1,
+  rafting2,
+  rafting3,
+  rafting4,
+  rafting5,
+  rafting6,
+  rafting7,
+  rafting8,
+  rafting9,
+  rafting10,
+  rafting11,
+  rafting12,
+];
+
+// Array of all empanadas images
+const EMPANADAS_IMAGES = [empanadas1, empanadas2];
 
 const ACTIVITIES = [
   {
@@ -12,7 +56,7 @@ const ACTIVITIES = [
     date: "November 27th - Afternoon",
     price: 45,
     description: "",
-    image: horsebackImage,
+    image: horseback1,
   },
   {
     id: "cooking",
@@ -22,7 +66,7 @@ const ACTIVITIES = [
     date: "November 28th - Midday",
     price: 140,
     description: "3-course menu with wine pairing",
-    image: empanadasImage,
+    image: empanadas1,
   },
   {
     id: "rafting",
@@ -38,9 +82,57 @@ const ACTIVITIES = [
 
 const ActivitySelection = ({ formData, updateArrayField }) => {
   const selectedActivities = formData[FORM_FIELDS.ACTIVITIES] || [];
+  const [carouselState, setCarouselState] = useState({
+    isOpen: false,
+    activityId: null,
+  });
 
   const handleActivityToggle = (activity, isSelected) => {
     updateArrayField(FORM_FIELDS.ACTIVITIES, activity, isSelected);
+  };
+
+  const handleImageClick = (e, activity) => {
+    e.stopPropagation(); // Prevent card selection
+    if (
+      activity.id === "horseback" ||
+      activity.id === "rafting" ||
+      activity.id === "cooking"
+    ) {
+      setCarouselState({
+        isOpen: true,
+        activityId: activity.id,
+      });
+    }
+  };
+
+  const handleCloseCarousel = () => {
+    setCarouselState({
+      isOpen: false,
+      activityId: null,
+    });
+  };
+
+  // Get images array based on activity
+  const getCarouselImages = () => {
+    switch (carouselState.activityId) {
+      case "horseback":
+        return HORSEBACK_IMAGES;
+      case "rafting":
+        return RAFTING_IMAGES;
+      case "cooking":
+        return EMPANADAS_IMAGES;
+      default:
+        return [];
+    }
+  };
+
+  // Check if activity has carousel
+  const hasCarousel = (activityId) => {
+    return (
+      activityId === "horseback" ||
+      activityId === "rafting" ||
+      activityId === "cooking"
+    );
   };
 
   return (
@@ -69,8 +161,21 @@ const ActivitySelection = ({ formData, updateArrayField }) => {
                 onClick={() => handleActivityToggle(activity, !isSelected)}
                 style={{ cursor: "pointer" }}
               >
-                <div className="activity-image">
+                <div
+                  className="activity-image"
+                  onClick={(e) => handleImageClick(e, activity)}
+                  style={{
+                    cursor: hasCarousel(activity.id) ? "zoom-in" : "pointer",
+                    position: "relative",
+                  }}
+                >
                   <img src={activity.image} alt={activity.name} />
+                  {hasCarousel(activity.id) && (
+                    <div className="image-overlay-hint">
+                      <i className="fas fa-search-plus"></i>
+                      <span>View Gallery</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="activity-content">
@@ -101,6 +206,13 @@ const ActivitySelection = ({ formData, updateArrayField }) => {
           })}
         </div>
       </section>
+
+      <ImageCarousel
+        images={getCarouselImages()}
+        isOpen={carouselState.isOpen}
+        onClose={handleCloseCarousel}
+        initialIndex={0}
+      />
     </div>
   );
 };

@@ -17,6 +17,7 @@ const PRICING = {
   horsebackRiding: 45,
   cookingClass: 140,
   rafting: 75,
+
   creditCardFeeRate: 0.04,
   installmentRate: 0.35,
   vatRate: 0.21,
@@ -192,6 +193,7 @@ function processFormData(data) {
   const horsebackRiding = data.horsebackRiding === "true";
   const cookingClass = data.cookingClass === "true";
   const rafting = data.rafting === "true";
+
   const argentineCitizen = data.argentineCitizen === "true";
 
   // Calculate base price
@@ -321,6 +323,7 @@ function saveToSheet(data) {
       data.horsebackRiding,
       data.cookingClass,
       data.rafting,
+
       data.paymentSchedule,
       data.paymentMethod,
       data.argentineCitizen,
@@ -364,6 +367,7 @@ function setupSheetHeaders(sheet) {
     "Horseback Riding",
     "Cooking Class",
     "Rafting",
+
     "Payment Schedule",
     "Payment Method",
     "Argentine Citizen",

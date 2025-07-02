@@ -1,9 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const EmailLogin = ({ onEmailSubmit }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Auto-prefill dev credentials on localhost or 192.x networks
+  useEffect(() => {
+    const hostname = window.location.hostname;
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.startsWith("192.")
+    ) {
+      setEmail("dev@test.com");
+      setPassword("dev123");
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

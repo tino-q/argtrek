@@ -213,7 +213,7 @@
 
 /* Form Actions */
 .form-actions {
-  padding: 40px;
+  padding: 20px 40px 40px 40px;
   text-align: center;
   background: var(--bg-light);
 }

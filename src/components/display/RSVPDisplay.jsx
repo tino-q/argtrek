@@ -1,6 +1,12 @@
 import { useState } from "react";
 
-const RSVPDisplay = ({ rsvpData, onContinue }) => {
+const RSVPDisplay = ({
+  rsvpData,
+  onContinue,
+  onLogout,
+  formData,
+  updateArrayField,
+}) => {
   const [showAllDetails, setShowAllDetails] = useState(false);
 
   // Extract key information with flexible field matching
@@ -36,6 +42,25 @@ const RSVPDisplay = ({ rsvpData, onContinue }) => {
       key.toLowerCase().includes("package price")
   );
   const packPrice = packPriceField ? rsvpData[packPriceField] : null;
+
+  // Get checked luggage price from RSVP data
+  const checkedLuggagePrice = rsvpData["VALIJA DESPACHADA"] || null;
+
+  // Handle checked luggage selection
+  const selectedActivities = formData?.activities || [];
+  const isLuggageSelected = selectedActivities.some(
+    (activity) =>
+      (typeof activity === "object" ? activity.id : activity) === "luggage"
+  );
+
+  const handleLuggageToggle = () => {
+    const luggageActivity = {
+      id: "luggage",
+      name: "Checked Luggage",
+      price: checkedLuggagePrice,
+    };
+    updateArrayField("activities", luggageActivity, !isLuggageSelected);
+  };
 
   // Define all services in chronological order
   const chronologicalServices = [
@@ -165,6 +190,23 @@ const RSVPDisplay = ({ rsvpData, onContinue }) => {
         </div>
       </div>
 
+      {/* Pack Price Display */}
+      {packPrice && (
+        <div className="pack-price-section">
+          <div className="pack-price-card">
+            <h3>
+              <i className="fas fa-tag"></i> Trip Package Price
+            </h3>
+            <div className="pack-price-display">
+              <span className="pack-price-label">
+                Price for selected flights and accommodations
+              </span>
+              <span className="pack-price-amount">${packPrice}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Included Services */}
       <div className="services-section">
         <h3>
@@ -212,6 +254,45 @@ const RSVPDisplay = ({ rsvpData, onContinue }) => {
           ))}
         </div>
       </div>
+
+      {/* Checked Luggage Addon */}
+      {checkedLuggagePrice && (
+        <div className="services-section">
+          <h3>
+            <i className="fas fa-plus-circle"></i> Optional Add-on
+          </h3>
+          <p className="services-description">
+            Add checked luggage to your flights:
+          </p>
+
+          <div className="services-grid">
+            <div
+              className={`service-item addon ${isLuggageSelected ? "selected" : ""}`}
+              onClick={handleLuggageToggle}
+              style={{ cursor: "pointer" }}
+            >
+              <div className="service-icon">
+                <i className="fas fa-suitcase-rolling"></i>
+              </div>
+              <div className="service-details">
+                <div className="service-title">Checked Luggage</div>
+                <div className="service-description">
+                  Add checked luggage to all your flights
+                </div>
+                <div className="service-price">${checkedLuggagePrice} USD</div>
+              </div>
+              <div className="service-checkbox">
+                <input
+                  type="checkbox"
+                  checked={isLuggageSelected}
+                  onChange={() => {}} // Handled by card click
+                  style={{ pointerEvents: "none" }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Show excluded services if requested */}
       {showAllDetails && excludedServices.length > 0 && (
@@ -263,23 +344,6 @@ const RSVPDisplay = ({ rsvpData, onContinue }) => {
         </div>
       )}
 
-      {/* Pack Price Display */}
-      {packPrice && (
-        <div className="pack-price-section">
-          <div className="pack-price-card">
-            <h3>
-              <i className="fas fa-tag"></i> Trip Package Price
-            </h3>
-            <div className="pack-price-display">
-              <span className="pack-price-label">
-                Price for selected flights and accommodations:
-              </span>
-              <span className="pack-price-amount">${packPrice}</span>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Toggle details button */}
       {excludedServices.length > 0 && (
         <div className="toggle-details">
@@ -317,8 +381,11 @@ const RSVPDisplay = ({ rsvpData, onContinue }) => {
         </div>
       </div>
 
-      {/* Continue Button */}
+      {/* Navigation Buttons */}
       <div className="form-actions">
+        <button type="button" className="btn-secondary" onClick={onLogout}>
+          <i className="fas fa-sign-out-alt"></i> Log Out
+        </button>
         <button type="button" className="submit-btn" onClick={onContinue}>
           <i className="fas fa-arrow-right"></i> Continue to Add-ons
         </button>

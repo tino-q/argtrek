@@ -32,6 +32,7 @@ export const useFormSubmission = () => {
         (activity) =>
           (typeof activity === "object" ? activity.id : activity) === "rafting"
       ),
+
       paymentSchedule: formData[FORM_FIELDS.PAYMENT_SCHEDULE],
       paymentMethod: formData[FORM_FIELDS.PAYMENT_METHOD],
       argentineCitizen: formData[FORM_FIELDS.ARGENTINE_CITIZEN],
