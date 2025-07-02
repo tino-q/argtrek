@@ -44,59 +44,64 @@ const ActivitySelection = ({ formData, updateArrayField }) => {
   };
 
   return (
-    <section className="form-section">
-      <h2>
-        <i className="fas fa-hiking"></i> Optional Activities
-      </h2>
-      <p className="section-description">
-        Enhance your trip with these amazing experiences!
-      </p>
-
-      <div className="activities-container">
-        {ACTIVITIES.map((activity) => {
-          const isSelected = selectedActivities.some(
-            (selected) => selected.id === activity.id
-          );
-
-          return (
-            <div
-              key={activity.id}
-              className={`activity-card ${isSelected ? "activity-selected" : ""}`}
-              onClick={() => handleActivityToggle(activity, !isSelected)}
-              style={{ cursor: "pointer" }}
-            >
-              <div className="activity-image">
-                <img src={activity.image} alt={activity.name} />
-              </div>
-
-              <div className="activity-content">
-                <div className="activity-header">
-                  <input
-                    type="checkbox"
-                    id={activity.id}
-                    name="activities"
-                    checked={isSelected}
-                    onChange={() => {}} // Handled by card click
-                    style={{ pointerEvents: "none", marginRight: "12px" }}
-                  />
-                  <i className={activity.icon}></i>
-                  <h3>{activity.name}</h3>
-                </div>
-
-                <div className="activity-details">
-                  <p className="location">{activity.location}</p>
-                  <p className="date">{activity.date}</p>
-                  {activity.description && (
-                    <p className="description">{activity.description}</p>
-                  )}
-                  <p className="price">${activity.price} USD</p>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+    <div>
+      <div className="section-header">
+        <h1>
+          <i className="fas fa-plus-circle"></i> Optional Add-ons
+        </h1>
+        <p className="section-description">
+          Enhance your Argentina adventure with these amazing experiences and
+          upgrades!
+        </p>
       </div>
-    </section>
+
+      <section className="form-section">
+        <div className="activities-container">
+          {ACTIVITIES.map((activity) => {
+            const isSelected = selectedActivities.some(
+              (selected) => selected.id === activity.id
+            );
+
+            return (
+              <div
+                key={activity.id}
+                className={`activity-card ${isSelected ? "activity-selected" : ""}`}
+                onClick={() => handleActivityToggle(activity, !isSelected)}
+                style={{ cursor: "pointer" }}
+              >
+                <div className="activity-image">
+                  <img src={activity.image} alt={activity.name} />
+                </div>
+
+                <div className="activity-content">
+                  <div className="activity-header">
+                    <input
+                      type="checkbox"
+                      id={activity.id}
+                      name="activities"
+                      checked={isSelected}
+                      onChange={() => {}} // Handled by card click
+                      style={{ pointerEvents: "none", marginRight: "12px" }}
+                    />
+                    <i className={activity.icon}></i>
+                    <h3>{activity.name}</h3>
+                  </div>
+
+                  <div className="activity-details">
+                    <p className="location">{activity.location}</p>
+                    <p className="date">{activity.date}</p>
+                    {activity.description && (
+                      <p className="description">{activity.description}</p>
+                    )}
+                    <p className="price">${activity.price} USD</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    </div>
   );
 };
 

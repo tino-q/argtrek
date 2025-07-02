@@ -10,12 +10,15 @@ import Header from "./components/layout/Header";
 import WelcomeSection from "./components/layout/WelcomeSection";
 import EmailLogin from "./components/auth/EmailLogin";
 import RSVPDisplay from "./components/display/RSVPDisplay";
+import ActivitySelection from "./components/form/ActivitySelection";
+import PrivateRoomUpgrade from "./components/form/PrivateRoomUpgrade";
 import NotificationContainer from "./components/common/NotificationContainer";
 
 function App() {
   // Application state
   const [currentStep, setCurrentStep] = useState("login"); // "login", "rsvp", "addons", "payment"
   const [userRSVP, setUserRSVP] = useState(null);
+  const [formData, setFormData] = useState({});
 
   // Form reference for validation feedback
   const formRef = useRef(null);
@@ -67,6 +70,7 @@ function App() {
         }
       } else {
         // Valid RSVP found - store data and move to RSVP display
+        console.log(result.data);
         setUserRSVP(result.data);
         setCurrentStep("rsvp");
         showSuccess("Trip details retrieved successfully!");
@@ -79,9 +83,59 @@ function App() {
     }
   };
 
+  // Form data management functions
+  const updateFormData = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const updateArrayField = (field, item, isSelected) => {
+    setFormData((prev) => {
+      const currentArray = prev[field] || [];
+      if (isSelected) {
+        // Add item if not already present
+        return {
+          ...prev,
+          [field]: currentArray.some((existing) => existing.id === item.id)
+            ? currentArray
+            : [...currentArray, item],
+        };
+      } else {
+        // Remove item
+        return {
+          ...prev,
+          [field]: currentArray.filter((existing) => existing.id !== item.id),
+        };
+      }
+    });
+  };
+
   // Handle continuing to add-ons from RSVP display
   const handleContinueToAddons = () => {
     setCurrentStep("addons");
+  };
+
+  // Handle continuing to payment from add-ons
+  const handleContinueToPayment = () => {
+    setCurrentStep("payment");
+  };
+
+  // Check if user is a solo traveler (no plus one)
+  const isSoloTraveler = () => {
+    if (!userRSVP) return false;
+
+    return userRSVP["Are you traveling solo or with a plus one?"] === "Solo";
+
+    // const plusOneField = Object.keys(userRSVP).find(
+    //   (key) =>
+    //     key.toLowerCase().includes("plus one") &&
+    //     key.toLowerCase().includes("name")
+    // );
+
+    // const plusOneName = plusOneField ? userRSVP[plusOneField] : null;
+    // return !plusOneName || plusOneName.trim() === "";
   };
 
   return (
@@ -104,9 +158,36 @@ function App() {
         )}
 
         {currentStep === "addons" && (
-          <div className="form-section">
-            <h2>Optional Add-ons</h2>
-            <p>Activity selection will appear here...</p>
+          <div className="addons-section">
+            <ActivitySelection
+              formData={formData}
+              updateArrayField={updateArrayField}
+            />
+
+            {isSoloTraveler() && (
+              <PrivateRoomUpgrade
+                formData={formData}
+                updateFormData={updateFormData}
+                rsvpData={userRSVP}
+              />
+            )}
+
+            <div className="form-actions">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => setCurrentStep("rsvp")}
+              >
+                <i className="fas fa-arrow-left"></i> Back to RSVP
+              </button>
+              <button
+                type="button"
+                className="submit-btn"
+                onClick={handleContinueToPayment}
+              >
+                <i className="fas fa-arrow-right"></i> Continue to Payment
+              </button>
+            </div>
           </div>
         )}
 

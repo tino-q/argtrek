@@ -106,13 +106,13 @@
 
 .login-btn {
   width: 100%;
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
+  background: var(--gradient-primary) !important;
+  color: white !important;
+  border: none !important;
   padding: 18px 40px;
   font-size: 1.1rem;
   font-weight: 600;
-  border-radius: 12px;
+  border-radius: 12px !important;
   cursor: pointer;
   transition: all 0.3s ease;
   display: inline-flex;
@@ -121,6 +121,10 @@
   gap: 12px;
   box-shadow: 0 10px 25px var(--shadow-primary);
   margin-top: 10px;
+  /* Override global button styles */
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
 }
 
 .login-btn:hover:not(:disabled) {

@@ -76,7 +76,7 @@ const EmailLogin = ({ onEmailSubmit }) => {
         <div className="form-actions">
           <button
             type="submit"
-            className={`submit-btn login-btn ${isLoading ? "loading" : ""}`}
+            className={`login-btn ${isLoading ? "loading" : ""}`}
             disabled={isLoading || !email.trim() || !password.trim()}
           >
             {isLoading ? (

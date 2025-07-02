@@ -12,6 +12,10 @@ This document describes the column structure for the RSVP data sheet that contai
 - **"PASSWORD"** - Unique password for each traveler (distributed via email for security)
 - **"PACK PRICE"** - Total price for selected flights and accommodations (numeric value without currency symbol)
 
+### Pricing Columns
+
+- **"PRIVATE ROOM UPGRADE"** - Private room upgrade price for this customer (numeric value in USD, only relevant for solo travelers)
+
 ### Boolean Itinerary Columns (1 = included, 0/empty = not included)
 
 #### Accommodations
@@ -60,6 +64,12 @@ The system uses individual boolean columns for each flight and accommodation rat
 
 - If plus one name exists → Shared room automatically
 - If no plus one → Solo traveler, may need room preference
+
+### Private Room Upgrade Logic
+
+- Private room upgrade option is only shown to solo travelers (those without a plus one)
+- Upgrade price is retrieved from the "PRIVATE ROOM UPGRADE" column for each customer
+- If plus one exists, private room upgrade is not available (they share with their plus one)
 
 ## Frontend Display Logic
 
