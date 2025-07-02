@@ -133,6 +133,25 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                         <input
                           type="radio"
                           name="roommatePreference"
+                          value="random"
+                          checked={roommatePreference === "random"}
+                          onChange={() =>
+                            handleRoommatePreferenceChange("random")
+                          }
+                          className="roommate-radio"
+                        />
+                        <span className="radio-checkmark"></span>
+                        <span className="option-text">
+                          I'm ok with random assignment
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="roommate-option">
+                      <label className="roommate-option-label">
+                        <input
+                          type="radio"
+                          name="roommatePreference"
                           value="know"
                           checked={roommatePreference === "know"}
                           onChange={() =>
@@ -162,25 +181,6 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                         <input
                           type="radio"
                           name="roommatePreference"
-                          value="random"
-                          checked={roommatePreference === "random"}
-                          onChange={() =>
-                            handleRoommatePreferenceChange("random")
-                          }
-                          className="roommate-radio"
-                        />
-                        <span className="radio-checkmark"></span>
-                        <span className="option-text">
-                          I'm ok with random assignment
-                        </span>
-                      </label>
-                    </div>
-
-                    <div className="roommate-option">
-                      <label className="roommate-option-label">
-                        <input
-                          type="radio"
-                          name="roommatePreference"
                           value="seeking"
                           checked={roommatePreference === "seeking"}
                           onChange={() =>
@@ -190,8 +190,8 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                         />
                         <span className="radio-checkmark"></span>
                         <span className="option-text">
-                          Add me to the "seeking a roomie list" - I'll get back
-                          to you with my roomie name afterwards
+                          Add me to the "seeking a roomie list" - I'll let Madi
+                          know my roomie name afterwards
                         </span>
                       </label>
                       {roommatePreference === "seeking" && (
