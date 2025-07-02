@@ -41,7 +41,7 @@ export const usePricing = (formData) => {
 
       // Activities price - handle both old string format and new object format
       const activities = formData[FORM_FIELDS.ACTIVITIES] || [];
-      const activitiesPrice = activities.reduce((total, activity) => {
+      let activitiesPrice = activities.reduce((total, activity) => {
         // Handle both old format (strings) and new format (objects)
         if (typeof activity === "string") {
           // Old format: activity names as strings, lookup prices
@@ -53,6 +53,13 @@ export const usePricing = (formData) => {
         }
         return total;
       }, 0);
+
+      // Add checked luggage price if selected
+      const checkedLuggagePrice =
+        formData.luggage?.checked && formData.luggagePrice
+          ? formData.luggagePrice
+          : 0;
+      activitiesPrice += checkedLuggagePrice;
 
       // Subtotal
       const subtotal = basePrice + accommodationPrice + activitiesPrice;
@@ -70,6 +77,35 @@ export const usePricing = (formData) => {
           ? total * 0.35
           : total;
 
+      // Build activities array for display
+      const displayActivities = activities.map((activity) => {
+        if (typeof activity === "string") {
+          const activityPrices = { horseback: 45, cooking: 140, rafting: 75 };
+          const activityNames = {
+            horseback: "Horse Back Riding",
+            cooking: "Empanadas Cooking Class",
+            rafting: "Rafting Adventure",
+          };
+          return {
+            name: activityNames[activity] || activity,
+            price: activityPrices[activity] || 0,
+          };
+        } else {
+          return {
+            name: activity.name,
+            price: activity.price,
+          };
+        }
+      });
+
+      // Add checked luggage to activities display if selected
+      if (formData.luggage?.checked && formData.luggagePrice) {
+        displayActivities.push({
+          name: "Checked Luggage",
+          price: formData.luggagePrice,
+        });
+      }
+
       setPricing({
         basePrice,
         accommodationPrice,
@@ -78,25 +114,7 @@ export const usePricing = (formData) => {
         processingFee,
         total,
         installmentAmount,
-        activities: activities.map((activity) => {
-          if (typeof activity === "string") {
-            const activityPrices = { horseback: 45, cooking: 140, rafting: 75 };
-            const activityNames = {
-              horseback: "Horse Back Riding",
-              cooking: "Empanadas Cooking Class",
-              rafting: "Rafting Adventure",
-            };
-            return {
-              name: activityNames[activity] || activity,
-              price: activityPrices[activity] || 0,
-            };
-          } else {
-            return {
-              name: activity.name,
-              price: activity.price,
-            };
-          }
-        }),
+        activities: displayActivities,
       });
     };
 

@@ -63,14 +63,14 @@ function App() {
             "PACK PRICE": 2250,
             "PRIVATE ROOM UPGRADE": 350,
             "IVA ALOJ": 0,
-            "22 NOV": true,
-            "23 NOV": true,
-            "24 NOV": true,
-            "25 NOV": true,
-            "26 NOV": true,
+            "22 NOV": false,
+            "23 NOV": false,
+            "24 NOV": false,
+            "25 NOV": false,
+            "26 NOV": false,
             "27 NOV": true,
             "28 NOV": true,
-            "29 NOV": false,
+            "29 NOV": true,
             "JA3045 AEP - BRC": true,
             "JA3725 BRC MDZ": true,
             "JA3073 MDZ AEP": true,
@@ -88,10 +88,7 @@ function App() {
           showSuccess("Development user logged in successfully!");
 
           setTimeout(() => {
-            formRef.current?.scrollIntoView({
-              behavior: "instant",
-              block: "start",
-            });
+            window.scrollTo({ top: 0, behavior: "instant" });
           }, 100);
           return;
         }
@@ -141,12 +138,9 @@ function App() {
         setCurrentStep("rsvp");
         showSuccess("Trip details retrieved successfully!");
 
-        // Scroll to form area
+        // Scroll to top of page
         setTimeout(() => {
-          formRef.current?.scrollIntoView({
-            behavior: "instant",
-            block: "start",
-          });
+          window.scrollTo({ top: 0, behavior: "instant" });
         }, 100);
       }
     } catch (error) {
@@ -344,9 +338,11 @@ function App() {
     <div className="container">
       <Header />
 
-      {currentStep === "login" && <WelcomeSection />}
+      {/* Show WelcomeSection only after successful login */}
+      {currentStep !== "login" && <WelcomeSection />}
 
       <div ref={formRef} className="trip-form">
+        {/* Login Step - Only show EmailLogin component */}
         {currentStep === "login" && (
           <EmailLogin onEmailSubmit={handleEmailLogin} />
         )}
