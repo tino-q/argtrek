@@ -213,6 +213,18 @@ input[type="checkbox"]:hover {
   border-radius: 15px;
 }
 
+.footer-help {
+  margin-bottom: 20px;
+  padding: 0 60px;
+}
+
+.footer-help p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
 .app-footer p {
   margin: 0;
   color: var(--text-secondary);
@@ -302,5 +314,14 @@ input[type="checkbox"]:hover {
   .footer-emoji {
     font-size: 1rem;
     margin: 0 6px;
+  }
+
+  .footer-help {
+    margin-bottom: 15px;
+    padding: 0 40px 15px 40px;
+  }
+
+  .footer-help p {
+    font-size: 0.85rem;
   }
 }

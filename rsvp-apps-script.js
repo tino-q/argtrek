@@ -62,7 +62,7 @@ function doGet(e) {
     return ContentService.createTextOutput(
       JSON.stringify({
         success: false,
-        error: "Internal server error. Please contact Madi for assistance.",
+        error: "Internal server error. Please contact Maddie for assistance.",
       })
     ).setMimeType(ContentService.MimeType.JSON);
   }
@@ -93,7 +93,8 @@ function lookupRSVP(email, password) {
     if (!sheet) {
       return {
         success: false,
-        error: "RSVP data sheet not found. Please contact Madi for assistance.",
+        error:
+          "RSVP data sheet not found. Please contact Maddie for assistance.",
       };
     }
 
@@ -104,7 +105,7 @@ function lookupRSVP(email, password) {
     if (values.length < 2) {
       return {
         success: false,
-        error: "No RSVP data available. Please contact Madi for assistance.",
+        error: "No RSVP data available. Please contact Maddie for assistance.",
       };
     }
 
@@ -121,7 +122,7 @@ function lookupRSVP(email, password) {
       return {
         success: false,
         error:
-          "Email column not found in RSVP data. Please contact Madi for assistance.",
+          "Email column not found in RSVP data. Please contact Maddie for assistance.",
       };
     }
 
@@ -133,7 +134,7 @@ function lookupRSVP(email, password) {
       return {
         success: false,
         error:
-          "Password column not found in RSVP data. Please contact Madi for assistance.",
+          "Password column not found in RSVP data. Please contact Maddie for assistance.",
       };
     }
 
@@ -153,7 +154,7 @@ function lookupRSVP(email, password) {
           return {
             success: false,
             error:
-              "Invalid password. Please check your password or contact Madi on WhatsApp for assistance.",
+              "Invalid password. Please check your password or contact Maddie on WhatsApp for assistance.",
           };
         }
 
@@ -190,14 +191,14 @@ function lookupRSVP(email, password) {
     return {
       success: false,
       error:
-        "Email not found in our RSVP database. Please check your email address or contact Madi on WhatsApp for assistance.",
+        "Email not found in our RSVP database. Please check your email address or contact Maddie on WhatsApp for assistance.",
     };
   } catch (error) {
     console.error("Error in lookupRSVP:", error);
     return {
       success: false,
       error:
-        "Unable to retrieve RSVP data. Please contact Madi for assistance.",
+        "Unable to retrieve RSVP data. Please contact Maddie for assistance.",
     };
   }
 }

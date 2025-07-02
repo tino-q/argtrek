@@ -15,6 +15,7 @@ This document describes the column structure for the RSVP data sheet that contai
 ### Pricing Columns
 
 - **"PRIVATE ROOM UPGRADE"** - Private room upgrade price for this customer (numeric value in USD, only relevant for solo travelers)
+- **"IVA ALOJ"** - VAT amount for accommodation for Argentine citizens (absolute value in USD, not a percentage)
 
 ### Boolean Itinerary Columns (1 = included, 0/empty = not included)
 
@@ -92,4 +93,4 @@ The system uses individual boolean columns for each flight and accommodation rat
 ### Contact Cases
 
 - Email not found → "Email not found in database"
-- For any changes to confirmed services → "Contact Madi on WhatsApp"
+- For any changes to confirmed services → "Contact Maddie on WhatsApp"

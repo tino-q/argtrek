@@ -100,7 +100,7 @@ const EmailLogin = ({ onEmailSubmit }) => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            Madi on WhatsApp <i className="fab fa-whatsapp"></i>
+            Maddie on WhatsApp <i className="fab fa-whatsapp"></i>
           </a>{" "}
           if you can't find your email or password.
         </p>

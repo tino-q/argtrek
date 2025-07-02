@@ -3,7 +3,7 @@
 
 import { FORM_FIELDS } from "../../utils/config";
 
-const PricingSummary = ({ pricing, formData }) => {
+const PricingSummary = ({ pricing, formData, rsvpData }) => {
   const formatCurrency = (amount) => {
     return `$${Math.round(amount).toLocaleString()}`;
   };
@@ -16,8 +16,24 @@ const PricingSummary = ({ pricing, formData }) => {
   const isInstallmentPlan =
     formData[FORM_FIELDS.PAYMENT_SCHEDULE] === "installments";
 
-  // Calculate VAT if Argentine citizen
-  const vatAmount = hasVAT ? Math.round(pricing.subtotal * 0.21) : 0;
+  // Get VAT amount from RSVP data if Argentine citizen
+  const getVATAmount = () => {
+    if (!hasVAT || !rsvpData) return 0;
+
+    // Look for "IVA ALOJ" column in RSVP data
+    const ivaAlojField = Object.keys(rsvpData).find(
+      (key) => key.toUpperCase() === "IVA ALOJ"
+    );
+
+    if (ivaAlojField && rsvpData[ivaAlojField]) {
+      const ivaAmount = parseFloat(rsvpData[ivaAlojField]);
+      return !isNaN(ivaAmount) ? ivaAmount : 0;
+    }
+
+    return 0;
+  };
+
+  const vatAmount = getVATAmount();
 
   // Calculate processing fee on subtotal + VAT
   const processingFee = hasProcessingFee

@@ -5,7 +5,7 @@
 export const PRICES = {
   tripOption1: 2250,
   tripOption2: 2600,
-  privateRoom: 300,
+  privateRoom: 0, // Dynamic price from RSVP data
   horseback: 45,
   cooking: 140,
   rafting: 75,
@@ -77,7 +77,7 @@ export const TRIP_OPTIONS = [
 // Contact Information
 export const CONTACTS = [
   {
-    name: "Madi (Travel Coordinator)",
+    name: "Maddie (Travel Coordinator)",
     phone: "+34 (689) 200 162",
     whatsapp: "https://wa.me/34689200162",
   },
@@ -99,6 +99,7 @@ export const FORM_FIELDS = {
   FULL_NAME: "fullName",
   TRIP_OPTION: "tripOption",
   ACCOMMODATION: "accommodation",
+  ACCOMMODATION_UPGRADE_PRICE: "accommodationUpgradePrice",
   ROOMMATE: "roommate",
   ROOMMATE_PREFERENCE: "roommatePreference",
   ROOMMATE_NAME: "roommateName",

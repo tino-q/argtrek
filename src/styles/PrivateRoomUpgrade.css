@@ -5,6 +5,9 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .room-option-card {
@@ -17,6 +20,10 @@
   cursor: pointer;
   user-select: none;
   width: 100%;
+  max-width: 100%;
+  min-width: 550px; /* Ensure consistent width for all cards */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .room-option-card:hover {
@@ -138,6 +145,14 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 20px;
+  width: 100%;
+  min-width: 0; /* Allow flex items to shrink below their content size */
+}
+
+.room-description {
+  flex: 1;
+  min-width: 0; /* Allow this to shrink and wrap text */
+  max-width: calc(100% - 120px); /* Reserve space for price section */
 }
 
 .room-description p {
@@ -174,6 +189,8 @@
   align-items: flex-end;
   gap: 5px;
   flex-shrink: 0;
+  min-width: 140px;
+  white-space: nowrap;
 }
 
 .price-label {
@@ -356,6 +373,7 @@
   text-decoration: none;
   transition: all 0.3s ease;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .btn-secondary:hover {
@@ -365,7 +383,17 @@
 }
 
 /* Responsive Design */
+@media (max-width: 900px) {
+  .room-option-card {
+    min-width: 450px; /* Smaller min-width for medium screens */
+  }
+}
+
 @media (max-width: 768px) {
+  .room-option-card {
+    min-width: unset; /* Remove min-width constraint on mobile */
+  }
+
   .room-option-details,
   .upgrade-details {
     flex-direction: column;
@@ -375,6 +403,12 @@
   .room-price,
   .upgrade-price {
     align-items: flex-start;
+    width: auto;
+    min-width: auto;
+  }
+
+  .room-description {
+    max-width: 100%; /* Allow full width on mobile */
   }
 
   .room-options-container {
@@ -388,6 +422,28 @@
 
   .room-option-header {
     gap: 15px;
+  }
+
+  /* Mobile button improvements */
+  .form-actions {
+    flex-direction: column;
+    gap: 15px;
+    padding-top: 25px;
+    margin-top: 25px;
+  }
+
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    padding: 15px 20px;
+    font-size: 0.95rem;
+  }
+
+  .submit-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 15px 20px;
+    font-size: 1rem;
   }
 
   .roommate-preferences {
@@ -430,6 +486,11 @@
 
 /* Enhanced mobile responsiveness */
 @media (max-width: 480px) {
+  .room-option-card {
+    min-width: unset; /* Remove min-width constraint on mobile */
+    padding: 15px;
+  }
+
   .room-option-header,
   .upgrade-header {
     flex-wrap: wrap;
@@ -455,6 +516,27 @@
     width: 6px;
     height: 6px;
   }
+
+  /* Enhanced mobile button styling */
+  .btn-secondary {
+    padding: 14px 18px;
+    font-size: 0.9rem;
+    gap: 8px;
+    min-height: 44px; /* Ensure touch-friendly button size */
+  }
+
+  .submit-btn {
+    padding: 14px 18px;
+    font-size: 0.95rem;
+    gap: 8px;
+    min-height: 44px; /* Ensure touch-friendly button size */
+  }
+
+  .form-actions {
+    gap: 12px;
+    padding-top: 20px;
+    margin-top: 20px;
+  }
 }
 
 /* Roommate Preferences Styling */
@@ -463,6 +545,9 @@
   display: flex;
   flex-direction: column;
   gap: 15px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .roommate-option {
@@ -480,6 +565,8 @@
   color: var(--text-secondary);
   line-height: 1.5;
   transition: color 0.3s ease;
+  max-width: 100%;
+  width: 100%;
 }
 
 .roommate-option-label:hover {
@@ -534,6 +621,10 @@
   font-weight: 500;
   line-height: 1.5;
   flex: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
 }
 
 .roommate-name-input {
@@ -573,6 +664,9 @@
   font-size: 0.85rem;
   color: var(--text-muted);
   line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: calc(100% - 28px);
 }
 
 .roommate-help-text i {

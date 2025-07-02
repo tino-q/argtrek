@@ -5,8 +5,9 @@ import { useState, useEffect } from "react";
 import { FORM_FIELDS } from "../utils/config";
 
 const ACCOMMODATION_PRICES = {
-  0: 0, // Shared room - no extra cost
-  private: 350, // Private room upgrade
+  0: 0, // Shared room - no extra cost (legacy)
+  shared: 0, // Shared room - no extra cost
+  private: 0, // Private room upgrade (price comes from RSVP data)
 };
 
 export const usePricing = (formData) => {
@@ -26,9 +27,17 @@ export const usePricing = (formData) => {
       // Base trip price
       const basePrice = parseFloat(formData[FORM_FIELDS.TRIP_OPTION]) || 0;
 
-      // Accommodation price
-      const accommodationPrice =
+      // Accommodation price - use dynamic price from RSVP data if available
+      let accommodationPrice =
         ACCOMMODATION_PRICES[formData[FORM_FIELDS.ACCOMMODATION]] || 0;
+
+      // If private room is selected and we have a dynamic price from RSVP data, use it
+      if (
+        formData[FORM_FIELDS.ACCOMMODATION] === "private" &&
+        formData[FORM_FIELDS.ACCOMMODATION_UPGRADE_PRICE]
+      ) {
+        accommodationPrice = formData[FORM_FIELDS.ACCOMMODATION_UPGRADE_PRICE];
+      }
 
       // Activities price - handle both old string format and new object format
       const activities = formData[FORM_FIELDS.ACTIVITIES] || [];

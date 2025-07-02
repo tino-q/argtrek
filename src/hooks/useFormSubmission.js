@@ -93,7 +93,7 @@ export const useFormSubmission = () => {
 
       if (error.message && error.message.includes("already been registered")) {
         errorMessage =
-          "⚠️ This email has already been registered for the trip. Each email can only register once. Please reach out to Madi for modifications.";
+          "⚠️ This email has already been registered for the trip. Each email can only register once. Please reach out to Maddie for modifications.";
         errorOptions = {
           customClass: "email-duplicate",
           duration: 8000,

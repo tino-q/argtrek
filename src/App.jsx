@@ -4,6 +4,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useNotifications } from "./hooks/useNotifications";
 import { useAnimations, injectAnimationStyles } from "./hooks/useAnimations";
+import { usePricing } from "./hooks/usePricing";
+import { FORM_FIELDS, CONTACTS } from "./utils/config";
 
 // Import components
 import Header from "./components/layout/Header";
@@ -12,6 +14,8 @@ import EmailLogin from "./components/auth/EmailLogin";
 import RSVPDisplay from "./components/display/RSVPDisplay";
 import ActivitySelection from "./components/form/ActivitySelection";
 import PrivateRoomUpgrade from "./components/form/PrivateRoomUpgrade";
+import PaymentOptions from "./components/form/PaymentOptions";
+import PricingSummary from "./components/layout/PricingSummary";
 import NotificationContainer from "./components/common/NotificationContainer";
 
 function App() {
@@ -27,6 +31,7 @@ function App() {
   const { notifications, showSuccess, showError, removeNotification } =
     useNotifications();
   const { _pulseElement, _shakeElement } = useAnimations();
+  const pricing = usePricing(formData);
 
   // Initialize animations when component mounts
   useEffect(() => {
@@ -74,6 +79,14 @@ function App() {
         setUserRSVP(result.data);
         setCurrentStep("rsvp");
         showSuccess("Trip details retrieved successfully!");
+
+        // Scroll to form area
+        setTimeout(() => {
+          formRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 100);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -114,12 +127,71 @@ function App() {
 
   // Handle continuing to add-ons from RSVP display
   const handleContinueToAddons = () => {
+    // Extract base trip price and accommodation upgrade price from RSVP data
+    if (userRSVP) {
+      const updates = {};
+
+      // Extract trip price
+      const priceField = Object.keys(userRSVP).find(
+        (key) =>
+          key.toLowerCase().includes("pack price") ||
+          key.toLowerCase().includes("total price") ||
+          key.toLowerCase().includes("package price") ||
+          key.toLowerCase().includes("trip option price") ||
+          key.toLowerCase().includes("price")
+      );
+
+      if (priceField && userRSVP[priceField]) {
+        const price = parseFloat(userRSVP[priceField]);
+        if (!isNaN(price)) {
+          updates.tripOption = price;
+        }
+      }
+
+      // Extract accommodation upgrade price
+      const accommodationPriceField = Object.keys(userRSVP).find(
+        (key) => key.toUpperCase() === "PRIVATE ROOM UPGRADE"
+      );
+
+      if (accommodationPriceField && userRSVP[accommodationPriceField]) {
+        const accommodationPrice = parseFloat(
+          userRSVP[accommodationPriceField]
+        );
+        if (!isNaN(accommodationPrice)) {
+          updates[FORM_FIELDS.ACCOMMODATION_UPGRADE_PRICE] = accommodationPrice;
+        }
+      }
+
+      // Update form data with extracted values
+      if (Object.keys(updates).length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          ...updates,
+        }));
+      }
+    }
     setCurrentStep("addons");
+
+    // Scroll to form area
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
   };
 
   // Handle continuing to payment from add-ons
   const handleContinueToPayment = () => {
     setCurrentStep("payment");
+
+    // Scroll to form area
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
   };
 
   // Check if user is a solo traveler (no plus one)
@@ -127,22 +199,34 @@ function App() {
     if (!userRSVP) return false;
 
     return userRSVP["Are you traveling solo or with a plus one?"] === "Solo";
+  };
 
-    // const plusOneField = Object.keys(userRSVP).find(
-    //   (key) =>
-    //     key.toLowerCase().includes("plus one") &&
-    //     key.toLowerCase().includes("name")
-    // );
+  // Navigation helpers with scroll
+  const goBackToRSVP = () => {
+    setCurrentStep("rsvp");
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
+  };
 
-    // const plusOneName = plusOneField ? userRSVP[plusOneField] : null;
-    // return !plusOneName || plusOneName.trim() === "";
+  const goBackToAddons = () => {
+    setCurrentStep("addons");
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
   };
 
   return (
     <div className="container">
       <Header />
 
-      <WelcomeSection />
+      {currentStep === "login" && <WelcomeSection />}
 
       <div ref={formRef} className="trip-form">
         {currentStep === "login" && (
@@ -176,7 +260,7 @@ function App() {
               <button
                 type="button"
                 className="btn-secondary"
-                onClick={() => setCurrentStep("rsvp")}
+                onClick={goBackToRSVP}
               >
                 <i className="fas fa-arrow-left"></i> Back to RSVP
               </button>
@@ -192,9 +276,35 @@ function App() {
         )}
 
         {currentStep === "payment" && (
-          <div className="form-section">
-            <h2>Payment Configuration</h2>
-            <p>Payment options will appear here...</p>
+          <div className="payment-section">
+            <PaymentOptions
+              formData={formData}
+              updateFormData={updateFormData}
+              rsvpData={userRSVP}
+            />
+
+            <PricingSummary
+              pricing={pricing}
+              formData={formData}
+              rsvpData={userRSVP}
+            />
+
+            <div className="form-actions">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={goBackToAddons}
+              >
+                <i className="fas fa-arrow-left"></i> Back to Add-ons
+              </button>
+              <button
+                type="button"
+                className="submit-btn"
+                // onClick={handleSubmitForm}
+              >
+                <i className="fas fa-check"></i> Complete Registration
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -205,6 +315,22 @@ function App() {
       />
 
       <footer className="app-footer">
+        <div className="footer-help">
+          <p>
+            Need help? Reach out to{" "}
+            <a
+              href={
+                CONTACTS.find((contact) => contact.name.includes("Maddie"))
+                  ?.whatsapp
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              className="whatsapp-link"
+            >
+              Maddie anytime on WhatsApp <i className="fab fa-whatsapp"></i>
+            </a>
+          </p>
+        </div>
         <p>
           <span className="footer-emoji">✨</span>
           vibe coded with{" "}

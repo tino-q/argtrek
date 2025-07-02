@@ -1,5 +1,7 @@
+import React from "react";
 import { FORM_FIELDS } from "../../utils/config";
 import { copyToClipboard } from "../../utils/clipboard";
+import "../../styles/PaymentOptions.css";
 
 const BANK_DETAILS = [
   { label: "Bank Name", value: "Revolut" },
@@ -14,8 +16,51 @@ const BANK_DETAILS = [
   { label: "Country", value: "Spain" },
 ];
 
-const PaymentOptions = ({ formData, updateFormData }) => {
+const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
   const isBankTransfer = formData[FORM_FIELDS.PAYMENT_METHOD] === "bank";
+
+  // Check if user is Jero or Nati (enforce Argentine citizenship)
+  const isEnforcedArgentine = () => {
+    if (!rsvpData) return false;
+
+    // Find the name field in RSVP data
+    const nameField = Object.keys(rsvpData).find(
+      (key) =>
+        key.toLowerCase().includes("name") &&
+        key.toLowerCase().includes("exactly") &&
+        key.toLowerCase().includes("appears")
+    );
+
+    if (nameField && rsvpData[nameField]) {
+      const userName = rsvpData[nameField].toLowerCase().trim();
+      return userName.includes("jero") || userName.includes("nati");
+    }
+
+    return false;
+  };
+
+  const enforcedArgentine = isEnforcedArgentine();
+
+  // Set default payment schedule to "full" (Single Payment) if not set
+  React.useEffect(() => {
+    if (!formData[FORM_FIELDS.PAYMENT_SCHEDULE]) {
+      updateFormData(FORM_FIELDS.PAYMENT_SCHEDULE, "full");
+    }
+  }, [formData, updateFormData]);
+
+  // Set default payment method to "credit" (Credit Card) if not set
+  React.useEffect(() => {
+    if (!formData[FORM_FIELDS.PAYMENT_METHOD]) {
+      updateFormData(FORM_FIELDS.PAYMENT_METHOD, "credit");
+    }
+  }, [formData, updateFormData]);
+
+  // Auto-set Argentine citizenship if enforced
+  React.useEffect(() => {
+    if (enforcedArgentine && !formData[FORM_FIELDS.ARGENTINE_CITIZEN]) {
+      updateFormData(FORM_FIELDS.ARGENTINE_CITIZEN, true);
+    }
+  }, [enforcedArgentine, formData, updateFormData]);
 
   const handleCopyClick = async (value, event) => {
     const button = event.currentTarget;
@@ -243,22 +288,30 @@ const PaymentOptions = ({ formData, updateFormData }) => {
       <div className="form-group">
         <div
           className="checkbox-option"
-          onClick={() =>
-            updateFormData(
-              FORM_FIELDS.ARGENTINE_CITIZEN,
-              !formData[FORM_FIELDS.ARGENTINE_CITIZEN]
-            )
-          }
-          style={{ cursor: "pointer" }}
+          onClick={() => {
+            if (!enforcedArgentine) {
+              updateFormData(
+                FORM_FIELDS.ARGENTINE_CITIZEN,
+                !formData[FORM_FIELDS.ARGENTINE_CITIZEN]
+              );
+            }
+          }}
+          style={{
+            cursor: enforcedArgentine ? "not-allowed" : "pointer",
+            opacity: enforcedArgentine ? 0.7 : 1,
+          }}
         >
           <input
             type="checkbox"
             id="argentineCitizen"
             name="argentineCitizen"
             checked={formData[FORM_FIELDS.ARGENTINE_CITIZEN] || false}
-            onChange={(e) =>
-              updateFormData(FORM_FIELDS.ARGENTINE_CITIZEN, e.target.checked)
-            }
+            onChange={(e) => {
+              if (!enforcedArgentine) {
+                updateFormData(FORM_FIELDS.ARGENTINE_CITIZEN, e.target.checked);
+              }
+            }}
+            disabled={enforcedArgentine}
             style={{ pointerEvents: "none" }}
           />
           <label
@@ -268,7 +321,15 @@ const PaymentOptions = ({ formData, updateFormData }) => {
           >
             <strong>I have Argentine citizenship</strong>
             <p className="help-text">
-              Argentine citizens are subject to 21% VAT on all services
+              Argentine citizens are subject to 21% VAT on accommodation
+              {enforcedArgentine && (
+                <>
+                  <br />
+                  <em style={{ color: "var(--primary)", fontSize: "0.9em" }}>
+                    ✓ Automatically applied based on your profile
+                  </em>
+                </>
+              )}
             </p>
           </label>
         </div>

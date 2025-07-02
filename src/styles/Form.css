@@ -232,6 +232,7 @@
   align-items: center;
   gap: 12px;
   box-shadow: 0 10px 25px var(--shadow-primary);
+  white-space: nowrap;
 }
 
 .submit-btn:hover {

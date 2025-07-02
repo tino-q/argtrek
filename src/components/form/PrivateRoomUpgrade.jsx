@@ -2,14 +2,15 @@ import { FORM_FIELDS } from "../../utils/config";
 import "../../styles/PrivateRoomUpgrade.css";
 
 const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
-  // Get private room upgrade price from RSVP data
-  const privateRoomUpgradeField = Object.keys(rsvpData || {}).find(
-    (key) => key.toUpperCase() === "PRIVATE ROOM UPGRADE"
-  );
-
-  const upgradePrice = privateRoomUpgradeField
-    ? rsvpData[privateRoomUpgradeField]
-    : 350;
+  // Get private room upgrade price - prioritize formData, then RSVP data, then 0 fallback
+  const upgradePrice =
+    formData[FORM_FIELDS.ACCOMMODATION_UPGRADE_PRICE] ||
+    (() => {
+      const privateRoomUpgradeField = Object.keys(rsvpData || {}).find(
+        (key) => key.toUpperCase() === "PRIVATE ROOM UPGRADE"
+      );
+      return privateRoomUpgradeField ? rsvpData[privateRoomUpgradeField] : 0;
+    })();
 
   // Extract accommodation information from RSVP data based on date keys
   const getAccommodations = () => {
@@ -63,6 +64,11 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
 
   const handleRoomSelection = (isPrivateRoom) => {
     updateFormData(FORM_FIELDS.PRIVATE_ROOM_UPGRADE, isPrivateRoom);
+    // Set accommodation field for pricing calculations
+    updateFormData(
+      FORM_FIELDS.ACCOMMODATION,
+      isPrivateRoom ? "private" : "shared"
+    );
     // Clear roommate preference and name if switching to private room
     if (isPrivateRoom) {
       updateFormData(FORM_FIELDS.ROOMMATE_PREFERENCE, "");
@@ -190,8 +196,8 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                         />
                         <span className="radio-checkmark"></span>
                         <span className="option-text">
-                          Add me to the "seeking a roomie list" - I'll let Madi
-                          know my roomie name afterwards
+                          Add me to the "seeking a roomie list" - I'll let
+                          Maddie know my roomie name afterwards
                         </span>
                       </label>
                       {roommatePreference === "seeking" && (
