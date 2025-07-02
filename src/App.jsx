@@ -23,9 +23,10 @@ import Footer from "./components/layout/Footer";
 
 function App() {
   // Application state
-  const [currentStep, setCurrentStep] = useState("login"); // "login", "rsvp", "addons", "payment"
+  const [currentStep, setCurrentStep] = useState("login"); // "login", "welcome", "rsvp", "addons", "payment"
   const [userRSVP, setUserRSVP] = useState(null);
   const [formData, setFormData] = useState({});
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Form reference for validation feedback
   const formRef = useRef(null);
@@ -41,6 +42,33 @@ function App() {
   useEffect(() => {
     injectAnimationStyles();
   }, []);
+
+  // Transition helper function
+  const transitionToWelcome = (userData, successMessage) => {
+    setIsTransitioning(true);
+
+    setTimeout(() => {
+      setUserRSVP(userData);
+      setCurrentStep("welcome");
+      setIsTransitioning(false);
+      showSuccess(successMessage);
+
+      // Scroll to top of page
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }, 100);
+    }, 1000); // 1 second transition
+  };
+
+  // Handle continuing from welcome to RSVP
+  const handleContinueToRSVP = () => {
+    setCurrentStep("rsvp");
+
+    // Scroll to top of page
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }, 100);
+  };
 
   // Handle email and password login submission
   const handleEmailLogin = async (email, password) => {
@@ -83,13 +111,10 @@ function App() {
           console.table(mockUserData);
           console.log("==========================================");
 
-          setUserRSVP(mockUserData);
-          setCurrentStep("rsvp");
-          showSuccess("Development user logged in successfully!");
-
-          setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: "instant" });
-          }, 100);
+          transitionToWelcome(
+            mockUserData,
+            "Development user logged in successfully!"
+          );
           return;
         }
       }
@@ -127,21 +152,17 @@ function App() {
           showError(result.error);
         }
       } else {
-        // Valid RSVP found - store data and move to RSVP display
+        // Valid RSVP found - store data and move to welcome display
         console.log("✅ USER LOGIN SUCCESS - Complete RSVP Payload:");
         console.log("===============================================");
         console.table(result.data);
         console.log("Raw JSON Data:", JSON.stringify(result.data, null, 2));
         console.log("===============================================");
 
-        setUserRSVP(result.data);
-        setCurrentStep("rsvp");
-        showSuccess("Trip details retrieved successfully!");
-
-        // Scroll to top of page
-        setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: "instant" });
-        }, 100);
+        transitionToWelcome(
+          result.data,
+          "Trip details retrieved successfully!"
+        );
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -227,12 +248,9 @@ function App() {
     }
     setCurrentStep("addons");
 
-    // Scroll to form area
+    // Scroll to top of page
     setTimeout(() => {
-      formRef.current?.scrollIntoView({
-        behavior: "instant",
-        block: "start",
-      });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }, 100);
   };
 
@@ -240,12 +258,9 @@ function App() {
   const handleContinueToPayment = () => {
     setCurrentStep("payment");
 
-    // Scroll to form area
+    // Scroll to top of page
     setTimeout(() => {
-      formRef.current?.scrollIntoView({
-        behavior: "instant",
-        block: "start",
-      });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }, 100);
   };
 
@@ -311,26 +326,25 @@ function App() {
     showSuccess(
       "Logged out successfully. You can now login with different credentials."
     );
+
+    // Scroll to top of page
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }, 100);
   };
 
   // Navigation helpers with scroll
   const goBackToRSVP = () => {
     setCurrentStep("rsvp");
     setTimeout(() => {
-      formRef.current?.scrollIntoView({
-        behavior: "instant",
-        block: "start",
-      });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }, 100);
   };
 
   const goBackToAddons = () => {
     setCurrentStep("addons");
     setTimeout(() => {
-      formRef.current?.scrollIntoView({
-        behavior: "instant",
-        block: "start",
-      });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }, 100);
   };
 
@@ -338,17 +352,45 @@ function App() {
     <div className="container">
       <Header />
 
-      {/* Show WelcomeSection only after successful login */}
-      {currentStep !== "login" && <WelcomeSection />}
+      {/* Show WelcomeSection only in the dedicated welcome step */}
+      {currentStep === "welcome" && !isTransitioning && <WelcomeSection />}
 
       <div ref={formRef} className="trip-form">
-        {/* Login Step - Only show EmailLogin component */}
-        {currentStep === "login" && (
+        {/* Transition Screen */}
+        {isTransitioning && (
+          <div className="transition-screen">
+            <div className="transition-content">
+              <div className="spinner-container">
+                <i className="fas fa-spinner fa-spin fa-3x"></i>
+              </div>
+              <h3>Loading your trip details...</h3>
+              <p>Please wait while we prepare your information</p>
+            </div>
+          </div>
+        )}
+
+        {/* Login Step */}
+        {currentStep === "login" && !isTransitioning && (
           <EmailLogin onEmailSubmit={handleEmailLogin} />
         )}
 
+        {/* Welcome Step - Dedicated step for welcome information */}
+        {currentStep === "welcome" && !isTransitioning && (
+          <div className="welcome-step">
+            <div className="welcome-actions">
+              <button
+                type="button"
+                className="submit-btn welcome-continue-btn"
+                onClick={handleContinueToRSVP}
+              >
+                <i className="fas fa-arrow-right"></i> Continue to Trip Details
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* RSVP Display Step */}
-        {currentStep === "rsvp" && userRSVP && (
+        {currentStep === "rsvp" && userRSVP && !isTransitioning && (
           <RSVPDisplay
             rsvpData={userRSVP}
             onContinue={handleContinueToAddons}
@@ -358,7 +400,7 @@ function App() {
           />
         )}
 
-        {currentStep === "addons" && (
+        {currentStep === "addons" && !isTransitioning && (
           <div className="addons-section">
             <ActivitySelection
               formData={formData}
@@ -392,7 +434,7 @@ function App() {
           </div>
         )}
 
-        {currentStep === "payment" && (
+        {currentStep === "payment" && !isTransitioning && (
           <div className="payment-section">
             <PaymentOptions
               formData={formData}
