@@ -257,38 +257,32 @@ const RSVPDisplay = ({
 
       {/* Checked Luggage Addon */}
       {checkedLuggagePrice && (
-        <div className="services-section">
-          <h3>
-            <i className="fas fa-plus-circle"></i> Optional Add-on
-          </h3>
-          <p className="services-description">
-            Add checked luggage to your flights:
-          </p>
-
-          <div className="services-grid">
-            <div
-              className={`service-item addon ${isLuggageSelected ? "selected" : ""}`}
-              onClick={handleLuggageToggle}
-              style={{ cursor: "pointer" }}
-            >
-              <div className="service-icon">
-                <i className="fas fa-suitcase-rolling"></i>
+        <div className="luggage-addon-section">
+          <div
+            className={`luggage-addon-card ${isLuggageSelected ? "selected" : ""}`}
+            onClick={handleLuggageToggle}
+            style={{ cursor: "pointer" }}
+          >
+            <div className="luggage-checkbox">
+              <input
+                type="checkbox"
+                checked={isLuggageSelected}
+                onChange={() => {}} // Handled by card click
+                style={{ pointerEvents: "none" }}
+              />
+            </div>
+            <div className="luggage-icon">
+              <i className="fas fa-suitcase-rolling"></i>
+            </div>
+            <div className="luggage-details">
+              <div className="luggage-title">Checked Luggage</div>
+              <div className="luggage-description">
+                Add checked luggage to all your flights
               </div>
-              <div className="service-details">
-                <div className="service-title">Checked Luggage</div>
-                <div className="service-description">
-                  Add checked luggage to all your flights
-                </div>
-                <div className="service-price">${checkedLuggagePrice} USD</div>
-              </div>
-              <div className="service-checkbox">
-                <input
-                  type="checkbox"
-                  checked={isLuggageSelected}
-                  onChange={() => {}} // Handled by card click
-                  style={{ pointerEvents: "none" }}
-                />
-              </div>
+            </div>
+            <div className="luggage-price">
+              <span className="price-amount">${checkedLuggagePrice}</span>
+              <span className="price-currency">USD</span>
             </div>
           </div>
         </div>
