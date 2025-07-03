@@ -26,19 +26,19 @@ export const RSVP_FIELDS = {
   SCORE: "Score",
 
   // Accommodation Dates
-  NOV_22: "22Nov",
-  NOV_23: "23Nov",
-  NOV_24: "24Nov",
-  NOV_25: "25Nov",
-  NOV_26: "26Nov",
-  NOV_27: "27Nov",
-  NOV_28: "28Nov",
-  NOV_29: "29Nov",
+  NOV_22: "22Nov_BSAS",
+  NOV_23: "23Nov_BSAS",
+  NOV_24: "24Nov_BARI",
+  NOV_25: "25Nov_BARI",
+  NOV_26: "26Nov_BARI",
+  NOV_27: "27Nov_MDZ",
+  NOV_28: "28Nov_MDZ",
+  NOV_29: "29Nov_BSAS",
 
   // Flights
-  FLIGHT_AEP_BRC: "JA3045AEP-BRC",
-  FLIGHT_BRC_MDZ: "JA3725BRC-MDZ",
-  FLIGHT_MDZ_AEP: "JA3073MDZ-AEP",
+  FLIGHT_AEP_BRC: "AEP-BRC",
+  FLIGHT_BRC_MDZ: "BRC-MDZ",
+  FLIGHT_MDZ_AEP: "MDZ-AEP",
 };
 
 /**
