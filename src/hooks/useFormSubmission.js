@@ -17,22 +17,12 @@ export const useFormSubmission = () => {
     return {
       email: formData[FORM_FIELDS.EMAIL],
       fullName: formData[FORM_FIELDS.FULL_NAME],
-      tripOption: parseInt(formData[FORM_FIELDS.TRIP_OPTION]) === 2250 ? 1 : 2,
+      basePrice: formData[FORM_FIELDS.BASE_PRICE] || 0,
       roommate: formData[FORM_FIELDS.ROOMMATE] || "",
-      horsebackRiding: formData[FORM_FIELDS.ACTIVITIES].some(
-        (activity) =>
-          (typeof activity === "object" ? activity.id : activity) ===
-          "horseback"
-      ),
-      cookingClass: formData[FORM_FIELDS.ACTIVITIES].some(
-        (activity) =>
-          (typeof activity === "object" ? activity.id : activity) === "cooking"
-      ),
-      rafting: formData[FORM_FIELDS.ACTIVITIES].some(
-        (activity) =>
-          (typeof activity === "object" ? activity.id : activity) === "rafting"
-      ),
-
+      // Individual activity selections (now directly available as booleans)
+      horsebackRiding: Boolean(formData[FORM_FIELDS.HORSEBACK]),
+      cookingClass: Boolean(formData[FORM_FIELDS.COOKING]),
+      rafting: Boolean(formData[FORM_FIELDS.RAFTING]),
       paymentSchedule: formData[FORM_FIELDS.PAYMENT_SCHEDULE],
       paymentMethod: formData[FORM_FIELDS.PAYMENT_METHOD],
       argentineCitizen: formData[FORM_FIELDS.ARGENTINE_CITIZEN],

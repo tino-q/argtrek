@@ -3,84 +3,104 @@
   width: 100%;
 }
 
+/* Form Actions Container */
 .navigation-container .form-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 20px;
-  margin-top: 30px;
-  padding: 30px 40px 40px 40px;
+  padding: 25px 30px 35px 30px;
   border-top: 1px solid var(--border-light);
   background: var(--bg-light);
-  text-align: left;
 }
 
-/* Primary Submit Button */
+/* Primary Submit Button - Matches app's primary style */
 .navigation-container .submit-btn {
   background: var(--gradient-primary);
   color: white;
   border: none;
-  padding: 18px 40px;
-  font-size: 1.1rem;
+  padding: 16px 32px;
+  font-size: 1rem;
   font-weight: 600;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 10px 25px var(--shadow-primary);
+  gap: 10px;
+  box-shadow: 0 4px 12px var(--shadow-primary-light);
   white-space: nowrap;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
 }
 
 .navigation-container .submit-btn:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px var(--shadow-primary-strong);
   background: var(--gradient-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--shadow-primary);
 }
 
 .navigation-container .submit-btn:active {
   transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--shadow-primary);
 }
 
 .navigation-container .submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
-  box-shadow: 0 5px 15px var(--shadow-primary-light);
+  box-shadow: 0 2px 8px var(--shadow-primary-light);
 }
 
-/* Secondary Back Button */
+/* Secondary Back Button - Matches copy button style */
 .navigation-container .btn-secondary {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 24px;
-  background: var(--bg-light);
+  gap: 8px;
+  padding: 16px 24px;
+  background: white;
   color: var(--text-secondary);
   border: 2px solid var(--border-light);
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 1rem;
   font-weight: 500;
   text-decoration: none;
   transition: all 0.3s ease;
   cursor: pointer;
   white-space: nowrap;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .navigation-container .btn-secondary:hover {
-  background: var(--border-light);
+  background: var(--primary-lighter);
   color: var(--text-primary);
+  border-color: var(--primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Single button (no back button) - center the forward button */
+.navigation-container .btn-secondary:active {
+  transform: translateY(-1px);
+  background: var(--primary-selected);
+}
+
+/* Single button centering */
 .navigation-container .form-actions:has(.submit-btn):not(:has(.btn-secondary)) {
   justify-content: center;
 }
 
-/* Single button (no forward button) - center the back button */
 .navigation-container .form-actions:has(.btn-secondary):not(:has(.submit-btn)) {
   justify-content: center;
 }
@@ -89,35 +109,28 @@
 @media (max-width: 768px) {
   .navigation-container .form-actions {
     flex-direction: column;
-    gap: 15px;
-    padding: 25px 20px 40px 20px;
-    margin-top: 25px;
+    gap: 16px;
+    padding: 20px 25px 30px 25px;
+    margin-top: 20px;
   }
 
   .navigation-container .btn-secondary {
     width: 100%;
     justify-content: center;
-    padding: 15px 20px;
+    padding: 14px 20px;
     font-size: 0.95rem;
-    order: 2; /* Put back button below forward button on mobile */
+    order: 2;
   }
 
   .navigation-container .submit-btn {
     width: 100%;
     justify-content: center;
-    padding: 15px 20px;
+    padding: 14px 20px;
     font-size: 1rem;
-    order: 1; /* Keep forward button at top on mobile */
+    order: 1;
   }
 
-  /* Single button cases - maintain centering */
-  .navigation-container
-    .form-actions:has(.submit-btn):not(:has(.btn-secondary)),
-  .navigation-container
-    .form-actions:has(.btn-secondary):not(:has(.submit-btn)) {
-    justify-content: center;
-  }
-
+  /* Single button cases */
   .navigation-container
     .form-actions:has(.submit-btn):not(:has(.btn-secondary))
     .submit-btn,
@@ -130,24 +143,24 @@
 }
 
 @media (max-width: 480px) {
+  .navigation-container .form-actions {
+    gap: 14px;
+    padding: 16px 20px 25px 20px;
+    margin-top: 16px;
+  }
+
   .navigation-container .btn-secondary {
     padding: 14px 18px;
     font-size: 0.9rem;
-    gap: 8px;
-    min-height: 44px; /* Ensure touch-friendly button size */
+    gap: 6px;
+    min-height: 48px;
   }
 
   .navigation-container .submit-btn {
     padding: 14px 18px;
     font-size: 0.95rem;
     gap: 8px;
-    min-height: 44px; /* Ensure touch-friendly button size */
-  }
-
-  .navigation-container .form-actions {
-    gap: 12px;
-    padding: 20px 15px 35px 15px;
-    margin-top: 20px;
+    min-height: 48px;
   }
 
   .navigation-container

@@ -1,56 +1,30 @@
 import { FORM_FIELDS } from "../../utils/config";
+import {
+  getPrivateRoomUpgradePrice,
+  getIncludedAccommodations,
+} from "../../utils/rsvpData";
 import "../../styles/PrivateRoomUpgrade.css";
 
 const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
   // Get private room upgrade price - prioritize formData, then RSVP data, then 0 fallback
   const upgradePrice =
     formData[FORM_FIELDS.ACCOMMODATION_UPGRADE_PRICE] ||
-    (() => {
-      const privateRoomUpgradeField = Object.keys(rsvpData || {}).find(
-        (key) => key.toUpperCase() === "PRIVATE ROOM UPGRADE"
-      );
-      return privateRoomUpgradeField ? rsvpData[privateRoomUpgradeField] : 0;
-    })();
+    getPrivateRoomUpgradePrice(rsvpData);
 
-  // Extract accommodation information from RSVP data based on date keys
+  // Extract accommodation information from RSVP data using centralized utility
   const getAccommodations = () => {
-    if (!rsvpData) {
+    const includedAccommodations = getIncludedAccommodations(rsvpData);
+
+    if (includedAccommodations.length === 0) {
       return ["Buenos Aires hotel", "Bariloche", "Mendoza"];
     }
 
-    const accommodations = [];
-
-    // Check Buenos Aires arrival accommodation (22 NOV OR 23 NOV)
-    const hasBuenosAiresArrival = rsvpData["22 NOV"] || rsvpData["23 NOV"];
-    if (hasBuenosAiresArrival) {
-      accommodations.push("Buenos Aires (arrival)");
-    }
-
-    // Check Bariloche (24 NOV OR 25 NOV OR 26 NOV)
-    const hasBariloche =
-      rsvpData["24 NOV"] || rsvpData["25 NOV"] || rsvpData["26 NOV"];
-    if (hasBariloche) {
-      accommodations.push("Bariloche");
-    }
-
-    // Check Mendoza accommodation (27 NOV OR 28 NOV)
-    const hasMendoza = rsvpData["27 NOV"] || rsvpData["28 NOV"];
-    if (hasMendoza) {
-      accommodations.push("Mendoza");
-    }
-
-    // Check Buenos Aires departure accommodation (29 NOV)
-    const hasBuenosAiresDeparture = rsvpData["29 NOV"];
-    if (hasBuenosAiresDeparture) {
-      accommodations.push("Buenos Aires (departure)");
-    }
-
-    // If no accommodations found, return default list
-    if (accommodations.length === 0) {
-      return ["Buenos Aires hotel", "Bariloche", "Mendoza"];
-    }
-
-    return accommodations;
+    return includedAccommodations.map((acc) => {
+      if (acc.period) {
+        return `${acc.location} (${acc.period})`;
+      }
+      return acc.location;
+    });
   };
 
   const accommodations = getAccommodations();

@@ -1,6 +1,7 @@
 import React from "react";
 import { FORM_FIELDS } from "../../utils/config";
 import { copyToClipboard } from "../../utils/clipboard";
+import { shouldEnforceArgentineCitizenship } from "../../utils/rsvpData";
 import "../../styles/PaymentOptions.css";
 
 const BANK_DETAILS = [
@@ -19,27 +20,8 @@ const BANK_DETAILS = [
 const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
   const isBankTransfer = formData[FORM_FIELDS.PAYMENT_METHOD] === "bank";
 
-  // Check if user is Jero or Nati (enforce Argentine citizenship)
-  const isEnforcedArgentine = () => {
-    if (!rsvpData) return false;
-
-    // Find the name field in RSVP data
-    const nameField = Object.keys(rsvpData).find(
-      (key) =>
-        key.toLowerCase().includes("name") &&
-        key.toLowerCase().includes("exactly") &&
-        key.toLowerCase().includes("appears")
-    );
-
-    if (nameField && rsvpData[nameField]) {
-      const userName = rsvpData[nameField].toLowerCase().trim();
-      return userName.includes("jero") || userName.includes("nati");
-    }
-
-    return false;
-  };
-
-  const enforcedArgentine = isEnforcedArgentine();
+  // Check if user should have Argentine citizenship enforced using centralized utility
+  const enforcedArgentine = shouldEnforceArgentineCitizenship(rsvpData);
 
   // Set default payment schedule to "full" (Single Payment) if not set
   React.useEffect(() => {
@@ -85,7 +67,7 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
       <div className="payment-warning">
         <i className="fas fa-exclamation-triangle"></i>
         <div>
-          <h3>Important Payment Information</h3>
+          <h3>Important</h3>
           <ul>
             <li>
               All rates are <strong>non-refundable</strong> - no exceptions

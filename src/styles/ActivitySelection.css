@@ -20,7 +20,7 @@
   cursor: pointer;
   user-select: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  height: 240px;
+  height: 280px;
 }
 
 .activity-card:hover {
@@ -48,6 +48,7 @@
   object-fit: cover;
   object-position: center;
   transition: transform 0.3s ease;
+  min-height: 280px;
 }
 
 .activity-card:hover .activity-image img {
@@ -82,10 +83,11 @@
 /* Content Section */
 .activity-content {
   flex: 1;
-  padding: 24px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  overflow: hidden;
 }
 
 /* Header with Checkbox, Icon, and Title */
@@ -124,7 +126,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  overflow: hidden;
 }
 
 .activity-details .location {
@@ -142,9 +145,17 @@
 
 .activity-details .description {
   color: #4b5563;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   margin: 0;
   font-style: italic;
+  line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .activity-details .price {
@@ -153,6 +164,7 @@
   color: #059669;
   margin: 8px 0 0 0;
   align-self: flex-start;
+  flex-shrink: 0;
 }
 
 /* Responsive Design */
@@ -163,12 +175,11 @@
 
   .activity-card {
     flex-direction: column;
-    height: auto;
-    min-height: 320px;
+    height: 380px;
   }
 
   .activity-image {
-    flex: 0 0 180px;
+    flex: 0 0 200px;
     width: 100%;
   }
 
@@ -190,8 +201,12 @@
 }
 
 @media (max-width: 480px) {
+  .activity-card {
+    height: 360px;
+  }
+
   .activity-image {
-    flex: 0 0 160px;
+    flex: 0 0 180px;
   }
 
   .activity-content {
@@ -200,5 +215,10 @@
 
   .activity-header h3 {
     font-size: 1rem;
+  }
+
+  .activity-details .description {
+    font-size: 0.8rem;
+    -webkit-line-clamp: 3;
   }
 }

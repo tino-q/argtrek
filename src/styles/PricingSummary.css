@@ -6,6 +6,8 @@
   margin: 40px 0;
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(45, 55, 72, 0.3);
+  margin-left: clamp(15px, 4vw, 40px);
+  margin-right: clamp(15px, 4vw, 40px);
 }
 
 .price-summary h2 {
@@ -72,5 +74,22 @@
 @media (max-width: 768px) {
   .price-summary {
     padding: 25px 20px;
+    margin-left: clamp(10px, 3vw, 25px);
+    margin-right: clamp(10px, 3vw, 25px);
+  }
+}
+
+@media (max-width: 480px) {
+  .price-summary {
+    margin-left: 15px;
+    margin-right: 15px;
+    padding: 20px 16px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .price-summary {
+    margin-left: clamp(40px, 6vw, 80px);
+    margin-right: clamp(40px, 6vw, 80px);
   }
 }

@@ -9,7 +9,6 @@
 
 .form-section {
   padding: 40px;
-  border-bottom: 1px solid var(--border-light);
 }
 
 .form-section:last-child {
@@ -211,40 +210,7 @@
   border-radius: 0;
 }
 
-/* Form Actions */
-.form-actions {
-  padding: 20px 40px 40px 40px;
-  text-align: center;
-  background: var(--bg-light);
-}
-
-.submit-btn {
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
-  padding: 18px 40px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 10px 25px var(--shadow-primary);
-  white-space: nowrap;
-}
-
-.submit-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px var(--shadow-primary-strong);
-  background: var(--gradient-hover);
-}
-
-.submit-btn:active {
-  transform: translateY(-1px);
-}
-
+/* Form Actions and Navigation Buttons - Handled by Navigation.css */
 .submit-note {
   margin-top: 15px;
   color: var(--text-secondary);
@@ -270,8 +236,5 @@
     font-size: 1.5rem;
   }
 
-  .submit-btn {
-    padding: 15px 30px;
-    font-size: 1rem;
-  }
+  /* Navigation buttons responsive styles handled by Navigation.css */
 }

@@ -1,6 +1,5 @@
 /* Welcome Hero Section - Complete Redesign */
 .welcome-hero {
-  margin-bottom: 40px;
   overflow: hidden;
 }
 
@@ -92,6 +91,8 @@
 /* Action Cards */
 .action-cards {
   display: grid;
+  padding-left: 20px;
+  padding-right: 20px;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 30px;
 }
@@ -244,11 +245,6 @@
 
   .destination-image {
     height: 200px;
-  }
-
-  .action-cards {
-    grid-template-columns: 1fr;
-    gap: 20px;
   }
 
   .action-card {

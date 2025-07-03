@@ -147,11 +147,6 @@ function validateFormData(data) {
     errors.push("Full name is required");
   }
 
-  const tripOptionNum = parseInt(data.tripOption);
-  if (!data.tripOption || (tripOptionNum !== 1 && tripOptionNum !== 2)) {
-    errors.push("Trip option must be 1 or 2");
-  }
-
   if (
     !data.paymentSchedule ||
     !["full", "installments"].includes(data.paymentSchedule)
@@ -299,12 +294,6 @@ function saveToSheet(data) {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = spreadsheet.getSheetByName(SHEET_NAME);
 
-    // Create sheet if it doesn't exist
-    if (!sheet) {
-      sheet = spreadsheet.insertSheet(SHEET_NAME);
-      setupSheetHeaders(sheet);
-    }
-
     // Check if email already exists (primary key constraint)
     if (emailExists(sheet, data.email)) {
       return {
@@ -352,36 +341,6 @@ function saveToSheet(data) {
       error: error.message,
     };
   }
-}
-
-/**
- * Setup sheet headers
- */
-function setupSheetHeaders(sheet) {
-  const headers = [
-    "Timestamp",
-    "Email",
-    "Full Name",
-    "Trip Option",
-    "Roommate",
-    "Horseback Riding",
-    "Cooking Class",
-    "Rafting",
-
-    "Payment Schedule",
-    "Payment Method",
-    "Argentine Citizen",
-    "Base Price",
-    "Accommodation Price",
-    "Activities Price",
-    "Subtotal",
-    "Processing Fee",
-    "VAT Amount",
-    "Total",
-    "Installment Amount",
-  ];
-
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
 }
 
 /**

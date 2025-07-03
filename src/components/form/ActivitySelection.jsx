@@ -1,95 +1,58 @@
 import { useState } from "react";
-import { FORM_FIELDS } from "../../utils/config";
-import raftingImage from "../../assets/bariloche-rafting.png";
+import { FORM_FIELDS, ACTIVITIES } from "../../utils/config";
 import ImageCarousel from "../common/ImageCarousel";
 
-// Import all horseback images
-import horseback1 from "../../assets/horseback-riding/horseback-riding-mendoza.jpeg";
-import horseback2 from "../../assets/horseback-riding/horseback-riding-mendoza-2.jpeg";
-import horseback3 from "../../assets/horseback-riding/horseback-riding-mendoza-3.jpeg";
+// Import dynamic image loader utility
+import {
+  getMainActivityImage,
+  getActivityImageSources,
+} from "../../utils/imageLoader";
 
-// Import all rafting images
-import rafting1 from "../../assets/rafting/rafting1.jpeg";
-import rafting2 from "../../assets/rafting/rafting2.jpeg";
-import rafting3 from "../../assets/rafting/rafting3.jpeg";
-import rafting4 from "../../assets/rafting/rafting4.jpeg";
-import rafting5 from "../../assets/rafting/rafting5.jpeg";
-import rafting6 from "../../assets/rafting/rafting6.jpeg";
-import rafting7 from "../../assets/rafting/rafting7.jpeg";
-import rafting8 from "../../assets/rafting/rafting8.jpeg";
-import rafting9 from "../../assets/rafting/rafting9.jpeg";
-import rafting10 from "../../assets/rafting/rafting10.jpeg";
-import rafting11 from "../../assets/rafting/rafting11.jpeg";
-import rafting12 from "../../assets/rafting/rafting12.jpeg";
-
-// Import all empanadas images
-import empanadas1 from "../../assets/empanadas/empanadas.png";
-import empanadas2 from "../../assets/empanadas/empanadas-2.png";
-
-// Array of all horseback images
-const HORSEBACK_IMAGES = [horseback1, horseback2, horseback3];
-
-// Array of all rafting images
-const RAFTING_IMAGES = [
-  rafting1,
-  rafting2,
-  rafting3,
-  rafting4,
-  rafting5,
-  rafting6,
-  rafting7,
-  rafting8,
-  rafting9,
-  rafting10,
-  rafting11,
-  rafting12,
-];
-
-// Array of all empanadas images
-const EMPANADAS_IMAGES = [empanadas1, empanadas2];
-
-const ACTIVITIES = [
-  {
-    id: "horseback",
-    icon: "fas fa-horse",
-    name: "Horse Back Riding",
-    location: "Mendoza",
-    date: "November 27th - Afternoon",
-    price: 45,
-    description: "",
-    image: horseback1,
-  },
-  {
-    id: "cooking",
-    icon: "fas fa-utensils",
-    name: "Empanadas Cooking Class",
-    location: "Mendoza",
-    date: "November 28th - Midday",
-    price: 140,
-    description: "3-course menu with wine pairing",
-    image: empanadas1,
-  },
+const ACTIVITY_LIST = [
   {
     id: "rafting",
+    formField: FORM_FIELDS.RAFTING,
     icon: "fas fa-water",
     name: "Rafting Adventure",
     location: "Bariloche",
     date: "November 26th - All Day",
     price: 75,
     description: "",
-    image: raftingImage,
+    image: getMainActivityImage("rafting"),
+  },
+  {
+    id: "horseback",
+    formField: FORM_FIELDS.HORSEBACK,
+    icon: "fas fa-horse",
+    name: "Horse Back Riding",
+    location: "Mendoza",
+    date: "November 27th - Afternoon",
+    price: 45,
+    description: "1-hour guided horseback riding experience",
+    image: getMainActivityImage("horseback"),
+  },
+  {
+    id: "cooking",
+    formField: FORM_FIELDS.COOKING,
+    icon: "fas fa-utensils",
+    name: "Empanadas Cooking Class",
+    location: "Mendoza",
+    date: "November 28th - Midday",
+    price: 140,
+    description:
+      "Exclusive cooking class with Casa del Visitante chefs. Learn to make traditional empanadas using regional products, followed by a 3-course lunch with wine pairing.",
+    image: getMainActivityImage("empanadas"),
   },
 ];
 
-const ActivitySelection = ({ formData, updateArrayField }) => {
-  const selectedActivities = formData[FORM_FIELDS.ACTIVITIES] || [];
+const ActivitySelection = ({ formData, updateFormData }) => {
   const [carouselState, setCarouselState] = useState({
     isOpen: false,
     activityId: null,
   });
 
   const handleActivityToggle = (activity, isSelected) => {
-    updateArrayField(FORM_FIELDS.ACTIVITIES, activity, isSelected);
+    updateFormData(activity.formField, isSelected);
   };
 
   const handleImageClick = (e, activity) => {
@@ -117,11 +80,11 @@ const ActivitySelection = ({ formData, updateArrayField }) => {
   const getCarouselImages = () => {
     switch (carouselState.activityId) {
       case "horseback":
-        return HORSEBACK_IMAGES;
+        return getActivityImageSources("horseback");
       case "rafting":
-        return RAFTING_IMAGES;
+        return getActivityImageSources("rafting");
       case "cooking":
-        return EMPANADAS_IMAGES;
+        return getActivityImageSources("empanadas");
       default:
         return [];
     }
@@ -140,20 +103,14 @@ const ActivitySelection = ({ formData, updateArrayField }) => {
     <div>
       <div className="section-header">
         <h1>
-          <i className="fas fa-plus-circle"></i> Optional Add-ons
+          <i className="fas fa-plus-circle"></i> Experiences
         </h1>
-        <p className="section-description">
-          Enhance your Argentina adventure with these amazing experiences and
-          upgrades!
-        </p>
       </div>
 
       <section className="form-section">
         <div className="activities-container">
-          {ACTIVITIES.map((activity) => {
-            const isSelected = selectedActivities.some(
-              (selected) => selected.id === activity.id
-            );
+          {ACTIVITY_LIST.map((activity) => {
+            const isSelected = Boolean(formData[activity.formField]);
 
             return (
               <div

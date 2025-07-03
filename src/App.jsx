@@ -3,28 +3,23 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useNotifications } from "./hooks/useNotifications";
-import { useAnimations, injectAnimationStyles } from "./hooks/useAnimations";
+import { injectAnimationStyles } from "./hooks/useAnimations";
 import { usePricing } from "./hooks/usePricing";
 import { useFormSubmission } from "./hooks/useFormSubmission";
 import { FORM_FIELDS } from "./utils/config";
+import { getEmail, getTravelerName } from "./utils/rsvpData";
 
 // Import components
 import Header from "./components/layout/Header";
-import WelcomeSection from "./components/layout/WelcomeSection";
-import EmailLogin from "./components/auth/EmailLogin";
-import RSVPDisplay from "./components/display/RSVPDisplay";
-import ActivitySelection from "./components/form/ActivitySelection";
-import PrivateRoomUpgrade from "./components/form/PrivateRoomUpgrade";
-import PaymentOptions from "./components/form/PaymentOptions";
-import PricingSummary from "./components/layout/PricingSummary";
+import StepRenderer from "./components/common/StepRenderer";
+import StepNavigation from "./components/common/StepNavigation";
 import NotificationContainer from "./components/common/NotificationContainer";
-import SafeSubmitButton from "./components/common/SafeSubmitButton";
-import Navigation from "./components/common/Navigation";
 import Footer from "./components/layout/Footer";
+import { STEPS } from "./utils/stepConfig";
 
 function App() {
   // Application state
-  const [currentStep, setCurrentStep] = useState("login"); // "login", "welcome", "rsvp", "addons", "payment"
+  const [currentStep, setCurrentStep] = useState(STEPS.LOGIN);
   const [userRSVP, setUserRSVP] = useState(null);
   const [formData, setFormData] = useState({});
 
@@ -34,8 +29,7 @@ function App() {
   // Custom hooks
   const { notifications, showSuccess, showError, removeNotification } =
     useNotifications();
-  const { _pulseElement, _shakeElement } = useAnimations();
-  const pricing = usePricing(formData);
+  const pricing = usePricing(userRSVP, formData);
   const { submitForm, isSubmitting } = useFormSubmission();
 
   // Initialize animations when component mounts
@@ -43,16 +37,19 @@ function App() {
     injectAnimationStyles();
   }, []);
 
-  // Handle successful login
-  const handleLoginSuccess = (userData, successMessage) => {
-    setUserRSVP(userData);
-    setCurrentStep("welcome");
-    showSuccess(successMessage);
-
-    // Scroll to top of page
+  // Generic navigation handler
+  const navigateToStep = (step) => {
+    setCurrentStep(step);
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: "instant" });
     }, 100);
+  };
+
+  // Handle successful login
+  const handleLoginSuccess = (userData, successMessage) => {
+    setUserRSVP(userData);
+    navigateToStep(STEPS.WELCOME);
+    showSuccess(successMessage);
   };
 
   // Handle email and password login submission
@@ -162,91 +159,10 @@ function App() {
     }));
   };
 
-  const updateArrayField = (field, item, isSelected) => {
-    setFormData((prev) => {
-      const currentArray = prev[field] || [];
-      if (isSelected) {
-        // Add item if not already present
-        return {
-          ...prev,
-          [field]: currentArray.some((existing) => existing.id === item.id)
-            ? currentArray
-            : [...currentArray, item],
-        };
-      } else {
-        // Remove item
-        return {
-          ...prev,
-          [field]: currentArray.filter((existing) => existing.id !== item.id),
-        };
-      }
-    });
-  };
-
-  // Navigation helpers with scroll
-  const navigateToStep = (step) => {
-    setCurrentStep(step);
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }, 100);
-  };
-
-  // Centralized navigation handlers
-  const handleWelcomeBack = () => {
-    navigateToStep("login");
-  };
-
-  const handleWelcomeForward = () => {
-    navigateToStep("rsvp");
-  };
-
-  const handleRSVPBack = () => {
-    navigateToStep("welcome");
-  };
-
-  const handleRSVPForward = () => {
-    // Extract base trip price and accommodation upgrade price from RSVP data
-    if (userRSVP) {
-      const updates = {};
-
-      // Extract pack price
-      if (userRSVP["PACK PRICE"]) {
-        updates[FORM_FIELDS.TRIP_OPTION] = userRSVP["PACK PRICE"].toString();
-      }
-
-      // Extract accommodation upgrade price
-      if (userRSVP["PRIVATE ROOM UPGRADE"]) {
-        updates[FORM_FIELDS.ACCOMMODATION_UPGRADE_PRICE] =
-          userRSVP["PRIVATE ROOM UPGRADE"];
-      }
-
-      // Apply updates if any
-      if (Object.keys(updates).length > 0) {
-        setFormData((prev) => ({
-          ...prev,
-          ...updates,
-        }));
-      }
-    }
-    navigateToStep("addons");
-  };
-
-  const handleAddonsBack = () => {
-    navigateToStep("rsvp");
-  };
-
-  const handleAddonsForward = () => {
-    navigateToStep("payment");
-  };
-
-  const handlePaymentBack = () => {
-    navigateToStep("addons");
-  };
-
-  // Check if user is a solo traveler (no plus one)
-  const isSoloTraveler = () => {
-    if (!userRSVP) return false;
-    return userRSVP["Are you traveling solo or with a plus one?"] === "Solo";
+  // Handle RSVP continue - proceed to next step
+  const handleRSVPContinue = () => {
+    // No need to copy RSVP data to formData - pricing hook will handle it
+    navigateToStep(STEPS.ADDONS);
   };
 
   // Handle form submission
@@ -263,17 +179,11 @@ function App() {
         return;
       }
 
-      // Add user info from RSVP data to form data
+      // Add user info from RSVP data to form data using centralized utility
       const submissionData = {
         ...formData,
-        [FORM_FIELDS.EMAIL]: userRSVP
-          ? userRSVP["Email (for all trip-related updates and communications)"]
-          : "",
-        [FORM_FIELDS.FULL_NAME]: userRSVP
-          ? userRSVP[
-              "Please write your name exactly as it appears on the ID you'll be traveling with."
-            ]
-          : "",
+        [FORM_FIELDS.EMAIL]: getEmail(userRSVP),
+        [FORM_FIELDS.FULL_NAME]: getTravelerName(userRSVP),
       };
 
       console.log("🚀 SUBMITTING FORM DATA:");
@@ -298,128 +208,38 @@ function App() {
 
   // Handle logout - goes back to login and clears all data
   const handleLogout = () => {
-    setCurrentStep("login");
+    navigateToStep(STEPS.LOGIN);
     setUserRSVP(null);
     setFormData({});
     showSuccess(
       "Logged out successfully. You can now login with different credentials."
     );
-
-    // Scroll to top of page
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }, 100);
   };
 
   return (
     <div className="container">
       <Header />
 
-      {/* Show WelcomeSection only in the dedicated welcome step */}
-      {currentStep === "welcome" && <WelcomeSection onLogout={handleLogout} />}
-
       <div ref={formRef} className="trip-form">
-        {/* Login Step */}
-        {currentStep === "login" && (
-          <EmailLogin onEmailSubmit={handleEmailLogin} />
-        )}
+        <StepRenderer
+          currentStep={currentStep}
+          userRSVP={userRSVP}
+          formData={formData}
+          updateFormData={updateFormData}
+          pricing={pricing}
+          onEmailSubmit={handleEmailLogin}
+          onLogout={handleLogout}
+          onRSVPContinue={handleRSVPContinue}
+        />
 
-        {/* Welcome Step - Dedicated step for welcome information */}
-        {currentStep === "welcome" && (
-          <div className="welcome-step">
-            <div className="welcome-actions">
-              <Navigation
-                onBack={handleWelcomeBack}
-                onForward={handleWelcomeForward}
-                backText="Back to Login"
-                forwardText="Continue to Trip Details"
-                forwardIcon="fas fa-arrow-right"
-                className="welcome-navigation"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* RSVP Display Step */}
-        {currentStep === "rsvp" && userRSVP && (
-          <>
-            <RSVPDisplay
-              rsvpData={userRSVP}
-              onContinue={handleRSVPForward}
-              onLogout={handleLogout}
-              formData={formData}
-              updateArrayField={updateArrayField}
-              hideNavigation={true} // Hide the built-in navigation
-            />
-            <Navigation
-              onBack={handleRSVPBack}
-              onForward={handleRSVPForward}
-              backText="Back to Welcome"
-              forwardText="Continue to Add-ons"
-            />
-          </>
-        )}
-
-        {currentStep === "addons" && (
-          <div className="addons-section">
-            <ActivitySelection
-              formData={formData}
-              updateArrayField={updateArrayField}
-            />
-
-            {isSoloTraveler() && (
-              <PrivateRoomUpgrade
-                formData={formData}
-                updateFormData={updateFormData}
-                rsvpData={userRSVP}
-              />
-            )}
-
-            <Navigation
-              onBack={handleAddonsBack}
-              onForward={handleAddonsForward}
-              backText="Back to Trip Details"
-              forwardText="Continue to Payment"
-            />
-          </div>
-        )}
-
-        {currentStep === "payment" && (
-          <div className="payment-section">
-            <PaymentOptions
-              formData={formData}
-              updateFormData={updateFormData}
-              rsvpData={userRSVP}
-            />
-
-            <PricingSummary
-              pricing={pricing}
-              formData={formData}
-              rsvpData={userRSVP}
-            />
-
-            <Navigation
-              onBack={handlePaymentBack}
-              onForward={null}
-              backText="Back to Add-ons"
-              showForward={false}
-              forwardComponent={
-                <SafeSubmitButton
-                  onSubmit={handleSubmitForm}
-                  isLoading={isSubmitting}
-                  disabled={
-                    !formData[FORM_FIELDS.PAYMENT_SCHEDULE] ||
-                    !formData[FORM_FIELDS.PAYMENT_METHOD]
-                  }
-                  confirmText="You can only submit once, sure?"
-                  confirmDuration={3000}
-                >
-                  <i className="fas fa-check"></i> Complete Registration
-                </SafeSubmitButton>
-              }
-            />
-          </div>
-        )}
+        <StepNavigation
+          currentStep={currentStep}
+          onNavigate={navigateToStep}
+          onSubmit={handleSubmitForm}
+          isSubmitting={isSubmitting}
+          formData={formData}
+          showError={showError}
+        />
       </div>
 
       <NotificationContainer

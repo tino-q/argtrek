@@ -1,26 +1,4 @@
-/* Safe Submit Button Styles */
-.submit-btn.confirming {
-  background: var(--gradient-warning);
-  color: white;
-  animation: pulse-warning 1s infinite;
-}
-
-.submit-btn.confirming:hover {
-  background: var(--gradient-warning-hover);
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px var(--shadow-warning-strong);
-}
-
-.submit-btn.loading {
-  opacity: 0.8;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.submit-btn.loading:hover {
-  transform: none;
-  box-shadow: 0 10px 25px var(--shadow-primary);
-}
+/* Safe Submit Button Specialized States */
 
 /* Warning gradient colors for confirmation state */
 :root {
@@ -32,20 +10,37 @@
 /* Pulse animation for warning state */
 @keyframes pulse-warning {
   0% {
-    box-shadow: 0 10px 25px var(--shadow-primary);
+    box-shadow: 0 4px 12px var(--shadow-primary-light);
   }
   50% {
-    box-shadow: 0 15px 35px var(--shadow-warning-strong);
+    box-shadow: 0 8px 20px var(--shadow-warning-strong);
   }
   100% {
-    box-shadow: 0 10px 25px var(--shadow-primary);
+    box-shadow: 0 4px 12px var(--shadow-primary-light);
   }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .submit-btn.confirming {
-    font-size: 0.9rem;
-    padding: 15px 25px;
-  }
+/* Confirming State */
+.submit-btn.confirming {
+  background: var(--gradient-warning);
+  color: white;
+  animation: pulse-warning 1.5s infinite;
+}
+
+.submit-btn.confirming:hover:not(:disabled) {
+  background: var(--gradient-warning-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--shadow-warning-strong);
+}
+
+/* Loading State */
+.submit-btn.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.submit-btn.loading:hover {
+  transform: none;
+  box-shadow: 0 4px 12px var(--shadow-primary-light);
 }
