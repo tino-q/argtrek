@@ -1,11 +1,13 @@
 // Main Trip Form React App
-// Refactored for RSVP confirmation + add-ons selection + payment processing
+// Enhanced with browser navigation integration using React Router
 
 import { useState, useRef, useEffect } from "react";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useNotifications } from "./hooks/useNotifications";
 import { injectAnimationStyles } from "./hooks/useAnimations";
 import { usePricing } from "./hooks/usePricing";
 import { useFormSubmission } from "./hooks/useFormSubmission";
+import { useRouteProtection } from "./hooks/useRouteProtection";
 import { FORM_FIELDS } from "./utils/config";
 import { getEmail, getTravelerName } from "./utils/rsvpData";
 
@@ -19,12 +21,12 @@ import { STEPS } from "./utils/stepConfig";
 
 function App() {
   // Application state
-  const [currentStep, setCurrentStep] = useState(STEPS.LOGIN);
   const [userRSVP, setUserRSVP] = useState(null);
   const [formData, setFormData] = useState({});
 
-  // Form reference for validation feedback
-  const formRef = useRef(null);
+  // React Router hooks
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Custom hooks
   const { notifications, showSuccess, showError, removeNotification } =
@@ -32,17 +34,46 @@ function App() {
   const pricing = usePricing(userRSVP, formData);
   const { submitForm, isSubmitting } = useFormSubmission();
 
+  // Route protection (automatically handles redirects)
+  useRouteProtection(userRSVP);
+
+  // Form reference for validation feedback
+  const formRef = useRef(null);
+
+  // Get current step from URL path
+  const getCurrentStepFromPath = () => {
+    const path = location.pathname.slice(1); // Remove leading slash
+    return path || STEPS.LOGIN; // Default to login if no path
+  };
+
+  const currentStep = getCurrentStepFromPath();
+
   // Initialize animations when component mounts
   useEffect(() => {
     injectAnimationStyles();
   }, []);
 
-  // Generic navigation handler
+  // Scroll to top when route changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location.pathname]);
+
+  // Update document title based on current step
+  useEffect(() => {
+    const stepTitles = {
+      [STEPS.LOGIN]: "Login - Argentina Trek",
+      [STEPS.WELCOME]: "Welcome - Argentina Trek",
+      [STEPS.RSVP]: "Trip Details - Argentina Trek",
+      [STEPS.ADDONS]: "Select Experiences - Argentina Trek",
+      [STEPS.PAYMENT]: "Payment - Argentina Trek",
+    };
+
+    document.title = stepTitles[currentStep] || "Argentina Trek";
+  }, [currentStep]);
+
+  // Generic navigation handler using React Router
   const navigateToStep = (step) => {
-    setCurrentStep(step);
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }, 100);
+    navigate(`/${step}`);
   };
 
   // Handle successful login
@@ -221,16 +252,120 @@ function App() {
       <Header />
 
       <div ref={formRef} className="trip-form">
-        <StepRenderer
-          currentStep={currentStep}
-          userRSVP={userRSVP}
-          formData={formData}
-          updateFormData={updateFormData}
-          pricing={pricing}
-          onEmailSubmit={handleEmailLogin}
-          onLogout={handleLogout}
-          onRSVPContinue={handleRSVPContinue}
-        />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <StepRenderer
+                currentStep={STEPS.LOGIN}
+                userRSVP={userRSVP}
+                formData={formData}
+                updateFormData={updateFormData}
+                pricing={pricing}
+                onEmailSubmit={handleEmailLogin}
+                onLogout={handleLogout}
+                onRSVPContinue={handleRSVPContinue}
+              />
+            }
+          />
+
+          <Route
+            path="/login"
+            element={
+              <StepRenderer
+                currentStep={STEPS.LOGIN}
+                userRSVP={userRSVP}
+                formData={formData}
+                updateFormData={updateFormData}
+                pricing={pricing}
+                onEmailSubmit={handleEmailLogin}
+                onLogout={handleLogout}
+                onRSVPContinue={handleRSVPContinue}
+              />
+            }
+          />
+
+          <Route
+            path="/welcome"
+            element={
+              <StepRenderer
+                currentStep={STEPS.WELCOME}
+                userRSVP={userRSVP}
+                formData={formData}
+                updateFormData={updateFormData}
+                pricing={pricing}
+                onEmailSubmit={handleEmailLogin}
+                onLogout={handleLogout}
+                onRSVPContinue={handleRSVPContinue}
+              />
+            }
+          />
+
+          <Route
+            path="/rsvp"
+            element={
+              <StepRenderer
+                currentStep={STEPS.RSVP}
+                userRSVP={userRSVP}
+                formData={formData}
+                updateFormData={updateFormData}
+                pricing={pricing}
+                onEmailSubmit={handleEmailLogin}
+                onLogout={handleLogout}
+                onRSVPContinue={handleRSVPContinue}
+              />
+            }
+          />
+
+          <Route
+            path="/addons"
+            element={
+              <StepRenderer
+                currentStep={STEPS.ADDONS}
+                userRSVP={userRSVP}
+                formData={formData}
+                updateFormData={updateFormData}
+                pricing={pricing}
+                onEmailSubmit={handleEmailLogin}
+                onLogout={handleLogout}
+                onRSVPContinue={handleRSVPContinue}
+              />
+            }
+          />
+
+          <Route
+            path="/payment"
+            element={
+              <StepRenderer
+                currentStep={STEPS.PAYMENT}
+                userRSVP={userRSVP}
+                formData={formData}
+                updateFormData={updateFormData}
+                pricing={pricing}
+                onEmailSubmit={handleEmailLogin}
+                onLogout={handleLogout}
+                onRSVPContinue={handleRSVPContinue}
+              />
+            }
+          />
+
+          {/* Catch-all route for invalid URLs */}
+          <Route
+            path="*"
+            element={
+              <StepRenderer
+                currentStep={userRSVP ? STEPS.WELCOME : STEPS.LOGIN}
+                userRSVP={userRSVP}
+                formData={formData}
+                updateFormData={updateFormData}
+                pricing={pricing}
+                onEmailSubmit={handleEmailLogin}
+                onLogout={handleLogout}
+                onRSVPContinue={handleRSVPContinue}
+              />
+            }
+          />
+        </Routes>
 
         <StepNavigation
           currentStep={currentStep}
