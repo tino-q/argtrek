@@ -6,6 +6,7 @@ import WelcomeSection from "../layout/WelcomeSection";
 import RSVPDisplay from "../display/RSVPDisplay";
 import AddonsStep from "../form/AddonsStep";
 import PaymentStep from "../form/PaymentStep";
+import PaymentDetailsDisplay from "../display/PaymentDetailsDisplay";
 import { getStepConfig } from "../../utils/stepConfig";
 
 const StepRenderer = ({
@@ -17,6 +18,7 @@ const StepRenderer = ({
   onEmailSubmit,
   onLogout,
   onRSVPContinue,
+  isFormSubmitted,
 }) => {
   const stepConfig = getStepConfig(currentStep);
 
@@ -26,7 +28,7 @@ const StepRenderer = ({
 
   switch (currentStep) {
     case "login":
-      return <EmailLogin onEmailSubmit={onEmailSubmit} />;
+      return <EmailLogin onEmailSubmit={onEmailSubmit} onLogout={onLogout} />;
 
     case "welcome":
       return <WelcomeSection onLogout={onLogout} />;
@@ -60,6 +62,28 @@ const StepRenderer = ({
           updateFormData={updateFormData}
           rsvpData={userRSVP}
           pricing={pricing}
+        />
+      );
+
+    case "payment-details":
+      // Protect payment details - only show if form has been submitted
+      if (!isFormSubmitted) {
+        return (
+          <div className="access-denied">
+            <h2>Access Denied</h2>
+            <p>
+              Payment details are only available after completing your
+              registration.
+            </p>
+          </div>
+        );
+      }
+      return (
+        <PaymentDetailsDisplay
+          rsvpData={userRSVP}
+          formData={formData}
+          pricing={pricing}
+          onLogout={onLogout}
         />
       );
 

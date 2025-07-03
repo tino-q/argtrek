@@ -1,9 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 
-const EmailLogin = ({ onEmailSubmit }) => {
+const EmailLogin = ({ onEmailSubmit, onLogout }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const hasLoggedOut = useRef(false);
+  const location = useLocation();
+  const previousLocation = useRef(location.pathname);
+
+  // Force logout and clear all data when navigating TO login page (not on re-renders)
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const isLoginPage = currentPath === "/login" || currentPath === "/";
+    const isNavigatingToLogin =
+      previousLocation.current !== currentPath && isLoginPage;
+
+    // Clear all data when navigating to login page, regardless of current state
+    if (onLogout && !hasLoggedOut.current && isNavigatingToLogin) {
+      hasLoggedOut.current = true;
+      onLogout();
+    }
+
+    // Update previous location
+    previousLocation.current = currentPath;
+
+    // Reset the flag when component unmounts
+    return () => {
+      hasLoggedOut.current = false;
+    };
+  }, [location.pathname, onLogout]);
 
   // Auto-prefill dev credentials on localhost or 192.x networks
   useEffect(() => {
@@ -13,8 +39,10 @@ const EmailLogin = ({ onEmailSubmit }) => {
       hostname === "127.0.0.1" ||
       hostname.startsWith("192.")
     ) {
-      setEmail("dev@test.com");
-      setPassword("dev123");
+      // setEmail("dev@test.com");
+      // setPassword("dev123");
+      setEmail("solo@gmail.com");
+      setPassword("solo");
     }
   }, []);
 

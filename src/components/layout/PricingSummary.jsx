@@ -38,7 +38,7 @@ const PricingSummary = ({ pricing, formData }) => {
           <div className="summary-row activity-row">
             <span>Private Room Upgrade</span>
             <span>
-              {formatCurrency(pricing.accommodationPrice)}
+              {formatCurrency(pricing.privateRoomUpgrade)}
               <small> (optional)</small>
             </span>
           </div>

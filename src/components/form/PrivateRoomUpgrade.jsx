@@ -7,9 +7,7 @@ import "../../styles/PrivateRoomUpgrade.css";
 
 const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
   // Get private room upgrade price - prioritize formData, then RSVP data, then 0 fallback
-  const upgradePrice =
-    formData[FORM_FIELDS.ACCOMMODATION_UPGRADE_PRICE] ||
-    getPrivateRoomUpgradePrice(rsvpData);
+  const upgradePrice = getPrivateRoomUpgradePrice(rsvpData);
 
   // Extract accommodation information from RSVP data using centralized utility
   const getAccommodations = () => {
@@ -181,14 +179,12 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                           className="roommate-radio"
                         />
                         <span className="radio-checkmark"></span>
-                        <span className="option-text">
-                          I know who I'm sharing with
-                        </span>
+                        <span className="option-text">I'm sharing with</span>
                       </label>
                       {roommatePreference === "know" && (
                         <input
                           type="text"
-                          placeholder="Enter roommate's name"
+                          placeholder="Name"
                           value={roommateName}
                           onChange={handleRoommateNameChange}
                           className="roommate-name-input"
@@ -211,16 +207,15 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                         />
                         <span className="radio-checkmark"></span>
                         <span className="option-text">
-                          Add me to the "seeking a roomie list" - I'll let
-                          Maddie know my roomie name afterwards
+                          Add me to the "find a roommate list"
                         </span>
                       </label>
                       {roommatePreference === "seeking" && (
                         <div className="roommate-help-text">
                           <i className="fas fa-info-circle"></i>
                           <span>
-                            We'll share the list with others seeking roommates
-                            after everyone completes their configuration
+                            Once everyone completes their registration, we'll
+                            share the list with others looking for roommates
                           </span>
                         </div>
                       )}

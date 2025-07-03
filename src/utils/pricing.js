@@ -45,7 +45,7 @@ export const PRICING_CONFIG = {
  * @param {string} period - "Arrival", "Departure" (for Buenos Aires only)
  * @returns {number} Price per night in USD
  */
-export const getAccommodationPrice = (location, period = null) => {
+export const getprivateRoomUpgrade = (location, period = null) => {
   const config = PRICING_CONFIG.accommodations[location];
 
   if (location === "Buenos Aires" && period) {

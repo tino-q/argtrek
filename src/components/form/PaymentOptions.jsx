@@ -1,6 +1,5 @@
 import React from "react";
 import { FORM_FIELDS } from "../../utils/config";
-import { copyToClipboard } from "../../utils/clipboard";
 import { shouldEnforceArgentineCitizenship } from "../../utils/rsvpData";
 import "../../styles/PaymentOptions.css";
 
@@ -17,8 +16,59 @@ const BANK_DETAILS = [
   { label: "Country", value: "Spain" },
 ];
 
+const CRYPTO_WALLETS = {
+  ETH: {
+    USDT: "0x1234567890123456789012345678901234567890",
+    USDC: "0x1234567890123456789012345678901234567890",
+  },
+  ARB: {
+    USDT: "0x1234567890123456789012345678901234567890",
+    USDC: "0x1234567890123456789012345678901234567890",
+  },
+  SOL: {
+    USDT: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    USDC: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+  },
+};
+
+const NETWORK_INFO = {
+  ETH: {
+    name: "Ethereum",
+    symbol: "ETH",
+    color: "#627EEA",
+    icon: "fab fa-ethereum",
+  },
+  ARB: {
+    name: "Arbitrum",
+    symbol: "ARB",
+    color: "#28A0F0",
+    icon: "fas fa-layer-group",
+  },
+  SOL: {
+    name: "Solana",
+    symbol: "SOL",
+    color: "#9945FF",
+    icon: "fas fa-sun",
+  },
+};
+
+const CURRENCY_INFO = {
+  USDT: {
+    name: "Tether USD",
+    symbol: "₮",
+    color: "#26A17B",
+    icon: "fas fa-dollar-sign",
+  },
+  USDC: {
+    name: "USD Coin",
+    symbol: "USDC",
+    color: "#2775CA",
+    icon: "fas fa-coins",
+  },
+};
+
 const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
-  const isBankTransfer = formData[FORM_FIELDS.PAYMENT_METHOD] === "bank";
+  const isCrypto = formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto";
 
   // Check if user should have Argentine citizenship enforced using centralized utility
   const enforcedArgentine = shouldEnforceArgentineCitizenship(rsvpData);
@@ -37,6 +87,16 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
     }
   }, [formData, updateFormData]);
 
+  // Set default Argentine citizenship to false if not already set
+  React.useEffect(() => {
+    if (
+      formData[FORM_FIELDS.ARGENTINE_CITIZEN] === undefined ||
+      formData[FORM_FIELDS.ARGENTINE_CITIZEN] === null
+    ) {
+      updateFormData(FORM_FIELDS.ARGENTINE_CITIZEN, false);
+    }
+  }, [formData, updateFormData]);
+
   // Auto-set Argentine citizenship if enforced
   React.useEffect(() => {
     if (enforcedArgentine && !formData[FORM_FIELDS.ARGENTINE_CITIZEN]) {
@@ -44,18 +104,19 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
     }
   }, [enforcedArgentine, formData, updateFormData]);
 
-  const handleCopyClick = async (value, event) => {
-    const button = event.currentTarget;
-    const success = await copyToClipboard(value);
-
-    if (success) {
-      // Add visual feedback
-      button.classList.add("copied");
-      setTimeout(() => {
-        button.classList.remove("copied");
-      }, 2000);
+  // Set default crypto currency to USDT when crypto is selected
+  React.useEffect(() => {
+    if (isCrypto && !formData[FORM_FIELDS.CRYPTO_CURRENCY]) {
+      updateFormData(FORM_FIELDS.CRYPTO_CURRENCY, "USDT");
     }
-  };
+  }, [isCrypto, formData, updateFormData]);
+
+  // Set default crypto network to ETH when crypto is selected
+  React.useEffect(() => {
+    if (isCrypto && !formData[FORM_FIELDS.CRYPTO_NETWORK]) {
+      updateFormData(FORM_FIELDS.CRYPTO_NETWORK, "ETH");
+    }
+  }, [isCrypto, formData, updateFormData]);
 
   return (
     <section className="form-section">
@@ -143,7 +204,7 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
       {/* Payment Method */}
       <div className="form-group">
         <label className="section-label">Payment Method *</label>
-        <div className="radio-group">
+        <div className="radio-group payment-methods-column">
           <div className="radio-option">
             <input
               type="radio"
@@ -160,7 +221,7 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
               <div className="option-content">
                 <h3>Credit Card</h3>
                 <p className="price">+4% processing fee</p>
-                <p className="description">Secure payment link sent to email</p>
+                <p className="description">Pay through a secure link</p>
               </div>
             </label>
           </div>
@@ -180,86 +241,124 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
             <label htmlFor="bankTransfer">
               <div className="option-content">
                 <h3>Bank Transfer</h3>
-                <p className="price">No additional fees</p>
-                <p className="description">
-                  Revolut recommended for free transfers
+                <p className="price" style={{ whiteSpace: "nowrap" }}>
+                  0% via Revolut
+                  <a
+                    href="https://revolut.com/referral/?referral-code=martin1h7!NOV1AR"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: "var(--primary)",
+                      textDecoration: "underline",
+                      marginLeft: "4px",
+                    }}
+                  >
+                    , sign up!
+                  </a>
                 </p>
+                <p className="description">2% via SWIFT</p>
+              </div>
+            </label>
+          </div>
+
+          <div className="radio-option">
+            <input
+              type="radio"
+              id="crypto"
+              name="paymentMethod"
+              value="crypto"
+              checked={formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto"}
+              onChange={(e) =>
+                updateFormData(FORM_FIELDS.PAYMENT_METHOD, e.target.value)
+              }
+              required
+            />
+            <label htmlFor="crypto">
+              <div className="option-content">
+                <h3>Crypto</h3>
+                <p className="price">0%</p>
+                <p className="description">USDT/USDC on ETH, ARB, or SOLANA</p>
               </div>
             </label>
           </div>
         </div>
       </div>
 
-      {/* Banking Details (Conditional) */}
-      {isBankTransfer && (
+      {/* Crypto Options (Conditional) */}
+      {isCrypto && (
         <div className="form-group">
-          <div className="banking-info">
-            <h3>
-              <i className="fas fa-university"></i> Bank Transfer Details
-            </h3>
-
-            <div className="bank-details">
-              {BANK_DETAILS.map((detail, index) => (
-                <div key={index} className="detail-row">
-                  <span className="label">{detail.label}:</span>
-                  <div className="value-container">
-                    <span className="value">{detail.value}</span>
-                    <button
-                      type="button"
-                      className="copy-btn"
-                      onClick={(e) => handleCopyClick(detail.value, e)}
-                      title="Copy to clipboard"
-                    >
-                      <i className="fas fa-copy"></i>
-                    </button>
+          <div className="crypto-options">
+            {/* Currency Selection */}
+            <div className="form-group">
+              <div className="radio-group crypto-currency-grid">
+                {Object.entries(CURRENCY_INFO).map(([currency, info]) => (
+                  <div key={currency} className="radio-option">
+                    <input
+                      type="radio"
+                      id={`crypto-${currency}`}
+                      name="cryptoCurrency"
+                      value={currency}
+                      checked={
+                        formData[FORM_FIELDS.CRYPTO_CURRENCY] === currency
+                      }
+                      onChange={(e) =>
+                        updateFormData(
+                          FORM_FIELDS.CRYPTO_CURRENCY,
+                          e.target.value
+                        )
+                      }
+                      required
+                    />
+                    <label htmlFor={`crypto-${currency}`}>
+                      <div className="option-content">
+                        <div
+                          className="option-icon"
+                          style={{ color: info.color }}
+                        >
+                          <i className={info.icon}></i>
+                        </div>
+                        <h3>{currency}</h3>
+                        <p className="description">{info.name}</p>
+                      </div>
+                    </label>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            {/* Transfer Instructions */}
-            <div className="transfer-instructions">
-              <h4>
-                <i className="fas fa-exclamation-circle"></i> Important Transfer
-                Instructions
-              </h4>
-              <ul>
-                <li>
-                  <strong>Fee Coverage:</strong> Select the option to cover ALL
-                  transfer fees on your end (often listed as "OUR" in your
-                  bank's transfer settings)
-                </li>
-                <li>
-                  <strong>Reference:</strong> Please include your full name in
-                  the transfer reference
-                </li>
-                <li>
-                  <strong>Note:</strong> Any unaccounted fees will be deducted
-                  from your payment
-                </li>
-              </ul>
-            </div>
-
-            {/* Revolut Recommendation */}
-            <div className="revolut-recommendation">
-              <div className="revolut-highlight">
-                <i className="fas fa-star"></i>
-                <div>
-                  <h4>Recommended: Use Revolut for Free Transfers</h4>
-                  <p>
-                    Transfers between Revolut users are free and instant, even
-                    internationally
-                  </p>
-                  <a
-                    href="https://www.revolut.com/en-US/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="revolut-link"
-                  >
-                    Create Revolut Account{" "}
-                    <i className="fas fa-external-link-alt"></i>
-                  </a>
-                </div>
+            {/* Network Selection */}
+            <div className="form-group">
+              <div className="radio-group crypto-network-grid">
+                {Object.entries(NETWORK_INFO).map(([network, info]) => (
+                  <div key={network} className="radio-option">
+                    <input
+                      type="radio"
+                      id={`network-${network}`}
+                      name="cryptoNetwork"
+                      value={network}
+                      checked={formData[FORM_FIELDS.CRYPTO_NETWORK] === network}
+                      onChange={(e) =>
+                        updateFormData(
+                          FORM_FIELDS.CRYPTO_NETWORK,
+                          e.target.value
+                        )
+                      }
+                      required
+                    />
+                    <label htmlFor={`network-${network}`}>
+                      <div className="option-content">
+                        <div
+                          className="option-icon"
+                          style={{ color: info.color }}
+                        >
+                          <i className={info.icon}></i>
+                        </div>
+                        <h3>{info.name}</h3>
+                        <p className="description">{info.symbol}</p>
+                      </div>
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

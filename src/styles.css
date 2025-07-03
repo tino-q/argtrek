@@ -962,7 +962,7 @@ input[type="checkbox"]:hover {
   background: linear-gradient(135deg, var(--text-primary), var(--text-muted));
   color: white;
   padding: 40px;
-  margin: 40px 0;
+  margin: 40px 0 20px;
   border-radius: 20px;
   box-shadow: 0 20px 40px rgba(45, 55, 72, 0.3);
 }

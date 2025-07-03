@@ -14,6 +14,18 @@ const PaymentStep = ({ formData, updateFormData, rsvpData, pricing }) => {
       />
 
       <PricingSummary pricing={pricing} formData={formData} />
+
+      {/* Information box about change requests */}
+      <div className="change-request-notice">
+        <div className="notice-content">
+          <i className="fas fa-info-circle"></i>
+          <div>
+            <p>
+              Once submitted all change requests must be done through Maddie
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

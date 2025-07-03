@@ -1,59 +1,59 @@
 import { useState } from "react";
-import { FORM_FIELDS } from "../utils/config";
-
-const GOOGLE_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxzlJgU4nNS9iVN6qfRlHD3e-qELz1lo_mU2EPupnoOpU0faBx92I38vYYkF_bos6Sm/exec";
+import { APPS_SCRIPT_URL } from "../utils/config";
 
 /**
  * Custom hook for handling form submission to Google Apps Script
+ * Simplified: Send raw form data, let backend handle all transformations
  */
 export const useFormSubmission = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   /**
-   * Transform form data to match Google Apps Script expected format
+   * Submit form data to Google Apps Script with minimal transformation
+   * Backend will handle all calculations and processing
    */
-  const transformFormData = (formData) => {
-    return {
-      email: formData[FORM_FIELDS.EMAIL],
-      fullName: formData[FORM_FIELDS.FULL_NAME],
-      basePrice: formData[FORM_FIELDS.BASE_PRICE] || 0,
-      roommate: formData[FORM_FIELDS.ROOMMATE] || "",
-      // Individual activity selections (now directly available as booleans)
-      horsebackRiding: Boolean(formData[FORM_FIELDS.HORSEBACK]),
-      cookingClass: Boolean(formData[FORM_FIELDS.COOKING]),
-      rafting: Boolean(formData[FORM_FIELDS.RAFTING]),
-      paymentSchedule: formData[FORM_FIELDS.PAYMENT_SCHEDULE],
-      paymentMethod: formData[FORM_FIELDS.PAYMENT_METHOD],
-      argentineCitizen: formData[FORM_FIELDS.ARGENTINE_CITIZEN],
-    };
-  };
-
-  /**
-   * Submit form data to Google Apps Script using FormData
-   */
-  const submitForm = async (formData) => {
+  const submitForm = async (formData, rsvpData, pricing) => {
     setIsSubmitting(true);
 
-    try {
-      // Transform data to expected format
-      const submissionData = transformFormData(formData);
+    console.log({ rsvpData });
 
-      // Create FormData object
+    try {
+      // Create FormData with raw form inputs + essential RSVP context
       const formDataPayload = new FormData();
 
-      // Append each field to FormData
-      Object.keys(submissionData).forEach((key) => {
-        formDataPayload.append(key, submissionData[key]);
+      // Combine all data using spreading with prefixes
+      const combinedData = {
+        ...Object.fromEntries(
+          Object.entries(formData).map(([key, value]) => [
+            `formData.${key}`,
+            value,
+          ])
+        ),
+        ...Object.fromEntries(
+          Object.entries(pricing).map(([key, value]) => [
+            `pricing.${key}`,
+            value,
+          ])
+        ),
+        ...Object.fromEntries(
+          Object.entries(rsvpData).map(([key, value]) => [
+            `rsvpData.${key}`,
+            value,
+          ])
+        ),
+      };
+
+      // Add all combined data to FormData
+      Object.entries(combinedData).forEach(([key, value]) => {
+        formDataPayload.append(key, value);
       });
 
-      // Submit to Google Apps Script using FormData
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
+      // Submit to Google Apps Script
+      const response = await fetch(APPS_SCRIPT_URL, {
         method: "POST",
-        body: formDataPayload, // No Content-Type header needed for FormData
+        body: formDataPayload,
       });
 
-      // Check if response is ok
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

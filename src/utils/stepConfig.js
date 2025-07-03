@@ -7,6 +7,7 @@ export const STEPS = {
   RSVP: "rsvp",
   ADDONS: "addons",
   PAYMENT: "payment",
+  PAYMENT_DETAILS: "payment-details",
 };
 
 export const STEP_CONFIG = {
@@ -59,6 +60,13 @@ export const STEP_CONFIG = {
     component: "PaymentStep",
     customForward: "SubmitButton",
   },
+  [STEPS.PAYMENT_DETAILS]: {
+    id: "payment-details",
+    showNavigation: false,
+    showBack: false,
+    showForward: false,
+    component: "PaymentDetailsDisplay",
+  },
 };
 
 // Get ordered list of steps
@@ -68,6 +76,7 @@ export const STEP_ORDER = [
   STEPS.RSVP,
   STEPS.ADDONS,
   STEPS.PAYMENT,
+  STEPS.PAYMENT_DETAILS,
 ];
 
 // Helper functions

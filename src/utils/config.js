@@ -1,6 +1,10 @@
 // Configuration and Constants for React App
 // Migrated from original config.js
 
+// Apps Script Configuration
+export const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbyo2LxXwOCiIXSzObrgcjrXutVvdHzpJ8zSpG99JLii6uMcMW-xCMu9FjwVmohSRY29/exec";
+
 // Price Configuration
 export const PRICES = {
   // Base price comes from RSVP data
@@ -79,22 +83,25 @@ export const CONTACTS = [
   },
 ];
 
-// Form Field Names (for consistency)
-// NOTE: Only user selections stored in formData - pricing data comes from rsvpData
+// Form Field Names - Direct 1:1 mapping to backend
 export const FORM_FIELDS = {
   EMAIL: "email",
   FULL_NAME: "fullName",
-  ACCOMMODATION: "accommodation",
+  PRIVATE_ROOM_UPGRADE: "privateRoomUpgrade",
   ROOMMATE: "roommate",
   ROOMMATE_PREFERENCE: "roommatePreference",
   ROOMMATE_NAME: "roommateName",
-  // Individual activity selections (boolean fields)
+  // Activities (sent as-is to backend)
   RAFTING: "rafting",
   HORSEBACK: "horseback",
   COOKING: "cooking",
-  PRIVATE_ROOM_UPGRADE: "privateRoomUpgrade", // Legacy field
-  SEEKING_ROOMMATE: "seekingRoommate",
+  // Payment options
   PAYMENT_SCHEDULE: "paymentSchedule",
   PAYMENT_METHOD: "paymentMethod",
+  CRYPTO_CURRENCY: "cryptoCurrency",
+  CRYPTO_NETWORK: "cryptoNetwork",
   ARGENTINE_CITIZEN: "argentineCitizen",
+  // Dietary preferences
+  DIETARY_RESTRICTIONS: "dietaryRestrictions",
+  DIETARY_MESSAGE: "dietaryMessage",
 };

@@ -6,7 +6,7 @@ const SafeSubmitButton = ({
   disabled = false,
   children,
   className = "submit-btn",
-  confirmText = "You can only submit once, sure?",
+  confirmText = "You can only submit once, continue?",
   confirmDuration = 3000,
 }) => {
   const [isConfirming, setIsConfirming] = useState(false);

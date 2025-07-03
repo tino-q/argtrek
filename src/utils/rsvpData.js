@@ -7,36 +7,38 @@
  */
 export const RSVP_FIELDS = {
   // Personal Information
-  TRAVELER_NAME:
-    "Please write your name exactly as it appears on the ID you'll be traveling with.",
-  PLUS_ONE_NAME:
-    "If traveling with plus one - Please write the name exactly as it appears on the ID of your plus one.",
-  EMAIL: "Email (for all trip-related updates and communications)",
+  TRAVELER_NAME: "name",
+  PLUS_ONE_NAME: "plus1",
+  EMAIL: "email",
   PASSWORD: "PASSWORD",
 
   // Pricing
-  PACK_PRICE: "PACK PRICE",
-  PRIVATE_ROOM_UPGRADE: "PRIVATE ROOM UPGRADE",
-  IVA_ALOJ: "IVA ALOJ",
-  CHECKED_LUGGAGE: "VALIJA DESPACHADA",
+  PACK_PRICE: "PACKPRICE",
+  PRIVATE_ROOM_UPGRADE: "PRIVATEROOM",
+  IVA_ALOJ: "IVAALOJ",
+  CHECKED_LUGGAGE: "VALIJA",
 
   // Trip Configuration
-  TRAVEL_TYPE: "Are you traveling solo or with a plus one?",
+  TRIP_OPTION: "option",
+  PARTY_SIZE: "party",
+  COMMENTS: "comments",
+  EMAIL2: "email2",
+  SCORE: "Score",
 
   // Accommodation Dates
-  NOV_22: "22 NOV",
-  NOV_23: "23 NOV",
-  NOV_24: "24 NOV",
-  NOV_25: "25 NOV",
-  NOV_26: "26 NOV",
-  NOV_27: "27 NOV",
-  NOV_28: "28 NOV",
-  NOV_29: "29 NOV",
+  NOV_22: "22Nov",
+  NOV_23: "23Nov",
+  NOV_24: "24Nov",
+  NOV_25: "25Nov",
+  NOV_26: "26Nov",
+  NOV_27: "27Nov",
+  NOV_28: "28Nov",
+  NOV_29: "29Nov",
 
   // Flights
-  FLIGHT_AEP_BRC: "JA3045 AEP - BRC",
-  FLIGHT_BRC_MDZ: "JA3725 BRC MDZ",
-  FLIGHT_MDZ_AEP: "JA3073 MDZ AEP",
+  FLIGHT_AEP_BRC: "JA3045AEP-BRC",
+  FLIGHT_BRC_MDZ: "JA3725BRC-MDZ",
+  FLIGHT_MDZ_AEP: "JA3073MDZ-AEP",
 };
 
 /**
@@ -115,8 +117,11 @@ export const getCheckedLuggagePrice = (rsvpData) => {
 export const isSoloTraveler = (rsvpData) => {
   if (!rsvpData) return false;
 
-  const travelType = rsvpData[RSVP_FIELDS.TRAVEL_TYPE];
-  return travelType === "Solo";
+  // Check if party size is 1 or if plus1 is empty/null
+  const partySize = rsvpData[RSVP_FIELDS.PARTY_SIZE];
+  const plusOne = rsvpData[RSVP_FIELDS.PLUS_ONE_NAME];
+
+  return partySize === 1 || !plusOne || plusOne.trim() === "";
 };
 
 /**
@@ -163,7 +168,7 @@ export const getIncludedAccommodations = (rsvpData) => {
       hotelName: "Hotel Madero Buenos Aires",
       address: "Rosario Vera Peñaloza 360, Puerto Madero, Buenos Aires",
       nights: buenosAiresArrival.map((field) => {
-        const date = field.split(" ")[0]; // Extract "22" from "22 NOV"
+        const date = field.replace("Nov", ""); // Extract "22" from "22Nov"
         return `Nov ${date}`;
       }),
     });
@@ -177,7 +182,7 @@ export const getIncludedAccommodations = (rsvpData) => {
       hotelName: "Llao Llao Hotel & Resort",
       address: "Av. Bustillo Km 25, San Carlos de Bariloche, Río Negro",
       nights: bariloche.map((field) => {
-        const date = field.split(" ")[0];
+        const date = field.replace("Nov", "");
         return `Nov ${date}`;
       }),
     });
@@ -191,7 +196,7 @@ export const getIncludedAccommodations = (rsvpData) => {
       hotelName: "Park Hyatt Mendoza",
       address: "Chile 1124, M5500 Mendoza, Argentina",
       nights: mendoza.map((field) => {
-        const date = field.split(" ")[0];
+        const date = field.replace("Nov", "");
         return `Nov ${date}`;
       }),
     });
@@ -219,76 +224,141 @@ export const getIncludedAccommodations = (rsvpData) => {
  * Get all excluded accommodations with their nights
  */
 export const getExcludedAccommodations = (rsvpData) => {
-  if (!rsvpData) return [];
+  console.log("🔍 getExcludedAccommodations called with:", rsvpData);
+
+  if (!rsvpData) {
+    console.log("❌ No rsvpData provided, returning empty array");
+    return [];
+  }
 
   const accommodations = [];
+  console.log("📋 Starting accommodation exclusion check...");
 
   // Buenos Aires - Arrival (Nov 22-23)
-  const buenosAiresArrivalExcluded = [
-    RSVP_FIELDS.NOV_22,
-    RSVP_FIELDS.NOV_23,
-  ].filter((field) => rsvpData[field] === false);
+  const buenosAiresArrivalFields = [RSVP_FIELDS.NOV_22, RSVP_FIELDS.NOV_23];
+  console.log(
+    "🏨 Buenos Aires arrival fields to check:",
+    buenosAiresArrivalFields
+  );
+  console.log(
+    "🏨 Buenos Aires arrival values:",
+    buenosAiresArrivalFields.map((field) => ({
+      field,
+      value: rsvpData[field],
+    }))
+  );
+
+  const buenosAiresArrivalExcluded = buenosAiresArrivalFields.filter(
+    (field) => rsvpData[field] === false
+  );
+  console.log(
+    "🏨 Buenos Aires arrival excluded nights:",
+    buenosAiresArrivalExcluded
+  );
 
   if (buenosAiresArrivalExcluded.length > 0) {
-    accommodations.push({
+    const baArrivalAccommodation = {
       location: "Buenos Aires",
       period: "arrival",
       hotelName: "Hotel Madero Buenos Aires",
       address: "Rosario Vera Peñaloza 360, Puerto Madero, Buenos Aires",
       nights: buenosAiresArrivalExcluded.map((field) => {
-        const date = field.split(" ")[0]; // Extract "22" from "22 NOV"
+        const date = field.replace("Nov", ""); // Extract "22" from "22Nov"
         return `Nov ${date}`;
       }),
-    });
+    };
+    console.log(
+      "✅ Adding Buenos Aires arrival accommodation:",
+      baArrivalAccommodation
+    );
+    accommodations.push(baArrivalAccommodation);
   }
 
   // Bariloche (Nov 24-26)
-  const barilocheExcluded = [
+  const barilocheFields = [
     RSVP_FIELDS.NOV_24,
     RSVP_FIELDS.NOV_25,
     RSVP_FIELDS.NOV_26,
-  ].filter((field) => rsvpData[field] === false);
+  ];
+  console.log("🏔️ Bariloche fields to check:", barilocheFields);
+  console.log(
+    "🏔️ Bariloche values:",
+    barilocheFields.map((field) => ({
+      field,
+      value: rsvpData[field],
+    }))
+  );
+
+  const barilocheExcluded = barilocheFields.filter(
+    (field) => rsvpData[field] === false
+  );
+  console.log("🏔️ Bariloche excluded nights:", barilocheExcluded);
 
   if (barilocheExcluded.length > 0) {
-    accommodations.push({
+    const barilocheAccommodation = {
       location: "Bariloche",
       hotelName: "Llao Llao Hotel & Resort",
       address: "Av. Bustillo Km 25, San Carlos de Bariloche, Río Negro",
       nights: barilocheExcluded.map((field) => {
-        const date = field.split(" ")[0];
+        const date = field.replace("Nov", "");
         return `Nov ${date}`;
       }),
-    });
+    };
+    console.log("✅ Adding Bariloche accommodation:", barilocheAccommodation);
+    accommodations.push(barilocheAccommodation);
   }
 
   // Mendoza (Nov 27-28)
-  const mendozaExcluded = [RSVP_FIELDS.NOV_27, RSVP_FIELDS.NOV_28].filter(
-    (field) => rsvpData[field] === false
+  const mendozaFields = [RSVP_FIELDS.NOV_27, RSVP_FIELDS.NOV_28];
+  console.log("🍷 Mendoza fields to check:", mendozaFields);
+  console.log(
+    "🍷 Mendoza values:",
+    mendozaFields.map((field) => ({
+      field,
+      value: rsvpData[field],
+    }))
   );
 
+  const mendozaExcluded = mendozaFields.filter(
+    (field) => rsvpData[field] === false
+  );
+  console.log("🍷 Mendoza excluded nights:", mendozaExcluded);
+
   if (mendozaExcluded.length > 0) {
-    accommodations.push({
+    const mendozaAccommodation = {
       location: "Mendoza",
       hotelName: "Park Hyatt Mendoza",
       address: "Chile 1124, M5500 Mendoza, Argentina",
       nights: mendozaExcluded.map((field) => {
-        const date = field.split(" ")[0];
+        const date = field.replace("Nov", "");
         return `Nov ${date}`;
       }),
-    });
+    };
+    console.log("✅ Adding Mendoza accommodation:", mendozaAccommodation);
+    accommodations.push(mendozaAccommodation);
   }
 
   // Buenos Aires - Departure (Nov 29)
+  console.log("🏨 Buenos Aires departure field to check:", RSVP_FIELDS.NOV_29);
+  console.log("🏨 Buenos Aires departure value:", rsvpData[RSVP_FIELDS.NOV_29]);
+
   if (rsvpData[RSVP_FIELDS.NOV_29] === false) {
-    accommodations.push({
+    const baDepartureAccommodation = {
       location: "Buenos Aires",
       period: "departure",
       hotelName: "Hotel Madero Buenos Aires",
       address: "Rosario Vera Peñaloza 360, Puerto Madero, Buenos Aires",
       nights: ["Nov 29"],
-    });
+    };
+    console.log(
+      "✅ Adding Buenos Aires departure accommodation:",
+      baDepartureAccommodation
+    );
+    accommodations.push(baDepartureAccommodation);
   }
 
+  console.log("📊 Final excluded accommodations array:", accommodations);
+  console.log("📊 Total excluded accommodations:", accommodations.length);
   return accommodations;
 };
 

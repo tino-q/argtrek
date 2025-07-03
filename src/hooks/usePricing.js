@@ -1,5 +1,5 @@
-// Pricing Hook for React App
-// Unified pricing calculator using rsvpData (readonly) + formData (user selections)
+// Pricing Hook for React App - DISPLAY ONLY
+// Shows pricing preview to user, but all actual calculations happen in backend
 
 import { useState, useEffect } from "react";
 import { FORM_FIELDS, ACTIVITIES } from "../utils/config";
@@ -13,7 +13,7 @@ import {
 export const usePricing = (rsvpData, formData) => {
   const [pricing, setPricing] = useState({
     basePrice: 0,
-    accommodationPrice: 0,
+    privateRoomUpgrade: 0,
     activitiesPrice: 0,
     vatAmount: 0,
     subtotal: 0,
@@ -43,9 +43,9 @@ export const usePricing = (rsvpData, formData) => {
       const wantsCheckedLuggage = formData.luggage?.checked;
 
       // === CALCULATE ACCOMMODATION PRICE ===
-      let accommodationPrice = 0;
+      let privateRoomUpgrade = 0;
       if (accommodationChoice === "private") {
-        accommodationPrice = getPrivateRoomUpgradePrice(rsvpData);
+        privateRoomUpgrade = getPrivateRoomUpgradePrice(rsvpData);
       }
 
       // === CALCULATE ACTIVITIES PRICE ===
@@ -87,7 +87,7 @@ export const usePricing = (rsvpData, formData) => {
       }
 
       // === CALCULATE SUBTOTAL ===
-      const subtotal = basePrice + accommodationPrice + activitiesPrice;
+      const subtotal = basePrice + privateRoomUpgrade + activitiesPrice;
 
       // === CALCULATE PROCESSING FEE ===
       // Apply processing fee to (subtotal + VAT)
@@ -104,7 +104,7 @@ export const usePricing = (rsvpData, formData) => {
 
       setPricing({
         basePrice,
-        accommodationPrice,
+        privateRoomUpgrade,
         activitiesPrice,
         vatAmount,
         subtotal,

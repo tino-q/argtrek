@@ -175,6 +175,16 @@ const RSVPDisplay = ({
     true
   );
 
+  console.log({
+    accommodations: excludedServices.accommodations,
+    flights: excludedServices.flights,
+    createChronologicalServicesValue: createChronologicalServices(
+      excludedServices.accommodations,
+      excludedServices.flights,
+      false
+    ),
+  });
+
   const excludedProcessedServices = createChronologicalServices(
     excludedServices.accommodations,
     excludedServices.flights,
@@ -512,35 +522,34 @@ const RSVPDisplay = ({
         </div>
 
         {/* Checked Luggage - Optional addon */}
-        {checkedLuggagePrice && (
-          <div
-            className={`luggage-addon-card ${isLuggageSelected ? "selected" : ""}`}
-            onClick={handleLuggageToggle}
-            style={{ cursor: "pointer" }}
-          >
-            <div className="luggage-checkbox">
-              <input
-                type="checkbox"
-                checked={isLuggageSelected}
-                onChange={() => {}} // Handled by card click
-                style={{ pointerEvents: "none" }}
-              />
-            </div>
-            <div className="luggage-icon">
-              <i className={LUGGAGE.checked.icon}></i>
-            </div>
-            <div className="luggage-details">
-              <div className="luggage-title">{LUGGAGE.checked.name}</div>
-              <div className="luggage-description">
-                {LUGGAGE.checked.description} (max {LUGGAGE.checked.maxWeight})
-              </div>
-            </div>
-            <div className="luggage-price">
-              <span className="price-amount">${checkedLuggagePrice}</span>
-              <span className="price-currency">USD</span>
+
+        <div
+          className={`luggage-addon-card ${isLuggageSelected ? "selected" : ""}`}
+          onClick={handleLuggageToggle}
+          style={{ cursor: "pointer" }}
+        >
+          <div className="luggage-checkbox">
+            <input
+              type="checkbox"
+              checked={isLuggageSelected}
+              onChange={() => {}} // Handled by card click
+              style={{ pointerEvents: "none" }}
+            />
+          </div>
+          <div className="luggage-icon">
+            <i className={LUGGAGE.checked.icon}></i>
+          </div>
+          <div className="luggage-details">
+            <div className="luggage-title">{LUGGAGE.checked.name}</div>
+            <div className="luggage-description">
+              {LUGGAGE.checked.description} (max {LUGGAGE.checked.maxWeight})
             </div>
           </div>
-        )}
+          <div className="luggage-price">
+            <span className="price-amount">${checkedLuggagePrice}</span>
+            <span className="price-currency">USD</span>
+          </div>
+        </div>
       </div>
 
       {/* Navigation Buttons - Only show if hideNavigation is false */}

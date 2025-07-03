@@ -8,7 +8,7 @@ import { injectAnimationStyles } from "./hooks/useAnimations";
 import { usePricing } from "./hooks/usePricing";
 import { useFormSubmission } from "./hooks/useFormSubmission";
 import { useRouteProtection } from "./hooks/useRouteProtection";
-import { FORM_FIELDS } from "./utils/config";
+import { FORM_FIELDS, APPS_SCRIPT_URL } from "./utils/config";
 import { getEmail, getTravelerName } from "./utils/rsvpData";
 
 // Import components
@@ -20,9 +20,32 @@ import Footer from "./components/layout/Footer";
 import { STEPS } from "./utils/stepConfig";
 
 function App() {
-  // Application state
+  // Get default form data state
+  const getDefaultFormData = () => {
+    return {
+      [FORM_FIELDS.PAYMENT_SCHEDULE]: "full",
+      [FORM_FIELDS.PAYMENT_METHOD]: "credit",
+      [FORM_FIELDS.ARGENTINE_CITIZEN]: false,
+      [FORM_FIELDS.DIETARY_RESTRICTIONS]: "none",
+      [FORM_FIELDS.PRIVATE_ROOM_UPGRADE]: false, // Default to shared room
+      [FORM_FIELDS.RAFTING]: false,
+      [FORM_FIELDS.HORSEBACK]: false,
+      [FORM_FIELDS.COOKING]: false,
+      [FORM_FIELDS.CRYPTO_CURRENCY]: "USDT",
+      [FORM_FIELDS.CRYPTO_NETWORK]: "ETH",
+      [FORM_FIELDS.ROOMMATE]: "",
+      [FORM_FIELDS.ROOMMATE_PREFERENCE]: "",
+      [FORM_FIELDS.ROOMMATE_NAME]: "",
+      [FORM_FIELDS.DIETARY_MESSAGE]: "",
+      [FORM_FIELDS.EMAIL]: "",
+      [FORM_FIELDS.FULL_NAME]: "",
+    };
+  };
+
+  // Application state - Simple initialization without localStorage
   const [userRSVP, setUserRSVP] = useState(null);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(getDefaultFormData());
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
   // React Router hooks
   const navigate = useNavigate();
@@ -35,7 +58,8 @@ function App() {
   const { submitForm, isSubmitting } = useFormSubmission();
 
   // Route protection (automatically handles redirects)
-  useRouteProtection(userRSVP);
+  const { isAuthorized, currentStep: protectedCurrentStep } =
+    useRouteProtection(userRSVP, isFormSubmitted);
 
   // Form reference for validation feedback
   const formRef = useRef(null);
@@ -66,6 +90,7 @@ function App() {
       [STEPS.RSVP]: "Trip Details - Argentina Trek",
       [STEPS.ADDONS]: "Select Experiences - Argentina Trek",
       [STEPS.PAYMENT]: "Payment - Argentina Trek",
+      [STEPS.PAYMENT_DETAILS]: "Payment Details - Argentina Trek",
     };
 
     document.title = stepTitles[currentStep] || "Argentina Trek";
@@ -86,58 +111,9 @@ function App() {
   // Handle email and password login submission
   const handleEmailLogin = async (email, password) => {
     try {
-      // Development bypass for localhost and local networks
-      const hostname = window.location.hostname;
-      if (
-        hostname === "localhost" ||
-        hostname === "127.0.0.1" ||
-        hostname.startsWith("192.")
-      ) {
-        if (email === "dev@test.com" && password === "dev123") {
-          const mockUserData = {
-            "Please write your name exactly as it appears on the ID you'll be traveling with.":
-              "Development User",
-            "If traveling with plus one - Please write the name exactly as it appears on the ID of your plus one.":
-              "",
-            "Email (for all trip-related updates and communications)":
-              "dev@test.com",
-            "PACK PRICE": 2250,
-            "PRIVATE ROOM UPGRADE": 350,
-            "IVA ALOJ": 120,
-            "22 NOV": true,
-            "23 NOV": true,
-            "24 NOV": true,
-            "25 NOV": true,
-            "26 NOV": true,
-            "27 NOV": true,
-            "28 NOV": true,
-            "29 NOV": true,
-            "JA3045 AEP - BRC": true,
-            "JA3725 BRC MDZ": true,
-            "JA3073 MDZ AEP": true,
-            "Are you traveling solo or with a plus one?": "Solo",
-            "VALIJA DESPACHADA": 69,
-          };
-
-          console.log("🚀 DEVELOPMENT BYPASS - Mock User Data:");
-          console.log("==========================================");
-          console.table(mockUserData);
-          console.log("==========================================");
-
-          handleLoginSuccess(
-            mockUserData,
-            "Development user logged in successfully!"
-          );
-          return;
-        }
-      }
-
       // Make GET request to RSVP Apps Script
-      const RSVP_SCRIPT_URL =
-        "https://script.google.com/macros/s/AKfycbwDS4eNkjF_ESiThcPyJUDxsJw7H2twEUVoHjjSzX_ZfPSugbReLiLUg22R11bCgJJFSw/exec";
-
       const response = await fetch(
-        `${RSVP_SCRIPT_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
+        `${APPS_SCRIPT_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
         {
           method: "GET",
         }
@@ -210,11 +186,11 @@ function App() {
         return;
       }
 
-      // Add user info from RSVP data to form data using centralized utility
+      // Create submission data with user info from RSVP (simplified 1:1 mapping)
       const submissionData = {
         ...formData,
-        [FORM_FIELDS.EMAIL]: getEmail(userRSVP),
-        [FORM_FIELDS.FULL_NAME]: getTravelerName(userRSVP),
+        email: getEmail(userRSVP),
+        fullName: getTravelerName(userRSVP),
       };
 
       console.log("🚀 SUBMITTING FORM DATA:");
@@ -223,11 +199,19 @@ function App() {
       console.log("Raw form data:", JSON.stringify(submissionData, null, 2));
       console.log("========================");
 
-      const result = await submitForm(submissionData);
+      const result = await submitForm(submissionData, userRSVP, pricing);
 
       if (result.success) {
-        showSuccess(result.message, result.options);
-        // Could redirect or show success state here
+        // Mark form as submitted and navigate to payment details
+        setIsFormSubmitted(true);
+        navigateToStep(STEPS.PAYMENT_DETAILS);
+        showSuccess(
+          "Registration confirmed! Check your payment details below.",
+          {
+            duration: 3000,
+            autoClose: true,
+          }
+        );
       } else {
         showError(result.message, result.options);
       }
@@ -241,140 +225,193 @@ function App() {
   const handleLogout = () => {
     navigateToStep(STEPS.LOGIN);
     setUserRSVP(null);
-    setFormData({});
+    setFormData(getDefaultFormData()); // Reset to default form state
+    setIsFormSubmitted(false);
+
     showSuccess(
       "Logged out successfully. You can now login with different credentials."
     );
   };
+
+  // Block rendering of protected content if not authorized
+  const shouldBlockRender =
+    !isAuthorized && protectedCurrentStep !== STEPS.LOGIN;
 
   return (
     <div className="container">
       <Header />
 
       <div ref={formRef} className="trip-form">
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <StepRenderer
-                currentStep={STEPS.LOGIN}
-                userRSVP={userRSVP}
-                formData={formData}
-                updateFormData={updateFormData}
-                pricing={pricing}
-                onEmailSubmit={handleEmailLogin}
-                onLogout={handleLogout}
-                onRSVPContinue={handleRSVPContinue}
-              />
-            }
-          />
+        {shouldBlockRender ? (
+          // Show loading while redirect happens
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "200px",
+              color: "#666",
+            }}
+          >
+            <div>
+              <i
+                className="fas fa-spinner fa-spin"
+                style={{ marginRight: "8px" }}
+              ></i>
+              Redirecting to login...
+            </div>
+          </div>
+        ) : (
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <StepRenderer
+                  currentStep={STEPS.LOGIN}
+                  userRSVP={userRSVP}
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  pricing={pricing}
+                  onEmailSubmit={handleEmailLogin}
+                  onLogout={handleLogout}
+                  onRSVPContinue={handleRSVPContinue}
+                  isFormSubmitted={isFormSubmitted}
+                />
+              }
+            />
 
-          <Route
-            path="/login"
-            element={
-              <StepRenderer
-                currentStep={STEPS.LOGIN}
-                userRSVP={userRSVP}
-                formData={formData}
-                updateFormData={updateFormData}
-                pricing={pricing}
-                onEmailSubmit={handleEmailLogin}
-                onLogout={handleLogout}
-                onRSVPContinue={handleRSVPContinue}
-              />
-            }
-          />
+            <Route
+              path="/login"
+              element={
+                <StepRenderer
+                  currentStep={STEPS.LOGIN}
+                  userRSVP={userRSVP}
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  pricing={pricing}
+                  onEmailSubmit={handleEmailLogin}
+                  onLogout={handleLogout}
+                  onRSVPContinue={handleRSVPContinue}
+                  isFormSubmitted={isFormSubmitted}
+                />
+              }
+            />
 
-          <Route
-            path="/welcome"
-            element={
-              <StepRenderer
-                currentStep={STEPS.WELCOME}
-                userRSVP={userRSVP}
-                formData={formData}
-                updateFormData={updateFormData}
-                pricing={pricing}
-                onEmailSubmit={handleEmailLogin}
-                onLogout={handleLogout}
-                onRSVPContinue={handleRSVPContinue}
-              />
-            }
-          />
+            <Route
+              path="/welcome"
+              element={
+                <StepRenderer
+                  currentStep={STEPS.WELCOME}
+                  userRSVP={userRSVP}
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  pricing={pricing}
+                  onEmailSubmit={handleEmailLogin}
+                  onLogout={handleLogout}
+                  onRSVPContinue={handleRSVPContinue}
+                  isFormSubmitted={isFormSubmitted}
+                />
+              }
+            />
 
-          <Route
-            path="/rsvp"
-            element={
-              <StepRenderer
-                currentStep={STEPS.RSVP}
-                userRSVP={userRSVP}
-                formData={formData}
-                updateFormData={updateFormData}
-                pricing={pricing}
-                onEmailSubmit={handleEmailLogin}
-                onLogout={handleLogout}
-                onRSVPContinue={handleRSVPContinue}
-              />
-            }
-          />
+            <Route
+              path="/rsvp"
+              element={
+                <StepRenderer
+                  currentStep={STEPS.RSVP}
+                  userRSVP={userRSVP}
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  pricing={pricing}
+                  onEmailSubmit={handleEmailLogin}
+                  onLogout={handleLogout}
+                  onRSVPContinue={handleRSVPContinue}
+                  isFormSubmitted={isFormSubmitted}
+                />
+              }
+            />
 
-          <Route
-            path="/addons"
-            element={
-              <StepRenderer
-                currentStep={STEPS.ADDONS}
-                userRSVP={userRSVP}
-                formData={formData}
-                updateFormData={updateFormData}
-                pricing={pricing}
-                onEmailSubmit={handleEmailLogin}
-                onLogout={handleLogout}
-                onRSVPContinue={handleRSVPContinue}
-              />
-            }
-          />
+            <Route
+              path="/addons"
+              element={
+                <StepRenderer
+                  currentStep={STEPS.ADDONS}
+                  userRSVP={userRSVP}
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  pricing={pricing}
+                  onEmailSubmit={handleEmailLogin}
+                  onLogout={handleLogout}
+                  onRSVPContinue={handleRSVPContinue}
+                  isFormSubmitted={isFormSubmitted}
+                />
+              }
+            />
 
-          <Route
-            path="/payment"
-            element={
-              <StepRenderer
-                currentStep={STEPS.PAYMENT}
-                userRSVP={userRSVP}
-                formData={formData}
-                updateFormData={updateFormData}
-                pricing={pricing}
-                onEmailSubmit={handleEmailLogin}
-                onLogout={handleLogout}
-                onRSVPContinue={handleRSVPContinue}
-              />
-            }
-          />
+            <Route
+              path="/payment"
+              element={
+                <StepRenderer
+                  currentStep={STEPS.PAYMENT}
+                  userRSVP={userRSVP}
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  pricing={pricing}
+                  onEmailSubmit={handleEmailLogin}
+                  onLogout={handleLogout}
+                  onRSVPContinue={handleRSVPContinue}
+                  isFormSubmitted={isFormSubmitted}
+                />
+              }
+            />
 
-          {/* Catch-all route for invalid URLs */}
-          <Route
-            path="*"
-            element={
-              <StepRenderer
-                currentStep={userRSVP ? STEPS.WELCOME : STEPS.LOGIN}
-                userRSVP={userRSVP}
-                formData={formData}
-                updateFormData={updateFormData}
-                pricing={pricing}
-                onEmailSubmit={handleEmailLogin}
-                onLogout={handleLogout}
-                onRSVPContinue={handleRSVPContinue}
-              />
-            }
-          />
-        </Routes>
+            <Route
+              path="/payment-details"
+              element={
+                <StepRenderer
+                  currentStep={STEPS.PAYMENT_DETAILS}
+                  userRSVP={userRSVP}
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  pricing={pricing}
+                  onEmailSubmit={handleEmailLogin}
+                  onLogout={handleLogout}
+                  onRSVPContinue={handleRSVPContinue}
+                  isFormSubmitted={isFormSubmitted}
+                />
+              }
+            />
 
-        <StepNavigation
-          currentStep={currentStep}
-          onNavigate={navigateToStep}
-          onSubmit={handleSubmitForm}
-          isSubmitting={isSubmitting}
-          formData={formData}
-          showError={showError}
-        />
+            {/* Catch-all route for invalid URLs */}
+            <Route
+              path="*"
+              element={
+                <StepRenderer
+                  currentStep={userRSVP ? STEPS.WELCOME : STEPS.LOGIN}
+                  userRSVP={userRSVP}
+                  formData={formData}
+                  updateFormData={updateFormData}
+                  pricing={pricing}
+                  onEmailSubmit={handleEmailLogin}
+                  onLogout={handleLogout}
+                  onRSVPContinue={handleRSVPContinue}
+                  isFormSubmitted={isFormSubmitted}
+                />
+              }
+            />
+          </Routes>
+        )}
+
+        {!shouldBlockRender && (
+          <StepNavigation
+            currentStep={currentStep}
+            onNavigate={navigateToStep}
+            onSubmit={handleSubmitForm}
+            isSubmitting={isSubmitting}
+            formData={formData}
+            showError={showError}
+          />
+        )}
       </div>
 
       <NotificationContainer

@@ -1,7 +1,7 @@
 import { FORM_FIELDS } from "../../utils/config";
 
 const AccommodationSelector = ({ formData, updateFormData }) => {
-  const isSharedRoom = formData[FORM_FIELDS.ACCOMMODATION] === "0";
+  const isSharedRoom = !formData[FORM_FIELDS.PRIVATE_ROOM_UPGRADE];
 
   return (
     <section className="form-section">
@@ -18,10 +18,10 @@ const AccommodationSelector = ({ formData, updateFormData }) => {
               type="radio"
               id="privateRoom"
               name="accommodation"
-              value="private"
-              checked={formData[FORM_FIELDS.ACCOMMODATION] === "private"}
+              value={true}
+              checked={formData[FORM_FIELDS.PRIVATE_ROOM_UPGRADE]}
               onChange={(e) =>
-                updateFormData(FORM_FIELDS.ACCOMMODATION, e.target.value)
+                updateFormData(FORM_FIELDS.PRIVATE_ROOM_UPGRADE, e.target.value)
               }
               required
             />
@@ -41,10 +41,10 @@ const AccommodationSelector = ({ formData, updateFormData }) => {
               type="radio"
               id="sharedRoom"
               name="accommodation"
-              value="0"
-              checked={formData[FORM_FIELDS.ACCOMMODATION] === "0"}
+              value={false}
+              checked={isSharedRoom}
               onChange={(e) =>
-                updateFormData(FORM_FIELDS.ACCOMMODATION, e.target.value)
+                updateFormData(FORM_FIELDS.PRIVATE_ROOM_UPGRADE, e.target.value)
               }
               required
             />

@@ -45,7 +45,7 @@ Field Name         | Data Type | Description                                 | R
 Field Name           | Data Type | Description                                                                                         | Required
 -------------------- | --------- | --------------------------------------------------------------------------------------------------- | --------
 `basePrice`          | Number    | Base trip price (2250 or 2600 USD)                                                                  | Yes
-`accommodationPrice` | Number    | Additional accommodation cost (0 or 350 USD)                                                        | Yes
+`privateRoomUpgrade` | Number    | Additional accommodation cost (0 or 350 USD)                                                        | Yes
 `activitiesPrice`    | Number    | Total cost of selected activities                                                                   | Yes
 `subtotal`           | Number    | Base + accommodation + activities                                                                   | Yes
 `processingFee`      | Number    | Credit card processing fee (4% if credit card)                                                      | Yes

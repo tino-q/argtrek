@@ -3,6 +3,7 @@
 
 import ActivitySelection from "./ActivitySelection";
 import PrivateRoomUpgrade from "./PrivateRoomUpgrade";
+import DietaryOptions from "./DietaryOptions";
 import { isSoloTraveler } from "../../utils/rsvpData";
 
 const AddonsStep = ({ formData, updateFormData, rsvpData }) => {
@@ -20,6 +21,8 @@ const AddonsStep = ({ formData, updateFormData, rsvpData }) => {
           rsvpData={rsvpData}
         />
       )}
+
+      <DietaryOptions formData={formData} updateFormData={updateFormData} />
     </div>
   );
 };
