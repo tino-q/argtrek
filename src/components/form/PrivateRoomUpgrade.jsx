@@ -77,6 +77,47 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
       </p>
 
       <div className="room-options-container">
+        {/* Private Room Upgrade Option */}
+        <div
+          className={`room-option-card ${hasPrivateRoomUpgrade ? "room-selected" : ""}`}
+          onClick={() => handleRoomSelection(true)}
+          style={{ cursor: "pointer" }}
+        >
+          <div className="room-option-content">
+            <div className="room-option-header">
+              <div className="radio-container">
+                <input
+                  type="radio"
+                  id="privateRoom"
+                  name="roomType"
+                  checked={hasPrivateRoomUpgrade}
+                  onChange={() => handleRoomSelection(true)}
+                  className="room-radio"
+                />
+                <label htmlFor="privateRoom" className="radio-label"></label>
+              </div>
+              <div className="option-info">
+                <i className="fas fa-crown"></i>
+                <h3>Private Room Upgrade</h3>
+              </div>
+            </div>
+            <div className="room-option-details">
+              <div className="room-description">
+                <p>Get your own private room in:</p>
+                <ul>
+                  {accommodations.map((accommodation, index) => (
+                    <li key={index}>{accommodation}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="room-price">
+                <span className="price-label">Upgrade Price:</span>
+                <span className="price-amount">+${upgradePrice} USD</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Shared Room Option (Default) */}
         <div
           className={`room-option-card ${!hasPrivateRoomUpgrade ? "room-selected" : ""}`}
@@ -190,47 +231,6 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
               <div className="room-price">
                 <span className="price-label">Price:</span>
                 <span className="price-amount">Included</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Private Room Upgrade Option */}
-        <div
-          className={`room-option-card ${hasPrivateRoomUpgrade ? "room-selected" : ""}`}
-          onClick={() => handleRoomSelection(true)}
-          style={{ cursor: "pointer" }}
-        >
-          <div className="room-option-content">
-            <div className="room-option-header">
-              <div className="radio-container">
-                <input
-                  type="radio"
-                  id="privateRoom"
-                  name="roomType"
-                  checked={hasPrivateRoomUpgrade}
-                  onChange={() => handleRoomSelection(true)}
-                  className="room-radio"
-                />
-                <label htmlFor="privateRoom" className="radio-label"></label>
-              </div>
-              <div className="option-info">
-                <i className="fas fa-crown"></i>
-                <h3>Private Room Upgrade</h3>
-              </div>
-            </div>
-            <div className="room-option-details">
-              <div className="room-description">
-                <p>Get your own private room in:</p>
-                <ul>
-                  {accommodations.map((accommodation, index) => (
-                    <li key={index}>{accommodation}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="room-price">
-                <span className="price-label">Upgrade Price:</span>
-                <span className="price-amount">+${upgradePrice} USD</span>
               </div>
             </div>
           </div>

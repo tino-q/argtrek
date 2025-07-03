@@ -160,6 +160,8 @@ export const getIncludedAccommodations = (rsvpData) => {
     accommodations.push({
       location: "Buenos Aires",
       period: "arrival",
+      hotelName: "Hotel Madero Buenos Aires",
+      address: "Rosario Vera Peñaloza 360, Puerto Madero, Buenos Aires",
       nights: buenosAiresArrival.map((field) => {
         const date = field.split(" ")[0]; // Extract "22" from "22 NOV"
         return `Nov ${date}`;
@@ -172,6 +174,8 @@ export const getIncludedAccommodations = (rsvpData) => {
   if (bariloche.length > 0) {
     accommodations.push({
       location: "Bariloche",
+      hotelName: "Llao Llao Hotel & Resort",
+      address: "Av. Bustillo Km 25, San Carlos de Bariloche, Río Negro",
       nights: bariloche.map((field) => {
         const date = field.split(" ")[0];
         return `Nov ${date}`;
@@ -184,6 +188,8 @@ export const getIncludedAccommodations = (rsvpData) => {
   if (mendoza.length > 0) {
     accommodations.push({
       location: "Mendoza",
+      hotelName: "Park Hyatt Mendoza",
+      address: "Chile 1124, M5500 Mendoza, Argentina",
       nights: mendoza.map((field) => {
         const date = field.split(" ")[0];
         return `Nov ${date}`;
@@ -200,6 +206,85 @@ export const getIncludedAccommodations = (rsvpData) => {
     accommodations.push({
       location: "Buenos Aires",
       period: "departure",
+      hotelName: "Hotel Madero Buenos Aires",
+      address: "Rosario Vera Peñaloza 360, Puerto Madero, Buenos Aires",
+      nights: ["Nov 29"],
+    });
+  }
+
+  return accommodations;
+};
+
+/**
+ * Get all excluded accommodations with their nights
+ */
+export const getExcludedAccommodations = (rsvpData) => {
+  if (!rsvpData) return [];
+
+  const accommodations = [];
+
+  // Buenos Aires - Arrival (Nov 22-23)
+  const buenosAiresArrivalExcluded = [
+    RSVP_FIELDS.NOV_22,
+    RSVP_FIELDS.NOV_23,
+  ].filter((field) => rsvpData[field] === false);
+
+  if (buenosAiresArrivalExcluded.length > 0) {
+    accommodations.push({
+      location: "Buenos Aires",
+      period: "arrival",
+      hotelName: "Hotel Madero Buenos Aires",
+      address: "Rosario Vera Peñaloza 360, Puerto Madero, Buenos Aires",
+      nights: buenosAiresArrivalExcluded.map((field) => {
+        const date = field.split(" ")[0]; // Extract "22" from "22 NOV"
+        return `Nov ${date}`;
+      }),
+    });
+  }
+
+  // Bariloche (Nov 24-26)
+  const barilocheExcluded = [
+    RSVP_FIELDS.NOV_24,
+    RSVP_FIELDS.NOV_25,
+    RSVP_FIELDS.NOV_26,
+  ].filter((field) => rsvpData[field] === false);
+
+  if (barilocheExcluded.length > 0) {
+    accommodations.push({
+      location: "Bariloche",
+      hotelName: "Llao Llao Hotel & Resort",
+      address: "Av. Bustillo Km 25, San Carlos de Bariloche, Río Negro",
+      nights: barilocheExcluded.map((field) => {
+        const date = field.split(" ")[0];
+        return `Nov ${date}`;
+      }),
+    });
+  }
+
+  // Mendoza (Nov 27-28)
+  const mendozaExcluded = [RSVP_FIELDS.NOV_27, RSVP_FIELDS.NOV_28].filter(
+    (field) => rsvpData[field] === false
+  );
+
+  if (mendozaExcluded.length > 0) {
+    accommodations.push({
+      location: "Mendoza",
+      hotelName: "Park Hyatt Mendoza",
+      address: "Chile 1124, M5500 Mendoza, Argentina",
+      nights: mendozaExcluded.map((field) => {
+        const date = field.split(" ")[0];
+        return `Nov ${date}`;
+      }),
+    });
+  }
+
+  // Buenos Aires - Departure (Nov 29)
+  if (rsvpData[RSVP_FIELDS.NOV_29] === false) {
+    accommodations.push({
+      location: "Buenos Aires",
+      period: "departure",
+      hotelName: "Hotel Madero Buenos Aires",
+      address: "Rosario Vera Peñaloza 360, Puerto Madero, Buenos Aires",
       nights: ["Nov 29"],
     });
   }
@@ -218,24 +303,149 @@ export const getIncludedFlights = (rsvpData) => {
   if (rsvpData[RSVP_FIELDS.FLIGHT_AEP_BRC]) {
     flights.push({
       code: "JA3045",
+      airline: "JetSMART Argentina",
       route: "Buenos Aires → Bariloche",
+      departure: {
+        airport: "AEP",
+        city: "Buenos Aires",
+        name: "Jorge Newbery Airfield",
+        time: "09:15",
+      },
+      arrival: {
+        airport: "BRC",
+        city: "Bariloche",
+        name: "Bariloche Airport",
+        time: "11:45",
+      },
       date: "Nov 24",
+      duration: "2h 30m",
+      aircraft: "Airbus A320",
     });
   }
 
   if (rsvpData[RSVP_FIELDS.FLIGHT_BRC_MDZ]) {
     flights.push({
       code: "JA3725",
+      airline: "JetSMART Argentina",
       route: "Bariloche → Mendoza",
+      departure: {
+        airport: "BRC",
+        city: "Bariloche",
+        name: "Bariloche Airport",
+        time: "13:20",
+      },
+      arrival: {
+        airport: "MDZ",
+        city: "Mendoza",
+        name: "Governor Francisco Gabrielli International Airport",
+        time: "15:10",
+      },
       date: "Nov 27",
+      duration: "1h 50m",
+      aircraft: "Airbus A320",
     });
   }
 
   if (rsvpData[RSVP_FIELDS.FLIGHT_MDZ_AEP]) {
     flights.push({
       code: "JA3073",
+      airline: "JetSMART Argentina",
       route: "Mendoza → Buenos Aires",
+      departure: {
+        airport: "MDZ",
+        city: "Mendoza",
+        name: "Governor Francisco Gabrielli International Airport",
+        time: "16:45",
+      },
+      arrival: {
+        airport: "AEP",
+        city: "Buenos Aires",
+        name: "Jorge Newbery Airfield",
+        time: "18:20",
+      },
       date: "Nov 29",
+      duration: "1h 35m",
+      aircraft: "Airbus A320",
+    });
+  }
+
+  return flights;
+};
+
+/**
+ * Get excluded flights
+ */
+export const getExcludedFlights = (rsvpData) => {
+  if (!rsvpData) return [];
+
+  const flights = [];
+
+  if (rsvpData[RSVP_FIELDS.FLIGHT_AEP_BRC] === false) {
+    flights.push({
+      code: "JA3045",
+      airline: "JetSMART Argentina",
+      route: "Buenos Aires → Bariloche",
+      departure: {
+        airport: "AEP",
+        city: "Buenos Aires",
+        name: "Jorge Newbery Airfield",
+        time: "09:15",
+      },
+      arrival: {
+        airport: "BRC",
+        city: "Bariloche",
+        name: "Bariloche Airport",
+        time: "11:45",
+      },
+      date: "Nov 24",
+      duration: "2h 30m",
+      aircraft: "Airbus A320",
+    });
+  }
+
+  if (rsvpData[RSVP_FIELDS.FLIGHT_BRC_MDZ] === false) {
+    flights.push({
+      code: "JA3725",
+      airline: "JetSMART Argentina",
+      route: "Bariloche → Mendoza",
+      departure: {
+        airport: "BRC",
+        city: "Bariloche",
+        name: "Bariloche Airport",
+        time: "13:20",
+      },
+      arrival: {
+        airport: "MDZ",
+        city: "Mendoza",
+        name: "Governor Francisco Gabrielli International Airport",
+        time: "15:10",
+      },
+      date: "Nov 27",
+      duration: "1h 50m",
+      aircraft: "Airbus A320",
+    });
+  }
+
+  if (rsvpData[RSVP_FIELDS.FLIGHT_MDZ_AEP] === false) {
+    flights.push({
+      code: "JA3073",
+      airline: "JetSMART Argentina",
+      route: "Mendoza → Buenos Aires",
+      departure: {
+        airport: "MDZ",
+        city: "Mendoza",
+        name: "Governor Francisco Gabrielli International Airport",
+        time: "16:45",
+      },
+      arrival: {
+        airport: "AEP",
+        city: "Buenos Aires",
+        name: "Jorge Newbery Airfield",
+        time: "18:20",
+      },
+      date: "Nov 29",
+      duration: "1h 35m",
+      aircraft: "Airbus A320",
     });
   }
 
@@ -288,5 +498,15 @@ export const getTripItinerary = (rsvpData) => {
   return {
     accommodations: getIncludedAccommodations(rsvpData),
     flights: getIncludedFlights(rsvpData),
+  };
+};
+
+/**
+ * Get excluded trip services
+ */
+export const getExcludedTripServices = (rsvpData) => {
+  return {
+    accommodations: getExcludedAccommodations(rsvpData),
+    flights: getExcludedFlights(rsvpData),
   };
 };

@@ -5,6 +5,7 @@ import {
   getPricingInfo,
   getTripItinerary,
   getCheckedLuggagePrice,
+  getExcludedTripServices,
 } from "../../utils/rsvpData";
 
 const RSVPDisplay = ({
@@ -21,6 +22,7 @@ const RSVPDisplay = ({
   const personalInfo = getPersonalInfo(rsvpData);
   const pricingInfo = getPricingInfo(rsvpData);
   const tripItinerary = getTripItinerary(rsvpData);
+  const excludedServices = getExcludedTripServices(rsvpData);
   const checkedLuggagePrice = getCheckedLuggagePrice(rsvpData);
 
   // Handle checked luggage selection
@@ -30,29 +32,154 @@ const RSVPDisplay = ({
     updateFormData("luggage", !isLuggageSelected);
   };
 
-  // Define all services in chronological order using centralized data
-  const processedServices = [
-    // Accommodations
-    ...tripItinerary.accommodations.map((accommodation) => ({
-      type: "accommodation",
-      location: accommodation.location,
-      period: accommodation.period,
-      nights: accommodation.nights.map((night) => ({ date: night })),
-      isIncluded: true,
-    })),
-    // Flights
-    ...tripItinerary.flights.map((flight) => ({
-      type: "flight",
-      code: flight.code,
-      route: flight.route,
-      date: flight.date,
-      isIncluded: true,
-    })),
-  ];
+  // Helper function to extract city names from route
+  const extractCityNames = (route) => {
+    const cities = route.split(" → ");
+    return { origin: cities[0], destination: cities[1] };
+  };
 
-  // For simplicity, assume all services from the utility are included
-  const includedServices = processedServices;
-  const excludedServices = []; // We'd need more logic here for excluded services
+  // Define all services in chronological order using centralized data
+  const createChronologicalServices = (accommodations, flights, isIncluded) => {
+    const services = [];
+
+    // Nov 22-23: Buenos Aires Arrival
+    const buenosAiresArrival = accommodations.find(
+      (acc) => acc.location === "Buenos Aires" && acc.period === "arrival"
+    );
+    if (buenosAiresArrival) {
+      services.push({
+        type: "accommodation",
+        location: buenosAiresArrival.location,
+        period: buenosAiresArrival.period,
+        hotelName: buenosAiresArrival.hotelName,
+        address: buenosAiresArrival.address,
+        nights: buenosAiresArrival.nights.map((night) => ({ date: night })),
+        isIncluded,
+        sortOrder: 1,
+      });
+    }
+
+    // Nov 24: Flight Buenos Aires → Bariloche
+    const flightToBRC = flights.find((flight) => flight.code === "JA3045");
+    if (flightToBRC) {
+      services.push({
+        type: "flight",
+        code: flightToBRC.code,
+        airline: flightToBRC.airline,
+        route: flightToBRC.route,
+        departure: flightToBRC.departure,
+        arrival: flightToBRC.arrival,
+        date: flightToBRC.date,
+        duration: flightToBRC.duration,
+        aircraft: flightToBRC.aircraft,
+        isIncluded,
+        sortOrder: 2,
+      });
+    }
+
+    // Nov 24-26: Bariloche
+    const bariloche = accommodations.find(
+      (acc) => acc.location === "Bariloche" && !acc.period
+    );
+    if (bariloche) {
+      services.push({
+        type: "accommodation",
+        location: bariloche.location,
+        period: bariloche.period,
+        hotelName: bariloche.hotelName,
+        address: bariloche.address,
+        nights: bariloche.nights.map((night) => ({ date: night })),
+        isIncluded,
+        sortOrder: 3,
+      });
+    }
+
+    // Nov 27: Flight Bariloche → Mendoza
+    const flightToMDZ = flights.find((flight) => flight.code === "JA3725");
+    if (flightToMDZ) {
+      services.push({
+        type: "flight",
+        code: flightToMDZ.code,
+        airline: flightToMDZ.airline,
+        route: flightToMDZ.route,
+        departure: flightToMDZ.departure,
+        arrival: flightToMDZ.arrival,
+        date: flightToMDZ.date,
+        duration: flightToMDZ.duration,
+        aircraft: flightToMDZ.aircraft,
+        isIncluded,
+        sortOrder: 4,
+      });
+    }
+
+    // Nov 27-28: Mendoza
+    const mendoza = accommodations.find(
+      (acc) => acc.location === "Mendoza" && !acc.period
+    );
+    if (mendoza) {
+      services.push({
+        type: "accommodation",
+        location: mendoza.location,
+        period: mendoza.period,
+        hotelName: mendoza.hotelName,
+        address: mendoza.address,
+        nights: mendoza.nights.map((night) => ({ date: night })),
+        isIncluded,
+        sortOrder: 5,
+      });
+    }
+
+    // Nov 29: Flight Mendoza → Buenos Aires
+    const flightToAEP = flights.find((flight) => flight.code === "JA3073");
+    if (flightToAEP) {
+      services.push({
+        type: "flight",
+        code: flightToAEP.code,
+        airline: flightToAEP.airline,
+        route: flightToAEP.route,
+        departure: flightToAEP.departure,
+        arrival: flightToAEP.arrival,
+        date: flightToAEP.date,
+        duration: flightToAEP.duration,
+        aircraft: flightToAEP.aircraft,
+        isIncluded,
+        sortOrder: 6,
+      });
+    }
+
+    // Nov 29: Buenos Aires Departure
+    const buenosAiresDeparture = accommodations.find(
+      (acc) => acc.location === "Buenos Aires" && acc.period === "departure"
+    );
+    if (buenosAiresDeparture) {
+      services.push({
+        type: "accommodation",
+        location: buenosAiresDeparture.location,
+        period: buenosAiresDeparture.period,
+        hotelName: buenosAiresDeparture.hotelName,
+        address: buenosAiresDeparture.address,
+        nights: buenosAiresDeparture.nights.map((night) => ({ date: night })),
+        isIncluded,
+        sortOrder: 7,
+      });
+    }
+
+    // Sort by chronological order
+    return services.sort((a, b) => a.sortOrder - b.sortOrder);
+  };
+
+  // Create chronologically ordered services
+  const includedServices = createChronologicalServices(
+    tripItinerary.accommodations,
+    tripItinerary.flights,
+    true
+  );
+
+  const excludedProcessedServices = createChronologicalServices(
+    excludedServices.accommodations,
+    excludedServices.flights,
+    false
+  );
 
   return (
     <section className="form-section">
@@ -117,46 +244,89 @@ const RSVPDisplay = ({
         </p>
 
         <div className="services-grid">
-          {includedServices.map((service, index) => (
-            <div key={index} className="service-item included">
-              <div className="service-icon">
-                <i
-                  className={
-                    service.type === "accommodation"
-                      ? "fas fa-bed"
-                      : "fas fa-plane"
-                  }
-                ></i>
-              </div>
-              <div className="service-details">
-                <div className="service-title">
-                  {service.type === "accommodation"
-                    ? `${service.location} Accommodation${service.period ? ` (${service.period})` : ""}`
-                    : `Flight ${service.route}`}
+          {includedServices.map((service, index) => {
+            return (
+              <div key={index} className="service-item included">
+                <div className="service-icon">
+                  <i
+                    className={
+                      service.type === "accommodation"
+                        ? "fas fa-bed"
+                        : "fas fa-plane"
+                    }
+                  ></i>
                 </div>
-                {service.type === "accommodation" ? (
-                  <div className="service-nights">
-                    {service.nights.map((night, nightIndex) => (
-                      <span key={nightIndex} className="night-badge">
-                        {night.date}
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="service-date">{service.date}</div>
-                )}
+                <div className="service-details">
+                  {service.type === "accommodation" ? (
+                    <>
+                      <div className="accommodation-single-line">
+                        <div className="accommodation-info-line">
+                          <span className="hotel-name-simple">
+                            {service.hotelName}
+                          </span>
+                          <span className="location-simple">
+                            {service.location}
+                            {service.period && ` (${service.period})`}
+                          </span>
+                        </div>
+                        <div className="accommodation-dates">
+                          {service.nights.length === 1
+                            ? service.nights[0].date
+                            : `${service.nights[0].date} - ${service.nights[service.nights.length - 1].date}`}
+                        </div>
+                        {service.address && (
+                          <div className="hotel-maps-link">
+                            <a
+                              href={`https://maps.google.com/?q=${encodeURIComponent(service.address)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <i className="fas fa-map-marker-alt"></i>
+                              View on Google Maps
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Flight - Single Line Format */}
+                      <div className="flight-single-line">
+                        {(() => {
+                          const cities = extractCityNames(service.route);
+                          return (
+                            <div className="flight-route-line">
+                              <span className="flight-segment">
+                                {cities.origin} ({service.departure.airport}){" "}
+                                {service.departure.time}
+                              </span>
+                              <span className="flight-arrow"> → </span>
+                              <span className="flight-segment">
+                                {cities.destination} ({service.arrival.airport}){" "}
+                                {service.arrival.time}
+                              </span>
+                            </div>
+                          );
+                        })()}
+                        <div className="flight-date">
+                          {service.date} - {service.code} - {service.airline}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="service-status included">
+                  <i className="fas fa-check"></i>
+                  <span>Included</span>
+                </div>
               </div>
-              <div className="service-status included">
-                <i className="fas fa-check"></i>
-                <span>Included</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
       {/* Toggle details button */}
-      {excludedServices.length > 0 && (
+      {excludedProcessedServices.length > 0 && (
         <div className="toggle-details">
           <button
             type="button"
@@ -172,48 +342,95 @@ const RSVPDisplay = ({
       )}
 
       {/* Services Not Included */}
-      {showAllDetails && excludedServices.length > 0 && (
+      {showAllDetails && excludedProcessedServices.length > 0 && (
         <div className="services-section">
           <p className="services-description">
             These flights and accommodations are not included in your trip:
           </p>
 
           <div className="services-grid">
-            {excludedServices.map((service, index) => (
-              <div key={`excluded-${index}`} className="service-item excluded">
-                <div className="service-icon">
-                  <i
-                    className={
-                      service.type === "accommodation"
-                        ? "fas fa-bed"
-                        : "fas fa-plane"
-                    }
-                  ></i>
-                </div>
-                <div className="service-details">
-                  <div className="service-title">
-                    {service.type === "accommodation"
-                      ? `${service.location} Accommodation${service.period ? ` (${service.period})` : ""}`
-                      : `Flight ${service.route}`}
+            {excludedProcessedServices.map((service, index) => {
+              return (
+                <div
+                  key={`excluded-${index}`}
+                  className="service-item excluded"
+                >
+                  <div className="service-icon">
+                    <i
+                      className={
+                        service.type === "accommodation"
+                          ? "fas fa-bed"
+                          : "fas fa-plane"
+                      }
+                    ></i>
                   </div>
-                  {service.type === "accommodation" ? (
-                    <div className="service-nights">
-                      {service.nights.map((night, nightIndex) => (
-                        <span key={nightIndex} className="night-badge excluded">
-                          {night.date}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="service-date">{service.date}</div>
-                  )}
+                  <div className="service-details">
+                    {service.type === "accommodation" ? (
+                      <>
+                        <div className="accommodation-single-line">
+                          <div className="accommodation-info-line">
+                            <span className="hotel-name-simple">
+                              {service.hotelName}
+                            </span>
+                            <span className="location-simple">
+                              {service.location}
+                              {service.period && ` (${service.period})`}
+                            </span>
+                          </div>
+                          <div className="accommodation-dates">
+                            {service.nights.length === 1
+                              ? service.nights[0].date
+                              : `${service.nights[0].date} - ${service.nights[service.nights.length - 1].date}`}
+                          </div>
+                          {service.address && (
+                            <div className="hotel-maps-link">
+                              <a
+                                href={`https://maps.google.com/?q=${encodeURIComponent(service.address)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <i className="fas fa-map-marker-alt"></i>
+                                View on Google Maps
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        {/* Flight - Single Line Format */}
+                        <div className="flight-single-line">
+                          {(() => {
+                            const cities = extractCityNames(service.route);
+                            return (
+                              <div className="flight-route-line">
+                                <span className="flight-segment">
+                                  {cities.origin} ({service.departure.airport}){" "}
+                                  {service.departure.time}
+                                </span>
+                                <span className="flight-arrow"> → </span>
+                                <span className="flight-segment">
+                                  {cities.destination} (
+                                  {service.arrival.airport}){" "}
+                                  {service.arrival.time}
+                                </span>
+                              </div>
+                            );
+                          })()}
+                          <div className="flight-date">
+                            {service.date} - {service.code} - {service.airline}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <div className="service-status excluded">
+                    <i className="fas fa-times"></i>
+                    <span>Not Included</span>
+                  </div>
                 </div>
-                <div className="service-status excluded">
-                  <i className="fas fa-times"></i>
-                  <span>Not Included</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
