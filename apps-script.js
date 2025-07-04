@@ -58,10 +58,27 @@ function doGet(e) {
     const rsvpResult = lookupRSVP(email.trim(), password.trim());
 
     if (rsvpResult.success) {
+      // Check if there's an existing submission for this email
+      const existingSubmission = getExistingSubmission(email.trim());
+
+      const responseData = {
+        rsvpData: rsvpResult.data,
+        hasExistingSubmission: existingSubmission !== null,
+      };
+
+      // If there's an existing submission, include all the data
+      if (existingSubmission) {
+        responseData.formData = existingSubmission.formData;
+        responseData.pricing = existingSubmission.pricing;
+        responseData.submissionResult = {
+          rowNumber: existingSubmission.rowNumber,
+        };
+      }
+
       return ContentService.createTextOutput(
         JSON.stringify({
           success: true,
-          data: rsvpResult.data,
+          data: responseData,
         })
       ).setMimeType(ContentService.MimeType.JSON);
     } else {
@@ -376,6 +393,93 @@ function lookupRSVP(email, password) {
       error:
         "Unable to retrieve RSVP data. Please contact Maddie for assistance.",
     };
+  }
+}
+
+/**
+ * Get existing submission data for an email from Trip Registrations sheet
+ */
+function getExistingSubmission(email) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
+
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return null;
+    }
+
+    // Get all data from the sheet
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+
+    // Get headers (first row)
+    const headers = values[0];
+
+    // Find the email column
+    const emailColumnIndex = headers.indexOf("rsvpData.email");
+
+    if (emailColumnIndex === -1) {
+      console.log(
+        "Email column 'rsvpData.email' not found in Trip Registrations sheet"
+      );
+      return null;
+    }
+
+    // Search for the email in the data rows (skip header row)
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const rowEmail = row[emailColumnIndex];
+
+      if (
+        rowEmail &&
+        rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
+      ) {
+        // Found the email! Reconstruct the data objects
+        const rawData = {};
+        for (let j = 0; j < headers.length; j++) {
+          rawData[headers[j]] = row[j];
+        }
+
+        // Reconstruct formData object
+        const formData = {};
+        Object.keys(rawData).forEach((key) => {
+          if (key.startsWith("formData.")) {
+            const formKey = key.replace("formData.", "");
+            formData[formKey] = rawData[key];
+          }
+        });
+
+        // Reconstruct pricing object
+        const pricing = {};
+        Object.keys(rawData).forEach((key) => {
+          if (key.startsWith("pricing.")) {
+            const pricingKey = key.replace("pricing.", "");
+            pricing[pricingKey] = rawData[key];
+          }
+        });
+
+        // Reconstruct rsvpData object
+        const rsvpData = {};
+        Object.keys(rawData).forEach((key) => {
+          if (key.startsWith("rsvpData.")) {
+            const rsvpKey = key.replace("rsvpData.", "");
+            rsvpData[rsvpKey] = rawData[key];
+          }
+        });
+
+        return {
+          formData,
+          pricing,
+          rsvpData,
+          rowNumber: i + 1, // +1 because sheet rows are 1-indexed
+        };
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error getting existing submission:", error);
+    return null;
   }
 }
 

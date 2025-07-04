@@ -3,7 +3,7 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxkV85fUfMqsLw9fxGskbfrwwDQImsQZ9GcehZWsw9Gg187O-xC4-5-xGFtdMODhKv4/exec";
+  "https://script.google.com/macros/s/AKfycbzYWbaetAyPmuxv8fFG-QIgd2jR6i0XpQuFOymKC0bu2ugYtOG1kcnDOhEEnLMEyfuB/exec";
 
 // Price Configuration
 export const PRICES = {

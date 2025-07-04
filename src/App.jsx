@@ -141,14 +141,39 @@ function App() {
           showError(result.error);
         }
       } else {
-        // Valid RSVP found - store data and move to welcome display
-        console.log("✅ USER LOGIN SUCCESS - Complete RSVP Payload:");
+        // Valid RSVP found - check if there's an existing submission
+        console.log("✅ USER LOGIN SUCCESS - Complete Response Payload:");
         console.log("===============================================");
         console.table(result.data);
         console.log("Raw JSON Data:", JSON.stringify(result.data, null, 2));
         console.log("===============================================");
 
-        handleLoginSuccess(result.data, "Trip details retrieved successfully!");
+        if (result.data.hasExistingSubmission) {
+          // User has already submitted - load their existing data and show payment details
+          console.log("🔄 EXISTING SUBMISSION FOUND - Loading previous data");
+
+          // Set all the data from the existing submission
+          setUserRSVP(result.data.rsvpData);
+          setFormData(result.data.formData);
+          setSubmissionResult(result.data.submissionResult);
+          setIsFormSubmitted(true);
+
+          // Navigate directly to payment details
+          navigateToStep(STEPS.PAYMENT_DETAILS);
+          showSuccess(
+            "Welcome back! Your previous registration has been loaded.",
+            {
+              duration: 4000,
+              autoClose: true,
+            }
+          );
+        } else {
+          // No existing submission - proceed with normal flow
+          handleLoginSuccess(
+            result.data.rsvpData,
+            "Trip details retrieved successfully!"
+          );
+        }
       }
     } catch (error) {
       console.error("Login error:", error);
