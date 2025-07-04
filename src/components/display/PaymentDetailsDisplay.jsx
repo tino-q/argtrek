@@ -328,18 +328,92 @@ const PaymentDetailsDisplay = ({
     const paymentMethod = formData[FORM_FIELDS.PAYMENT_METHOD];
     if (paymentMethod === "bank") {
       doc.text("Payment Method: Bank Transfer", 20, yPosition);
+      yPosition += 10;
+
+      // Bank Details
+      doc.setFontSize(12);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Bank Transfer Details:", 20, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setTextColor(60, 60, 60);
+      BANK_DETAILS.forEach((detail) => {
+        checkPageBreak(5);
+        doc.text(`${detail.label}: ${detail.value}`, 20, yPosition);
+        yPosition += 5;
+      });
+
+      // Transfer Instructions
+      checkPageBreak(40);
       yPosition += 5;
-      doc.text("Bank: Revolut", 20, yPosition);
+      doc.setFontSize(12);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Important Transfer Instructions:", 20, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setTextColor(60, 60, 60);
+      doc.text(
+        "• Fee Coverage: Select option to cover ALL transfer fees",
+        20,
+        yPosition
+      );
       yPosition += 5;
-      doc.text("Account: SONSOLES RKT SL", 20, yPosition);
+      doc.text(
+        "  (often listed as 'OUR' in your bank's transfer settings)",
+        25,
+        yPosition
+      );
       yPosition += 5;
-      doc.text("IBAN: ES51 1583 0001 1093 9530 1696", 20, yPosition);
+      doc.text(
+        "• Reference: Include your full name in the transfer reference",
+        20,
+        yPosition
+      );
+      yPosition += 5;
+      doc.text(
+        "• Note: Any unaccounted fees will be deducted from payment",
+        20,
+        yPosition
+      );
+      yPosition += 5;
+      doc.text(
+        "• Confirmation: Send transfer receipt to Maddie via email",
+        20,
+        yPosition
+      );
+      yPosition += 8;
+
+      // Revolut Recommendation
+      doc.setFontSize(11);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Recommended: Use Revolut for Free Transfers", 20, yPosition);
+      yPosition += 5;
+      doc.setFontSize(10);
+      doc.setTextColor(60, 60, 60);
+      doc.text(
+        "Transfers between Revolut users are free and instant",
+        20,
+        yPosition
+      );
+      yPosition += 5;
+      doc.text("Create account at: https://www.revolut.com/", 20, yPosition);
       yPosition += 5;
     } else if (paymentMethod === "crypto") {
       doc.text("Payment Method: Cryptocurrency", 20, yPosition);
-      yPosition += 5;
+      yPosition += 10;
+
+      // Crypto Details
+      doc.setFontSize(12);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Cryptocurrency Payment Details:", 20, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setTextColor(60, 60, 60);
       doc.text(
-        `Network: ${formData[FORM_FIELDS.CRYPTO_NETWORK]}`,
+        `Network: ${NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.name || formData[FORM_FIELDS.CRYPTO_NETWORK]}`,
         20,
         yPosition
       );
@@ -350,10 +424,82 @@ const PaymentDetailsDisplay = ({
         yPosition
       );
       yPosition += 5;
+
+      // Wallet Address
+      const walletAddress =
+        CRYPTO_WALLETS[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.[
+          formData[FORM_FIELDS.CRYPTO_CURRENCY]
+        ];
+      if (walletAddress) {
+        doc.text("Wallet Address:", 20, yPosition);
+        yPosition += 5;
+        // Split long wallet address across lines if needed
+        const addressParts = walletAddress.match(/.{1,50}/g) || [walletAddress];
+        addressParts.forEach((part, index) => {
+          doc.text(index === 0 ? part : `  ${part}`, 20, yPosition);
+          yPosition += 5;
+        });
+      }
+
+      // Crypto Instructions
+      checkPageBreak(35);
+      yPosition += 5;
+      doc.setFontSize(12);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Important Instructions:", 20, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setTextColor(60, 60, 60);
+      doc.text(
+        `• Network Verification: Ensure you're sending on ${NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.name || formData[FORM_FIELDS.CRYPTO_NETWORK]}`,
+        20,
+        yPosition
+      );
+      yPosition += 5;
+      doc.text(
+        `• Currency Match: Only send ${formData[FORM_FIELDS.CRYPTO_CURRENCY]} to this address`,
+        20,
+        yPosition
+      );
+      yPosition += 5;
+      doc.text(
+        "• Transaction Reference: Include your full name in memo if possible",
+        20,
+        yPosition
+      );
+      yPosition += 5;
+      doc.text(
+        "• Confirmation: Send transaction hash to Maddie via email",
+        20,
+        yPosition
+      );
+      yPosition += 5;
     } else if (paymentMethod === "credit") {
       doc.text("Payment Method: Credit Card", 20, yPosition);
+      yPosition += 10;
+
+      // Credit Card Details
+      doc.setFontSize(12);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Credit Card Payment Process:", 20, yPosition);
+      yPosition += 8;
+
+      doc.setFontSize(10);
+      doc.setTextColor(60, 60, 60);
+      doc.text(
+        "• Payment link will be sent to your email within 24 hours",
+        20,
+        yPosition
+      );
       yPosition += 5;
-      doc.text("Payment link will be sent within 24 hours", 20, yPosition);
+      doc.text("• Check your spam/junk folder if not received", 20, yPosition);
+      yPosition += 5;
+      doc.text("• Payment link remains active for 24 hours", 20, yPosition);
+      yPosition += 5;
+      doc.text("• Supports Apple Pay & Google Pay", 20, yPosition);
+      yPosition += 5;
+      doc.text("• Contact Maddie if you need assistance", 20, yPosition);
       yPosition += 5;
     }
 

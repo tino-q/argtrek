@@ -1,6 +1,9 @@
 import React from "react";
 import { FORM_FIELDS } from "../../utils/config";
-import { shouldEnforceArgentineCitizenship } from "../../utils/rsvpData";
+import {
+  shouldEnforceArgentineCitizenship,
+  getVATAmount,
+} from "../../utils/rsvpData";
 import "../../styles/PaymentOptions.css";
 
 const BANK_DETAILS = [
@@ -72,6 +75,10 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
 
   // Check if user should have Argentine citizenship enforced using centralized utility
   const enforcedArgentine = shouldEnforceArgentineCitizenship(rsvpData);
+
+  // Check if VAT amount is 0 to hide the Argentine citizenship checkbox
+  const vatAmount = getVATAmount(rsvpData);
+  const shouldHideArgentineCitizenship = vatAmount === 0;
 
   // Set default payment schedule to "full" (Single Payment) if not set
   React.useEffect(() => {
@@ -374,56 +381,61 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
         </div>
       )}
 
-      {/* Argentine Citizen Checkbox */}
-      <div className="form-group">
-        <div
-          className="checkbox-option"
-          onClick={() => {
-            if (!enforcedArgentine) {
-              updateFormData(
-                FORM_FIELDS.ARGENTINE_CITIZEN,
-                !formData[FORM_FIELDS.ARGENTINE_CITIZEN]
-              );
-            }
-          }}
-          style={{
-            cursor: enforcedArgentine ? "not-allowed" : "pointer",
-            opacity: enforcedArgentine ? 0.7 : 1,
-          }}
-        >
-          <input
-            type="checkbox"
-            id="argentineCitizen"
-            name="argentineCitizen"
-            checked={formData[FORM_FIELDS.ARGENTINE_CITIZEN] || false}
-            onChange={(e) => {
+      {/* Argentine Citizen Checkbox - Only show if VAT amount is not 0 */}
+      {!shouldHideArgentineCitizenship && (
+        <div className="form-group">
+          <div
+            className="checkbox-option"
+            onClick={() => {
               if (!enforcedArgentine) {
-                updateFormData(FORM_FIELDS.ARGENTINE_CITIZEN, e.target.checked);
+                updateFormData(
+                  FORM_FIELDS.ARGENTINE_CITIZEN,
+                  !formData[FORM_FIELDS.ARGENTINE_CITIZEN]
+                );
               }
             }}
-            disabled={enforcedArgentine}
-            style={{ pointerEvents: "none" }}
-          />
-          <label
-            htmlFor="argentineCitizen"
-            className="checkbox-label"
-            style={{ pointerEvents: "none" }}
+            style={{
+              cursor: enforcedArgentine ? "not-allowed" : "pointer",
+              opacity: enforcedArgentine ? 0.7 : 1,
+            }}
           >
-            <strong>I have Argentine citizenship</strong>
-            <p className="help-text">
-              Argentine citizens are subject to 21% VAT on accommodation
-              {enforcedArgentine && (
-                <>
-                  <br />
-                  <em style={{ color: "var(--primary)", fontSize: "0.9em" }}>
-                    ✓ Automatically applied based on your profile
-                  </em>
-                </>
-              )}
-            </p>
-          </label>
+            <input
+              type="checkbox"
+              id="argentineCitizen"
+              name="argentineCitizen"
+              checked={formData[FORM_FIELDS.ARGENTINE_CITIZEN] || false}
+              onChange={(e) => {
+                if (!enforcedArgentine) {
+                  updateFormData(
+                    FORM_FIELDS.ARGENTINE_CITIZEN,
+                    e.target.checked
+                  );
+                }
+              }}
+              disabled={enforcedArgentine}
+              style={{ pointerEvents: "none" }}
+            />
+            <label
+              htmlFor="argentineCitizen"
+              className="checkbox-label"
+              style={{ pointerEvents: "none" }}
+            >
+              <strong>I have Argentine citizenship</strong>
+              <p className="help-text">
+                Argentine citizens are subject to 21% VAT on accommodation
+                {enforcedArgentine && (
+                  <>
+                    <br />
+                    <em style={{ color: "var(--primary)", fontSize: "0.9em" }}>
+                      ✓ Automatically applied based on your profile
+                    </em>
+                  </>
+                )}
+              </p>
+            </label>
+          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 };

@@ -182,8 +182,8 @@ export const getIncludedAccommodations = (rsvpData) => {
     accommodations.push({
       location: "Buenos Aires",
       period: "arrival",
-      hotelName: "Hotel Madero Buenos Aires",
-      address: "Rosario Vera Peñaloza 360, Puerto Madero, Buenos Aires",
+      hotelName: "Hotel in Buenos Aires",
+      address: "",
       nights: formatFieldsToNights(buenosAiresArrival),
     });
   }
@@ -193,8 +193,8 @@ export const getIncludedAccommodations = (rsvpData) => {
   if (bariloche.length > 0) {
     accommodations.push({
       location: "Bariloche",
-      hotelName: "Llao Llao Hotel & Resort",
-      address: "Av. Bustillo Km 25, San Carlos de Bariloche, Río Negro",
+      hotelName: "Hotel in Bariloche",
+      address: "",
       nights: formatFieldsToNights(bariloche),
     });
   }
@@ -204,8 +204,8 @@ export const getIncludedAccommodations = (rsvpData) => {
   if (mendoza.length > 0) {
     accommodations.push({
       location: "Mendoza",
-      hotelName: "Park Hyatt Mendoza",
-      address: "Chile 1124, M5500 Mendoza, Argentina",
+      hotelName: "Hotel in Mendoza",
+      address: "",
       nights: formatFieldsToNights(mendoza),
     });
   }
@@ -219,8 +219,8 @@ export const getIncludedAccommodations = (rsvpData) => {
     accommodations.push({
       location: "Buenos Aires",
       period: "departure",
-      hotelName: "Hotel Madero Buenos Aires",
-      address: "Rosario Vera Peñaloza 360, Puerto Madero, Buenos Aires",
+      hotelName: "Hotel in Buenos Aires",
+      address: "",
       nights: ["Nov 29"],
     });
   }
@@ -268,8 +268,8 @@ export const getExcludedAccommodations = (rsvpData) => {
     const baArrivalAccommodation = {
       location: "Buenos Aires",
       period: "arrival",
-      hotelName: "Hotel Madero Buenos Aires",
-      address: "Rosario Vera Peñaloza 360, Puerto Madero, Buenos Aires",
+      hotelName: "Hotel in Buenos Aires",
+      address: "",
       nights: formatFieldsToNights(buenosAiresArrivalExcluded),
     };
     console.log(
@@ -302,8 +302,8 @@ export const getExcludedAccommodations = (rsvpData) => {
   if (barilocheExcluded.length > 0) {
     const barilocheAccommodation = {
       location: "Bariloche",
-      hotelName: "Llao Llao Hotel & Resort",
-      address: "Av. Bustillo Km 25, San Carlos de Bariloche, Río Negro",
+      hotelName: "Hotel in Bariloche",
+      address: "",
       nights: formatFieldsToNights(barilocheExcluded),
     };
     console.log("✅ Adding Bariloche accommodation:", barilocheAccommodation);
@@ -329,8 +329,8 @@ export const getExcludedAccommodations = (rsvpData) => {
   if (mendozaExcluded.length > 0) {
     const mendozaAccommodation = {
       location: "Mendoza",
-      hotelName: "Park Hyatt Mendoza",
-      address: "Chile 1124, M5500 Mendoza, Argentina",
+      hotelName: "Hotel in Mendoza",
+      address: "",
       nights: formatFieldsToNights(mendozaExcluded),
     };
     console.log("✅ Adding Mendoza accommodation:", mendozaAccommodation);
@@ -345,8 +345,8 @@ export const getExcludedAccommodations = (rsvpData) => {
     const baDepartureAccommodation = {
       location: "Buenos Aires",
       period: "departure",
-      hotelName: "Hotel Madero Buenos Aires",
-      address: "Rosario Vera Peñaloza 360, Puerto Madero, Buenos Aires",
+      hotelName: "Hotel in Buenos Aires",
+      address: "",
       nights: ["Nov 29"],
     };
     console.log(
