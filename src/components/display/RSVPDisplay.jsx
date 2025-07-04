@@ -18,6 +18,7 @@ const RSVPDisplay = ({
   const [showAllDetails, setShowAllDetails] = useState(false);
   const [showHealthInsuranceDetails, setShowHealthInsuranceDetails] =
     useState(false);
+  const [showConfirmationDetails, setShowConfirmationDetails] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [hasInitialized, setHasInitialized] = useState(false);
 
@@ -493,140 +494,171 @@ const RSVPDisplay = ({
               <span className="checkmark"></span>
               <div className="confirmation-text">
                 <strong>
-                  I confirm that I have read, understood, and agree to the
-                  following:
+                  I confirm that I have read, understood, and agreed to the
+                  following terms and conditions
                 </strong>
 
-                <div className="terms-section">
-                  <h4>TRAVELER INFORMATION</h4>
-                  <ul>
-                    <li>
-                      The name and surname above <strong>exactly match</strong>{" "}
-                      my travel document (passport/ID) for this trip
-                    </li>
-                    <li>
-                      I have <strong>double-checked</strong> all my traveler
-                      information above
-                    </li>
-                    <li>All information provided is accurate and complete</li>
-                  </ul>
-                </div>
+                {/* Collapsible Terms Details */}
+                <div className="confirmation-details">
+                  <button
+                    type="button"
+                    className="btn-link details-toggle"
+                    onClick={() =>
+                      setShowConfirmationDetails(!showConfirmationDetails)
+                    }
+                  >
+                    {showConfirmationDetails ? "Hide" : "Show"} terms and
+                    conditions
+                    <i
+                      className={`fas fa-chevron-${showConfirmationDetails ? "up" : "down"}`}
+                    ></i>
+                  </button>
 
-                <div className="terms-section">
-                  <h4>HEALTH INSURANCE</h4>
-                  <ul>
-                    <li>
-                      I have or will obtain by the time of the trip a valid
-                      health insurance policy that complies with the new
-                      Argentine requirement established by{" "}
-                      <a
-                        href="https://www.boletinoficial.gob.ar/detalleAviso/primera/326096/20250529"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Decree 366/2025
-                      </a>
-                      , covering all regular medical treatments and services
-                      during my stay in Argentina.
-                    </li>
-                  </ul>
-
-                  {/* Collapsible Health Insurance Details */}
-                  <div className="health-insurance-details">
-                    <button
-                      type="button"
-                      className="btn-link details-toggle"
-                      onClick={() =>
-                        setShowHealthInsuranceDetails(
-                          !showHealthInsuranceDetails
-                        )
-                      }
-                    >
-                      {showHealthInsuranceDetails ? "Hide" : "Show"} health
-                      insurance requirements
-                      <i
-                        className={`fas fa-chevron-${showHealthInsuranceDetails ? "up" : "down"}`}
-                      ></i>
-                    </button>
-
-                    {showHealthInsuranceDetails && (
-                      <div className="health-insurance-requirements">
-                        <p>
-                          In accordance with{" "}
-                          <a
-                            href="https://www.boletinoficial.gob.ar/detalleAviso/primera/326096/20250529"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Decree 366/2025
-                          </a>
-                          , all foreign visitors to Argentina must have valid
-                          health insurance that:
-                        </p>
+                  {showConfirmationDetails && (
+                    <div className="confirmation-requirements">
+                      <div className="terms-section">
+                        <h4>TRAVELER INFORMATION</h4>
                         <ul>
                           <li>
-                            Covers general medical care, outpatient treatment,
-                            and hospitalization.
+                            The name and surname above{" "}
+                            <strong>exactly match</strong> my travel document
+                            (passport/ID) for this trip
                           </li>
                           <li>
-                            Is valid throughout the entire stay in Argentina.
+                            I have <strong>double-checked</strong> all my
+                            traveler information above
                           </li>
                           <li>
-                            Clearly states that it covers the traveler while in
-                            Argentina (country-specific coverage).
-                          </li>
-                          <li>Includes coverage for medical emergencies.</li>
-                          <li>
-                            May be required to be presented at the border or
-                            upon request by local authorities.
+                            All information provided is accurate and complete
                           </li>
                         </ul>
-                        <p>
-                          <strong>Note:</strong> Public healthcare services in
-                          Argentina will only be available to non-residents in
-                          cases of emergency. For all other situations, proof of
-                          valid health insurance will be required in order to
-                          receive care.
-                        </p>
                       </div>
-                    )}
-                  </div>
-                </div>
 
-                <div className="terms-section">
-                  <h4>TERMS & CONDITIONS</h4>
-                  <ul>
-                    <li>
-                      This proposal is subject to availability and may change
-                      until the group reservation is confirmed with a deposit.
-                      In case of delayed payments, prices may be adjusted due to
-                      currency fluctuations or updated supplier rates.
-                    </li>
-                    <li>
-                      Deposits are non-refundable. The remaining balance must be
-                      paid according to the specified deadlines.
-                    </li>
-                    <li>
-                      Prices do not include visa processing fees or travel
-                      insurance. Each traveler is responsible for obtaining the
-                      necessary visa and health insurance.
-                    </li>
-                    <li>
-                      All passengers must have valid travel documents in good
-                      condition. It is the traveler's responsibility to verify
-                      passport, visa, and health requirements. A passport valid
-                      for at least 6 months is recommended.
-                    </li>
-                    <li>
-                      The organizer acts solely as an intermediary and is not
-                      responsible for delays, changes, or cancellations due to
-                      weather, third parties, or force majeure.
-                    </li>
-                    <li>
-                      Participation in all activities implies voluntary
-                      acceptance of associated risks.
-                    </li>
-                  </ul>
+                      <div className="terms-section">
+                        <h4>HEALTH INSURANCE</h4>
+                        <ul>
+                          <li>
+                            I have or will obtain by the time of the trip a
+                            valid health insurance policy that complies with the
+                            new Argentine requirement established by{" "}
+                            <a
+                              href="https://www.boletinoficial.gob.ar/detalleAviso/primera/326096/20250529"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Decree 366/2025
+                            </a>
+                            , covering all regular medical treatments and
+                            services during my stay in Argentina.
+                          </li>
+                        </ul>
+
+                        {/* Collapsible Health Insurance Details */}
+                        <div className="health-insurance-details">
+                          <button
+                            type="button"
+                            className="btn-link details-toggle"
+                            onClick={() =>
+                              setShowHealthInsuranceDetails(
+                                !showHealthInsuranceDetails
+                              )
+                            }
+                          >
+                            {showHealthInsuranceDetails ? "Hide" : "Show"}{" "}
+                            health insurance requirements
+                            <i
+                              className={`fas fa-chevron-${showHealthInsuranceDetails ? "up" : "down"}`}
+                            ></i>
+                          </button>
+
+                          {showHealthInsuranceDetails && (
+                            <div className="health-insurance-requirements">
+                              <p>
+                                In accordance with{" "}
+                                <a
+                                  href="https://www.boletinoficial.gob.ar/detalleAviso/primera/326096/20250529"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  Decree 366/2025
+                                </a>
+                                , all foreign visitors to Argentina must have
+                                valid health insurance that:
+                              </p>
+                              <ul>
+                                <li>
+                                  Covers general medical care, outpatient
+                                  treatment, and hospitalization.
+                                </li>
+                                <li>
+                                  Is valid throughout the entire stay in
+                                  Argentina.
+                                </li>
+                                <li>
+                                  Clearly states that it covers the traveler
+                                  while in Argentina (country-specific
+                                  coverage).
+                                </li>
+                                <li>
+                                  Includes coverage for medical emergencies.
+                                </li>
+                                <li>
+                                  May be required to be presented at the border
+                                  or upon request by local authorities.
+                                </li>
+                              </ul>
+                              <p>
+                                <strong>Note:</strong> Public healthcare
+                                services in Argentina will only be available to
+                                non-residents in cases of emergency. For all
+                                other situations, proof of valid health
+                                insurance will be required in order to receive
+                                care.
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="terms-section">
+                        <h4>TERMS & CONDITIONS</h4>
+                        <ul>
+                          <li>
+                            This proposal is subject to availability and may
+                            change until the group reservation is confirmed with
+                            a deposit. In case of delayed payments, prices may
+                            be adjusted due to currency fluctuations or updated
+                            supplier rates.
+                          </li>
+                          <li>
+                            Deposits are non-refundable. The remaining balance
+                            must be paid according to the specified deadlines.
+                          </li>
+                          <li>
+                            Prices do not include visa processing fees or travel
+                            insurance. Each traveler is responsible for
+                            obtaining the necessary visa and health insurance.
+                          </li>
+                          <li>
+                            All passengers must have valid travel documents in
+                            good condition. It is the traveler's responsibility
+                            to verify passport, visa, and health requirements. A
+                            passport valid for at least 6 months is recommended.
+                          </li>
+                          <li>
+                            The organizer acts solely as an intermediary and is
+                            not responsible for delays, changes, or
+                            cancellations due to weather, third parties, or
+                            force majeure.
+                          </li>
+                          <li>
+                            Participation in all activities implies voluntary
+                            acceptance of associated risks.
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </label>
