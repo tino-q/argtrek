@@ -18,6 +18,7 @@ export const useRouteProtection = (userRSVP, isFormSubmitted) => {
   const isAuthorized = useMemo(() => {
     const stepRequirements = {
       [STEPS.LOGIN]: () => true, // Always accessible
+      [STEPS.NEW_EMAIL]: () => true, // Always accessible
       [STEPS.WELCOME]: () => !!userRSVP, // Requires user RSVP data
       [STEPS.RSVP]: () => !!userRSVP,
       [STEPS.ADDONS]: () => !!userRSVP,
@@ -55,6 +56,7 @@ export const useRouteProtection = (userRSVP, isFormSubmitted) => {
     isStepAccessible: (step) => {
       switch (step) {
         case STEPS.LOGIN:
+        case STEPS.NEW_EMAIL:
           return true;
         case STEPS.WELCOME:
         case STEPS.RSVP:

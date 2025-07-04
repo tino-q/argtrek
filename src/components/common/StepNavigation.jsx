@@ -1,6 +1,7 @@
 // Generic Step Navigation Component
 // Uses step configuration to provide consistent navigation across all steps
 
+import { useState } from "react";
 import Navigation from "./Navigation";
 import SafeSubmitButton from "./SafeSubmitButton";
 import { getStepConfig } from "../../utils/stepConfig";
@@ -13,7 +14,9 @@ const StepNavigation = ({
   isSubmitting,
   formData,
   showError,
+  onNewEmailRequest,
 }) => {
+  const [isNewEmailLoading, setIsNewEmailLoading] = useState(false);
   const stepConfig = getStepConfig(currentStep);
 
   if (!stepConfig?.showNavigation) {
@@ -26,9 +29,33 @@ const StepNavigation = ({
     }
   };
 
-  const handleForward = () => {
+  const handleForward = async () => {
     if (stepConfig.forwardStep) {
       onNavigate(stepConfig.forwardStep);
+    }
+  };
+
+  const handleNewEmailSubmit = async () => {
+    if (currentStep === "new-email" && onNewEmailRequest) {
+      // Get email and name from URL params and form data
+      const urlParams = new URLSearchParams(window.location.search);
+      const email = urlParams.get("email");
+      const name = formData.newEmailName;
+
+      if (!email || !name) {
+        showError("Please provide both email and name.");
+        return;
+      }
+
+      setIsNewEmailLoading(true);
+      try {
+        await onNewEmailRequest(email, name);
+        // Navigation will be handled by the parent component after successful request
+      } catch {
+        // Error handling is done in the parent component
+      } finally {
+        setIsNewEmailLoading(false);
+      }
     }
   };
 
@@ -71,6 +98,29 @@ const StepNavigation = ({
             confirmDuration={3000}
           >
             <i className="fas fa-check"></i> Submit Registration
+          </SafeSubmitButton>
+        }
+      />
+    );
+  }
+
+  // Handle new email request with SafeSubmitButton
+  if (stepConfig.customForward === "SafeSubmitButton") {
+    return (
+      <Navigation
+        onBack={handleBack}
+        onForward={null}
+        backText={stepConfig.backText}
+        showForward={false}
+        forwardComponent={
+          <SafeSubmitButton
+            onSubmit={handleNewEmailSubmit}
+            isLoading={isNewEmailLoading}
+            disabled={!formData.newEmailName}
+            confirmText="Submit account request?"
+            confirmDuration={3000}
+          >
+            <i className="fas fa-paper-plane"></i> Request My Account
           </SafeSubmitButton>
         }
       />

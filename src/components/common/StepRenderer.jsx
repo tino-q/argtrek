@@ -7,6 +7,7 @@ import RSVPDisplay from "../display/RSVPDisplay";
 import AddonsStep from "../form/AddonsStep";
 import PaymentStep from "../form/PaymentStep";
 import PaymentDetailsDisplay from "../display/PaymentDetailsDisplay";
+import NewEmailStep from "../form/NewEmailStep";
 import { getStepConfig } from "../../utils/stepConfig";
 
 const StepRenderer = ({
@@ -20,6 +21,7 @@ const StepRenderer = ({
   onRSVPContinue,
   isFormSubmitted,
   submissionResult,
+  onEmailNotFound,
 }) => {
   const stepConfig = getStepConfig(currentStep);
 
@@ -29,7 +31,16 @@ const StepRenderer = ({
 
   switch (currentStep) {
     case "login":
-      return <EmailLogin onEmailSubmit={onEmailSubmit} onLogout={onLogout} />;
+      return (
+        <EmailLogin
+          onEmailSubmit={onEmailSubmit}
+          onLogout={onLogout}
+          onEmailNotFound={onEmailNotFound}
+        />
+      );
+
+    case "new-email":
+      return <NewEmailStep updateFormData={updateFormData} />;
 
     case "welcome":
       return <WelcomeSection onLogout={onLogout} />;

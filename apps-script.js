@@ -12,6 +12,7 @@
 const TRIP_REGISTRATIONS_SHEET_NAME = "Trip Registrations";
 const RSVP_SHEET_NAME = "RSVP"; // Sheet containing RSVP data
 const TPV_PAYMENTS_SHEET_NAME = "TPV PAYMENTS"; // Sheet for REDSYS TPV payment callbacks
+const NEW_EMAILS_SHEET_NAME = "NEW EMAILS"; // Sheet for new email requests
 const PRICING = {
   // These base prices will be overridden by RSVP data
   tripOption1: 2250,
@@ -112,6 +113,11 @@ function doPost(e) {
     // Check if this is a REDSYS TPV callback
     if (data.Ds_MerchantParameters) {
       return handleRedsysCallback(data);
+    }
+
+    // Check if this is a new email request
+    if (data.action === "new_email") {
+      return handleNewEmailRequest(data);
     }
 
     // Continue with existing form submission logic
@@ -662,6 +668,145 @@ function saveToSheet(data) {
     return {
       success: false,
       error: error.message,
+    };
+  }
+}
+
+/**
+ * Handle new email request submissions
+ */
+function handleNewEmailRequest(data) {
+  try {
+    console.log("Processing new email request:", data);
+
+    // Validate required fields
+    if (!data.email || !data.name) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: "Email and name are required",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Check if email already requested in NEW EMAILS sheet
+    const alreadyRequested = checkEmailInNewEmails(data.email);
+    if (alreadyRequested) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: "Account creation already requested for this email",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Save to NEW EMAILS sheet
+    const result = saveToNewEmailsSheet(data);
+
+    if (result.success) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: true,
+          message: "Account creation request submitted successfully",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    } else {
+      throw new Error(result.error || "Failed to save new email request");
+    }
+  } catch (error) {
+    console.error("Error processing new email request:", error);
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: "Internal server error: " + error.message,
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Check if email already requested in NEW EMAILS sheet
+ */
+function checkEmailInNewEmails(email) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(NEW_EMAILS_SHEET_NAME);
+
+    if (!sheet) {
+      return false;
+    }
+
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+
+    if (values.length < 2) {
+      return false;
+    }
+
+    const headers = values[0];
+    const emailColumnIndex = headers.indexOf("email");
+
+    if (emailColumnIndex === -1) {
+      return false;
+    }
+
+    // Search for the email in the data rows
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const rowEmail = row[emailColumnIndex];
+
+      if (
+        rowEmail &&
+        rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error checking email in NEW EMAILS:", error);
+    return false;
+  }
+}
+
+/**
+ * Save new email request to NEW EMAILS sheet
+ */
+function saveToNewEmailsSheet(data) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = spreadsheet.getSheetByName(NEW_EMAILS_SHEET_NAME);
+
+    // Create NEW EMAILS sheet if it doesn't exist
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(NEW_EMAILS_SHEET_NAME);
+      // Add headers
+      const headers = ["timestamp", "email", "name", "status"];
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    }
+
+    // Prepare data row
+    const timestamp = new Date().toISOString();
+    const rowData = [timestamp, data.email, data.name, "pending"];
+
+    // Append the new row
+    sheet.appendRow(rowData);
+
+    // Get the row number of the newly added row
+    const lastRow = sheet.getLastRow();
+
+    console.log("New email request saved successfully to row:", lastRow);
+
+    return {
+      success: true,
+      rowNumber: lastRow,
+    };
+  } catch (error) {
+    console.error("Error saving to NEW EMAILS sheet:", error);
+    return {
+      success: false,
+      error: "Failed to save new email request",
     };
   }
 }

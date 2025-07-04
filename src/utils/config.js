@@ -3,7 +3,12 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzYWbaetAyPmuxv8fFG-QIgd2jR6i0XpQuFOymKC0bu2ugYtOG1kcnDOhEEnLMEyfuB/exec";
+  "https://script.google.com/macros/s/AKfycbxCn7TIbAorWcIf9ZZSptok0VRoC203-iDMzwBukLlkfRezolntw0n6XKP72-DF-Orm/exec";
+
+// Action Types for Apps Script
+export const ACTION_TYPES = {
+  NEW_EMAIL: "new_email",
+};
 
 // Price Configuration
 export const PRICES = {

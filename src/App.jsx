@@ -8,7 +8,7 @@ import { injectAnimationStyles } from "./hooks/useAnimations";
 import { usePricing } from "./hooks/usePricing";
 import { useFormSubmission } from "./hooks/useFormSubmission";
 import { useRouteProtection } from "./hooks/useRouteProtection";
-import { FORM_FIELDS, APPS_SCRIPT_URL } from "./utils/config";
+import { FORM_FIELDS, APPS_SCRIPT_URL, ACTION_TYPES } from "./utils/config";
 import { getEmail, getTravelerName } from "./utils/rsvpData";
 
 // Import components
@@ -18,6 +18,11 @@ import StepNavigation from "./components/common/StepNavigation";
 import NotificationContainer from "./components/common/NotificationContainer";
 import Footer from "./components/layout/Footer";
 import { STEPS } from "./utils/stepConfig";
+
+// Wrapper component to handle step rendering with common props
+function StepWrapper({ step, commonProps }) {
+  return <StepRenderer currentStep={step} {...commonProps} />;
+}
 
 function App() {
   // Get default form data state
@@ -52,8 +57,13 @@ function App() {
   const location = useLocation();
 
   // Custom hooks
-  const { notifications, showSuccess, showError, removeNotification } =
-    useNotifications();
+  const {
+    notifications,
+    showSuccess,
+    showError,
+    showWarning,
+    removeNotification,
+  } = useNotifications();
   const pricing = usePricing(userRSVP, formData);
   const { submitForm, isSubmitting } = useFormSubmission();
 
@@ -86,6 +96,7 @@ function App() {
   useEffect(() => {
     const stepTitles = {
       [STEPS.LOGIN]: "Login - Argentina Trek",
+      [STEPS.NEW_EMAIL]: "Request Account - Argentina Trek",
       [STEPS.WELCOME]: "Welcome - Argentina Trek",
       [STEPS.RSVP]: "Trip Details - Argentina Trek",
       [STEPS.ADDONS]: "Select Experiences - Argentina Trek",
@@ -106,6 +117,59 @@ function App() {
     setUserRSVP(userData);
     navigateToStep(STEPS.WELCOME);
     showSuccess(successMessage);
+  };
+
+  // Handle email not found - navigate to new email step
+  const handleEmailNotFound = (email) => {
+    navigateToStep(`${STEPS.NEW_EMAIL}?email=${encodeURIComponent(email)}`);
+  };
+
+  // Handle new email request submission
+  const handleNewEmailRequest = async (email, name) => {
+    try {
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          action: ACTION_TYPES.NEW_EMAIL,
+          email: email,
+          name: name,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showSuccess(
+          "Account creation request submitted successfully! We'll process your request ASAP and notify you by email when ready.",
+          {
+            duration: 6000,
+            autoClose: true,
+          }
+        );
+      } else {
+        if (result.error.includes("already requested")) {
+          showWarning(
+            "Account creation has already been requested for this email. Please wait for processing."
+          );
+        } else if (result.error.includes("already exists")) {
+          showWarning(
+            "This email is already registered. Please try logging in instead."
+          );
+        } else {
+          showError(
+            result.error || "Failed to submit account creation request"
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error submitting new email request:", error);
+      showError(
+        "Failed to submit account creation request. Please try again or contact Maddie on WhatsApp."
+      );
+    }
   };
 
   // Handle email and password login submission
@@ -134,9 +198,9 @@ function App() {
           result.error.includes("email") ||
           result.error.includes("Email not found")
         ) {
-          showError(
-            "Email not found. Please check your email address and try again."
-          );
+          // Let the EmailLogin component handle the "email not found" error
+          // by throwing an error that it can catch
+          throw new Error("Email not found in our RSVP database");
         } else {
           showError(result.error);
         }
@@ -177,6 +241,12 @@ function App() {
       }
     } catch (error) {
       console.error("Login error:", error);
+
+      // Re-throw "Email not found" errors so EmailLogin component can handle them
+      if (error.message && error.message.includes("Email not found")) {
+        throw error;
+      }
+
       showError(
         "Failed to retrieve trip details. Please check your internet connection and try again."
       );
@@ -262,6 +332,22 @@ function App() {
     );
   };
 
+  // Extract common props to eliminate repetition
+  const commonStepProps = {
+    userRSVP,
+    formData,
+    updateFormData,
+    pricing,
+    onEmailSubmit: handleEmailLogin,
+    onLogout: handleLogout,
+    onRSVPContinue: handleRSVPContinue,
+    isFormSubmitted,
+    submissionResult,
+    onNewEmailRequest: handleNewEmailRequest,
+    onEmailNotFound: handleEmailNotFound,
+    onNavigate: navigateToStep,
+  };
+
   // Block rendering of protected content if not authorized
   const shouldBlockRender =
     !isAuthorized && protectedCurrentStep !== STEPS.LOGIN;
@@ -295,144 +381,73 @@ function App() {
             <Route
               path="/"
               element={
-                <StepRenderer
-                  currentStep={STEPS.LOGIN}
-                  userRSVP={userRSVP}
-                  formData={formData}
-                  updateFormData={updateFormData}
-                  pricing={pricing}
-                  onEmailSubmit={handleEmailLogin}
-                  onLogout={handleLogout}
-                  onRSVPContinue={handleRSVPContinue}
-                  isFormSubmitted={isFormSubmitted}
-                  submissionResult={submissionResult}
-                />
+                <StepWrapper step={STEPS.LOGIN} commonProps={commonStepProps} />
               }
             />
-
             <Route
               path="/login"
               element={
-                <StepRenderer
-                  currentStep={STEPS.LOGIN}
-                  userRSVP={userRSVP}
-                  formData={formData}
-                  updateFormData={updateFormData}
-                  pricing={pricing}
-                  onEmailSubmit={handleEmailLogin}
-                  onLogout={handleLogout}
-                  onRSVPContinue={handleRSVPContinue}
-                  isFormSubmitted={isFormSubmitted}
-                  submissionResult={submissionResult}
+                <StepWrapper step={STEPS.LOGIN} commonProps={commonStepProps} />
+              }
+            />
+            <Route
+              path="/new-email"
+              element={
+                <StepWrapper
+                  step={STEPS.NEW_EMAIL}
+                  commonProps={commonStepProps}
                 />
               }
             />
-
             <Route
               path="/welcome"
               element={
-                <StepRenderer
-                  currentStep={STEPS.WELCOME}
-                  userRSVP={userRSVP}
-                  formData={formData}
-                  updateFormData={updateFormData}
-                  pricing={pricing}
-                  onEmailSubmit={handleEmailLogin}
-                  onLogout={handleLogout}
-                  onRSVPContinue={handleRSVPContinue}
-                  isFormSubmitted={isFormSubmitted}
-                  submissionResult={submissionResult}
+                <StepWrapper
+                  step={STEPS.WELCOME}
+                  commonProps={commonStepProps}
                 />
               }
             />
-
             <Route
               path="/rsvp"
               element={
-                <StepRenderer
-                  currentStep={STEPS.RSVP}
-                  userRSVP={userRSVP}
-                  formData={formData}
-                  updateFormData={updateFormData}
-                  pricing={pricing}
-                  onEmailSubmit={handleEmailLogin}
-                  onLogout={handleLogout}
-                  onRSVPContinue={handleRSVPContinue}
-                  isFormSubmitted={isFormSubmitted}
-                  submissionResult={submissionResult}
-                />
+                <StepWrapper step={STEPS.RSVP} commonProps={commonStepProps} />
               }
             />
-
             <Route
               path="/addons"
               element={
-                <StepRenderer
-                  currentStep={STEPS.ADDONS}
-                  userRSVP={userRSVP}
-                  formData={formData}
-                  updateFormData={updateFormData}
-                  pricing={pricing}
-                  onEmailSubmit={handleEmailLogin}
-                  onLogout={handleLogout}
-                  onRSVPContinue={handleRSVPContinue}
-                  isFormSubmitted={isFormSubmitted}
-                  submissionResult={submissionResult}
+                <StepWrapper
+                  step={STEPS.ADDONS}
+                  commonProps={commonStepProps}
                 />
               }
             />
-
             <Route
               path="/payment"
               element={
-                <StepRenderer
-                  currentStep={STEPS.PAYMENT}
-                  userRSVP={userRSVP}
-                  formData={formData}
-                  updateFormData={updateFormData}
-                  pricing={pricing}
-                  onEmailSubmit={handleEmailLogin}
-                  onLogout={handleLogout}
-                  onRSVPContinue={handleRSVPContinue}
-                  isFormSubmitted={isFormSubmitted}
-                  submissionResult={submissionResult}
+                <StepWrapper
+                  step={STEPS.PAYMENT}
+                  commonProps={commonStepProps}
                 />
               }
             />
-
             <Route
               path="/payment-details"
               element={
-                <StepRenderer
-                  currentStep={STEPS.PAYMENT_DETAILS}
-                  userRSVP={userRSVP}
-                  formData={formData}
-                  updateFormData={updateFormData}
-                  pricing={pricing}
-                  onEmailSubmit={handleEmailLogin}
-                  onLogout={handleLogout}
-                  onRSVPContinue={handleRSVPContinue}
-                  isFormSubmitted={isFormSubmitted}
-                  submissionResult={submissionResult}
+                <StepWrapper
+                  step={STEPS.PAYMENT_DETAILS}
+                  commonProps={commonStepProps}
                 />
               }
             />
-
             {/* Catch-all route for invalid URLs */}
             <Route
               path="*"
               element={
-                <StepRenderer
-                  currentStep={userRSVP ? STEPS.WELCOME : STEPS.LOGIN}
-                  userRSVP={userRSVP}
-                  formData={formData}
-                  updateFormData={updateFormData}
-                  pricing={pricing}
-                  onEmailSubmit={handleEmailLogin}
-                  onLogout={handleLogout}
-                  onRSVPContinue={handleRSVPContinue}
-                  isFormSubmitted={isFormSubmitted}
-                  submissionResult={submissionResult}
+                <StepWrapper
+                  step={userRSVP ? STEPS.WELCOME : STEPS.LOGIN}
+                  commonProps={commonStepProps}
                 />
               }
             />
@@ -447,6 +462,7 @@ function App() {
             isSubmitting={isSubmitting}
             formData={formData}
             showError={showError}
+            onNewEmailRequest={handleNewEmailRequest}
           />
         )}
       </div>

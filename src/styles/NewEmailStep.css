@@ -1,0 +1,238 @@
+/* New Email Step Styles - Following Application Premium Patterns */
+
+.new-email-description {
+  margin-bottom: 30px;
+}
+
+/* Enhanced notice following login-description pattern */
+.email-not-found-notice {
+  background: linear-gradient(
+    135deg,
+    var(--primary-lighter),
+    var(--primary-cream)
+  );
+  border: 2px solid var(--primary-border);
+  border-left: 4px solid var(--primary);
+  padding: 24px;
+  margin-bottom: 30px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(117, 170, 219, 0.1);
+}
+
+.email-not-found-notice p {
+  margin: 0 0 10px 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.email-not-found-notice p:last-child {
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+/* Form styling following app patterns */
+.new-email-form {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.new-email-form .form-group {
+  margin-bottom: 25px;
+}
+
+.new-email-form .form-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.new-email-form .form-group label i {
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+/* Enhanced input styling matching EmailLogin patterns */
+.new-email-form input[type="text"],
+.new-email-form input[type="email"] {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid var(--border-light);
+  border-radius: 10px;
+  font-size: 1rem;
+  background-color: white;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.new-email-form input[type="text"]:focus,
+.new-email-form input[type="email"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow:
+    0 0 0 3px var(--focus-primary),
+    0 4px 8px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+.new-email-form input[type="text"]:hover,
+.new-email-form input[type="email"]:hover {
+  border-color: var(--primary-light);
+}
+
+.new-email-form input[type="text"]:disabled,
+.new-email-form input[type="email"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-light);
+}
+
+/* Premium info section */
+.processing-info {
+  background: var(--primary-bg);
+  border: 1px solid var(--primary-border);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Info content layout - icon to the left as requested */
+.info-content {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.info-content i {
+  color: var(--primary);
+  font-size: 1.3rem;
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.info-text h4 {
+  margin: 0 0 12px 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.info-text ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-primary);
+}
+
+.info-text li {
+  margin-bottom: 6px;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+/* Form actions removed - now handled by StepNavigation component */
+
+/* Enhanced help section following EmailLogin patterns */
+.login-help {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: var(--bg-light);
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.login-help p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.login-help a {
+  color: #25d366;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+}
+
+.login-help a:hover {
+  color: #128c7e;
+  text-decoration: underline;
+  transform: translateY(-1px);
+}
+
+.login-help a i {
+  font-size: 1rem;
+}
+
+/* Responsive design following app patterns */
+@media (max-width: 768px) {
+  .new-email-form {
+    max-width: 100%;
+  }
+
+  .email-not-found-notice {
+    padding: 20px;
+    margin-bottom: 25px;
+    font-size: 0.95rem;
+  }
+
+  .processing-info {
+    padding: 20px;
+  }
+
+  .info-content {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .info-content i {
+    font-size: 1.2rem;
+    margin-top: 0;
+  }
+
+  .new-email-form .form-group {
+    margin-bottom: 20px;
+  }
+
+  .new-email-form input[type="text"],
+  .new-email-form input[type="email"] {
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  /* Form actions removed - now handled by StepNavigation component */
+}
+
+@media (max-width: 480px) {
+  .email-not-found-notice {
+    padding: 16px;
+    font-size: 0.9rem;
+  }
+
+  .processing-info {
+    padding: 16px;
+  }
+
+  .info-text h4 {
+    font-size: 1rem;
+  }
+
+  .info-text li {
+    font-size: 0.9rem;
+  }
+}

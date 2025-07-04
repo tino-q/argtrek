@@ -3,6 +3,7 @@
 
 export const STEPS = {
   LOGIN: "login",
+  NEW_EMAIL: "new-email",
   WELCOME: "welcome",
   RSVP: "rsvp",
   ADDONS: "addons",
@@ -15,6 +16,16 @@ export const STEP_CONFIG = {
     id: "login",
     showNavigation: false,
     component: "EmailLogin",
+  },
+  [STEPS.NEW_EMAIL]: {
+    id: "new-email",
+    showNavigation: true,
+    showBack: true,
+    showForward: false,
+    backText: "Back to Login",
+    backStep: STEPS.LOGIN,
+    component: "NewEmailStep",
+    customForward: "SafeSubmitButton",
   },
   [STEPS.WELCOME]: {
     id: "welcome",
@@ -72,6 +83,7 @@ export const STEP_CONFIG = {
 // Get ordered list of steps
 export const STEP_ORDER = [
   STEPS.LOGIN,
+  STEPS.NEW_EMAIL,
   STEPS.WELCOME,
   STEPS.RSVP,
   STEPS.ADDONS,
