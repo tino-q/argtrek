@@ -89,15 +89,48 @@ const PaymentDetailsDisplay = ({
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.width;
     const pageHeight = doc.internal.pageSize.height;
-    const margin = 20;
-    const maxYPosition = pageHeight - 40; // Leave space for footer
+    const margin = 25;
+    const contentWidth = pageWidth - margin * 2;
+    const maxYPosition = pageHeight - 40;
     let yPosition = margin;
 
-    // Get trip itinerary data
-    const tripItinerary = getTripItinerary(rsvpData);
+    // Color scheme
+    const colors = {
+      primary: [24, 119, 242], // Blue
+      secondary: [108, 117, 125], // Gray
+      accent: [40, 167, 69], // Green
+      text: [33, 37, 41], // Dark gray
+      light: [248, 249, 250], // Light gray
+      success: [25, 135, 84], // Success green
+    };
 
-    // Helper function to check if we need a new page
-    const checkPageBreak = (requiredSpace = 10) => {
+    // Typography helpers
+    const setSubtitle = (size = 14) => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(size);
+      doc.setTextColor(...colors.primary);
+    };
+
+    const setBody = (size = 10) => {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(size);
+      doc.setTextColor(...colors.text);
+    };
+
+    const setLabel = (size = 9) => {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(size);
+      doc.setTextColor(...colors.secondary);
+    };
+
+    const setSmall = (size = 8) => {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(size);
+      doc.setTextColor(...colors.secondary);
+    };
+
+    // Helper functions
+    const checkPageBreak = (requiredSpace = 15) => {
       if (yPosition + requiredSpace > maxYPosition) {
         doc.addPage();
         yPosition = margin;
@@ -106,486 +139,539 @@ const PaymentDetailsDisplay = ({
       return false;
     };
 
-    // Header
-    doc.setFontSize(20);
-    doc.setTextColor(40, 40, 40);
-    doc.text(
-      "Argentina Trek - Trip Registration Summary",
-      pageWidth / 2,
-      yPosition,
-      { align: "center" }
-    );
-    yPosition += 15;
+    const addBox = (x, y, width, height, fillColor = colors.light) => {
+      doc.setFillColor(...fillColor);
+      doc.setDrawColor(...colors.secondary);
+      doc.setLineWidth(0.2);
+      doc.roundedRect(x, y, width, height, 2, 2, "FD");
+    };
 
-    // Order Number
-    if (submissionResult?.rowNumber) {
-      doc.setFontSize(14);
-      doc.setTextColor(100, 100, 100);
-      doc.text(
-        `Order #${submissionResult.rowNumber}`,
-        pageWidth / 2,
-        yPosition,
-        { align: "center" }
-      );
-      yPosition += 15;
-    }
+    const addKeyValue = (label, value, yPos = yPosition, indent = 0) => {
+      setLabel();
+      doc.text(label + ":", margin + indent, yPos);
+      setBody();
+      doc.text(value, margin + indent + 50, yPos);
+      return yPos + 6;
+    };
 
-    // Date
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(
-      `Generated: ${new Date().toLocaleDateString()}`,
-      pageWidth / 2,
-      yPosition,
-      { align: "center" }
-    );
-    yPosition += 20;
-
-    // Customer Information
-    checkPageBreak(30);
-    doc.setFontSize(14);
-    doc.setTextColor(40, 40, 40);
-    doc.text("Customer Information", 20, yPosition);
-    yPosition += 10;
-
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.text(`Primary Traveler: ${travelerName}`, 20, yPosition);
-    yPosition += 5;
-
+    // Get data
+    const tripItinerary = getTripItinerary(rsvpData);
+    const travelerName = getTravelerName(rsvpData);
     const plusOneName = getPlusOneName(rsvpData);
-    if (plusOneName) {
-      doc.text(`Plus One: ${plusOneName}`, 20, yPosition);
-      yPosition += 5;
-    }
 
-    doc.text(`Email: ${getEmail(rsvpData)}`, 20, yPosition);
-    yPosition += 5;
+    // === HEADER SECTION ===
+    // Header background
+    addBox(0, 0, pageWidth, 60, colors.primary);
 
-    // Confirmed Flights
-    if (tripItinerary.flights && tripItinerary.flights.length > 0) {
-      checkPageBreak(50);
-      yPosition += 15;
-      doc.setFontSize(14);
-      doc.setTextColor(40, 40, 40);
-      doc.text("Confirmed Flights", 20, yPosition);
-      yPosition += 10;
+    // Company logo/title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
+    doc.setTextColor(255, 255, 255);
+    doc.text("ARGENTINA TREK", pageWidth / 2, 25, { align: "center" });
 
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text("Trip Registration Summary", pageWidth / 2, 35, {
+      align: "center",
+    });
+
+    // Order number badge
+    if (submissionResult?.rowNumber) {
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
-
-      tripItinerary.flights.forEach((flight) => {
-        checkPageBreak(30);
-        doc.text(`Flight ${flight.code} - ${flight.airline}`, 20, yPosition);
-        yPosition += 5;
-        doc.text(`  ${flight.route}`, 20, yPosition);
-        yPosition += 5;
-        doc.text(
-          `  ${flight.date} - Departure: ${flight.departure.time} (${flight.departure.airport})`,
-          20,
-          yPosition
-        );
-        yPosition += 5;
-        doc.text(
-          `  Arrival: ${flight.arrival.time} (${flight.arrival.airport})`,
-          20,
-          yPosition
-        );
-        yPosition += 5;
-        doc.text(
-          `  Duration: ${flight.duration} - Aircraft: ${flight.aircraft}`,
-          20,
-          yPosition
-        );
-        yPosition += 8;
+      doc.text(`ORDER #${submissionResult.rowNumber}`, pageWidth / 2, 45, {
+        align: "center",
       });
     }
 
-    // Confirmed Hotels
+    setSmall();
+    doc.setTextColor(255, 255, 255);
+    doc.text(
+      `Generated: ${new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })}`,
+      pageWidth / 2,
+      52,
+      { align: "center" }
+    );
+
+    yPosition = 75;
+
+    // === TRAVELER INFORMATION ===
+    checkPageBreak(35);
+    setSubtitle(16);
+    doc.text("Traveler Information", margin, yPosition);
+    yPosition += 8;
+
+    addBox(margin, yPosition, contentWidth, 25, colors.light);
+    yPosition += 8;
+
+    yPosition = addKeyValue("Primary Traveler", travelerName, yPosition, 8);
+    if (plusOneName) {
+      yPosition = addKeyValue("Plus One", plusOneName, yPosition, 8);
+    }
+    yPosition = addKeyValue("Email", getEmail(rsvpData), yPosition, 8);
+    yPosition += 12;
+
+    // === CONFIRMED FLIGHTS ===
+    if (tripItinerary.flights && tripItinerary.flights.length > 0) {
+      // Don't break page for flights - keep them on first page
+      setSubtitle(14);
+      doc.text("Confirmed Flights", margin, yPosition);
+      yPosition += 10;
+
+      tripItinerary.flights.forEach((flight, index) => {
+        // Don't break page for individual flights - keep all on first page
+
+        // Flight card - increased height for better spacing
+        addBox(
+          margin,
+          yPosition,
+          contentWidth,
+          30,
+          index % 2 === 0 ? [248, 249, 250] : [255, 255, 255]
+        );
+
+        // Flight number and airline (left side) - with text wrapping
+        setLabel(8);
+        const flightCode = flight.code || "";
+        const airline = flight.airline || "";
+        const flightHeader = `${flightCode} - ${airline}`;
+
+        // Check if text fits, if not split it
+        const maxLeftWidth = contentWidth * 0.6; // Use 60% of width for left side
+        const flightHeaderLines = doc.splitTextToSize(
+          flightHeader,
+          maxLeftWidth
+        );
+
+        let currentY = yPosition + 8;
+        flightHeaderLines.forEach((line, lineIndex) => {
+          doc.text(line, margin + 6, currentY + lineIndex * 5);
+        });
+
+        // Route (left side, adjust position based on header lines)
+        setBody(8);
+        const routeY = currentY + flightHeaderLines.length * 5 + 2;
+        const routeLines = doc.splitTextToSize(flight.route, maxLeftWidth);
+        routeLines.forEach((line, lineIndex) => {
+          doc.text(line, margin + 6, routeY + lineIndex * 5);
+        });
+
+        // Right side content - date, times, duration
+        const rightX = pageWidth - margin - 6;
+
+        // Date (right side, first line)
+        setSmall(8);
+        doc.text(flight.date, rightX, yPosition + 8, {
+          align: "right",
+        });
+
+        // Times (right side, second line)
+        setSmall(8);
+        const timeText = `${flight.departure.time} - ${flight.arrival.time}`;
+        doc.text(timeText, rightX, yPosition + 15, {
+          align: "right",
+        });
+
+        // Duration and aircraft (right side, third line)
+        setSmall(7);
+        const durationText = `${flight.duration} - ${flight.aircraft}`;
+        doc.text(durationText, rightX, yPosition + 22, {
+          align: "right",
+        });
+
+        yPosition += 36;
+      });
+    }
+
+    // === CONFIRMED ACCOMMODATIONS ===
     if (
       tripItinerary.accommodations &&
       tripItinerary.accommodations.length > 0
     ) {
-      checkPageBreak(50);
-      yPosition += 10;
-      doc.setFontSize(14);
-      doc.setTextColor(40, 40, 40);
-      doc.text("Confirmed Hotels", 20, yPosition);
+      // Force page break - hotels always start on second page
+      doc.addPage();
+      yPosition = margin;
+      setSubtitle(14);
+      doc.text("Confirmed Accommodations", margin, yPosition);
       yPosition += 10;
 
-      doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
+      tripItinerary.accommodations.forEach((hotel, index) => {
+        // Check if we need page break for individual hotels
+        checkPageBreak(35);
 
-      tripItinerary.accommodations.forEach((hotel) => {
-        checkPageBreak(25);
-        doc.text(`${hotel.hotelName} - ${hotel.location}`, 20, yPosition);
-        yPosition += 5;
-        doc.text(`  ${hotel.address}`, 20, yPosition);
-        yPosition += 5;
+        // Hotel card - increased height for better spacing
+        addBox(
+          margin,
+          yPosition,
+          contentWidth,
+          30,
+          index % 2 === 0 ? [248, 249, 250] : [255, 255, 255]
+        );
+
+        // Hotel name (left side) - with text wrapping
+        setLabel(8);
+        const maxLeftWidth = contentWidth * 0.65; // Use 65% of width for left side
+        const hotelNameLines = doc.splitTextToSize(
+          hotel.hotelName,
+          maxLeftWidth
+        );
+
+        let currentY = yPosition + 8;
+        hotelNameLines.forEach((line, lineIndex) => {
+          doc.text(line, margin + 6, currentY + lineIndex * 5);
+        });
+
+        // Hotel location (left side, adjust position based on name lines)
+        setBody(8);
+        const locationY = currentY + hotelNameLines.length * 5 + 2;
+        const locationLines = doc.splitTextToSize(hotel.location, maxLeftWidth);
+        locationLines.forEach((line, lineIndex) => {
+          doc.text(line, margin + 6, locationY + lineIndex * 5);
+        });
+
+        // Dates (right side)
+        setSmall(8);
         const nightsText =
           hotel.nights.length === 1
             ? hotel.nights[0]
             : `${hotel.nights[0]} - ${hotel.nights[hotel.nights.length - 1]}`;
-        doc.text(`  Dates: ${nightsText}`, 20, yPosition);
-        yPosition += 8;
+        doc.text(nightsText, pageWidth - margin - 6, yPosition + 15, {
+          align: "right",
+        });
+
+        yPosition += 36;
       });
     }
 
-    // Trip Details
-    checkPageBreak(40);
-    yPosition += 10;
-    doc.setFontSize(14);
-    doc.setTextColor(40, 40, 40);
-    doc.text("Trip Details", 20, yPosition);
+    // === PRICING BREAKDOWN ===
+    yPosition += 20; // Add more space before pricing breakdown
+    checkPageBreak(100);
+    setSubtitle(16);
+    doc.text("Pricing Breakdown", margin, yPosition);
     yPosition += 10;
 
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.text(`Base Trip Price: $${getBasePrice(rsvpData)}`, 20, yPosition);
-    yPosition += 5;
+    // Pricing box - extended height to accommodate all content including checked luggage
+    addBox(margin, yPosition, contentWidth, 80, [248, 252, 255]);
+    yPosition += 8;
 
-    // Accommodations
+    // Base price
+    yPosition = addKeyValue(
+      "Base Trip Price",
+      `$${getBasePrice(rsvpData)}`,
+      yPosition,
+      8
+    );
+
+    // Private room upgrade
     if (formData[FORM_FIELDS.PRIVATE_ROOM_UPGRADE]) {
-      doc.text(
-        `Private Room Upgrade: $${getPrivateRoomUpgradePrice(rsvpData)}`,
-        20,
-        yPosition
+      yPosition = addKeyValue(
+        "Private Room Upgrade",
+        `$${getPrivateRoomUpgradePrice(rsvpData)}`,
+        yPosition,
+        8
       );
-      yPosition += 5;
     }
 
     // Activities
     const activities = [];
-    if (formData[FORM_FIELDS.RAFTING]) {
+    if (formData[FORM_FIELDS.RAFTING])
       activities.push({
         name: ACTIVITIES.rafting.name,
         price: ACTIVITIES.rafting.price,
       });
-    }
-    if (formData[FORM_FIELDS.HORSEBACK]) {
+    if (formData[FORM_FIELDS.HORSEBACK])
       activities.push({
         name: ACTIVITIES.horseback.name,
         price: ACTIVITIES.horseback.price,
       });
-    }
-    if (formData[FORM_FIELDS.COOKING]) {
+    if (formData[FORM_FIELDS.COOKING])
       activities.push({
         name: ACTIVITIES.cooking.name,
         price: ACTIVITIES.cooking.price,
       });
-    }
 
     if (activities.length > 0) {
-      checkPageBreak(15 + activities.length * 5);
-      yPosition += 5;
-      doc.text("Selected Activities:", 20, yPosition);
-      yPosition += 5;
       activities.forEach((activity) => {
-        doc.text(`• ${activity.name}: $${activity.price}`, 25, yPosition);
-        yPosition += 5;
+        yPosition = addKeyValue(
+          activity.name,
+          `$${activity.price}`,
+          yPosition,
+          8
+        );
       });
     }
 
-    // Pricing Summary
-    checkPageBreak(50);
-    yPosition += 10;
-    doc.setFontSize(14);
-    doc.setTextColor(40, 40, 40);
-    doc.text("Pricing Summary", 20, yPosition);
-    yPosition += 10;
+    // Checked luggage - informational line
+    yPosition = addKeyValue("Checked Luggage", "(pending)", yPosition, 8);
 
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
-    doc.text(`Subtotal: $${pricing.subtotal}`, 20, yPosition);
-    yPosition += 5;
+    // Subtotal
+    yPosition += 3;
+    doc.setDrawColor(...colors.secondary);
+    doc.setLineWidth(0.3);
+    doc.line(margin + 8, yPosition, pageWidth - margin - 8, yPosition);
+    yPosition += 8;
 
+    yPosition = addKeyValue("Subtotal", `$${pricing.subtotal}`, yPosition, 8);
+
+    // Fees and taxes
     if (pricing.vatAmount > 0) {
-      doc.text(`VAT (21%): $${pricing.vatAmount}`, 20, yPosition);
-      yPosition += 5;
+      yPosition = addKeyValue(
+        "VAT (21%)",
+        `$${pricing.vatAmount}`,
+        yPosition,
+        8
+      );
     }
-
     if (pricing.processingFee > 0) {
-      doc.text(`Processing Fee (4%): $${pricing.processingFee}`, 20, yPosition);
-      yPosition += 5;
+      yPosition = addKeyValue(
+        "Processing Fee (4%)",
+        `$${pricing.processingFee}`,
+        yPosition,
+        8
+      );
     }
 
-    doc.setFontSize(12);
-    doc.setTextColor(40, 40, 40);
-    doc.text(`Total: $${pricing.total}`, 20, yPosition);
-    yPosition += 5;
+    // Total
+    yPosition += 3;
+    // doc.setDrawColor(...colors.success);
+    doc.setLineWidth(0.5);
+    doc.line(margin + 8, yPosition, pageWidth - margin - 8, yPosition);
+    yPosition += 8;
 
-    // Payment Information
-    checkPageBreak(60);
-    yPosition += 15;
+    setLabel(12);
+    // doc.setTextColor(...colors.success);
+    doc.text("TOTAL:", margin + 8, yPosition);
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.setTextColor(40, 40, 40);
-    doc.text("Payment Information", 20, yPosition);
-    yPosition += 10;
+    doc.text(`$${pricing.total}`, margin + 8 + 50, yPosition);
 
-    doc.setFontSize(10);
-    doc.setTextColor(60, 60, 60);
+    yPosition += 20;
+
+    // === PAYMENT INFORMATION ===
+    checkPageBreak(100);
+    setSubtitle(16);
+    doc.text("Payment Information", margin, yPosition);
+    yPosition += 10;
 
     const paymentMethod = formData[FORM_FIELDS.PAYMENT_METHOD];
-    if (paymentMethod === "bank") {
-      doc.text("Payment Method: Bank Transfer", 20, yPosition);
-      yPosition += 10;
 
-      // Bank Details
-      doc.setFontSize(12);
-      doc.setTextColor(40, 40, 40);
-      doc.text("Bank Transfer Details:", 20, yPosition);
+    // Payment method header
+    addBox(margin, yPosition, contentWidth, 15, colors.primary);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(11);
+    doc.setTextColor(255, 255, 255);
+    const methodText =
+      paymentMethod === "bank"
+        ? "BANK TRANSFER"
+        : paymentMethod === "crypto"
+          ? "CRYPTOCURRENCY"
+          : "CREDIT CARD";
+    doc.text(methodText, margin + 8, yPosition + 10);
+    yPosition += 20;
+
+    if (paymentMethod === "bank") {
+      // Bank details box
+      addBox(margin, yPosition, contentWidth, 60, [248, 255, 248]);
       yPosition += 8;
 
-      doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
+      setLabel(9);
+      doc.text("BANK TRANSFER DETAILS", margin + 8, yPosition);
+      yPosition += 8;
+
       BANK_DETAILS.forEach((detail) => {
         checkPageBreak(5);
-        doc.text(`${detail.label}: ${detail.value}`, 20, yPosition);
+        // Use single column layout to prevent overflow
+        yPosition = addKeyValue(detail.label, detail.value, yPosition, 8);
+      });
+
+      yPosition += 15;
+
+      // Important instructions
+      checkPageBreak(40);
+      addBox(margin, yPosition, contentWidth, 35, [255, 248, 240]);
+      yPosition += 8;
+
+      setLabel(9);
+      doc.setTextColor(180, 83, 9);
+      doc.text("IMPORTANT INSTRUCTIONS", margin + 8, yPosition);
+      yPosition += 8;
+
+      setSmall(8);
+      doc.setTextColor(...colors.text);
+      const instructions = [
+        "- Select 'OUR' option to cover ALL transfer fees in your bank",
+        "- Include your full name in the transfer reference",
+        "- Send transfer receipt to " + EMAIL_CONFIG.MADDIE,
+        "- Recommended: Use Revolut for free transfers",
+      ];
+
+      instructions.forEach((instruction) => {
+        doc.text(instruction, margin + 8, yPosition);
         yPosition += 5;
       });
 
-      // Transfer Instructions
-      checkPageBreak(40);
-      yPosition += 5;
-      doc.setFontSize(12);
-      doc.setTextColor(40, 40, 40);
-      doc.text("Important Transfer Instructions:", 20, yPosition);
-      yPosition += 8;
-
-      doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
-      doc.text(
-        "• Fee Coverage: Select option to cover ALL transfer fees",
-        20,
-        yPosition
-      );
-      yPosition += 5;
-      doc.text(
-        "  (often listed as 'OUR' in your bank's transfer settings)",
-        25,
-        yPosition
-      );
-      yPosition += 5;
-      doc.text(
-        "• Reference: Include your full name in the transfer reference",
-        20,
-        yPosition
-      );
-      yPosition += 5;
-      doc.text(
-        "• Note: Any unaccounted fees will be deducted from payment",
-        20,
-        yPosition
-      );
-      yPosition += 5;
-      doc.text(
-        "• Confirmation: Send transfer receipt to Maddie via email to " +
-          EMAIL_CONFIG.MADDIE,
-        20,
-        yPosition
-      );
-      yPosition += 8;
-
-      // Revolut Recommendation
-      doc.setFontSize(11);
-      doc.setTextColor(40, 40, 40);
-      doc.text("Recommended: Use Revolut for Free Transfers", 20, yPosition);
-      yPosition += 5;
-      doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
-      doc.text(
-        "Transfers between Revolut users are free and instant",
-        20,
-        yPosition
-      );
-      yPosition += 5;
-      doc.text("Create account at: https://www.revolut.com/", 20, yPosition);
-      yPosition += 5;
-    } else if (paymentMethod === "crypto") {
-      doc.text("Payment Method: Cryptocurrency", 20, yPosition);
       yPosition += 10;
-
-      // Crypto Details
-      doc.setFontSize(12);
-      doc.setTextColor(40, 40, 40);
-      doc.text("Cryptocurrency Payment Details:", 20, yPosition);
+    } else if (paymentMethod === "crypto") {
+      // Crypto details
+      addBox(margin, yPosition, contentWidth, 50, [248, 248, 255]);
       yPosition += 8;
 
-      doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
-      doc.text(
-        `Network: ${NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.name || formData[FORM_FIELDS.CRYPTO_NETWORK]}`,
-        20,
-        yPosition
+      yPosition = addKeyValue(
+        "Network",
+        NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.name ||
+          formData[FORM_FIELDS.CRYPTO_NETWORK],
+        yPosition,
+        8
       );
-      yPosition += 5;
-      doc.text(
-        `Currency: ${formData[FORM_FIELDS.CRYPTO_CURRENCY]}`,
-        20,
-        yPosition
+      yPosition = addKeyValue(
+        "Currency",
+        formData[FORM_FIELDS.CRYPTO_CURRENCY],
+        yPosition,
+        8
       );
-      yPosition += 5;
 
-      // Wallet Address
       const walletAddress =
         CRYPTO_WALLETS[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.[
           formData[FORM_FIELDS.CRYPTO_CURRENCY]
         ];
       if (walletAddress) {
-        doc.text("Wallet Address:", 20, yPosition);
-        yPosition += 5;
-        // Split long wallet address across lines if needed
-        const addressParts = walletAddress.match(/.{1,50}/g) || [walletAddress];
-        addressParts.forEach((part, index) => {
-          doc.text(index === 0 ? part : `  ${part}`, 20, yPosition);
+        setLabel();
+        doc.text("Wallet Address:", margin + 8, yPosition);
+        yPosition += 6;
+        setBody(7);
+        // Split long wallet address into multiple lines if needed
+        const maxWidth = contentWidth - 16;
+        const addressLines = doc.splitTextToSize(walletAddress, maxWidth);
+        addressLines.forEach((line) => {
+          doc.text(line, margin + 8, yPosition);
           yPosition += 5;
         });
+        yPosition += 3;
       }
 
-      // Crypto Instructions
-      checkPageBreak(35);
-      yPosition += 5;
-      doc.setFontSize(12);
-      doc.setTextColor(40, 40, 40);
-      doc.text("Important Instructions:", 20, yPosition);
-      yPosition += 8;
-
-      doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
-      doc.text(
-        `• Network Verification: Ensure you're sending on ${NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.name || formData[FORM_FIELDS.CRYPTO_NETWORK]}`,
-        20,
-        yPosition
-      );
-      yPosition += 5;
-      doc.text(
-        `• Currency Match: Only send ${formData[FORM_FIELDS.CRYPTO_CURRENCY]} to this address`,
-        20,
-        yPosition
-      );
-      yPosition += 5;
-      doc.text(
-        "• Transaction Reference: Include your full name in memo if possible",
-        20,
-        yPosition
-      );
-      yPosition += 5;
-      doc.text(
-        "• Confirmation: Send transaction hash to Maddie via email to " +
-          EMAIL_CONFIG.MADDIE,
-        20,
-        yPosition
-      );
-      yPosition += 5;
-    } else if (paymentMethod === "credit") {
-      doc.text("Payment Method: Credit Card", 20, yPosition);
       yPosition += 10;
-
-      // Credit Card Details
-      doc.setFontSize(12);
-      doc.setTextColor(40, 40, 40);
-      doc.text("Credit Card Payment Process:", 20, yPosition);
+    } else if (paymentMethod === "credit") {
+      // Credit card info
+      addBox(margin, yPosition, contentWidth, 25, [255, 248, 248]);
       yPosition += 8;
 
-      doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
-      doc.text(
-        "• Payment link will be sent to your email within 24 hours",
-        20,
-        yPosition
-      );
-      yPosition += 5;
-      doc.text("• Check your spam/junk folder if not received", 20, yPosition);
-      yPosition += 5;
-      doc.text("• Payment link remains active for 24 hours", 20, yPosition);
-      yPosition += 5;
-      doc.text("• Supports Apple Pay & Google Pay", 20, yPosition);
-      yPosition += 5;
-      doc.text("• Contact Maddie if you need assistance", 20, yPosition);
-      yPosition += 5;
+      setBody();
+      const creditInstructions = [
+        "- Payment link will be sent to your email within 24 hours",
+        "- Check spam/junk folder if not received",
+        "- Supports Apple Pay & Google Pay",
+      ];
+
+      creditInstructions.forEach((instruction) => {
+        doc.text(instruction, margin + 8, yPosition);
+        yPosition += 5;
+      });
+
+      yPosition += 10;
     }
 
-    // Payment Schedule
+    // Payment schedule
     if (formData[FORM_FIELDS.PAYMENT_SCHEDULE] === "installments") {
-      checkPageBreak(20);
-      yPosition += 5;
-      doc.text("Payment Schedule: Installments", 20, yPosition);
-      yPosition += 5;
+      checkPageBreak(25);
+      addBox(margin, yPosition, contentWidth, 20, [248, 255, 248]);
+      yPosition += 8;
 
-      // Calculate installment payments
+      setLabel();
+      doc.text("INSTALLMENT PLAN", margin + 8, yPosition);
+      yPosition += 6;
+
       const firstPayment =
         pricing.installmentAmount || Math.round(pricing.total * 0.35);
       const secondPayment = pricing.total - firstPayment;
 
-      doc.text(`First Payment (35%): $${firstPayment}`, 20, yPosition);
-      yPosition += 5;
-      doc.text(`Second Payment (65%): $${secondPayment}`, 20, yPosition);
-      yPosition += 5;
+      yPosition = addKeyValue(
+        "First Payment (35%)",
+        `$${firstPayment}`,
+        yPosition,
+        8
+      );
+      yPosition = addKeyValue(
+        "Second Payment (65%)",
+        `$${secondPayment}`,
+        yPosition,
+        8
+      );
+      yPosition += 10;
     }
 
-    // Dietary Restrictions
+    // === DIETARY INFORMATION ===
     const dietaryRestrictions = formData[FORM_FIELDS.DIETARY_RESTRICTIONS];
-    if (dietaryRestrictions && dietaryRestrictions.length > 0) {
-      checkPageBreak(40);
-      yPosition += 15;
-      doc.setFontSize(14);
-      doc.setTextColor(40, 40, 40);
-      doc.text("Dietary Information", 20, yPosition);
+    if (dietaryRestrictions && dietaryRestrictions !== "none") {
+      checkPageBreak(30);
+      setSubtitle(14);
+      doc.text("Dietary Information", margin, yPosition);
       yPosition += 10;
 
-      doc.setFontSize(10);
-      doc.setTextColor(60, 60, 60);
+      addBox(margin, yPosition, contentWidth, 20, [248, 255, 248]);
+      yPosition += 8;
 
-      // Handle different data types for dietary restrictions
       let dietaryText = "";
       if (Array.isArray(dietaryRestrictions)) {
         dietaryText = dietaryRestrictions.join(", ");
-      } else if (typeof dietaryRestrictions === "string") {
-        dietaryText = dietaryRestrictions;
       } else {
         dietaryText = String(dietaryRestrictions);
       }
 
-      doc.text(`Dietary Restrictions: ${dietaryText}`, 20, yPosition);
-      yPosition += 5;
+      yPosition = addKeyValue(
+        "Dietary Restrictions",
+        dietaryText,
+        yPosition,
+        8
+      );
 
       if (formData[FORM_FIELDS.DIETARY_MESSAGE]) {
-        doc.text(
-          `Additional Notes: ${formData[FORM_FIELDS.DIETARY_MESSAGE]}`,
-          20,
-          yPosition
+        yPosition = addKeyValue(
+          "Additional Notes",
+          formData[FORM_FIELDS.DIETARY_MESSAGE],
+          yPosition,
+          8
         );
-        yPosition += 5;
       }
+      yPosition += 15;
     }
 
-    // Footer
-    checkPageBreak(20);
-    yPosition = Math.max(yPosition + 10, pageHeight - 30);
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
+    // === FOOTER ===
+    yPosition = Math.max(yPosition, pageHeight - 35);
+
+    // Footer background
+    addBox(0, yPosition - 5, pageWidth, 30, colors.primary);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
     doc.text(
       "Thank you for choosing Argentina Trek!",
       pageWidth / 2,
-      yPosition,
+      yPosition + 8,
       { align: "center" }
     );
-    yPosition += 5;
-    doc.text(`Contact: ${EMAIL_CONFIG.MADDIE}`, pageWidth / 2, yPosition, {
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Contact: ${EMAIL_CONFIG.MADDIE}`, pageWidth / 2, yPosition + 16, {
       align: "center",
     });
 
-    // Generate PDF and open print dialog for the PDF (not the webpage)
+    // Generate and open PDF
     const pdfBlob = doc.output("blob");
     const pdfUrl = URL.createObjectURL(pdfBlob);
 
-    // Open PDF in new window and trigger print dialog
-    const printWindow = window.open(pdfUrl, "_blank");
-    if (printWindow) {
-      printWindow.onload = () => {
-        printWindow.print();
-      };
-    }
+    window.open(pdfUrl, "_blank");
+    // const printWindow =
+    // if (printWindow) {
+    //   printWindow.onload = () => {
+    //     printWindow.print();
+    //   };
+    // }
   };
 
   return (
@@ -684,7 +770,7 @@ const PaymentDetailsDisplay = ({
                         even internationally
                       </p>
                       <a
-                        href="https://www.revolut.com/en-US/"
+                        href="Join me and over 50 million users who love Revolut. Sign up with my link below:  https://revolut.com/referral/?referral-code=mbaklayan!JUN2-25-VR-ES-AE&geo-redirect"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="revolut-link"

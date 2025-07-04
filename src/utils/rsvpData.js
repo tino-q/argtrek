@@ -360,7 +360,7 @@ export const getIncludedFlights = (rsvpData) => {
     flights.push({
       code: "JA3047",
       airline: "JetSMART Argentina",
-      route: "Buenos Aires → Bariloche",
+      route: "Buenos Aires - Bariloche",
       departure: {
         airport: "AEP",
         city: "Buenos Aires",
@@ -383,7 +383,7 @@ export const getIncludedFlights = (rsvpData) => {
     flights.push({
       code: "JA3725",
       airline: "JetSMART Argentina",
-      route: "Bariloche → Mendoza",
+      route: "Bariloche - Mendoza",
       departure: {
         airport: "BRC",
         city: "Bariloche",
@@ -406,7 +406,7 @@ export const getIncludedFlights = (rsvpData) => {
     flights.push({
       code: "JA3073",
       airline: "JetSMART Argentina",
-      route: "Mendoza → Buenos Aires",
+      route: "Mendoza - Buenos Aires",
       departure: {
         airport: "MDZ",
         city: "Mendoza",
@@ -440,7 +440,7 @@ export const getExcludedFlights = (rsvpData) => {
     flights.push({
       code: "JA3047",
       airline: "JetSMART Argentina",
-      route: "Buenos Aires → Bariloche",
+      route: "Buenos Aires - Bariloche",
       departure: {
         airport: "AEP",
         city: "Buenos Aires",
@@ -463,7 +463,7 @@ export const getExcludedFlights = (rsvpData) => {
     flights.push({
       code: "JA3725",
       airline: "JetSMART Argentina",
-      route: "Bariloche → Mendoza",
+      route: "Bariloche - Mendoza",
       departure: {
         airport: "BRC",
         city: "Bariloche",
@@ -486,7 +486,7 @@ export const getExcludedFlights = (rsvpData) => {
     flights.push({
       code: "JA3073",
       airline: "JetSMART Argentina",
-      route: "Mendoza → Buenos Aires",
+      route: "Mendoza - Buenos Aires",
       departure: {
         airport: "MDZ",
         city: "Mendoza",

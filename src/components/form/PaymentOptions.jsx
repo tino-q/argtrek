@@ -254,7 +254,7 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
                 <p className="price" style={{ whiteSpace: "nowrap" }}>
                   0% via Revolut,
                   <a
-                    href="https://revolut.com/referral/?referral-code=martin1h7!NOV1AR"
+                    href="Join me and over 50 million users who love Revolut. Sign up with my link below:  https://revolut.com/referral/?referral-code=mbaklayan!JUN2-25-VR-ES-AE&geo-redirect"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{

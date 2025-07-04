@@ -13,6 +13,8 @@ const PricingSummary = ({ pricing, formData }) => {
 
   const hasActivities = pricing.activities && pricing.activities.length > 0;
 
+  const hasCheckedLuggage = formData[FORM_FIELDS.CHECKED_LUGGAGE] === true;
+
   const hasVAT = formData[FORM_FIELDS.ARGENTINE_CITIZEN];
 
   const hasProcessingFee = formData[FORM_FIELDS.PAYMENT_METHOD] === "credit";
@@ -56,6 +58,17 @@ const PricingSummary = ({ pricing, formData }) => {
                 </span>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Checked Luggage */}
+        {hasCheckedLuggage && (
+          <div className="summary-row activity-row">
+            <span>Checked Luggage</span>
+            <span>
+              pending
+              <small> (optional)</small>
+            </span>
           </div>
         )}
 
