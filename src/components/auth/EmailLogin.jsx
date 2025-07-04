@@ -122,22 +122,6 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
           <i className="fas fa-sign-in-alt"></i> Access Your Trip Details
         </h2>
 
-        <div className="login-description">
-          {new URLSearchParams(window.location.search).get("email") &&
-          new URLSearchParams(window.location.search).get("password") ? (
-            <p>
-              <i className="fas fa-magic" style={{ marginRight: "8px" }}></i>
-              Magic link detected! Automatically logging you in with your
-              credentials...
-            </p>
-          ) : (
-            <p>
-              Enter your email address and password to access your confirmed
-              Argentina trip itinerary and pricing information.
-            </p>
-          )}
-        </div>
-
         <form onSubmit={handleSubmit} className="email-login-form">
           <div className="form-group">
             <label htmlFor="loginEmail">
@@ -172,7 +156,7 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
               disabled={isLoading}
             />
             <small className="password-help">
-              Check your email for the password we sent you
+              Check your email for your login link
             </small>
           </div>
 
@@ -181,6 +165,7 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
               type="submit"
               className={`login-btn ${isLoading ? "loading" : ""}`}
               disabled={isLoading || !email.trim() || !password.trim()}
+              style={{ marginBottom: "30px" }}
             >
               {isLoading ? (
                 <>
@@ -194,20 +179,6 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
             </button>
           </div>
         </form>
-
-        <div className="login-help">
-          <p>
-            <strong>Need help?</strong> Contact{" "}
-            <a
-              href="https://wa.me/34689200162"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Maddie on WhatsApp <i className="fab fa-whatsapp"></i>
-            </a>{" "}
-            if you can't find your email or password.
-          </p>
-        </div>
       </section>
     </>
   );
