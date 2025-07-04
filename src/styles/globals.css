@@ -88,6 +88,11 @@
   box-sizing: border-box;
 }
 
+html {
+  min-width: 375px;
+  /* Prevents layout from resizing below 375px - page becomes static */
+}
+
 /* Global form element styling to prevent dark mode interference */
 input,
 select,
@@ -110,6 +115,7 @@ body {
   color: var(--text-primary);
   background: var(--gradient-background);
   min-height: 100vh;
+  min-width: 375px;
   margin: 0;
   display: flex;
   justify-content: center;
@@ -121,6 +127,55 @@ body {
   width: 100%;
   max-width: 900px;
   padding: 20px;
+}
+
+/* Form Content Wrapper - Critical for responsive behavior */
+.form-content-wrapper {
+  max-width: min(700px, calc(100vw - 40px));
+  margin: 0 auto;
+  padding: 0 20px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Progressive responsive adjustments */
+@media (max-width: 768px) {
+  .form-content-wrapper {
+    max-width: calc(100vw - 30px);
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-content-wrapper {
+    max-width: calc(100vw - 20px);
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 375px) {
+  .form-content-wrapper {
+    max-width: 355px; /* Fixed width: 375px - 20px margin */
+    padding: 0 10px;
+    width: 355px;
+  }
+
+  /* Ensure all form elements respect the container */
+  .form-content-wrapper * {
+    max-width: 100%;
+    overflow: hidden;
+    word-wrap: break-word;
+  }
+
+  /* Specific input field optimizations */
+  .form-content-wrapper input,
+  .form-content-wrapper select,
+  .form-content-wrapper textarea {
+    max-width: 100%;
+    padding: 12px 8px;
+    border-width: 1px;
+  }
 }
 
 /* Base Form Styles */

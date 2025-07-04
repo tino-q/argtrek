@@ -646,17 +646,18 @@
   }
 }
 
-@media (max-width: 280px) {
+/* Static layout for screens 375px and below */
+@media (max-width: 375px) {
   .crypto-network-grid {
     grid-template-columns: 1fr !important;
     gap: 14px;
+    width: 100%;
   }
-}
 
-@media (max-width: 360px) {
   .crypto-currency-grid {
     grid-template-columns: 1fr !important;
     gap: 6px;
+    width: 100%;
   }
 
   .crypto-currency-grid .radio-option .option-content,

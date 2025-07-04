@@ -22,6 +22,8 @@ const StepRenderer = ({
   isFormSubmitted,
   submissionResult,
   onEmailNotFound,
+  showSuccess,
+  showError,
 }) => {
   const stepConfig = getStepConfig(currentStep);
 
@@ -29,80 +31,90 @@ const StepRenderer = ({
     return null;
   }
 
-  switch (currentStep) {
-    case "login":
-      return (
-        <EmailLogin
-          onEmailSubmit={onEmailSubmit}
-          onLogout={onLogout}
-          onEmailNotFound={onEmailNotFound}
-        />
-      );
-
-    case "new-email":
-      return <NewEmailStep updateFormData={updateFormData} />;
-
-    case "welcome":
-      return <WelcomeSection userRSVP={userRSVP} />;
-
-    case "rsvp":
-      if (!userRSVP) return null;
-      return (
-        <RSVPDisplay
-          rsvpData={userRSVP}
-          onContinue={onRSVPContinue}
-          onLogout={onLogout}
-          formData={formData}
-          updateFormData={updateFormData}
-          hideNavigation={true}
-        />
-      );
-
-    case "addons":
-      return (
-        <AddonsStep
-          formData={formData}
-          updateFormData={updateFormData}
-          rsvpData={userRSVP}
-        />
-      );
-
-    case "payment":
-      return (
-        <PaymentStep
-          formData={formData}
-          updateFormData={updateFormData}
-          rsvpData={userRSVP}
-          pricing={pricing}
-        />
-      );
-
-    case "payment-details":
-      // Protect payment details - only show if form has been submitted
-      if (!isFormSubmitted) {
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case "login":
         return (
-          <div className="access-denied">
-            <h2>Access Denied</h2>
-            <p>
-              Payment details are only available after completing your
-              registration.
-            </p>
-          </div>
+          <EmailLogin
+            onEmailSubmit={onEmailSubmit}
+            onLogout={onLogout}
+            onEmailNotFound={onEmailNotFound}
+          />
         );
-      }
-      return (
-        <PaymentDetailsDisplay
-          rsvpData={userRSVP}
-          formData={formData}
-          pricing={pricing}
-          onLogout={onLogout}
-          submissionResult={submissionResult}
-        />
-      );
 
-    default:
-      return null;
-  }
+      case "new-email":
+        return <NewEmailStep updateFormData={updateFormData} />;
+
+      case "welcome":
+        return (
+          <WelcomeSection
+            userRSVP={userRSVP}
+            showSuccess={showSuccess}
+            showError={showError}
+          />
+        );
+
+      case "rsvp":
+        if (!userRSVP) return null;
+        return (
+          <RSVPDisplay
+            rsvpData={userRSVP}
+            onContinue={onRSVPContinue}
+            onLogout={onLogout}
+            formData={formData}
+            updateFormData={updateFormData}
+            hideNavigation={true}
+          />
+        );
+
+      case "addons":
+        return (
+          <AddonsStep
+            formData={formData}
+            updateFormData={updateFormData}
+            rsvpData={userRSVP}
+          />
+        );
+
+      case "payment":
+        return (
+          <PaymentStep
+            formData={formData}
+            updateFormData={updateFormData}
+            rsvpData={userRSVP}
+            pricing={pricing}
+          />
+        );
+
+      case "payment-details":
+        // Protect payment details - only show if form has been submitted
+        if (!isFormSubmitted) {
+          return (
+            <div className="access-denied">
+              <h2>Access Denied</h2>
+              <p>
+                Payment details are only available after completing your
+                registration.
+              </p>
+            </div>
+          );
+        }
+        return (
+          <PaymentDetailsDisplay
+            rsvpData={userRSVP}
+            formData={formData}
+            pricing={pricing}
+            onLogout={onLogout}
+            submissionResult={submissionResult}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return <div className="form-content-wrapper">{renderStepContent()}</div>;
 };
 
 export default StepRenderer;

@@ -306,6 +306,7 @@
   color: #6c757d;
   font-size: 1.1rem;
   font-weight: 500;
+  margin-top: 20px;
 }
 
 .luggage-warning {
@@ -879,7 +880,6 @@
 .flight-date {
   color: var(--text-secondary);
   font-size: 0.8rem;
-  margin-bottom: 0.5rem;
 }
 
 /* Single Line Hotel/Accommodation Format */
@@ -912,6 +912,19 @@
   color: var(--text-secondary);
   font-size: 0.8rem;
   margin-bottom: 0.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* Hotel date elements */
+.check-in-date,
+.check-out-date {
+  white-space: nowrap;
+}
+
+.date-separator {
+  white-space: nowrap;
 }
 
 .hotel-maps-link {
@@ -975,6 +988,18 @@
   font-size: 0.9rem;
 }
 
+.flight-cities {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.flight-iata-times {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
 .flight-segment {
   color: var(--text-primary);
   font-weight: 500;
@@ -994,6 +1019,14 @@
     gap: 0.25rem;
   }
 
+  .flight-cities {
+    font-size: 0.9rem;
+  }
+
+  .flight-iata-times {
+    font-size: 0.8rem;
+  }
+
   .flight-segment {
     font-size: 0.8rem;
   }
@@ -1010,6 +1043,17 @@
     gap: 0.125rem;
   }
 
+  .flight-cities {
+    font-size: 0.85rem;
+    width: 100%;
+  }
+
+  .flight-iata-times {
+    font-size: 0.75rem;
+    width: 100%;
+    margin-left: 0.5rem;
+  }
+
   .flight-arrow {
     display: none;
   }
@@ -1018,6 +1062,72 @@
     content: " →";
     color: var(--primary);
     font-weight: 600;
+  }
+
+  /* Hotel date responsive formatting on small screens */
+  .accommodation-dates {
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 0.75rem;
+  }
+
+  .date-separator {
+    display: none;
+  }
+
+  .check-out-date {
+    margin-top: 2px;
+  }
+}
+
+/* Static layout for screens 375px and below */
+@media (max-width: 375px) {
+  .service-item {
+    padding: 0.75rem 0.5rem;
+    gap: 0.5rem;
+    overflow: hidden;
+    width: 100%;
+    max-width: 335px; /* Fixed width within 375px container */
+  }
+
+  .service-details {
+    min-width: 0;
+    overflow: hidden;
+    word-wrap: break-word;
+    width: 100%;
+  }
+
+  .service-title {
+    font-size: 0.9rem;
+    line-height: 1.2;
+  }
+
+  .accommodation-info-line {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+  }
+
+  .hotel-name-simple {
+    font-size: 0.85rem;
+  }
+
+  .accommodation-dates {
+    font-size: 0.7rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .flight-cities {
+    font-size: 0.8rem;
+  }
+
+  .flight-iata-times {
+    font-size: 0.7rem;
+    margin-left: 0.25rem;
+  }
+
+  .flight-date {
+    font-size: 0.65rem;
   }
 }
 

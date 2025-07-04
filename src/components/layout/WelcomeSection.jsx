@@ -3,11 +3,14 @@
 
 import { CONTACTS } from "../../utils/config";
 import { getTravelerName } from "../../utils/rsvpData";
+import { useClipboard } from "../../utils/clipboard";
 import barilocheImage from "../../assets/bariloche.png";
 import buenosAiresImage from "../../assets/buenos-aires.png";
 import mendozaImage from "../../assets/mendoza.png";
 
-const WelcomeSection = ({ userRSVP }) => {
+const WelcomeSection = ({ userRSVP, showSuccess, showError }) => {
+  const { copy } = useClipboard();
+
   const destinations = [
     {
       name: "Buenos Aires",
@@ -34,82 +37,95 @@ const WelcomeSection = ({ userRSVP }) => {
       ? travelerName.split(" ")[0] // Get first name for a more personal touch
       : "Traveler"; // Fallback if name is not available
 
-  return (
-    <section className="welcome-hero">
-      {/* Main Hero Content */}
-      <div className="hero-content">
-        <div className="hero-text">
-          <h1 className="hero-title">Welcome {firstName}!</h1>
-          <p className="hero-subtitle">
-            We're excited that you want to join us on this incredible journey
-            through Argentina's most breathtaking destinations!
-          </p>
-        </div>
+  // Handle phone number copy
+  const handlePhoneCopy = async (phone, name) => {
+    try {
+      const result = await copy(phone);
+      if (result.success) {
+        showSuccess(`${name}'s phone number copied to clipboard!`);
+      } else {
+        showError("Failed to copy phone number. Please try again.");
+      }
+    } catch {
+      showError("Failed to copy phone number. Please try again.");
+    }
+  };
 
-        {/* Destination Images */}
-        <div className="destinations-stack">
-          {destinations.map((destination, index) => (
-            <div key={index} className="destination-card">
-              <div className="destination-image">
-                <img src={destination.image} alt={destination.name} />
-                <div className="destination-overlay">
-                  <h3>{destination.name}</h3>
-                  <p>{destination.description}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+  return (
+    <section className="form-section">
+      {/* Welcome Header */}
+      <div className="welcome-header">
+        <h1 className="welcome-title">Welcome {firstName}!</h1>
+        <p className="welcome-subtitle">
+          We're excited that you want to join us on this incredible journey
+          through Argentina's most breathtaking destinations!
+        </p>
       </div>
 
-      {/* Action Cards */}
-      <div className="action-cards">
-        <div className="action-card itinerary-card">
-          <div className="card-icon">
-            <i className="fas fa-map-marked-alt"></i>
-          </div>
-          <div className="card-content">
-            <h3>Explore the Full Itinerary</h3>
-            <p>Discover every detail of your Argentina adventure</p>
-            <a
-              href="https://docs.google.com/presentation/d/164WBfbVElZFp-EVOFWNsplV9U8s5IltaFy4t9rmcpO4/edit?usp=sharing"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="action-button primary"
-            >
-              View Details <i className="fas fa-external-link-alt"></i>
-            </a>
-          </div>
-        </div>
-
-        <div className="action-card contact-card">
-          <div className="card-icon">
-            <i className="fas fa-headset"></i>
-          </div>
-          <div className="card-content">
-            <h3>Need Assistance?</h3>
-            <p>Our team is here to help with any questions</p>
-            <div className="contacts-grid">
-              {CONTACTS.map((contact, index) => (
-                <a
-                  key={index}
-                  href={contact.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="contact-row"
-                  title={`Message ${contact.name} on WhatsApp`}
-                >
-                  <div className="contact-info">
-                    <span className="contact-name">{contact.name}</span>
-                    <span className="contact-phone">{contact.phone}</span>
-                  </div>
-                  <div className="whatsapp-btn">
-                    <i className="fab fa-whatsapp"></i>
-                  </div>
-                </a>
-              ))}
+      {/* Destination Images */}
+      <div className="destinations-stack">
+        {destinations.map((destination, index) => (
+          <div key={index} className="destination-card">
+            <div className="destination-image">
+              <img src={destination.image} alt={destination.name} />
+              <div className="destination-overlay">
+                <h3>{destination.name}</h3>
+                <p>{destination.description}</p>
+              </div>
             </div>
           </div>
+        ))}
+      </div>
+
+      {/* Itinerary Section */}
+      <div className="itinerary-section">
+        <div className="section-icon">
+          <i className="fas fa-map-marked-alt"></i>
+        </div>
+        <h3>Explore the Full Itinerary</h3>
+        <p>Discover every detail of your Argentina adventure</p>
+        <a
+          href="https://docs.google.com/presentation/d/164WBfbVElZFp-EVOFWNsplV9U8s5IltaFy4t9rmcpO4/edit?usp=sharing"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="action-button primary"
+        >
+          View Details <i className="fas fa-external-link-alt"></i>
+        </a>
+      </div>
+
+      {/* Contact Section */}
+      <div className="contact-section">
+        <div className="section-icon">
+          <i className="fas fa-headset"></i>
+        </div>
+        <h3>Need Assistance?</h3>
+        <p>Our team is here to help with any questions</p>
+        <div className="contacts-grid">
+          {CONTACTS.map((contact, index) => (
+            <div key={index} className="contact-row">
+              <div className="contact-info">
+                <span className="contact-name">{contact.name}</span>
+                <button
+                  className="contact-phone clickable"
+                  onClick={() => handlePhoneCopy(contact.phone, contact.name)}
+                  title={`Copy ${contact.name}'s phone number`}
+                >
+                  {contact.phone}
+                  <i className="fas fa-copy"></i>
+                </button>
+              </div>
+              <a
+                href={contact.whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="whatsapp-btn"
+                title={`Message ${contact.name} on WhatsApp`}
+              >
+                <i className="fab fa-whatsapp"></i>
+              </a>
+            </div>
+          ))}
         </div>
       </div>
     </section>

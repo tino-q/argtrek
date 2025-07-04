@@ -160,7 +160,7 @@ const RSVPDisplay = ({
   // Helper function to extract city names from route
   const extractCityNames = (route) => {
     const cities = route.split(" → ");
-    return { origin: cities[0], destination: cities[1] };
+    return { origin: cities[0].replace("→", ""), destination: cities[1] };
   };
 
   // Define all services in chronological order using centralized data
@@ -344,7 +344,7 @@ const RSVPDisplay = ({
                   : `${service.nights[0].date} - ${service.nights[service.nights.length - 1].date}`}
               </div>
               <div className="accommodation-dates">
-                * per person based on double occupancy
+                * per person, double occupancy
               </div>
             </div>
           </>
@@ -356,21 +356,27 @@ const RSVPDisplay = ({
                 const cities = extractCityNames(service.route);
                 return (
                   <div className="flight-route-line">
-                    <span className="flight-segment">
-                      {cities.origin} ({service.departure.airport}){" "}
-                      {service.departure.time}
-                    </span>
-                    <span className="flight-arrow"> → </span>
-                    <span className="flight-segment">
-                      {cities.destination} ({service.arrival.airport}){" "}
-                      {service.arrival.time}
-                    </span>
+                    <div>
+                      <span className="flight-segment">{cities.origin}</span>
+                    </div>
+
+                    <div>
+                      <span className="flight-segment">
+                        ({service.departure.airport}) {service.departure.time}
+                      </span>
+                      <span className="flight-arrow"> → </span>
+                      <span className="flight-segment">
+                        {cities.destination} ({service.arrival.airport}){" "}
+                        {service.arrival.time}
+                      </span>
+                    </div>
                   </div>
                 );
               })()}
               <div className="flight-date">
-                {service.date} - {service.code} - {service.airline}
+                {service.date} - {service.code}
               </div>
+              <div className="flight-date">{service.airline}</div>
             </div>
           </>
         )}

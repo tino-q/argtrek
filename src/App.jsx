@@ -446,6 +446,9 @@ function App() {
     onNewEmailRequest: handleNewEmailRequest,
     onEmailNotFound: handleEmailNotFound,
     onNavigate: navigateToStep,
+    showSuccess,
+    showError,
+    showWarning,
   };
 
   // Block rendering of protected content if not authorized

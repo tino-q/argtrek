@@ -108,15 +108,20 @@
   }
 }
 
-@media (max-width: 360px) {
+/* Static layout for screens 375px and below */
+@media (max-width: 375px) {
   .dietary-options-grid {
     grid-template-columns: 1fr !important;
     gap: 6px;
+    width: 100%;
+    max-width: 335px;
+    margin: 0 auto;
   }
 
   .dietary-options-grid .radio-option .option-content {
     padding: 0;
     height: auto;
+    width: 100%;
   }
 
   .dietary-options-grid .radio-option .option-icon {
