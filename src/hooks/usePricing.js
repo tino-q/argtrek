@@ -37,14 +37,13 @@ export const usePricing = (rsvpData, formData) => {
       const checkedLuggagePrice = getCheckedLuggagePrice(rsvpData);
 
       // === USER SELECTIONS FROM FORM ===
-      const accommodationChoice = formData[FORM_FIELDS.ACCOMMODATION];
       const paymentMethod = formData[FORM_FIELDS.PAYMENT_METHOD];
       const paymentSchedule = formData[FORM_FIELDS.PAYMENT_SCHEDULE];
       const wantsCheckedLuggage = formData.luggage?.checked;
 
       // === CALCULATE ACCOMMODATION PRICE ===
       let privateRoomUpgrade = 0;
-      if (accommodationChoice === "private") {
+      if (formData[FORM_FIELDS.PRIVATE_ROOM_UPGRADE]) {
         privateRoomUpgrade = getPrivateRoomUpgradePrice(rsvpData);
       }
 
@@ -144,7 +143,7 @@ export const validatePricingData = (rsvpData, formData) => {
   }
 
   if (
-    formData[FORM_FIELDS.ACCOMMODATION] === "shared" &&
+    !formData[FORM_FIELDS.PRIVATE_ROOM_UPGRADE] &&
     !formData.roommate?.trim()
   ) {
     errors.push("Please specify your roommate for shared accommodation");

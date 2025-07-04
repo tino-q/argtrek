@@ -36,11 +36,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
 
   const handleRoomSelection = (isPrivateRoom) => {
     updateFormData(FORM_FIELDS.PRIVATE_ROOM_UPGRADE, isPrivateRoom);
-    // Set accommodation field for pricing calculations
-    updateFormData(
-      FORM_FIELDS.ACCOMMODATION,
-      isPrivateRoom ? "private" : "shared"
-    );
+
     // Clear roommate preference and name if switching to private room
     if (isPrivateRoom) {
       updateFormData(FORM_FIELDS.ROOMMATE_PREFERENCE, "");

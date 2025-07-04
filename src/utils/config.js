@@ -88,7 +88,6 @@ export const FORM_FIELDS = {
   EMAIL: "email",
   FULL_NAME: "fullName",
   PRIVATE_ROOM_UPGRADE: "privateRoomUpgrade",
-  ROOMMATE: "roommate",
   ROOMMATE_PREFERENCE: "roommatePreference",
   ROOMMATE_NAME: "roommateName",
   // Activities (sent as-is to backend)

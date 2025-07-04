@@ -9,7 +9,7 @@ const PricingSummary = ({ pricing, formData }) => {
   };
 
   const hasAccommodationUpgrade =
-    formData[FORM_FIELDS.ACCOMMODATION] === "private";
+    formData[FORM_FIELDS.PRIVATE_ROOM_UPGRADE] === true;
 
   const hasActivities = pricing.activities && pricing.activities.length > 0;
 

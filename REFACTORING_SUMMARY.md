@@ -97,7 +97,7 @@ RSVP_FIELDS = {
 ### Actual RSVP Columns
 
 ```
-Timestamp | name | party | plus1 | option | email | comments | email2 | Score | 
+Timestamp | name | party | plus1 | option | email | comments | email2  | 
 22Nov | 23Nov | JA3045AEP-BRC | 24Nov | 25Nov | 26Nov | JA3725BRC-MDZ | 
 27Nov | 28Nov | JA3073MDZ-AEP | 29Nov | PACKPRICE | PASSWORD | PRIVATEROOM | 
 IVAALOJ | VALIJA

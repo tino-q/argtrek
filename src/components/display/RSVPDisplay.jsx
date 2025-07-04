@@ -32,6 +32,9 @@ const RSVPDisplay = ({
     updateFormData("luggage", !isLuggageSelected);
   };
 
+  // Helper function to get generic hotel description
+  const getGenericHotelDescription = (location) => `Hotel in ${location}`;
+
   // Helper function to extract city names from route
   const extractCityNames = (route) => {
     const cities = route.split(" → ");
@@ -272,11 +275,7 @@ const RSVPDisplay = ({
                       <div className="accommodation-single-line">
                         <div className="accommodation-info-line">
                           <span className="hotel-name-simple">
-                            {service.hotelName}
-                          </span>
-                          <span className="location-simple">
-                            {service.location}
-                            {service.period && ` (${service.period})`}
+                            {getGenericHotelDescription(service.location)}
                           </span>
                         </div>
                         <div className="accommodation-dates">
@@ -284,18 +283,9 @@ const RSVPDisplay = ({
                             ? service.nights[0].date
                             : `${service.nights[0].date} - ${service.nights[service.nights.length - 1].date}`}
                         </div>
-                        {service.address && (
-                          <div className="hotel-maps-link">
-                            <a
-                              href={`https://maps.google.com/?q=${encodeURIComponent(service.address)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <i className="fas fa-map-marker-alt"></i>
-                              View on Google Maps
-                            </a>
-                          </div>
-                        )}
+                        <div className="accommodation-dates">
+                          * per person based on double occupancy
+                        </div>
                       </div>
                     </>
                   ) : (
@@ -354,6 +344,9 @@ const RSVPDisplay = ({
       {/* Services Not Included */}
       {showAllDetails && excludedProcessedServices.length > 0 && (
         <div className="services-section">
+          <h3>
+            <i className="fas fa-times-circle"></i> Services Not Included
+          </h3>
           <p className="services-description">
             These flights and accommodations are not included in your trip:
           </p>
@@ -380,11 +373,7 @@ const RSVPDisplay = ({
                         <div className="accommodation-single-line">
                           <div className="accommodation-info-line">
                             <span className="hotel-name-simple">
-                              {service.hotelName}
-                            </span>
-                            <span className="location-simple">
-                              {service.location}
-                              {service.period && ` (${service.period})`}
+                              {getGenericHotelDescription(service.location)}
                             </span>
                           </div>
                           <div className="accommodation-dates">
@@ -392,18 +381,9 @@ const RSVPDisplay = ({
                               ? service.nights[0].date
                               : `${service.nights[0].date} - ${service.nights[service.nights.length - 1].date}`}
                           </div>
-                          {service.address && (
-                            <div className="hotel-maps-link">
-                              <a
-                                href={`https://maps.google.com/?q=${encodeURIComponent(service.address)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <i className="fas fa-map-marker-alt"></i>
-                                View on Google Maps
-                              </a>
-                            </div>
-                          )}
+                          <div className="accommodation-dates">
+                            * per person based on double occupancy
+                          </div>
                         </div>
                       </>
                     ) : (
