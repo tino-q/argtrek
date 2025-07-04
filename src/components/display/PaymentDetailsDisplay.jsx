@@ -462,7 +462,7 @@ const PaymentDetailsDisplay = ({
 
     if (paymentMethod === "bank") {
       // Bank details box
-      addBox(margin, yPosition, contentWidth, 60, [248, 255, 248]);
+      addBox(margin, yPosition, contentWidth, 70, [248, 255, 248]);
       yPosition += 8;
 
       setLabel(9);
