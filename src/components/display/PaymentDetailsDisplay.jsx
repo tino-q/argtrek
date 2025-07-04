@@ -908,7 +908,7 @@ const PaymentDetailsDisplay = ({
                       <ul style={{ marginTop: "0.5rem", marginLeft: "1rem" }}>
                         <li>
                           <a
-                            href="https://wa.me/34689200162"
+                            href="https://wa.me/5491169729783"
                             target="_blank"
                             rel="noopener noreferrer"
                             style={{

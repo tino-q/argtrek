@@ -16,6 +16,8 @@ const RSVPDisplay = ({
   hideNavigation = false,
 }) => {
   const [showAllDetails, setShowAllDetails] = useState(false);
+  const [showHealthInsuranceDetails, setShowHealthInsuranceDetails] =
+    useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [hasInitialized, setHasInitialized] = useState(false);
 
@@ -85,11 +87,11 @@ const RSVPDisplay = ({
 
     setValidationErrors(errors);
 
-    // Check if travel document confirmation is checked
+    // Check if confirmation is checked
     const hasFieldErrors = Object.keys(errors).length > 0;
     const hasConfirmationError = !formData.travelDocumentConfirmed;
 
-    // If confirmation checkbox is not checked, ALWAYS scroll to it (regardless of field errors)
+    // If confirmation checkbox is not checked, scroll to it
     if (hasConfirmationError) {
       const confirmationElement = document.getElementById(
         "travel-document-confirmation"
@@ -360,12 +362,12 @@ const RSVPDisplay = ({
                       <span className="flight-segment">{cities.origin}</span>
                     </div>
 
-                    <div>
-                      <span className="flight-segment">
+                    <div className="flight-date ">
+                      <span>
                         ({service.departure.airport}) {service.departure.time}
                       </span>
                       <span className="flight-arrow"> → </span>
-                      <span className="flight-segment">
+                      <span>
                         {cities.destination} ({service.arrival.airport}){" "}
                         {service.arrival.time}
                       </span>
@@ -473,7 +475,7 @@ const RSVPDisplay = ({
           {/* Room Type - Read-only, at bottom */}
         </div>
 
-        {/* Travel Document Confirmation */}
+        {/* Travel Document & Health Insurance Confirmation */}
         <div
           id="travel-document-confirmation"
           className="travel-document-confirmation"
@@ -501,9 +503,79 @@ const RSVPDisplay = ({
                     information above
                   </li>
                   <li>All information provided is accurate and complete</li>
+                  <li>
+                    I have or will obtain by the time of the trip a valid health
+                    insurance policy that complies with the new Argentine
+                    requirement established by{" "}
+                    <a
+                      href="https://www.boletinoficial.gob.ar/detalleAviso/primera/326096/20250529"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Decree 366/2025
+                    </a>
+                    , covering all regular medical treatments and services
+                    during my stay in Argentina.
+                  </li>
                 </ul>
               </div>
             </label>
+          </div>
+
+          {/* Collapsible Health Insurance Details */}
+          <div className="health-insurance-details">
+            <button
+              type="button"
+              className="btn-link details-toggle"
+              onClick={() =>
+                setShowHealthInsuranceDetails(!showHealthInsuranceDetails)
+              }
+            >
+              {showHealthInsuranceDetails ? "Hide" : "Show"} health insurance
+              requirements
+              <i
+                className={`fas fa-chevron-${showHealthInsuranceDetails ? "up" : "down"}`}
+              ></i>
+            </button>
+
+            {showHealthInsuranceDetails && (
+              <div className="health-insurance-requirements">
+                <p>
+                  In accordance with{" "}
+                  <a
+                    href="https://www.boletinoficial.gob.ar/detalleAviso/primera/326096/20250529"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Decree 366/2025
+                  </a>
+                  , all foreign visitors to Argentina must have valid health
+                  insurance that:
+                </p>
+                <ul>
+                  <li>
+                    Covers general medical care, outpatient treatment, and
+                    hospitalization.
+                  </li>
+                  <li>Is valid throughout the entire stay in Argentina.</li>
+                  <li>
+                    Clearly states that it covers the traveler while in
+                    Argentina (country-specific coverage).
+                  </li>
+                  <li>Includes coverage for medical emergencies.</li>
+                  <li>
+                    May be required to be presented at the border or upon
+                    request by local authorities.
+                  </li>
+                </ul>
+                <p>
+                  <strong>Note:</strong> Public healthcare services in Argentina
+                  will only be available to non-residents in cases of emergency.
+                  For all other situations, proof of valid health insurance will
+                  be required in order to receive care.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -601,7 +673,7 @@ const RSVPDisplay = ({
               This information is based on your confirmed RSVP. If you need to
               modify any of these details, please contact{" "}
               <a
-                href="https://wa.me/34689200162"
+                href="https://wa.me/5491169729783"
                 target="_blank"
                 rel="noopener noreferrer"
               >

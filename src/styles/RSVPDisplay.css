@@ -911,7 +911,6 @@
 .accommodation-dates {
   color: var(--text-secondary);
   font-size: 0.8rem;
-  margin-bottom: 0.25rem;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1440,6 +1439,111 @@
   }
 
   .confirmation-text li {
+    font-size: 0.85rem;
+  }
+}
+
+/* Health Insurance Details Section */
+.health-insurance-details {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.details-toggle {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.details-toggle:hover {
+  color: var(--text-primary);
+}
+
+.details-toggle i {
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.health-insurance-requirements {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  animation: fadeIn 0.3s ease;
+}
+
+.health-insurance-requirements h4 {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.health-insurance-requirements p {
+  margin: 0 0 0.75rem 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.health-insurance-requirements ul {
+  margin: 0 0 0.75rem 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.health-insurance-requirements li {
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.health-insurance-requirements strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .health-insurance-details {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+  }
+
+  .details-toggle {
+    font-size: 0.85rem;
+  }
+
+  .health-insurance-requirements {
+    padding: 0.75rem;
+  }
+
+  .health-insurance-requirements h4 {
+    font-size: 0.9rem;
+  }
+
+  .health-insurance-requirements p,
+  .health-insurance-requirements li {
     font-size: 0.85rem;
   }
 }

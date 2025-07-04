@@ -78,8 +78,8 @@ export const LUGGAGE = {
 export const CONTACTS = [
   {
     name: "Maddie (Travel Coordinator)",
-    phone: "+34 (689) 200 162",
-    whatsapp: "https://wa.me/34689200162",
+    phone: "+54 (911) 6972 9783",
+    whatsapp: "https://wa.me/5491169729783",
   },
   {
     name: "Nati",
