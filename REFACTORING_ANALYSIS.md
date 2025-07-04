@@ -218,7 +218,7 @@ const paymentSubmission = {
   ],
   addonsTotal: 185, // calculated
   paymentMethod: "credit", // or "bank"
-  processingFee: 97.4, // 4% if credit
+  processingFee: 97.4, // 2.85% if credit
   finalTotal: 2532.4,
   submissionTimestamp: "2025-01-XX"
 }
@@ -293,7 +293,7 @@ const basePrice = calculateRSVPCost(userRSVP.itinerary);
 - **Flights**: $Y per flight per person
 - **Room type**: +$350 for private (if not shared in RSVP)
 - **Add-ons**: Existing activity pricing
-- **Payment processing**: 4% credit card fee
+- **Payment processing**: 2.85% credit card fee
 
 #### **Pricing Configuration Needed:**
 

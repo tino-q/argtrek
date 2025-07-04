@@ -42,15 +42,15 @@ Field Name        | Data Type | Description                                 | Re
 
 ### Pricing Columns (Calculated Values)
 
-Field Name           | Data Type | Description                                    | Required
--------------------- | --------- | ---------------------------------------------- | --------
-`basePrice`          | Number    | Base trip price (2250 or 2600 USD)             | Yes
-`privateRoomUpgrade` | Number    | Additional accommodation cost (0 or 350 USD)   | Yes
-`activitiesPrice`    | Number    | Total cost of selected activities              | Yes
-`subtotal`           | Number    | Base + accommodation + activities              | Yes
-`processingFee`      | Number    | Credit card processing fee (4% if credit card) | Yes
-`total`              | Number    | Final total amount                             | Yes
-`installmentAmount`  | Number    | First installment amount (35% if installments) | Yes
+Field Name           | Data Type | Description                                       | Required
+-------------------- | --------- | ------------------------------------------------- | --------
+`basePrice`          | Number    | Base trip price (2250 or 2600 USD)                | Yes
+`privateRoomUpgrade` | Number    | Additional accommodation cost (0 or 350 USD)      | Yes
+`activitiesPrice`    | Number    | Total cost of selected activities                 | Yes
+`subtotal`           | Number    | Base + accommodation + activities                 | Yes
+`processingFee`      | Number    | Credit card processing fee (2.85% if credit card) | Yes
+`total`              | Number    | Final total amount                                | Yes
+`installmentAmount`  | Number    | First installment amount (35% if installments)    | Yes
 
 ## Data Validation Rules
 
@@ -72,14 +72,14 @@ Field Name           | Data Type | Description                                  
 - `privateRoomUpgrade`: Set to accommodation upgrade price or 0
 - `activitiesPrice`: Sum of selected activity prices
 - `subtotal`: Base + accommodation + activities
-- `processingFee`: 4% of subtotal if credit card payment, otherwise 0
+- `processingFee`: 2.85% of subtotal if credit card payment, otherwise 0
 - `total`: Subtotal + processing fee
 - `installmentAmount`: 35% of total if installment plan, otherwise equals total
 
 ### Business Rules
 
 - All prices are in USD
-- Credit card payments incur a 4% processing fee
+- Credit card payments incur a 2.85% processing fee
 - Bank transfers have no processing fee
 - Installment plans require 35% upfront, 65% by deadline
 - Activity selections are optional but recorded as boolean values

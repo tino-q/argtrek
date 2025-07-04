@@ -34,7 +34,7 @@ export const PRICING_STRUCTURE = {
   },
   processingFee: {
     type: "number",
-    description: "Credit card processing fee (4%)",
+    description: "Credit card processing fee (2.85%)",
     required: true,
     calculated: true,
     aliases: ["creditCardFee"], // Common mistake

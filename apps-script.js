@@ -24,7 +24,7 @@ const PRICING = {
 
   // Note: Luggage is no longer priced, only tracked as boolean preference
 
-  creditCardFeeRate: 0.04,
+  creditCardFeeRate: 0.0285,
   installmentRate: 0.35,
 };
 

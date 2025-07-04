@@ -79,7 +79,7 @@ const PricingSummary = ({ pricing, formData }) => {
         {/* Processing Fee (Credit Card) */}
         {hasProcessingFee && (
           <div className="summary-row">
-            <span>Processing Fee (4%)</span>
+            <span>Processing Fee (2.85%)</span>
             <span>{formatCurrency(pricing.processingFee)}</span>
           </div>
         )}

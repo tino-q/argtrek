@@ -17,7 +17,7 @@ export const PRICES = {
   horseback: 45,
   cooking: 140,
   rafting: 75,
-  creditCardFeeRate: 0.04,
+  creditCardFeeRate: 0.0285,
   installmentRate: 0.35,
 };
 

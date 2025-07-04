@@ -71,7 +71,7 @@ export const usePricing = (rsvpData, formData) => {
       // === CALCULATE PROCESSING FEE ===
       // Apply processing fee to subtotal (no VAT)
       const processingFee =
-        paymentMethod === "credit" ? Math.round(subtotal * 0.04) : 0;
+        paymentMethod === "credit" ? Math.round(subtotal * 0.0285) : 0;
 
       // === CALCULATE FINAL TOTAL ===
       const total = subtotal + processingFee;

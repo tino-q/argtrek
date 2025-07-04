@@ -202,7 +202,7 @@ const PaymentOptions = ({ formData, updateFormData }) => {
             <label htmlFor="creditCard">
               <div className="option-content">
                 <h3>Credit Card</h3>
-                <p className="price">+4% processing fee</p>
+                <p className="price">+2.85% processing fee</p>
                 <p className="description">
                   Pay through a secure link sent to your email
                 </p>

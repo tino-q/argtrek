@@ -26,7 +26,7 @@ export const PRICING_CONFIG = {
 
   // Payment Processing Fees
   fees: {
-    creditCardRate: 0.04, // 4%
+    creditCardRate: 0.0285, // 2.85%
     bankTransferFee: 0, // No fee for bank transfers
   },
 

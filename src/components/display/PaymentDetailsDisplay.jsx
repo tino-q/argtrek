@@ -412,7 +412,7 @@ const PaymentDetailsDisplay = ({
     // Fees and taxes
     if (pricing.processingFee > 0) {
       yPosition = addKeyValue(
-        "Processing Fee (4%)",
+        "Processing Fee (2.85%)",
         `$${pricing.processingFee}`,
         yPosition,
         8
