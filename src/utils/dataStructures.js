@@ -26,12 +26,6 @@ export const PRICING_STRUCTURE = {
     required: true,
     calculated: true,
   },
-  vatAmount: {
-    type: "number",
-    description: "VAT amount for accommodation (Argentine citizens)",
-    required: true,
-    source: "rsvpData.IVAALOJ",
-  },
   subtotal: {
     type: "number",
     description: "Base + accommodation + activities",
@@ -73,28 +67,29 @@ export const PRICING_STRUCTURE = {
 // FORM DATA STRUCTURE
 // ========================================
 export const FORM_DATA_STRUCTURE = {
-  // Personal Information
+  // Contact Information
   email: {
     type: "string",
-    description: "User email address",
+    description: "Participant's email address",
     required: true,
     validation: "email",
   },
   firstName: {
     type: "string",
-    description: "Traveler's first name",
+    description: "Participant's first name",
     required: true,
+    minLength: 2,
   },
   lastName: {
     type: "string",
-    description: "Traveler's last name",
+    description: "Participant's last name",
     required: true,
+    minLength: 2,
   },
   phoneNumber: {
     type: "string",
-    description: "Traveler's phone number",
+    description: "Participant's phone number",
     required: true,
-    validation: "phone",
   },
 
   // Accommodation
@@ -105,36 +100,37 @@ export const FORM_DATA_STRUCTURE = {
   },
   roommatePreference: {
     type: "string",
-    description: "Roommate preference (specific/any)",
+    description: "Roommate preference (random/specific)",
     required: false,
+    values: ["random", "specific", ""],
   },
   roommateName: {
     type: "string",
-    description: "Specific roommate name if specified",
+    description: "Specific roommate name if applicable",
     required: false,
   },
 
   // Activities
   rafting: {
     type: "boolean",
-    description: "Rafting activity selection",
+    description: "Whether user selected rafting activity",
     required: true,
   },
   horseback: {
     type: "boolean",
-    description: "Horseback riding activity selection",
+    description: "Whether user selected horseback riding",
     required: true,
   },
   cooking: {
     type: "boolean",
-    description: "Cooking class activity selection",
+    description: "Whether user selected cooking class",
     required: true,
   },
 
   // Luggage
   checkedLuggage: {
     type: "boolean",
-    description: "Whether user wants checked luggage (not recommended)",
+    description: "Whether user needs checked luggage",
     required: true,
   },
 
@@ -162,11 +158,6 @@ export const FORM_DATA_STRUCTURE = {
     description: "Crypto network (ETH/ARB/SOL)",
     required: false,
     values: ["ETH", "ARB", "SOL"],
-  },
-  argentineCitizen: {
-    type: "boolean",
-    description: "Whether user is Argentine citizen",
-    required: true,
   },
 
   // Dietary
@@ -211,16 +202,6 @@ export const RSVP_DATA_STRUCTURE = {
     description: "Private room upgrade price",
     required: true,
   },
-  IVAALOJ: {
-    type: "number",
-    description: "VAT amount for accommodation",
-    required: true,
-  },
-  // VALIJA: {
-  //   type: "number",
-  //   description: "Checked luggage price",
-  //   required: true,
-  // }, // Removed - no longer pricing luggage
 };
 
 // ========================================
@@ -260,23 +241,25 @@ export const validatePricingStructure = (pricing) => {
 };
 
 /**
- * Generate suggestions for common field name mistakes
- * @param {Object} obj - Object to analyze
- * @returns {Array} Array of suggestions
+ * Generate suggestions for common pricing structure errors
+ * @param {Object} pricing - Pricing object
+ * @returns {Array} Array of suggestion strings
  */
-const generateSuggestions = (obj) => {
+const generateSuggestions = (pricing) => {
   const suggestions = [];
 
-  // Check for common aliases
-  Object.entries(PRICING_STRUCTURE).forEach(([correctKey, config]) => {
-    if (config.aliases && obj[correctKey] === undefined) {
-      config.aliases.forEach((alias) => {
-        if (obj[alias] !== undefined) {
-          suggestions.push(`Found '${alias}', did you mean '${correctKey}'?`);
-        }
-      });
-    }
-  });
+  // Check for common alias mistakes
+  if (pricing.creditCardFee && !pricing.processingFee) {
+    suggestions.push(
+      "Use 'processingFee' instead of 'creditCardFee' for consistency"
+    );
+  }
+
+  if (pricing.firstPayment && !pricing.installmentAmount) {
+    suggestions.push(
+      "Use 'installmentAmount' instead of 'firstPayment' for consistency"
+    );
+  }
 
   return suggestions;
 };
@@ -311,66 +294,70 @@ export const getCalculatedPricingProperties = (pricing) => {
 };
 
 /**
- * Safe field accessor with fallback and suggestions
- * @param {Object} obj - Object to access
- * @param {string} field - Field name to access
- * @param {*} fallback - Fallback value
- * @returns {*} Field value or fallback
+ * Validate form data structure
+ * @param {Object} formData - Form data object to validate
+ * @returns {Object} Validation result with isValid and errors
  */
-export const safeFieldAccess = (obj, field, fallback = null) => {
-  if (!obj || typeof obj !== "object") {
-    console.warn(
-      `safeFieldAccess: Invalid object provided for field '${field}'`
-    );
-    return fallback;
+export const validateFormDataStructure = (formData) => {
+  const errors = [];
+
+  if (!formData || typeof formData !== "object") {
+    return { isValid: false, errors: ["Form data object is required"] };
   }
 
-  if (obj[field] !== undefined) {
-    return obj[field];
-  }
+  // Check required fields
+  Object.entries(FORM_DATA_STRUCTURE).forEach(([key, config]) => {
+    if (config.required && formData[key] === undefined) {
+      errors.push(`Missing required field: ${key}`);
+    }
 
-  // Check for common aliases
-  const structure = PRICING_STRUCTURE[field] || FORM_DATA_STRUCTURE[field];
-  if (structure && structure.aliases) {
-    for (const alias of structure.aliases) {
-      if (obj[alias] !== undefined) {
-        console.warn(
-          `Field '${field}' not found, using alias '${alias}'. Consider updating your code.`
+    if (formData[key] !== undefined) {
+      const value = formData[key];
+      const expectedType = config.type;
+
+      // Handle array|string type
+      if (expectedType.includes("|")) {
+        const types = expectedType.split("|");
+        const isValidType = types.some((type) => {
+          if (type === "array") return Array.isArray(value);
+          return typeof value === type;
+        });
+
+        if (!isValidType) {
+          errors.push(
+            `Field ${key} should be one of: ${types.join(", ")}, got ${typeof value}`
+          );
+        }
+      } else if (typeof value !== expectedType) {
+        errors.push(
+          `Field ${key} should be ${expectedType}, got ${typeof value}`
         );
-        return obj[alias];
+      }
+
+      // Check allowed values
+      if (config.values && !config.values.includes(value)) {
+        errors.push(
+          `Field ${key} must be one of: ${config.values.join(", ")}, got: ${value}`
+        );
+      }
+
+      // Check minimum length for strings
+      if (
+        config.minLength &&
+        typeof value === "string" &&
+        value.length < config.minLength
+      ) {
+        errors.push(
+          `Field ${key} must be at least ${config.minLength} characters long`
+        );
       }
     }
-  }
+  });
 
-  console.warn(
-    `Field '${field}' not found in object. Available fields: ${Object.keys(obj).join(", ")}`
-  );
-  return fallback;
-};
-
-/**
- * Development helper: Log structure mismatches
- * @param {Object} obj - Object to analyze
- * @param {Object} expectedStructure - Expected structure
- * @param {string} objectName - Name for logging
- */
-export const logStructureMismatches = (
-  obj,
-  expectedStructure,
-  objectName = "Object"
-) => {
-  // Only log in development mode
-  if (import.meta.env.MODE !== "development") return;
-
-  const validation = validatePricingStructure(obj);
-  if (!validation.isValid) {
-    console.group(`🔍 ${objectName} Structure Issues:`);
-    validation.errors.forEach((error) => console.warn(`❌ ${error}`));
-    validation.suggestions.forEach((suggestion) =>
-      console.info(`💡 ${suggestion}`)
-    );
-    console.groupEnd();
-  }
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
 };
 
 // ========================================
@@ -381,7 +368,6 @@ export const SAFE_PRICING_FIELDS = {
   BASE_PRICE: "basePrice",
   PRIVATE_ROOM_UPGRADE: "privateRoomUpgrade",
   ACTIVITIES_PRICE: "activitiesPrice",
-  VAT_AMOUNT: "vatAmount",
   SUBTOTAL: "subtotal",
   PROCESSING_FEE: "processingFee", // NOT creditCardFee
   TOTAL: "total",
@@ -405,7 +391,6 @@ export const SAFE_FORM_FIELDS = {
   PAYMENT_METHOD: "paymentMethod",
   CRYPTO_CURRENCY: "cryptoCurrency",
   CRYPTO_NETWORK: "cryptoNetwork",
-  ARGENTINE_CITIZEN: "argentineCitizen",
   DIETARY_RESTRICTIONS: "dietaryRestrictions",
   DIETARY_MESSAGE: "dietaryMessage",
 };

@@ -3,18 +3,13 @@
 
 import { useState, useEffect } from "react";
 import { FORM_FIELDS, ACTIVITIES } from "../utils/config";
-import {
-  getBasePrice,
-  getPrivateRoomUpgradePrice,
-  getVATAmount,
-} from "../utils/rsvpData";
+import { getBasePrice, getPrivateRoomUpgradePrice } from "../utils/rsvpData";
 
 export const usePricing = (rsvpData, formData) => {
   const [pricing, setPricing] = useState({
     basePrice: 0,
     privateRoomUpgrade: 0,
     activitiesPrice: 0,
-    vatAmount: 0,
     subtotal: 0,
     processingFee: 0,
     total: 0,
@@ -30,9 +25,6 @@ export const usePricing = (rsvpData, formData) => {
     const calculatePricing = () => {
       // === READONLY DATA FROM RSVP (Backend) ===
       const basePrice = getBasePrice(rsvpData);
-      const vatAmount = formData[FORM_FIELDS.ARGENTINE_CITIZEN]
-        ? getVATAmount(rsvpData)
-        : 0;
 
       // === USER SELECTIONS FROM FORM ===
       const paymentMethod = formData[FORM_FIELDS.PAYMENT_METHOD];
@@ -77,13 +69,12 @@ export const usePricing = (rsvpData, formData) => {
       const subtotal = basePrice + privateRoomUpgrade + activitiesPrice;
 
       // === CALCULATE PROCESSING FEE ===
-      // Apply processing fee to (subtotal + VAT)
-      const subtotalWithVAT = subtotal + vatAmount;
+      // Apply processing fee to subtotal (no VAT)
       const processingFee =
-        paymentMethod === "credit" ? Math.round(subtotalWithVAT * 0.04) : 0;
+        paymentMethod === "credit" ? Math.round(subtotal * 0.04) : 0;
 
       // === CALCULATE FINAL TOTAL ===
-      const total = subtotalWithVAT + processingFee;
+      const total = subtotal + processingFee;
 
       // === CALCULATE INSTALLMENT AMOUNT ===
       const installmentAmount =
@@ -93,7 +84,6 @@ export const usePricing = (rsvpData, formData) => {
         basePrice,
         privateRoomUpgrade,
         activitiesPrice,
-        vatAmount,
         subtotal,
         processingFee,
         total,

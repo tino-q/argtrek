@@ -1,9 +1,5 @@
 import React from "react";
 import { FORM_FIELDS } from "../../utils/config";
-import {
-  shouldEnforceArgentineCitizenship,
-  getVATAmount,
-} from "../../utils/rsvpData";
 import "../../styles/PaymentOptions.css";
 
 const BANK_DETAILS = [
@@ -70,15 +66,8 @@ const CURRENCY_INFO = {
   },
 };
 
-const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
+const PaymentOptions = ({ formData, updateFormData }) => {
   const isCrypto = formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto";
-
-  // Check if user should have Argentine citizenship enforced using centralized utility
-  const enforcedArgentine = shouldEnforceArgentineCitizenship(rsvpData);
-
-  // Check if VAT amount is 0 to hide the Argentine citizenship checkbox
-  const vatAmount = getVATAmount(rsvpData);
-  const shouldHideArgentineCitizenship = vatAmount === 0;
 
   // Set default payment schedule to "full" (Single Payment) if not set
   React.useEffect(() => {
@@ -103,13 +92,6 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
       updateFormData(FORM_FIELDS.ARGENTINE_CITIZEN, false);
     }
   }, [formData, updateFormData]);
-
-  // Auto-set Argentine citizenship if enforced
-  React.useEffect(() => {
-    if (enforcedArgentine && !formData[FORM_FIELDS.ARGENTINE_CITIZEN]) {
-      updateFormData(FORM_FIELDS.ARGENTINE_CITIZEN, true);
-    }
-  }, [enforcedArgentine, formData, updateFormData]);
 
   // Set default crypto currency to USDT when crypto is selected
   React.useEffect(() => {
@@ -377,62 +359,6 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
                 ))}
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Argentine Citizen Checkbox - Only show if VAT amount is not 0 */}
-      {!shouldHideArgentineCitizenship && (
-        <div className="form-group">
-          <div
-            className="checkbox-option"
-            onClick={() => {
-              if (!enforcedArgentine) {
-                updateFormData(
-                  FORM_FIELDS.ARGENTINE_CITIZEN,
-                  !formData[FORM_FIELDS.ARGENTINE_CITIZEN]
-                );
-              }
-            }}
-            style={{
-              cursor: enforcedArgentine ? "not-allowed" : "pointer",
-              opacity: enforcedArgentine ? 0.7 : 1,
-            }}
-          >
-            <input
-              type="checkbox"
-              id="argentineCitizen"
-              name="argentineCitizen"
-              checked={formData[FORM_FIELDS.ARGENTINE_CITIZEN] || false}
-              onChange={(e) => {
-                if (!enforcedArgentine) {
-                  updateFormData(
-                    FORM_FIELDS.ARGENTINE_CITIZEN,
-                    e.target.checked
-                  );
-                }
-              }}
-              disabled={enforcedArgentine}
-              style={{ pointerEvents: "none" }}
-            />
-            <label
-              htmlFor="argentineCitizen"
-              className="checkbox-label"
-              style={{ pointerEvents: "none" }}
-            >
-              <strong>I have Argentine citizenship</strong>
-              <p className="help-text">
-                Argentine citizens are subject to 21% VAT on accommodation
-                {enforcedArgentine && (
-                  <>
-                    <br />
-                    <em style={{ color: "var(--primary)", fontSize: "0.9em" }}>
-                      ✓ Automatically applied based on your profile
-                    </em>
-                  </>
-                )}
-              </p>
-            </label>
           </div>
         </div>
       )}

@@ -29,18 +29,8 @@ const BANK_DETAILS = [
 ];
 
 const CRYPTO_WALLETS = {
-  ETH: {
-    USDT: "0xB15E94F7eDD9bB738E5Ba0991ee173E4Fb40d6B3",
-    USDC: "0xB15E94F7eDD9bB738E5Ba0991ee173E4Fb40d6B3",
-  },
-  ARB: {
-    USDT: "0xB15E94F7eDD9bB738E5Ba0991ee173E4Fb40d6B3",
-    USDC: "0xB15E94F7eDD9bB738E5Ba0991ee173E4Fb40d6B3",
-  },
-  SOL: {
-    USDT: "6GtbPf58peWCT2EQEpbPdvAx4XuRAGmCW4vQszt1vqjy",
-    USDC: "6GtbPf58peWCT2EQEpbPdvAx4XuRAGmCW4vQszt1vqjy",
-  },
+  ETH: "0xB15E94F7eDD9bB738E5Ba0991ee173E4Fb40d6B3", // Used for both ETH and ARB
+  SOL: "6GtbPf58peWCT2EQEpbPdvAx4XuRAGmCW4vQszt1vqjy", // Used for SOL
 };
 
 const NETWORK_INFO = {
@@ -150,7 +140,7 @@ const PaymentDetailsDisplay = ({
       setLabel();
       doc.text(label + ":", margin + indent, yPos);
       setBody();
-      doc.text(value, margin + indent + 50, yPos);
+      doc.text(value, margin + indent + 57, yPos);
       return yPos + 6;
     };
 
@@ -406,7 +396,9 @@ const PaymentDetailsDisplay = ({
     }
 
     // Checked luggage - informational line
-    yPosition = addKeyValue("Checked Luggage", "(pending)", yPosition, 8);
+    if (formData[FORM_FIELDS.CHECKED_LUGGAGE]) {
+      yPosition = addKeyValue("Checked Luggage", "(pending)", yPosition, 8);
+    }
 
     // Subtotal
     yPosition += 3;
@@ -418,14 +410,6 @@ const PaymentDetailsDisplay = ({
     yPosition = addKeyValue("Subtotal", `$${pricing.subtotal}`, yPosition, 8);
 
     // Fees and taxes
-    if (pricing.vatAmount > 0) {
-      yPosition = addKeyValue(
-        "VAT (21%)",
-        `$${pricing.vatAmount}`,
-        yPosition,
-        8
-      );
-    }
     if (pricing.processingFee > 0) {
       yPosition = addKeyValue(
         "Processing Fee (4%)",
@@ -447,9 +431,9 @@ const PaymentDetailsDisplay = ({
     doc.text("TOTAL:", margin + 8, yPosition);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.text(`$${pricing.total}`, margin + 8 + 50, yPosition);
+    doc.text(`$${pricing.total}`, margin + 8 + 56, yPosition);
 
-    yPosition += 20;
+    yPosition += 55;
 
     // === PAYMENT INFORMATION ===
     checkPageBreak(100);
@@ -517,7 +501,7 @@ const PaymentDetailsDisplay = ({
       yPosition += 10;
     } else if (paymentMethod === "crypto") {
       // Crypto details
-      addBox(margin, yPosition, contentWidth, 50, [248, 248, 255]);
+      addBox(margin, yPosition, contentWidth, 30, [248, 248, 255]);
       yPosition += 8;
 
       yPosition = addKeyValue(
@@ -534,23 +518,27 @@ const PaymentDetailsDisplay = ({
         8
       );
 
-      const walletAddress =
-        CRYPTO_WALLETS[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.[
-          formData[FORM_FIELDS.CRYPTO_CURRENCY]
-        ];
+      // Get wallet address (ARB uses the same wallet as ETH)
+      const networkKey =
+        formData[FORM_FIELDS.CRYPTO_NETWORK] === "ARB"
+          ? "ETH"
+          : formData[FORM_FIELDS.CRYPTO_NETWORK];
+      const walletAddress = CRYPTO_WALLETS[networkKey];
       if (walletAddress) {
-        setLabel();
-        doc.text("Wallet Address:", margin + 8, yPosition);
-        yPosition += 6;
-        setBody(7);
-        // Split long wallet address into multiple lines if needed
-        const maxWidth = contentWidth - 16;
-        const addressLines = doc.splitTextToSize(walletAddress, maxWidth);
-        addressLines.forEach((line) => {
-          doc.text(line, margin + 8, yPosition);
-          yPosition += 5;
-        });
-        yPosition += 3;
+        yPosition = addKeyValue("Wallet Address", walletAddress, yPosition, 8);
+
+        // setLabel();
+        // doc.text("Wallet Address:", margin + 8, yPosition);
+        // yPosition += 6;
+        // setBody(7);
+        // // Split long wallet address into multiple lines if needed
+        // const maxWidth = contentWidth - 16;
+        // const addressLines = doc.splitTextToSize(walletAddress, maxWidth);
+        // addressLines.forEach((line) => {
+        //   doc.text(line, margin + 8, yPosition);
+        //   yPosition += 5;
+        // });
+        // yPosition += 3;
       }
 
       yPosition += 10;
@@ -577,7 +565,7 @@ const PaymentDetailsDisplay = ({
     // Payment schedule
     if (formData[FORM_FIELDS.PAYMENT_SCHEDULE] === "installments") {
       checkPageBreak(25);
-      addBox(margin, yPosition, contentWidth, 20, [248, 255, 248]);
+      addBox(margin, yPosition, contentWidth, 30, [248, 255, 248]);
       yPosition += 8;
 
       setLabel();
@@ -589,18 +577,18 @@ const PaymentDetailsDisplay = ({
       const secondPayment = pricing.total - firstPayment;
 
       yPosition = addKeyValue(
-        "First Payment (35%)",
+        "1st Payment (35%)",
         `$${firstPayment}`,
         yPosition,
         8
       );
       yPosition = addKeyValue(
-        "Second Payment (65%)",
+        "2nd Payment (65%) by Sept 15th",
         `$${secondPayment}`,
         yPosition,
         8
       );
-      yPosition += 10;
+      yPosition += 25;
     }
 
     // === DIETARY INFORMATION ===
@@ -822,25 +810,28 @@ const PaymentDetailsDisplay = ({
                           <button
                             type="button"
                             className="copy-btn"
-                            onClick={(e) =>
-                              handleCopyClick(
-                                CRYPTO_WALLETS[
-                                  formData[FORM_FIELDS.CRYPTO_NETWORK]
-                                ]?.[formData[FORM_FIELDS.CRYPTO_CURRENCY]],
-                                e
-                              )
-                            }
+                            onClick={(e) => {
+                              // ARB uses the same wallet as ETH
+                              const networkKey =
+                                formData[FORM_FIELDS.CRYPTO_NETWORK] === "ARB"
+                                  ? "ETH"
+                                  : formData[FORM_FIELDS.CRYPTO_NETWORK];
+                              handleCopyClick(CRYPTO_WALLETS[networkKey], e);
+                            }}
                             title="Copy wallet address"
                           >
                             <i className="fas fa-copy"></i>
                           </button>
                         </span>
                         <span className="value crypto-address">
-                          {
-                            CRYPTO_WALLETS[
-                              formData[FORM_FIELDS.CRYPTO_NETWORK]
-                            ]?.[formData[FORM_FIELDS.CRYPTO_CURRENCY]]
-                          }
+                          {(() => {
+                            // ARB uses the same wallet as ETH
+                            const networkKey =
+                              formData[FORM_FIELDS.CRYPTO_NETWORK] === "ARB"
+                                ? "ETH"
+                                : formData[FORM_FIELDS.CRYPTO_NETWORK];
+                            return CRYPTO_WALLETS[networkKey];
+                          })()}
                         </span>
                       </div>
                     </div>

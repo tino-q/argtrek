@@ -15,7 +15,6 @@ This document describes the column structure for the RSVP data sheet that contai
 ### Pricing Columns
 
 - **"PRIVATE ROOM UPGRADE"** - Private room upgrade price for this customer (numeric value in USD, only relevant for solo travelers)
-- **"IVA ALOJ"** - VAT amount for accommodation for Argentine citizens (absolute value in USD, not a percentage)
 
 ### Boolean Itinerary Columns (1 = included, 0/empty = not included)
 
@@ -47,30 +46,38 @@ This document describes the column structure for the RSVP data sheet that contai
 
 - **Password Verification**: "PASSWORD" column
 
-  - Case-sensitive matching
-  - Passwords should be unique for each traveler
-  - Passwords are distributed separately via email
-  - Password is removed from API response for security
+  - Must match exactly (case-sensitive)
+  - No additional processing required
 
-### Boolean Conversion
+### Price Processing
 
-- `1` or `"1"` → `true` (service included)
-- `0`, `"0"`, or `""` → `false` (service not included)
+- **Pack Price**: "PACK PRICE"
 
-### Service-Based Model
+  - Remove any currency symbols ($, USD, etc.)
+  - Convert to numeric value
+  - Use as base trip cost
 
-The system uses individual boolean columns for each flight and accommodation rather than predefined "options". This allows for complete customization of each traveler's itinerary based on their specific selections.
+- **Private Room Upgrade**: "PRIVATE ROOM UPGRADE"
 
-### Plus One Logic
+  - Use directly as numeric value
+  - Only applies to solo travelers
+  - Set to 0 if not applicable
 
-- If plus one name exists → Shared room automatically
-- If no plus one → Solo traveler, may need room preference
+### Itinerary Processing
 
-### Private Room Upgrade Logic
+- **Boolean Fields**: All accommodation and flight columns
 
-- Private room upgrade option is only shown to solo travelers (those without a plus one)
-- Upgrade price is retrieved from the "PRIVATE ROOM UPGRADE" column for each customer
-- If plus one exists, private room upgrade is not available (they share with their plus one)
+  - 1 or TRUE = included in package
+  - 0, FALSE, or empty = not included (excluded service)
+  - Used to generate personalized itinerary
+
+## Example Row Structure
+
+```
+| Name         | Plus One | Email            | Password | Pack Price | Private Room | 22 NOV | 23 NOV | ... |
+|-------------|----------|------------------|----------|------------|-------------|--------|--------|-----|
+| John Smith  |          | john@email.com   | xyz123   | 2250       | 350         | 1      | 1      | ... |
+```
 
 ## Frontend Display Logic
 

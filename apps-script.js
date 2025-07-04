@@ -26,7 +26,6 @@ const PRICING = {
 
   creditCardFeeRate: 0.04,
   installmentRate: 0.35,
-  vatRate: 0.21,
 };
 
 /**
@@ -594,7 +593,6 @@ function saveToSheet(data) {
 
       "formData.checkedLuggage",
       "formData.privateRoomUpgrade",
-      "formData.argentineCitizen",
 
       "formData.cooking",
       "formData.horseback",
@@ -612,7 +610,6 @@ function saveToSheet(data) {
       "pricing.processingFee",
       "pricing.subtotal",
       "pricing.total",
-      "pricing.vatAmount",
 
       "rsvpData.22Nov_BSAS",
       "rsvpData.23Nov_BSAS",
@@ -626,7 +623,6 @@ function saveToSheet(data) {
       "rsvpData.29Nov_BSAS",
       "rsvpData.AEP-BRC",
       "rsvpData.BRC-MDZ",
-      "rsvpData.IVAALOJ",
       "rsvpData.MDZ-AEP",
       "rsvpData.PACKPRICE",
       "rsvpData.PRIVATEROOM",

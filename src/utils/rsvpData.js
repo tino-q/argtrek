@@ -17,8 +17,6 @@ export const RSVP_FIELDS = {
   // Pricing
   PACK_PRICE: "PACKPRICE",
   PRIVATE_ROOM_UPGRADE: "PRIVATEROOM",
-  IVA_ALOJ: "IVAALOJ",
-  // CHECKED_LUGGAGE: "VALIJA", // Removed - no longer pricing luggage
 
   // Trip Configuration
   TRIP_OPTION: "option",
@@ -116,16 +114,6 @@ export const getPrivateRoomUpgradePrice = (rsvpData) => {
 
   const price = rsvpData[RSVP_FIELDS.PRIVATE_ROOM_UPGRADE];
   return parseFloat(price) || 0;
-};
-
-/**
- * Get VAT amount for accommodation (for Argentine citizens)
- */
-export const getVATAmount = (rsvpData) => {
-  if (!rsvpData) return 0;
-
-  const vatAmount = rsvpData[RSVP_FIELDS.IVA_ALOJ];
-  return parseFloat(vatAmount) || 0;
 };
 
 /**
@@ -509,20 +497,6 @@ export const getExcludedFlights = (rsvpData) => {
 };
 
 /**
- * Check if user should have Argentine citizenship auto-enforced
- * (for specific users like Jero or Nati)
- */
-export const shouldEnforceArgentineCitizenship = (rsvpData) => {
-  if (!rsvpData) return false;
-
-  const name = getTravelerName(rsvpData);
-  if (!name) return false;
-
-  const lowerName = name.toLowerCase().trim();
-  return lowerName.includes("jero") || lowerName.includes("nati");
-};
-
-/**
  * Split traveler name into first name and last name
  */
 export const splitTravelerName = (rsvpData, formData) => {
@@ -570,7 +544,6 @@ export const getPricingInfo = (rsvpData) => {
   return {
     basePrice: getBasePrice(rsvpData),
     privateRoomUpgrade: getPrivateRoomUpgradePrice(rsvpData),
-    vatAmount: getVATAmount(rsvpData),
   };
 };
 

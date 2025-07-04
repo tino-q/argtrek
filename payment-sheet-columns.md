@@ -35,24 +35,22 @@ Field Name        | Data Type | Description                                  | R
 
 ### Payment Configuration Columns
 
-Field Name         | Data Type | Description                                 | Required
------------------- | --------- | ------------------------------------------- | --------
-`paymentSchedule`  | Text      | Payment schedule ("full" or "installments") | Yes
-`paymentMethod`    | Text      | Payment method ("credit" or "bank")         | Yes
-`argentineCitizen` | Boolean   | Whether participant is Argentine citizen    | Yes
+Field Name        | Data Type | Description                                 | Required
+----------------- | --------- | ------------------------------------------- | --------
+`paymentSchedule` | Text      | Payment schedule ("full" or "installments") | Yes
+`paymentMethod`   | Text      | Payment method ("credit" or "bank")         | Yes
 
 ### Pricing Columns (Calculated Values)
 
-Field Name           | Data Type | Description                                                                                         | Required
--------------------- | --------- | --------------------------------------------------------------------------------------------------- | --------
-`basePrice`          | Number    | Base trip price (2250 or 2600 USD)                                                                  | Yes
-`privateRoomUpgrade` | Number    | Additional accommodation cost (0 or 350 USD)                                                        | Yes
-`activitiesPrice`    | Number    | Total cost of selected activities                                                                   | Yes
-`subtotal`           | Number    | Base + accommodation + activities                                                                   | Yes
-`processingFee`      | Number    | Credit card processing fee (4% if credit card)                                                      | Yes
-`vatAmount`          | Number    | VAT amount for accommodation (absolute value from RSVP data "IVA ALOJ" column if Argentine citizen) | Yes
-`total`              | Number    | Final total amount                                                                                  | Yes
-`installmentAmount`  | Number    | First installment amount (35% if installments)                                                      | Yes
+Field Name           | Data Type | Description                                    | Required
+-------------------- | --------- | ---------------------------------------------- | --------
+`basePrice`          | Number    | Base trip price (2250 or 2600 USD)             | Yes
+`privateRoomUpgrade` | Number    | Additional accommodation cost (0 or 350 USD)   | Yes
+`activitiesPrice`    | Number    | Total cost of selected activities              | Yes
+`subtotal`           | Number    | Base + accommodation + activities              | Yes
+`processingFee`      | Number    | Credit card processing fee (4% if credit card) | Yes
+`total`              | Number    | Final total amount                             | Yes
+`installmentAmount`  | Number    | First installment amount (35% if installments) | Yes
 
 ## Data Validation Rules
 
@@ -67,4 +65,21 @@ Field Name           | Data Type | Description                                  
 - `horsebackRiding`: Must be boolean (TRUE/FALSE)
 - `cookingClass`: Must be boolean (TRUE/FALSE)
 - `rafting`: Must be boolean (TRUE/FALSE)
-- `argentineCitizen`: Must be boolean (TRUE/FALSE)
+
+### Pricing Calculation Rules
+
+- `basePrice`: Always comes from RSVP lookup data
+- `privateRoomUpgrade`: Set to accommodation upgrade price or 0
+- `activitiesPrice`: Sum of selected activity prices
+- `subtotal`: Base + accommodation + activities
+- `processingFee`: 4% of subtotal if credit card payment, otherwise 0
+- `total`: Subtotal + processing fee
+- `installmentAmount`: 35% of total if installment plan, otherwise equals total
+
+### Business Rules
+
+- All prices are in USD
+- Credit card payments incur a 4% processing fee
+- Bank transfers have no processing fee
+- Installment plans require 35% upfront, 65% by deadline
+- Activity selections are optional but recorded as boolean values

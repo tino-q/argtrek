@@ -30,7 +30,6 @@ function App() {
     return {
       [FORM_FIELDS.PAYMENT_SCHEDULE]: "full",
       [FORM_FIELDS.PAYMENT_METHOD]: "credit",
-      [FORM_FIELDS.ARGENTINE_CITIZEN]: false,
       [FORM_FIELDS.DIETARY_RESTRICTIONS]: "none",
       [FORM_FIELDS.PRIVATE_ROOM_UPGRADE]: false, // Default to shared room
       [FORM_FIELDS.RAFTING]: false,

@@ -19,7 +19,6 @@ export const PRICES = {
   rafting: 75,
   creditCardFeeRate: 0.04,
   installmentRate: 0.35,
-  vatRate: 0.21,
 };
 
 // Activity Information
@@ -119,8 +118,89 @@ export const FORM_FIELDS = {
   PAYMENT_METHOD: "paymentMethod",
   CRYPTO_CURRENCY: "cryptoCurrency",
   CRYPTO_NETWORK: "cryptoNetwork",
-  ARGENTINE_CITIZEN: "argentineCitizen",
   // Dietary preferences
   DIETARY_RESTRICTIONS: "dietaryRestrictions",
   DIETARY_MESSAGE: "dietaryMessage",
+};
+
+// Application Configuration
+// Central configuration file for the Argentina Trip form
+
+// Base URL for API requests
+export const API_URL =
+  "https://script.google.com/macros/s/AKfycbwRYPqDwfHyZFr9TNLJjBrWG2SgJz_vfNc1qzK_2LKX9xyLkcxOpyRvQMiGE17uAFV6aQ/exec";
+
+// Form Steps Configuration
+export const STEPS = {
+  EMAIL_LOGIN: "email-login",
+  NEW_EMAIL: "new-email",
+  RSVP_DISPLAY: "rsvp-display",
+  ADDONS: "addons",
+  ACTIVITIES: "activities",
+  PAYMENT: "payment",
+  CONFIRMATION: "confirmation",
+};
+
+// Step Navigation Configuration
+export const STEP_CONFIG = {
+  [STEPS.EMAIL_LOGIN]: {
+    title: "Login",
+    description: "Enter your credentials",
+    showInNavigation: false,
+  },
+  [STEPS.NEW_EMAIL]: {
+    title: "Request Access",
+    description: "Request trip access",
+    showInNavigation: false,
+  },
+  [STEPS.RSVP_DISPLAY]: {
+    title: "Trip Details",
+    description: "Review your confirmed itinerary",
+    showInNavigation: true,
+  },
+  [STEPS.ADDONS]: {
+    title: "Add-ons",
+    description: "Accommodation & dietary preferences",
+    showInNavigation: true,
+  },
+  [STEPS.ACTIVITIES]: {
+    title: "Activities",
+    description: "Optional excursions",
+    showInNavigation: true,
+  },
+  [STEPS.PAYMENT]: {
+    title: "Payment",
+    description: "Payment method & schedule",
+    showInNavigation: true,
+  },
+  [STEPS.CONFIRMATION]: {
+    title: "Confirmation",
+    description: "Registration complete",
+    showInNavigation: false,
+  },
+};
+
+// Get ordered steps for navigation
+export const getOrderedSteps = () => {
+  return Object.keys(STEP_CONFIG).filter(
+    (step) => STEP_CONFIG[step].showInNavigation
+  );
+};
+
+// Validation Configuration
+export const VALIDATION = {
+  EMAIL_PATTERN: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  PHONE_PATTERN: /^[\d\s\-+()]+$/,
+  MIN_NAME_LENGTH: 2,
+  MAX_MESSAGE_LENGTH: 500,
+};
+
+// UI Constants
+export const UI_CONSTANTS = {
+  ANIMATION_DURATION: 300,
+  TOAST_DURATION: 5000,
+  LOADING_DELAY: 500,
+  SUCCESS_COLOR: "#22c55e",
+  ERROR_COLOR: "#ef4444",
+  WARNING_COLOR: "#f59e0b",
 };

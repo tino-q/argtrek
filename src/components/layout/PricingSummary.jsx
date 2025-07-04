@@ -15,8 +15,6 @@ const PricingSummary = ({ pricing, formData }) => {
 
   const hasCheckedLuggage = formData[FORM_FIELDS.CHECKED_LUGGAGE] === true;
 
-  const hasVAT = formData[FORM_FIELDS.ARGENTINE_CITIZEN];
-
   const hasProcessingFee = formData[FORM_FIELDS.PAYMENT_METHOD] === "credit";
 
   const isInstallmentPlan =
@@ -77,22 +75,6 @@ const PricingSummary = ({ pricing, formData }) => {
           <span>Subtotal</span>
           <span>{formatCurrency(pricing.subtotal)}</span>
         </div>
-
-        {/* VAT (Argentine Citizens) */}
-        {hasVAT && (
-          <div className="summary-row">
-            <span>VAT (21%) on accommodation</span>
-            <span>{formatCurrency(pricing.vatAmount)}</span>
-          </div>
-        )}
-
-        {/* Intermediate Subtotal (when VAT is applied) */}
-        {hasVAT && (
-          <div className="summary-row subtotal">
-            <span>Subtotal (incl. VAT)</span>
-            <span>{formatCurrency(pricing.subtotal + pricing.vatAmount)}</span>
-          </div>
-        )}
 
         {/* Processing Fee (Credit Card) */}
         {hasProcessingFee && (
