@@ -119,7 +119,7 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
     <>
       <section className="form-section">
         <h2>
-          <i className="fas fa-sign-in-alt"></i> Access Your Trip Details
+          <i className="fas fa-sign-in-alt"></i> Log in
         </h2>
 
         <form onSubmit={handleSubmit} className="email-login-form">

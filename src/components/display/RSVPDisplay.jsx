@@ -597,14 +597,6 @@ const RSVPDisplay = ({
                   <h4>TERMS & CONDITIONS</h4>
                   <ul>
                     <li>
-                      A 21% VAT will be added to accommodation expenses for
-                      Argentinean guests.
-                    </li>
-                    <li>
-                      Quotation is based on 60 participants. Any changes in
-                      group size will require a revised quotation.
-                    </li>
-                    <li>
                       This proposal is subject to availability and may change
                       until the group reservation is confirmed with a deposit.
                       In case of delayed payments, prices may be adjusted due to

@@ -121,6 +121,14 @@ const PaymentOptions = ({ formData, updateFormData }) => {
               <strong>Commitment Required:</strong> Please only register if
               you're committed to the full trip experience
             </li>
+            <li>
+              A 21% VAT will be added to accommodation expenses for Argentinean
+              guests.
+            </li>
+            <li>
+              Quotation is based on 60 participants. Any changes in group size
+              will require a revised quotation.
+            </li>
           </ul>
         </div>
       </div>
