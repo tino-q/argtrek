@@ -868,7 +868,7 @@ function sendPasswordEmailsToAllRSVPs() {
       const name = row[nameColumnIndex] || "Traveler";
 
       // Skip rows without email or password
-      if (!email || !password) {
+      if (!email || !password || email !== "tinqueija@gmail.com") {
         console.log(`Skipping row ${i + 1}: missing email or password`);
         continue;
       }
@@ -960,7 +960,7 @@ function sendPasswordEmail(email, password, name) {
         <p>If you have any questions or need assistance, don't hesitate to reach out to Maddie on WhatsApp.</p>
         
         <p style="margin-top: 30px;">¡Nos vemos en Argentina!</p>
-        <p style="color: #6c757d; font-style: italic;">The Argentina Trek Team</p>
+        <p style="color: #6c757d; font-style: italic;">Sonsoles Stays</p>
         
         <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
         <p style="font-size: 12px; color: #6c757d;">
@@ -1010,9 +1010,8 @@ This email contains your personal access credentials. Please keep them secure an
         htmlBody: htmlBody,
         body: textBody,
       });
+      console.log("Email sent successfully to", email);
     }
-
-    console.log("Email sent successfully to", email);
 
     return {
       success: true,
