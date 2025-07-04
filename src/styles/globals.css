@@ -2,6 +2,7 @@
 :root {
   /* Primary Theme - Argentine Celeste (Flag Blue) */
   --primary: #75aadb; /* celeste - Argentine flag blue */
+  --primary-rgb: 117, 170, 219; /* primary color as RGB values */
   --primary-dark: #5a8bc4; /* darker celeste */
   --primary-darker: #4a73a1; /* deepest blue */
   --primary-light: #8fc3e8; /* lighter celeste */

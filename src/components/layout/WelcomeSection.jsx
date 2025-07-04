@@ -91,21 +91,22 @@ const WelcomeSection = ({ userRSVP }) => {
             <p>Our team is here to help with any questions</p>
             <div className="contacts-grid">
               {CONTACTS.map((contact, index) => (
-                <div key={index} className="contact-row">
+                <a
+                  key={index}
+                  href={contact.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="contact-row"
+                  title={`Message ${contact.name} on WhatsApp`}
+                >
                   <div className="contact-info">
                     <span className="contact-name">{contact.name}</span>
                     <span className="contact-phone">{contact.phone}</span>
                   </div>
-                  <a
-                    href={contact.whatsapp}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="whatsapp-btn"
-                    title={`Message ${contact.name} on WhatsApp`}
-                  >
+                  <div className="whatsapp-btn">
                     <i className="fab fa-whatsapp"></i>
-                  </a>
-                </div>
+                  </div>
+                </a>
               ))}
             </div>
           </div>
