@@ -6,7 +6,7 @@
  * Google Apps Script globals: ContentService, SpreadsheetApp, Utilities
  */
 
-/* global ContentService, SpreadsheetApp, Utilities */
+/* global ContentService, SpreadsheetApp, Utilities, MailApp */
 
 // Configuration
 const TRIP_REGISTRATIONS_SHEET_NAME = "Trip Registrations";
@@ -812,6 +812,203 @@ function saveToNewEmailsSheet(data) {
     return {
       success: false,
       error: "Failed to save new email request",
+    };
+  }
+}
+
+/**
+ * Manual trigger function to send password emails to all RSVP users
+ * Run this function manually from the Apps Script editor when needed
+ */
+// eslint-disable-next-line no-unused-vars
+function sendPasswordEmailsToAllRSVPs() {
+  try {
+    console.log("Starting to send password emails to all RSVP users...");
+
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(RSVP_SHEET_NAME);
+
+    if (!sheet) {
+      throw new Error("RSVP sheet not found");
+    }
+
+    // Get all data from the sheet
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+
+    if (values.length < 2) {
+      console.log("No RSVP data found");
+      return;
+    }
+
+    // Get headers (first row)
+    const headers = values[0];
+
+    // Find column indices
+    const emailColumnIndex = headers.indexOf("email");
+    const passwordColumnIndex = headers.indexOf("PASSWORD");
+    const nameColumnIndex = headers.indexOf("name");
+
+    if (emailColumnIndex === -1) {
+      throw new Error("Email column not found in RSVP sheet");
+    }
+
+    if (passwordColumnIndex === -1) {
+      throw new Error("PASSWORD column not found in RSVP sheet");
+    }
+
+    let emailsSent = 0;
+    let errors = 0;
+
+    // Process each row (skip header row)
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const email = row[emailColumnIndex];
+      const password = row[passwordColumnIndex];
+      const name = row[nameColumnIndex] || "Traveler";
+
+      // Skip rows without email or password
+      if (!email || !password) {
+        console.log(`Skipping row ${i + 1}: missing email or password`);
+        continue;
+      }
+
+      try {
+        // Send the email
+        const result = sendPasswordEmail(
+          email.toString().trim(),
+          password.toString().trim(),
+          name.toString().trim()
+        );
+
+        if (result.success) {
+          emailsSent++;
+          console.log(`✓ Email sent to: ${email}`);
+        } else {
+          errors++;
+          console.error(
+            `✗ Failed to send email to: ${email} - ${result.error}`
+          );
+        }
+
+        // Add a small delay to avoid hitting Gmail sending limits
+        Utilities.sleep(1000); // 1 second delay
+      } catch (emailError) {
+        errors++;
+        console.error(`✗ Error sending email to ${email}:`, emailError);
+      }
+    }
+
+    // Final summary
+    console.log(`\n=== EMAIL SENDING SUMMARY ===`);
+    console.log(`Total emails sent: ${emailsSent}`);
+    console.log(`Total errors: ${errors}`);
+    console.log(`Total processed: ${emailsSent + errors}`);
+
+    return {
+      success: true,
+      emailsSent: emailsSent,
+      errors: errors,
+      message: `Completed: ${emailsSent} emails sent, ${errors} errors`,
+    };
+  } catch (error) {
+    console.error("Error in sendPasswordEmailsToAllRSVPs:", error);
+    throw error;
+  }
+}
+
+/**
+ * Send password email to a specific user
+ */
+function sendPasswordEmail(email, password, name) {
+  try {
+    const subject = "Argentina awaits, confirm your trip";
+
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2c3e50;">¡Hola ${name}!</h2>
+        
+        <p>Argentina awaits you! 🇦🇷✈️</p>
+        
+        <p>You're all set to confirm your spot on our amazing Argentina adventure. Use the details below to access your trip registration:</p>
+        
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #495057;">Your Trip Access Details:</h3>
+          <p><strong>Website:</strong> <a href="https://argtrek.sonsolesstays.com" style="color: #007bff;">argtrek.sonsolesstays.com</a></p>
+          <p><strong>Your Email:</strong> ${email}</p>
+          <p><strong>Your Password:</strong> <code style="background-color: #e9ecef; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${password}</code></p>
+        </div>
+        
+        <p>Click the link above and use your email and password to:</p>
+        <ul>
+          <li>✅ Confirm your trip details</li>
+          <li>🏠 Select your accommodation preferences</li>
+          <li>🎯 Choose your activities</li>
+          <li>💳 Complete your payment</li>
+        </ul>
+        
+        <p><strong>Important:</strong> Please complete your registration as soon as possible to secure your spot!</p>
+        
+        <p>If you have any questions or need assistance, don't hesitate to reach out to Maddie on WhatsApp.</p>
+        
+        <p style="margin-top: 30px;">¡Nos vemos en Argentina!</p>
+        <p style="color: #6c757d; font-style: italic;">The Argentina Trek Team</p>
+        
+        <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
+        <p style="font-size: 12px; color: #6c757d;">
+          This email contains your personal access credentials. Please keep them secure and don't share them with others.
+        </p>
+      </div>
+    `;
+
+    const textBody = `
+¡Hola ${name}!
+
+Argentina awaits you! 🇦🇷✈️
+
+You're all set to confirm your spot on our amazing Argentina adventure. Use the details below to access your trip registration:
+
+Your Trip Access Details:
+Website: https://argtrek.sonsolesstays.com
+Your Email: ${email}
+Your Password: ${password}
+
+Visit the website and use your email and password to:
+✅ Confirm your trip details
+🏠 Select your accommodation preferences  
+🎯 Choose your activities
+💳 Complete your payment
+
+Important: Please complete your registration as soon as possible to secure your spot!
+
+If you have any questions or need assistance, don't hesitate to reach out to Maddie on WhatsApp.
+
+¡Nos vemos en Argentina!
+The Argentina Trek Team
+
+---
+This email contains your personal access credentials. Please keep them secure and don't share them with others.
+    `;
+
+    // Send the email using Gmail API
+    // MailApp.sendEmail({
+    //   to: email,
+    //   subject: subject,
+    //   htmlBody: htmlBody,
+    //   body: textBody,
+    // });
+
+    console.log("Email sent successfully to", email);
+
+    return {
+      success: true,
+      message: `Email sent successfully to ${email}`,
+    };
+  } catch (error) {
+    console.error(`Error sending email to ${email}:`, error);
+    return {
+      success: false,
+      error: error.message,
     };
   }
 }

@@ -3,7 +3,7 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbzfaGd1j0_IIeR5VXm9bsmBsxOPcZ4isy8LseJclfOmGXeufRS58KrQ_dbz8zlryxbj/exec";
+  "https://script.google.com/macros/s/AKfycbxQvZTzsqj7tf2n7oEPIlNvPnrs6w4lmfc0yv861DcHM98HPxNmt2_HYPFRfkgWsCqL/exec";
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {
@@ -125,10 +125,6 @@ export const FORM_FIELDS = {
 
 // Application Configuration
 // Central configuration file for the Argentina Trip form
-
-// Base URL for API requests
-export const API_URL =
-  "https://script.google.com/macros/s/AKfycbwRYPqDwfHyZFr9TNLJjBrWG2SgJz_vfNc1qzK_2LKX9xyLkcxOpyRvQMiGE17uAFV6aQ/exec";
 
 // Form Steps Configuration
 export const STEPS = {
