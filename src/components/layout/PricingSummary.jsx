@@ -97,7 +97,7 @@ const PricingSummary = ({ pricing, formData }) => {
 
         {/* Amount Due Now */}
         <div className="payment-amount">
-          <span>Amount Due Now</span>
+          <span>Amount Due Now {isInstallmentPlan ? "(35%)" : "(100%)"}</span>
           <span>{formatCurrency(pricing.installmentAmount)}</span>
         </div>
 

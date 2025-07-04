@@ -1,10 +1,18 @@
 // Payment Details Display Component
 // Shows payment information after successful trip registration
 
-import { getTravelerName } from "../../utils/rsvpData";
-import { FORM_FIELDS, EMAIL_CONFIG } from "../../utils/config";
+import {
+  getTravelerName,
+  getEmail,
+  getPlusOneName,
+  getBasePrice,
+  getPrivateRoomUpgradePrice,
+  getTripItinerary,
+} from "../../utils/rsvpData";
+import { FORM_FIELDS, EMAIL_CONFIG, ACTIVITIES } from "../../utils/config";
 import { copyToClipboard } from "../../utils/clipboard";
 import PricingSummary from "../layout/PricingSummary";
+import jsPDF from "jspdf";
 import "../../styles/PaymentDetailsDisplay.css";
 
 const BANK_DETAILS = [
@@ -22,16 +30,16 @@ const BANK_DETAILS = [
 
 const CRYPTO_WALLETS = {
   ETH: {
-    USDT: "0x1234567890123456789012345678901234567890",
-    USDC: "0x1234567890123456789012345678901234567890",
+    USDT: "0xB15E94F7eDD9bB738E5Ba0991ee173E4Fb40d6B3",
+    USDC: "0xB15E94F7eDD9bB738E5Ba0991ee173E4Fb40d6B3",
   },
   ARB: {
-    USDT: "0x1234567890123456789012345678901234567890",
-    USDC: "0x1234567890123456789012345678901234567890",
+    USDT: "0xB15E94F7eDD9bB738E5Ba0991ee173E4Fb40d6B3",
+    USDC: "0xB15E94F7eDD9bB738E5Ba0991ee173E4Fb40d6B3",
   },
   SOL: {
-    USDT: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
-    USDC: "9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM",
+    USDT: "6GtbPf58peWCT2EQEpbPdvAx4XuRAGmCW4vQszt1vqjy",
+    USDC: "6GtbPf58peWCT2EQEpbPdvAx4XuRAGmCW4vQszt1vqjy",
   },
 };
 
@@ -60,7 +68,6 @@ const PaymentDetailsDisplay = ({
   rsvpData,
   formData,
   pricing,
-  onLogout,
   submissionResult,
 }) => {
   const travelerName = getTravelerName(rsvpData);
@@ -75,6 +82,361 @@ const PaymentDetailsDisplay = ({
       setTimeout(() => {
         button.classList.remove("copied");
       }, 2000);
+    }
+  };
+
+  const generatePDFSummary = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const maxYPosition = pageHeight - 40; // Leave space for footer
+    let yPosition = margin;
+
+    // Get trip itinerary data
+    const tripItinerary = getTripItinerary(rsvpData);
+
+    // Helper function to check if we need a new page
+    const checkPageBreak = (requiredSpace = 10) => {
+      if (yPosition + requiredSpace > maxYPosition) {
+        doc.addPage();
+        yPosition = margin;
+        return true;
+      }
+      return false;
+    };
+
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(40, 40, 40);
+    doc.text(
+      "Argentina Trek - Trip Registration Summary",
+      pageWidth / 2,
+      yPosition,
+      { align: "center" }
+    );
+    yPosition += 15;
+
+    // Order Number
+    if (submissionResult?.rowNumber) {
+      doc.setFontSize(14);
+      doc.setTextColor(100, 100, 100);
+      doc.text(
+        `Order #${submissionResult.rowNumber}`,
+        pageWidth / 2,
+        yPosition,
+        { align: "center" }
+      );
+      yPosition += 15;
+    }
+
+    // Date
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(
+      `Generated: ${new Date().toLocaleDateString()}`,
+      pageWidth / 2,
+      yPosition,
+      { align: "center" }
+    );
+    yPosition += 20;
+
+    // Customer Information
+    checkPageBreak(30);
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Customer Information", 20, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setTextColor(60, 60, 60);
+    doc.text(`Primary Traveler: ${travelerName}`, 20, yPosition);
+    yPosition += 5;
+
+    const plusOneName = getPlusOneName(rsvpData);
+    if (plusOneName) {
+      doc.text(`Plus One: ${plusOneName}`, 20, yPosition);
+      yPosition += 5;
+    }
+
+    doc.text(`Email: ${getEmail(rsvpData)}`, 20, yPosition);
+    yPosition += 5;
+
+    // Confirmed Flights
+    if (tripItinerary.flights && tripItinerary.flights.length > 0) {
+      checkPageBreak(50);
+      yPosition += 15;
+      doc.setFontSize(14);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Confirmed Flights", 20, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.setTextColor(60, 60, 60);
+
+      tripItinerary.flights.forEach((flight) => {
+        checkPageBreak(30);
+        doc.text(`Flight ${flight.code} - ${flight.airline}`, 20, yPosition);
+        yPosition += 5;
+        doc.text(`  ${flight.route}`, 20, yPosition);
+        yPosition += 5;
+        doc.text(
+          `  ${flight.date} - Departure: ${flight.departure.time} (${flight.departure.airport})`,
+          20,
+          yPosition
+        );
+        yPosition += 5;
+        doc.text(
+          `  Arrival: ${flight.arrival.time} (${flight.arrival.airport})`,
+          20,
+          yPosition
+        );
+        yPosition += 5;
+        doc.text(
+          `  Duration: ${flight.duration} - Aircraft: ${flight.aircraft}`,
+          20,
+          yPosition
+        );
+        yPosition += 8;
+      });
+    }
+
+    // Confirmed Hotels
+    if (
+      tripItinerary.accommodations &&
+      tripItinerary.accommodations.length > 0
+    ) {
+      checkPageBreak(50);
+      yPosition += 10;
+      doc.setFontSize(14);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Confirmed Hotels", 20, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.setTextColor(60, 60, 60);
+
+      tripItinerary.accommodations.forEach((hotel) => {
+        checkPageBreak(25);
+        doc.text(`${hotel.hotelName} - ${hotel.location}`, 20, yPosition);
+        yPosition += 5;
+        doc.text(`  ${hotel.address}`, 20, yPosition);
+        yPosition += 5;
+        const nightsText =
+          hotel.nights.length === 1
+            ? hotel.nights[0]
+            : `${hotel.nights[0]} - ${hotel.nights[hotel.nights.length - 1]}`;
+        doc.text(`  Dates: ${nightsText}`, 20, yPosition);
+        yPosition += 8;
+      });
+    }
+
+    // Trip Details
+    checkPageBreak(40);
+    yPosition += 10;
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Trip Details", 20, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setTextColor(60, 60, 60);
+    doc.text(`Base Trip Price: $${getBasePrice(rsvpData)}`, 20, yPosition);
+    yPosition += 5;
+
+    // Accommodations
+    if (formData[FORM_FIELDS.PRIVATE_ROOM_UPGRADE]) {
+      doc.text(
+        `Private Room Upgrade: $${getPrivateRoomUpgradePrice(rsvpData)}`,
+        20,
+        yPosition
+      );
+      yPosition += 5;
+    }
+
+    // Activities
+    const activities = [];
+    if (formData[FORM_FIELDS.RAFTING]) {
+      activities.push({
+        name: ACTIVITIES.rafting.name,
+        price: ACTIVITIES.rafting.price,
+      });
+    }
+    if (formData[FORM_FIELDS.HORSEBACK]) {
+      activities.push({
+        name: ACTIVITIES.horseback.name,
+        price: ACTIVITIES.horseback.price,
+      });
+    }
+    if (formData[FORM_FIELDS.COOKING]) {
+      activities.push({
+        name: ACTIVITIES.cooking.name,
+        price: ACTIVITIES.cooking.price,
+      });
+    }
+
+    if (activities.length > 0) {
+      checkPageBreak(15 + activities.length * 5);
+      yPosition += 5;
+      doc.text("Selected Activities:", 20, yPosition);
+      yPosition += 5;
+      activities.forEach((activity) => {
+        doc.text(`• ${activity.name}: $${activity.price}`, 25, yPosition);
+        yPosition += 5;
+      });
+    }
+
+    // Pricing Summary
+    checkPageBreak(50);
+    yPosition += 10;
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Pricing Summary", 20, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setTextColor(60, 60, 60);
+    doc.text(`Subtotal: $${pricing.subtotal}`, 20, yPosition);
+    yPosition += 5;
+
+    if (pricing.vatAmount > 0) {
+      doc.text(`VAT (21%): $${pricing.vatAmount}`, 20, yPosition);
+      yPosition += 5;
+    }
+
+    if (pricing.processingFee > 0) {
+      doc.text(`Processing Fee (4%): $${pricing.processingFee}`, 20, yPosition);
+      yPosition += 5;
+    }
+
+    doc.setFontSize(12);
+    doc.setTextColor(40, 40, 40);
+    doc.text(`Total: $${pricing.total}`, 20, yPosition);
+    yPosition += 5;
+
+    // Payment Information
+    checkPageBreak(60);
+    yPosition += 15;
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Payment Information", 20, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setTextColor(60, 60, 60);
+
+    const paymentMethod = formData[FORM_FIELDS.PAYMENT_METHOD];
+    if (paymentMethod === "bank") {
+      doc.text("Payment Method: Bank Transfer", 20, yPosition);
+      yPosition += 5;
+      doc.text("Bank: Revolut", 20, yPosition);
+      yPosition += 5;
+      doc.text("Account: SONSOLES RKT SL", 20, yPosition);
+      yPosition += 5;
+      doc.text("IBAN: ES51 1583 0001 1093 9530 1696", 20, yPosition);
+      yPosition += 5;
+    } else if (paymentMethod === "crypto") {
+      doc.text("Payment Method: Cryptocurrency", 20, yPosition);
+      yPosition += 5;
+      doc.text(
+        `Network: ${formData[FORM_FIELDS.CRYPTO_NETWORK]}`,
+        20,
+        yPosition
+      );
+      yPosition += 5;
+      doc.text(
+        `Currency: ${formData[FORM_FIELDS.CRYPTO_CURRENCY]}`,
+        20,
+        yPosition
+      );
+      yPosition += 5;
+    } else if (paymentMethod === "credit") {
+      doc.text("Payment Method: Credit Card", 20, yPosition);
+      yPosition += 5;
+      doc.text("Payment link will be sent within 24 hours", 20, yPosition);
+      yPosition += 5;
+    }
+
+    // Payment Schedule
+    if (formData[FORM_FIELDS.PAYMENT_SCHEDULE] === "installments") {
+      checkPageBreak(20);
+      yPosition += 5;
+      doc.text("Payment Schedule: Installments", 20, yPosition);
+      yPosition += 5;
+
+      // Calculate installment payments
+      const firstPayment =
+        pricing.installmentAmount || Math.round(pricing.total * 0.35);
+      const secondPayment = pricing.total - firstPayment;
+
+      doc.text(`First Payment (35%): $${firstPayment}`, 20, yPosition);
+      yPosition += 5;
+      doc.text(`Second Payment (65%): $${secondPayment}`, 20, yPosition);
+      yPosition += 5;
+    }
+
+    // Dietary Restrictions
+    const dietaryRestrictions = formData[FORM_FIELDS.DIETARY_RESTRICTIONS];
+    if (dietaryRestrictions && dietaryRestrictions.length > 0) {
+      checkPageBreak(40);
+      yPosition += 15;
+      doc.setFontSize(14);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Dietary Information", 20, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.setTextColor(60, 60, 60);
+
+      // Handle different data types for dietary restrictions
+      let dietaryText = "";
+      if (Array.isArray(dietaryRestrictions)) {
+        dietaryText = dietaryRestrictions.join(", ");
+      } else if (typeof dietaryRestrictions === "string") {
+        dietaryText = dietaryRestrictions;
+      } else {
+        dietaryText = String(dietaryRestrictions);
+      }
+
+      doc.text(`Dietary Restrictions: ${dietaryText}`, 20, yPosition);
+      yPosition += 5;
+
+      if (formData[FORM_FIELDS.DIETARY_MESSAGE]) {
+        doc.text(
+          `Additional Notes: ${formData[FORM_FIELDS.DIETARY_MESSAGE]}`,
+          20,
+          yPosition
+        );
+        yPosition += 5;
+      }
+    }
+
+    // Footer
+    checkPageBreak(20);
+    yPosition = Math.max(yPosition + 10, pageHeight - 30);
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.text(
+      "Thank you for choosing Argentina Trek!",
+      pageWidth / 2,
+      yPosition,
+      { align: "center" }
+    );
+    yPosition += 5;
+    doc.text(`Contact: ${EMAIL_CONFIG.MADDIE}`, pageWidth / 2, yPosition, {
+      align: "center",
+    });
+
+    // Generate PDF and open print dialog for the PDF (not the webpage)
+    const pdfBlob = doc.output("blob");
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+
+    // Open PDF in new window and trigger print dialog
+    const printWindow = window.open(pdfUrl, "_blank");
+    if (printWindow) {
+      printWindow.onload = () => {
+        printWindow.print();
+      };
     }
   };
 
@@ -152,6 +514,10 @@ const PaymentDetailsDisplay = ({
                     <li>
                       <strong>Note:</strong> Any unaccounted fees will be
                       deducted from your payment
+                    </li>
+                    <li>
+                      <strong>Confirmation:</strong> Please send any
+                      transfer/receipt confirmation to Maddie via email
                     </li>
                   </ul>
                 </div>
@@ -269,7 +635,7 @@ const PaymentDetailsDisplay = ({
                       </li>
                       <li>
                         <strong>Confirmation:</strong> Please send transaction
-                        hash after payment for verification
+                        hash and any receipt confirmation to Maddie via email
                       </li>
                     </ul>
                   </div>
@@ -335,13 +701,17 @@ const PaymentDetailsDisplay = ({
         </div>
       </div>
 
-      <div className="logout-section">
-        <button className="logout-button" onClick={onLogout} type="button">
-          Complete Registration
+      <div className="print-section">
+        <button
+          className="print-button"
+          onClick={generatePDFSummary}
+          type="button"
+        >
+          📄 Generate PDF Summary
         </button>
-        <p className="logout-note">
-          You can now close this page. All details have been saved and emailed
-          to you.
+        <p className="print-note">
+          Generate and print your comprehensive trip registration summary with
+          all confirmed flights, hotels, and payment details.
         </p>
       </div>
     </div>

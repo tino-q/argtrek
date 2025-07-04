@@ -177,7 +177,6 @@
 .logout-section {
   text-align: center;
   padding-top: 2rem;
-  border-top: 2px solid #e5e7eb;
 }
 
 .logout-button {
@@ -201,6 +200,47 @@
   color: #6b7280;
   font-size: 0.9rem;
   margin: 0;
+}
+
+.print-section {
+  text-align: center;
+  padding-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.print-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.print-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.print-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.print-note {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .access-denied {
