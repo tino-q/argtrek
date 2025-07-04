@@ -83,14 +83,17 @@ const WelcomeSection = ({ userRSVP, showSuccess, showError }) => {
           <i className="fas fa-map-marked-alt"></i>
         </div>
         <h3>Explore the Full Itinerary</h3>
-        <p>Discover every detail of your Argentina adventure</p>
+        <p>
+          Full agenda coming soon! Until then, check out our RSVP presentation
+          to get excited about your Argentina adventure.
+        </p>
         <a
           href="https://docs.google.com/presentation/d/164WBfbVElZFp-EVOFWNsplV9U8s5IltaFy4t9rmcpO4/edit?usp=sharing"
           target="_blank"
           rel="noopener noreferrer"
           className="action-button primary"
         >
-          View Details <i className="fas fa-external-link-alt"></i>
+          View Presentation <i className="fas fa-external-link-alt"></i>
         </a>
       </div>
 

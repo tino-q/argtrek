@@ -840,12 +840,12 @@ const PaymentDetailsDisplay = ({
             <div className="important-notes">
               <h4>Important Instructions</h4>
               <ul>
-                <li>
-                  Select the option to cover ALL transfer fees on your end
-                  (often listed as "OUR")
-                </li>
                 <li>Include your full name in the transfer reference</li>
-                <li>Any unaccounted fees will be deducted from your payment</li>
+                <li>
+                  Configure the transfer to cover all fees on your end,
+                  otherwise any unaccounted fees will be deducted from your
+                  payment
+                </li>
                 <li>
                   Send transfer confirmation to{" "}
                   <a href={`mailto:${EMAIL_CONFIG.MADDIE}`}>
