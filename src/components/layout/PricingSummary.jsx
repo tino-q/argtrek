@@ -96,10 +96,12 @@ const PricingSummary = ({ pricing, formData }) => {
         </div>
 
         {/* Amount Due Now */}
-        <div className="payment-amount">
-          <span>Amount Due Now {isInstallmentPlan ? "(35%)" : "(100%)"}</span>
-          <span>{formatCurrency(pricing.installmentAmount)}</span>
-        </div>
+        {isInstallmentPlan && (
+          <div className="payment-amount">
+            <span>Amount Due Now (35%)</span>
+            <span>{formatCurrency(pricing.installmentAmount)}</span>
+          </div>
+        )}
 
         {/* Installment Note */}
         {isInstallmentPlan && (

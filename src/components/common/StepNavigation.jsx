@@ -15,6 +15,7 @@ const StepNavigation = ({
   formData,
   showError,
   onNewEmailRequest,
+  onRSVPContinue,
 }) => {
   const [isNewEmailLoading, setIsNewEmailLoading] = useState(false);
   const stepConfig = getStepConfig(currentStep);
@@ -30,6 +31,12 @@ const StepNavigation = ({
   };
 
   const handleForward = async () => {
+    // Special handling for RSVP step to use custom validation
+    if (currentStep === "rsvp" && onRSVPContinue) {
+      onRSVPContinue();
+      return;
+    }
+
     if (stepConfig.forwardStep) {
       onNavigate(stepConfig.forwardStep);
     }

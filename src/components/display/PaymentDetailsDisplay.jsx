@@ -70,7 +70,7 @@ const PaymentDetailsDisplay = ({
   pricing,
   submissionResult,
 }) => {
-  const travelerName = getTravelerName(rsvpData);
+  const travelerName = getTravelerName(rsvpData, formData);
 
   const handleCopyClick = async (value, event) => {
     const button = event.currentTarget;

@@ -12,7 +12,7 @@
 
 /* Form components */
 @import "./Form.css";
-@import "./PersonalInfo.css";
+
 @import "./AccommodationSelector.css";
 @import "./ActivitySelection.css";
 @import "./PrivateRoomUpgrade.css";

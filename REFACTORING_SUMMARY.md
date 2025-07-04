@@ -133,7 +133,8 @@ IVAALOJ | VALIJA
 Form Field        | Backend Field     | Type
 ----------------- | ----------------- | -------
 `email`           | `email`           | string
-`fullName`        | `fullName`        | string
+`firstName`       | `firstName`       | string
+`lastName`        | `lastName`        | string
 `horseback`       | `horseback`       | boolean
 `cooking`         | `cooking`         | boolean
 `rafting`         | `rafting`         | boolean

@@ -583,26 +583,28 @@ function saveToSheet(data) {
     let sheet = spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
 
     const HEADERS_IN_ORDER = [
-      "formData.argentineCitizen",
-      "formData.checkedLuggage",
-      "formData.cooking",
-      "formData.cryptoCurrency",
-      "formData.cryptoNetwork",
-      "formData.dietaryMessage",
-      "formData.dietaryRestrictions",
       "formData.email",
       "formData.firstName",
-      "formData.fullName",
-      "formData.horseback",
       "formData.lastName",
-      "formData.paymentMethod",
-      "formData.paymentSchedule",
       "formData.phoneNumber",
-      "formData.privateRoomUpgrade",
-      "formData.rafting",
       "formData.roommateName",
       "formData.roommatePreference",
-      "pricing.activities",
+      "formData.dietaryMessage",
+      "formData.dietaryRestrictions",
+
+      "formData.checkedLuggage",
+      "formData.privateRoomUpgrade",
+      "formData.argentineCitizen",
+
+      "formData.cooking",
+      "formData.horseback",
+      "formData.rafting",
+
+      "formData.paymentSchedule",
+      "formData.paymentMethod",
+      "formData.cryptoCurrency",
+      "formData.cryptoNetwork",
+
       "pricing.activitiesPrice",
       "pricing.basePrice",
       "pricing.installmentAmount",
@@ -611,6 +613,7 @@ function saveToSheet(data) {
       "pricing.subtotal",
       "pricing.total",
       "pricing.vatAmount",
+
       "rsvpData.22Nov_BSAS",
       "rsvpData.23Nov_BSAS",
       "rsvpData.23Nov_Dinner_Welcome",

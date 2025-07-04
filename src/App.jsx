@@ -9,7 +9,7 @@ import { usePricing } from "./hooks/usePricing";
 import { useFormSubmission } from "./hooks/useFormSubmission";
 import { useRouteProtection } from "./hooks/useRouteProtection";
 import { FORM_FIELDS, APPS_SCRIPT_URL, ACTION_TYPES } from "./utils/config";
-import { getEmail, getTravelerName } from "./utils/rsvpData";
+import { getEmail } from "./utils/rsvpData";
 
 // Import components
 import Header from "./components/layout/Header";
@@ -43,7 +43,6 @@ function App() {
       [FORM_FIELDS.ROOMMATE_NAME]: "",
       [FORM_FIELDS.DIETARY_MESSAGE]: "",
       [FORM_FIELDS.EMAIL]: "",
-      [FORM_FIELDS.FULL_NAME]: "",
       [FORM_FIELDS.FIRST_NAME]: "",
       [FORM_FIELDS.LAST_NAME]: "",
       [FORM_FIELDS.PHONE_NUMBER]: "",
@@ -120,10 +119,9 @@ function App() {
   };
 
   // Handle successful login
-  const handleLoginSuccess = (userData, successMessage) => {
+  const handleLoginSuccess = (userData) => {
     setUserRSVP(userData);
     navigateToStep(STEPS.WELCOME);
-    showSuccess(successMessage);
   };
 
   // Handle email not found - navigate to new email step
@@ -240,10 +238,7 @@ function App() {
           );
         } else {
           // No existing submission - proceed with normal flow
-          handleLoginSuccess(
-            result.data.rsvpData,
-            "Trip details retrieved successfully!"
-          );
+          handleLoginSuccess(result.data.rsvpData);
         }
       }
     } catch (error) {
@@ -289,33 +284,56 @@ function App() {
     const hasFieldErrors = Object.keys(errors).length > 0;
     const hasConfirmationError = !formData.travelDocumentConfirmed;
 
-    // If there are validation errors, show error message and scroll to checkbox if needed
+    // If there are validation errors, show error message and scroll to first error
     if (hasFieldErrors || hasConfirmationError) {
-      if (hasFieldErrors) {
-        showError(
-          "Please fill in all required fields: First Name, Last Name, and Phone Number."
-        );
+      // Determine which field to scroll to based on priority order
+      let scrollTarget = null;
+      let errorMessage = "";
+
+      // Check in priority order: First Name → Last Name → Phone Number → Checkbox
+      if (errors[FORM_FIELDS.FIRST_NAME]) {
+        scrollTarget = document.getElementById("first-name-input");
+        errorMessage = "Please enter your first name.";
+      } else if (errors[FORM_FIELDS.LAST_NAME]) {
+        scrollTarget = document.getElementById("last-name-input");
+        errorMessage = "Please enter your last name.";
+      } else if (errors[FORM_FIELDS.PHONE_NUMBER]) {
+        scrollTarget = document.getElementById("phone-number-input");
+        errorMessage = "Please enter your phone number.";
       } else if (hasConfirmationError) {
-        showError(
-          "Please confirm that your travel document information is correct."
-        );
+        scrollTarget = document.getElementById("travel-document-confirmation");
+        errorMessage =
+          "Please confirm that your travel document information is correct.";
       }
 
-      // Scroll to the travel document confirmation checkbox if it's the issue
-      if (hasConfirmationError) {
-        const confirmationElement = document.getElementById(
-          "travel-document-confirmation"
+      // Show appropriate error message
+      if (hasFieldErrors) {
+        showError(
+          errorMessage ||
+            "Please fill in all required fields: First Name, Last Name, and Phone Number."
         );
-        if (confirmationElement) {
-          confirmationElement.scrollIntoView({
-            behavior: "smooth",
-            block: "center",
-          });
-          // Add a visual flash effect
-          confirmationElement.classList.add("highlight-error");
+      } else if (hasConfirmationError) {
+        showError(errorMessage);
+      }
+
+      // Scroll to the first error field
+      if (scrollTarget) {
+        scrollTarget.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+
+        // Add highlight effect for checkbox, focus for input fields
+        if (scrollTarget.id === "travel-document-confirmation") {
+          scrollTarget.classList.add("highlight-error");
           setTimeout(() => {
-            confirmationElement.classList.remove("highlight-error");
+            scrollTarget.classList.remove("highlight-error");
           }, 2000);
+        } else {
+          // Focus the input field
+          setTimeout(() => {
+            scrollTarget.focus();
+          }, 300);
         }
       }
 
@@ -344,7 +362,6 @@ function App() {
       const submissionData = {
         ...formData,
         email: getEmail(userRSVP),
-        fullName: getTravelerName(userRSVP),
       };
 
       console.log("🚀 SUBMITTING FORM DATA:");
@@ -522,6 +539,7 @@ function App() {
             formData={formData}
             showError={showError}
             onNewEmailRequest={handleNewEmailRequest}
+            onRSVPContinue={handleRSVPContinue}
           />
         )}
       </div>

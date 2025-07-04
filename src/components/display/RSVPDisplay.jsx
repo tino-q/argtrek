@@ -17,22 +17,55 @@ const RSVPDisplay = ({
 }) => {
   const [showAllDetails, setShowAllDetails] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Extract data using centralized utilities
-  const personalInfo = getPersonalInfo(rsvpData);
+  const personalInfo = getPersonalInfo(rsvpData, formData);
   const pricingInfo = getPricingInfo(rsvpData);
   const tripItinerary = getTripItinerary(rsvpData);
   const excludedServices = getExcludedTripServices(rsvpData);
 
-  // Initialize form data with RSVP data if not already set
+  // Initialize form data with RSVP data only once, not when user clears fields
   useEffect(() => {
-    if (!formData[FORM_FIELDS.FIRST_NAME] && personalInfo.firstName) {
-      updateFormData(FORM_FIELDS.FIRST_NAME, personalInfo.firstName);
+    if (!hasInitialized && (personalInfo.firstName || personalInfo.lastName)) {
+      if (!formData[FORM_FIELDS.FIRST_NAME] && personalInfo.firstName) {
+        updateFormData(FORM_FIELDS.FIRST_NAME, personalInfo.firstName);
+      }
+      if (!formData[FORM_FIELDS.LAST_NAME] && personalInfo.lastName) {
+        updateFormData(FORM_FIELDS.LAST_NAME, personalInfo.lastName);
+      }
+      setHasInitialized(true);
     }
-    if (!formData[FORM_FIELDS.LAST_NAME] && personalInfo.lastName) {
-      updateFormData(FORM_FIELDS.LAST_NAME, personalInfo.lastName);
+  }, [
+    hasInitialized,
+    personalInfo.firstName,
+    personalInfo.lastName,
+    formData,
+    updateFormData,
+  ]);
+
+  // Initial validation check for empty required fields
+  useEffect(() => {
+    const errors = {};
+
+    if (!formData[FORM_FIELDS.FIRST_NAME]?.trim()) {
+      errors[FORM_FIELDS.FIRST_NAME] = true;
     }
-  }, [personalInfo.firstName, personalInfo.lastName, formData, updateFormData]);
+
+    if (!formData[FORM_FIELDS.LAST_NAME]?.trim()) {
+      errors[FORM_FIELDS.LAST_NAME] = true;
+    }
+
+    if (!formData[FORM_FIELDS.PHONE_NUMBER]?.trim()) {
+      errors[FORM_FIELDS.PHONE_NUMBER] = true;
+    }
+
+    setValidationErrors(errors);
+  }, [
+    formData[FORM_FIELDS.FIRST_NAME],
+    formData[FORM_FIELDS.LAST_NAME],
+    formData[FORM_FIELDS.PHONE_NUMBER],
+  ]);
 
   // Validation function
   const validateRequiredFields = () => {
@@ -84,17 +117,33 @@ const RSVPDisplay = ({
     }
   };
 
-  // Handle input change and clear validation error
+  // Handle input change and real-time validation
   const handleInputChange = (field, value) => {
     updateFormData(field, value);
 
-    // Clear validation error for this field if it now has a value
-    if (value?.trim() && validationErrors[field]) {
+    // Real-time validation - show error if field is empty
+    if (!value?.trim()) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        [field]: true,
+      }));
+    } else {
+      // Clear validation error for this field if it now has a value
       setValidationErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
       });
+    }
+  };
+
+  // Handle input blur for validation
+  const handleInputBlur = (field, value) => {
+    if (!value?.trim()) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        [field]: true,
+      }));
     }
   };
 
@@ -354,10 +403,14 @@ const RSVPDisplay = ({
           <div className="info-row">
             <span className="label">First Name:</span>
             <input
+              id="first-name-input"
               type="text"
               value={formData[FORM_FIELDS.FIRST_NAME] || ""}
               onChange={(e) =>
                 handleInputChange(FORM_FIELDS.FIRST_NAME, e.target.value)
+              }
+              onBlur={(e) =>
+                handleInputBlur(FORM_FIELDS.FIRST_NAME, e.target.value)
               }
               placeholder="Enter your first name"
               className={`editable-input ${validationErrors[FORM_FIELDS.FIRST_NAME] ? "error" : ""}`}
@@ -369,10 +422,14 @@ const RSVPDisplay = ({
           <div className="info-row">
             <span className="label">Last Name:</span>
             <input
+              id="last-name-input"
               type="text"
               value={formData[FORM_FIELDS.LAST_NAME] || ""}
               onChange={(e) =>
                 handleInputChange(FORM_FIELDS.LAST_NAME, e.target.value)
+              }
+              onBlur={(e) =>
+                handleInputBlur(FORM_FIELDS.LAST_NAME, e.target.value)
               }
               placeholder="Enter your last name"
               className={`editable-input ${validationErrors[FORM_FIELDS.LAST_NAME] ? "error" : ""}`}
@@ -384,10 +441,14 @@ const RSVPDisplay = ({
           <div className="info-row">
             <span className="label">Phone Number:</span>
             <input
+              id="phone-number-input"
               type="text"
               value={formData[FORM_FIELDS.PHONE_NUMBER] || ""}
               onChange={(e) =>
                 handleInputChange(FORM_FIELDS.PHONE_NUMBER, e.target.value)
+              }
+              onBlur={(e) =>
+                handleInputBlur(FORM_FIELDS.PHONE_NUMBER, e.target.value)
               }
               placeholder="Enter your phone number"
               className={`editable-input ${validationErrors[FORM_FIELDS.PHONE_NUMBER] ? "error" : ""}`}

@@ -3,7 +3,7 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxCn7TIbAorWcIf9ZZSptok0VRoC203-iDMzwBukLlkfRezolntw0n6XKP72-DF-Orm/exec";
+  "https://script.google.com/macros/s/AKfycbzfaGd1j0_IIeR5VXm9bsmBsxOPcZ4isy8LseJclfOmGXeufRS58KrQ_dbz8zlryxbj/exec";
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {
@@ -102,7 +102,6 @@ export const EMAIL_CONFIG = {
 // Form Field Names - Direct 1:1 mapping to backend
 export const FORM_FIELDS = {
   EMAIL: "email",
-  FULL_NAME: "fullName",
   FIRST_NAME: "firstName",
   LAST_NAME: "lastName",
   PHONE_NUMBER: "phoneNumber",

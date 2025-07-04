@@ -80,11 +80,6 @@ export const FORM_DATA_STRUCTURE = {
     required: true,
     validation: "email",
   },
-  fullName: {
-    type: "string",
-    description: "Full name of traveler",
-    required: true,
-  },
   firstName: {
     type: "string",
     description: "Traveler's first name",
@@ -396,7 +391,6 @@ export const SAFE_PRICING_FIELDS = {
 
 export const SAFE_FORM_FIELDS = {
   EMAIL: "email",
-  FULL_NAME: "fullName",
   FIRST_NAME: "firstName",
   LAST_NAME: "lastName",
   PHONE_NUMBER: "phoneNumber",

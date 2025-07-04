@@ -6,11 +6,12 @@ This document describes the column structure for the Google Sheet that will stor
 
 ### Basic Information Columns
 
-Field Name  | Data Type | Description                               | Required
------------ | --------- | ----------------------------------------- | --------
-`timestamp` | DateTime  | Submission timestamp (auto-generated)     | Yes
-`email`     | Email     | Participant's email address               | Yes
-`fullName`  | Text      | Participant's full name (as on travel ID) | Yes
+Field Name  | Data Type | Description                           | Required
+----------- | --------- | ------------------------------------- | --------
+`timestamp` | DateTime  | Submission timestamp (auto-generated) | Yes
+`email`     | Email     | Participant's email address           | Yes
+`firstName` | Text      | Participant's first name              | Yes
+`lastName`  | Text      | Participant's last name               | Yes
 
 ### Trip Configuration Columns
 
@@ -58,7 +59,8 @@ Field Name           | Data Type | Description                                  
 ### Required Field Validation
 
 - `email`: Must be valid email format
-- `fullName`: Must not be empty
+- `firstName`: Must not be empty
+- `lastName`: Must not be empty
 - `tripOption`: Must be either 1 or 2
 - `paymentSchedule`: Must be either "full" or "installments"
 - `paymentMethod`: Must be either "credit" or "bank"

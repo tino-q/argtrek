@@ -1,6 +1,8 @@
 // RSVP Data Utility
 // Centralized access to RSVP data with proper field mapping and validation
 
+import { FORM_FIELDS } from "./config";
+
 /**
  * RSVP Field Name Constants
  * These match the exact column names from the Google Sheets backend
@@ -61,8 +63,16 @@ const formatFieldsToNights = (fields) => {
 /**
  * Get traveler's primary name from RSVP data
  */
-export const getTravelerName = (rsvpData) => {
+export const getTravelerName = (rsvpData, formData) => {
   if (!rsvpData) return "Name not found";
+
+  if (
+    formData &&
+    formData[FORM_FIELDS.FIRST_NAME] &&
+    formData[FORM_FIELDS.LAST_NAME]
+  ) {
+    return `${formData[FORM_FIELDS.FIRST_NAME]} ${formData[FORM_FIELDS.LAST_NAME]}`;
+  }
 
   const name = rsvpData[RSVP_FIELDS.TRAVELER_NAME];
   return name || "Name not found";
@@ -515,8 +525,8 @@ export const shouldEnforceArgentineCitizenship = (rsvpData) => {
 /**
  * Split traveler name into first name and last name
  */
-export const splitTravelerName = (rsvpData) => {
-  const fullName = getTravelerName(rsvpData);
+export const splitTravelerName = (rsvpData, formData) => {
+  const fullName = getTravelerName(rsvpData, formData);
 
   if (!fullName || fullName === "Name not found") {
     return { firstName: "", lastName: "" };
@@ -538,11 +548,11 @@ export const splitTravelerName = (rsvpData) => {
 /**
  * Get all personal information in one object
  */
-export const getPersonalInfo = (rsvpData) => {
-  const { firstName, lastName } = splitTravelerName(rsvpData);
+export const getPersonalInfo = (rsvpData, formData) => {
+  const { firstName, lastName } = splitTravelerName(rsvpData, formData);
 
   return {
-    name: getTravelerName(rsvpData),
+    name: getTravelerName(rsvpData, formData),
     firstName,
     lastName,
     plusOneName: getPlusOneName(rsvpData),
