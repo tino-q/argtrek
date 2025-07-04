@@ -196,6 +196,20 @@ input[type="checkbox"]:hover {
   transform: translateY(-1px);
 }
 
+/* Footer WhatsApp Link - More specific to override footer-link */
+.footer-link.whatsapp-link {
+  color: #25d366 !important;
+  text-decoration: underline;
+  background: none;
+  padding: 0;
+}
+
+.footer-link.whatsapp-link:hover {
+  color: #128c7e !important;
+  background: none;
+  text-decoration: underline;
+}
+
 .whatsapp-link i {
   font-size: 0.9rem;
   opacity: 0.8;
@@ -212,19 +226,16 @@ input[type="checkbox"]:hover {
   border-radius: 15px;
 }
 
-.footer-help {
-  margin-bottom: 20px;
+.footer-section {
+  margin-bottom: 16px;
   padding: 0 60px;
 }
 
-.footer-help p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  font-weight: 500;
+.footer-section:last-child {
+  margin-bottom: 0;
 }
 
-.app-footer p {
+.footer-line {
   margin: 0;
   color: var(--text-secondary);
   font-size: 0.9rem;
@@ -239,7 +250,7 @@ input[type="checkbox"]:hover {
   animation: footerPulse 3s ease-in-out infinite;
 }
 
-.cursor-link {
+.footer-link {
   color: var(--primary);
   text-decoration: none;
   font-weight: 600;
@@ -249,41 +260,10 @@ input[type="checkbox"]:hover {
   position: relative;
 }
 
-.cursor-link:hover {
+.footer-link:hover {
   color: var(--primary-dark);
   background: var(--focus-primary);
   transform: translateY(-1px);
-}
-
-.author-name {
-  color: var(--text-primary);
-  font-weight: 700;
-  background: linear-gradient(
-    135deg,
-    var(--primary) 0%,
-    var(--primary-dark) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  padding: 0 2px;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  border-radius: 4px;
-}
-
-.author-name:hover {
-  background: linear-gradient(
-    135deg,
-    var(--primary-dark) 0%,
-    var(--primary-darker) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  transform: translateY(-1px);
-  padding: 2px 6px;
-  background-color: var(--focus-primary);
 }
 
 /* Footer animation */
@@ -306,22 +286,18 @@ input[type="checkbox"]:hover {
     padding: 20px 0;
   }
 
-  .app-footer p {
+  .footer-section {
+    margin-bottom: 12px;
+    padding: 0 40px;
+  }
+
+  .footer-line {
     font-size: 0.85rem;
   }
 
   .footer-emoji {
     font-size: 1rem;
     margin: 0 6px;
-  }
-
-  .footer-help {
-    margin-bottom: 15px;
-    padding: 0 40px 15px 40px;
-  }
-
-  .footer-help p {
-    font-size: 0.85rem;
   }
 }
 
