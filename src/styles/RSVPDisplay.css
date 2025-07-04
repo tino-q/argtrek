@@ -12,6 +12,10 @@
   position: relative;
 }
 
+.terms-section {
+  margin-top: 20px;
+}
+
 .info-card h3 {
   margin-bottom: 1rem;
   font-size: 1.2rem;

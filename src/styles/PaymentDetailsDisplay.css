@@ -3,9 +3,7 @@
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: transparent;
 }
 
 .confirmation-header {
@@ -25,6 +23,12 @@
   font-size: 1.1rem;
   color: #374151;
   margin: 0;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  word-wrap: break-word;
+  hyphens: none;
 }
 
 .order-number {
@@ -34,10 +38,6 @@
   border: 1px solid #86efac;
   border-radius: 8px;
   text-align: center;
-}
-
-.order-number p {
-  margin: 0;
   font-size: 1.1rem;
   color: #166534;
 }
@@ -47,166 +47,192 @@
   color: #059669;
 }
 
-.payment-instructions {
+/* Payment Section */
+.payment-section {
+  margin-bottom: 2rem;
+  margin-top: 3rem;
+}
+
+.payment-section h3 {
+  color: #111827;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.payment-content {
   margin-bottom: 2rem;
 }
 
-.payment-instructions h3 {
-  color: #111827;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
-
-.payment-instructions h4 {
+.payment-content h4 {
   color: #374151;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
   font-size: 1.2rem;
 }
 
-.payment-method-details {
-  background: #f9fafb;
-  padding: 0.5rem 1.5rem;
-  border-radius: 8px;
+.payment-timeline {
+  font-size: 1.1rem;
+  color: #374151;
   margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
 }
 
+/* Detail Rows */
 .bank-details,
 .crypto-details {
   margin-bottom: 1.5rem;
 }
 
-.bank-details p,
-.crypto-details p {
-  margin: 0.5rem 0;
-  line-height: 1.5;
+.detail-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.detail-row .label {
+  font-weight: 600;
+  color: #475569;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.detail-row .value {
+  color: #1e293b;
+  flex: 1;
+  word-break: break-word;
+}
+
+.value-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
 }
 
 .crypto-address {
   font-family: "Courier New", monospace;
-  background: #e5e7eb;
+  font-size: 0.9rem;
+  background: #e2e8f0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.copy-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
   padding: 0.5rem;
   border-radius: 4px;
-  word-break: break-all;
-  font-size: 0.9rem;
-  margin: 0.5rem 0 !important;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.8rem;
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.crypto-note {
-  font-style: italic;
-  color: #6b7280;
-  font-size: 0.9rem;
+.copy-btn:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
 }
 
-.payment-schedule {
-  background: #fef3c7;
+.copy-btn:active {
+  transform: translateY(0);
+}
+
+.copy-btn.copied {
+  background: #10b981;
+}
+
+.copy-btn.copied:hover {
+  background: #059669;
+}
+
+/* Important Notes */
+.important-notes {
+  margin-top: 1.5rem;
   padding: 1.5rem;
+  background: #fefce8;
   border-radius: 8px;
-  margin-bottom: 1.5rem;
+  border-left: 4px solid #eab308;
 }
 
-.payment-schedule h4 {
-  color: #92400e;
+.important-notes h4 {
+  color: #a16207;
   margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
 }
 
-.schedule-details p {
-  margin: 0.5rem 0;
-  color: #92400e;
-}
-
-.total-amount {
-  background: #dcfce7;
-  padding: 1.5rem;
-  border-radius: 8px;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.total-amount h4 {
-  color: #166534;
-  margin-top: 0;
-}
-
-.amount {
-  font-size: 1.5rem;
-  color: #166534;
-  margin: 0;
-}
-
-.next-steps {
-  background: #f0f9ff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-}
-
-.next-steps h3 {
-  color: #0369a1;
-  margin-top: 0;
-}
-
-.next-steps ul {
+.important-notes ul {
   margin: 0;
   padding-left: 1.5rem;
 }
 
-.next-steps li {
+.important-notes li {
   margin-bottom: 0.5rem;
-  line-height: 1.5;
+  line-height: 1.6;
+  color: #a16207;
+}
+
+.important-notes li ul {
+  margin-top: 0.5rem;
+}
+
+.important-notes li ul li {
+  margin-bottom: 0.25rem;
+}
+
+.important-notes a {
+  color: #0369a1;
+  text-decoration: underline;
+}
+
+.important-notes a:hover {
+  color: #0c4a6e;
+}
+
+.revolut-note {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f0f9ff;
+  border-radius: 6px;
+  border: 1px solid #bae6fd;
+}
+
+.revolut-note strong {
   color: #0369a1;
 }
 
-.contact-info {
-  border-radius: 8px;
+.revolut-note a {
+  color: #0369a1;
+  text-decoration: underline;
 }
 
-.contact-info h3 {
-  color: #7c3aed;
-  margin-top: 0;
+.revolut-note a:hover {
+  color: #0c4a6e;
 }
 
-.contact-info p {
-  margin: 0.5rem 0;
-  color: #7c3aed;
-}
-
-.logout-section {
-  text-align: center;
-  padding-top: 2rem;
-}
-
-.logout-button {
-  background: #059669;
-  color: white;
-  border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  margin-bottom: 1rem;
-}
-
-.logout-button:hover {
-  background: #047857;
-}
-
-.logout-note {
-  color: #6b7280;
-  font-size: 0.9rem;
-  margin: 0;
-}
-
+/* Print Section */
 .print-section {
   text-align: center;
+  margin-top: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 2px solid #e5e7eb;
 }
 
 .print-button {
-  background: #3b82f6;
+  background: #059669;
   color: white;
   border: none;
   padding: 0.75rem 2rem;
@@ -216,53 +242,27 @@
   cursor: pointer;
   transition: all 0.2s;
   margin-bottom: 1rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .print-button:hover {
-  background: #2563eb;
+  background: #047857;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .print-button:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .print-note {
   color: #6b7280;
   font-size: 0.9rem;
   margin: 0;
-  line-height: 1.4;
 }
 
-.access-denied {
-  text-align: center;
-  padding: 3rem;
-  background: #fef2f2;
-  border-radius: 8px;
-  border: 1px solid #fecaca;
-}
-
-.access-denied h2 {
-  color: #dc2626;
-  margin-bottom: 1rem;
-}
-
-.access-denied p {
-  color: #991b1b;
-  margin: 0;
-}
-
-/* Mobile Responsiveness */
+/* Responsive Design */
 @media (max-width: 768px) {
   .payment-details-section {
-    padding: 1rem;
-    margin: 1rem;
+    padding: 1.5rem;
   }
 
   .confirmation-header h2 {
@@ -271,539 +271,66 @@
 
   .confirmation-message {
     font-size: 1rem;
+    max-width: 100%;
+    padding: 0 1rem;
   }
 
-  .payment-instructions h3 {
+  .payment-section h3 {
     font-size: 1.3rem;
   }
 
-  .payment-instructions h4 {
+  .payment-content h4 {
     font-size: 1.1rem;
   }
 
-  .amount {
-    font-size: 1.3rem;
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .detail-row .label {
+    min-width: auto;
+  }
+
+  .value-container {
+    width: 100%;
   }
 
   .crypto-address {
     font-size: 0.8rem;
   }
 
-  /* Bank Details Mobile Layout */
-  .banking-info {
-    padding: 1rem;
-  }
-
-  .wallet-details {
-    padding: 0.75rem;
-  }
-
-  /* Stack bank detail rows vertically on mobile */
-  .detail-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    padding: 12px 0;
-  }
-
-  .detail-row .label {
-    font-size: 0.8rem;
-    margin-bottom: 4px;
-  }
-
-  .detail-row .value {
-    font-size: 0.8rem;
-    word-break: break-all;
-    line-height: 1.3;
-  }
-
-  .value-container {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-  }
-
   .copy-btn {
-    min-width: 28px;
-    height: 28px;
-    padding: 4px 6px;
-    flex-shrink: 0;
-  }
-
-  .copy-btn i {
-    font-size: 0.7rem;
+    margin-left: auto;
   }
 }
 
 @media (max-width: 480px) {
   .payment-details-section {
-    padding: 0.75rem;
-    margin: 0.5rem;
+    padding: 1rem;
   }
 
-  .banking-info {
-    padding: 0.75rem;
+  .important-notes {
+    padding: 1rem;
   }
 
-  .wallet-details {
+  .detail-row {
     padding: 0.5rem;
   }
 
-  /* Further improve bank details on very small screens */
-  .detail-row {
-    padding: 10px 0;
-  }
-
   .detail-row .value {
-    font-size: 0.75rem;
-    letter-spacing: 0.3px;
+    font-size: 0.9rem;
   }
 
-  /* Special handling for IBAN - better readability */
-  .detail-row .value[data-type="iban"] {
-    word-spacing: 2px;
+  .crypto-address {
+    font-size: 0.75rem;
+    padding: 0.25rem;
   }
 
   .copy-btn {
-    min-width: 24px;
-    height: 24px;
-    padding: 2px 4px;
-  }
-
-  .copy-btn i {
-    font-size: 0.6rem;
-  }
-
-  /* Adjust instructions and recommendation sections */
-  .transfer-instructions {
-    padding: 0.75rem;
-  }
-
-  .revolut-recommendation {
-    padding: 0.75rem;
-  }
-
-  .revolut-highlight {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-}
-
-/* Crypto Payment Section Styles */
-.crypto-payment-section {
-  margin-top: 1.5rem;
-}
-
-.wallet-info {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.wallet-address-container {
-  margin-bottom: 1.5rem;
-}
-
-.wallet-details {
-  background: white;
-  border-radius: 6px;
-  padding: 1rem;
-  border: 1px solid #e5e7eb;
-}
-
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.detail-row:last-child {
-  border-bottom: none;
-}
-
-.detail-row .label {
-  font-weight: 600;
-  color: #6b7280;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.detail-row .value {
-  font-weight: 500;
-  color: #111827;
-  font-family: "Courier New", monospace;
-  font-size: 0.9rem;
-}
-
-.value-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.copy-btn {
-  background: #dbeafe;
-  border: 1px solid #3b82f6;
-  border-radius: 6px;
-  padding: 6px 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  height: 32px;
-  color: #1d4ed8;
-}
-
-.copy-btn:hover {
-  background: #3b82f6;
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.copy-btn:active {
-  transform: translateY(0);
-  background: #1d4ed8;
-}
-
-.copy-btn i {
-  font-size: 0.8rem;
-}
-
-.copy-btn.copied {
-  background: #10b981;
-  color: white;
-  border-color: #047857;
-}
-
-.copy-btn.copied:hover {
-  background: #047857;
-}
-
-.crypto-instructions {
-  background: #fffbeb;
-  border: 1px solid #f59e0b;
-  border-radius: 6px;
-  padding: 1rem;
-}
-
-.crypto-instructions h4 {
-  color: #92400e;
-  font-size: 1rem;
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.crypto-instructions ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.crypto-instructions li {
-  color: #92400e;
-  margin-bottom: 0.5rem;
-  position: relative;
-  padding-left: 1rem;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.crypto-instructions li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: #f59e0b;
-  font-weight: bold;
-}
-
-/* Bank Payment Section Styles */
-.bank-payment-section {
-  margin-bottom: 1.5rem;
-}
-
-.banking-info {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.transfer-instructions {
-  background: #fffbeb;
-  border: 1px solid #f59e0b;
-  border-radius: 6px;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-.transfer-instructions h4 {
-  color: #92400e;
-  font-size: 1rem;
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.transfer-instructions ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.transfer-instructions li {
-  color: #92400e;
-  margin-bottom: 0.5rem;
-  position: relative;
-  padding-left: 1rem;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.transfer-instructions li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: #f59e0b;
-  font-weight: bold;
-}
-
-.revolut-recommendation {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  border-radius: 8px;
-  padding: 1.5rem;
-  color: white;
-}
-
-.revolut-highlight {
-  display: flex;
-  align-items: flex-start;
-  gap: 15px;
-}
-
-.revolut-highlight i {
-  font-size: 1.5rem;
-  margin-top: 2px;
-  opacity: 0.9;
-}
-
-.revolut-highlight h4 {
-  font-size: 1.1rem;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: white;
-}
-
-.revolut-highlight p {
-  margin-bottom: 12px;
-  opacity: 0.9;
-  font-size: 0.9rem;
-  color: white;
-}
-
-.revolut-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: white;
-  text-decoration: none;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  transition: background 0.3s ease;
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.revolut-link:hover {
-  background-color: #e0e7ff;
-  color: #3730a3;
-}
-
-/* Credit Card Payment Section */
-.credit-card-payment-section {
-  margin-bottom: 2rem;
-}
-
-.credit-card-info {
-  background: #f8fafc;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-}
-
-.payment-link-notice {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  background: #dbeafe;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #93c5fd;
-  margin-bottom: 1.5rem;
-}
-
-.notice-icon {
-  flex-shrink: 0;
-  width: 2.5rem;
-  height: 2.5rem;
-  background: #3b82f6;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-}
-
-.notice-content h4 {
-  margin: 0 0 0.5rem 0;
-  color: #1e40af;
-  font-size: 1.1rem;
-}
-
-.notice-content p {
-  margin: 0;
-  color: #1e40af;
-  line-height: 1.5;
-}
-
-.credit-card-details {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  margin-bottom: 1.5rem;
-}
-
-.credit-card-details h4 {
-  margin: 0 0 1rem 0;
-  color: #374151;
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.details-grid {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.detail-item:last-child {
-  border-bottom: none;
-}
-
-.detail-item .label {
-  font-weight: 500;
-  color: #6b7280;
-  flex-shrink: 0;
-}
-
-.detail-item .value {
-  color: #111827;
-  text-align: right;
-  font-weight: 500;
-}
-
-.credit-card-instructions {
-  background: #f0f9ff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border: 1px solid #bae6fd;
-}
-
-.credit-card-instructions h4 {
-  margin: 0 0 1rem 0;
-  color: #0369a1;
-  font-size: 1.1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.credit-card-instructions ul {
-  margin: 0;
-  padding-left: 1.5rem;
-}
-
-.credit-card-instructions li {
-  margin-bottom: 0.75rem;
-  line-height: 1.5;
-  color: #0369a1;
-}
-
-.credit-card-instructions li:last-child {
-  margin-bottom: 0;
-}
-
-.credit-card-instructions li::marker {
-  color: #0369a1;
-}
-
-/* Mobile Responsive Styles for Credit Card Section */
-@media (max-width: 768px) {
-  .payment-link-notice {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
-  }
-
-  .notice-icon {
-    align-self: center;
-  }
-
-  .details-grid {
-    gap: 1rem;
-  }
-
-  .detail-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-  }
-
-  .detail-item .value {
-    text-align: left;
-  }
-}
-
-@media (max-width: 480px) {
-  .credit-card-info {
-    padding: 1rem;
-  }
-
-  .payment-link-notice {
-    padding: 1rem;
-  }
-
-  .credit-card-details {
-    padding: 1rem;
-  }
-
-  .credit-card-instructions {
-    padding: 1rem;
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
   }
 }

@@ -627,6 +627,129 @@ const PaymentDetailsDisplay = ({
       yPosition += 15;
     }
 
+    // === TERMS AND CONDITIONS ===
+    checkPageBreak(50);
+    setSubtitle(16);
+    doc.text("Terms and Conditions", margin, yPosition);
+    yPosition += 10;
+
+    // TRAVELER INFORMATION section
+    addBox(margin, yPosition, contentWidth, 35, [248, 252, 255]);
+    yPosition += 8;
+
+    setSubtitle(12);
+    doc.text("TRAVELER INFORMATION", margin + 8, yPosition);
+    yPosition += 8;
+
+    setBody(9);
+    const travelerTerms = [
+      "• The name and surname above exactly match my travel document (passport/ID) for this trip",
+      "• I have double-checked all my traveler information above",
+      "• All information provided is accurate and complete",
+    ];
+
+    travelerTerms.forEach((term) => {
+      checkPageBreak(5);
+      const termLines = doc.splitTextToSize(term, contentWidth - 16);
+      termLines.forEach((line) => {
+        doc.text(line, margin + 8, yPosition);
+        yPosition += 5;
+      });
+      yPosition += 2;
+    });
+
+    yPosition += 8;
+
+    // HEALTH INSURANCE section
+    checkPageBreak(70);
+    addBox(margin, yPosition, contentWidth, 80, [248, 252, 255]);
+    yPosition += 8;
+
+    setSubtitle(12);
+    doc.text("HEALTH INSURANCE", margin + 8, yPosition);
+    yPosition += 8;
+
+    setBody(9);
+    const healthInsuranceText =
+      "• I have or will obtain by the time of the trip a valid health insurance policy that complies with the new Argentine requirement established by Decree 366/2025, covering all regular medical treatments and services during my stay in Argentina.";
+    const healthInsuranceLines = doc.splitTextToSize(
+      healthInsuranceText,
+      contentWidth - 16
+    );
+    healthInsuranceLines.forEach((line) => {
+      doc.text(line, margin + 8, yPosition);
+      yPosition += 5;
+    });
+    yPosition += 8;
+
+    // Health insurance requirements details
+    setLabel(10);
+    doc.text("Health Insurance Requirements:", margin + 8, yPosition);
+    yPosition += 6;
+
+    setBody(8);
+    const healthRequirements = [
+      "• Covers general medical care, outpatient treatment, and hospitalization",
+      "• Is valid throughout the entire stay in Argentina",
+      "• Clearly states that it covers the traveler while in Argentina (country-specific coverage)",
+      "• Includes coverage for medical emergencies",
+      "• May be required to be presented at the border or upon request by local authorities",
+    ];
+
+    healthRequirements.forEach((requirement) => {
+      checkPageBreak(5);
+      const reqLines = doc.splitTextToSize(requirement, contentWidth - 16);
+      reqLines.forEach((line) => {
+        doc.text(line, margin + 8, yPosition);
+        yPosition += 4;
+      });
+      yPosition += 1;
+    });
+
+    setBody(8);
+    const healthNote =
+      "Note: Public healthcare services in Argentina will only be available to non-residents in cases of emergency. For all other situations, proof of valid health insurance will be required in order to receive care.";
+    const healthNoteLines = doc.splitTextToSize(healthNote, contentWidth - 16);
+    healthNoteLines.forEach((line) => {
+      doc.text(line, margin + 8, yPosition);
+      yPosition += 4;
+    });
+
+    yPosition += 15;
+
+    // TERMS & CONDITIONS section
+    checkPageBreak(100);
+    addBox(margin, yPosition, contentWidth, 95, [248, 252, 255]);
+    yPosition += 8;
+
+    setSubtitle(12);
+    doc.text("TERMS & CONDITIONS", margin + 8, yPosition);
+    yPosition += 8;
+
+    setBody(9);
+    const termsAndConditions = [
+      "• A 21% VAT will be added to accommodation expenses for Argentinean guests.",
+      "• Quotation is based on 60 participants. Any changes in group size will require a revised quotation.",
+      "• This proposal is subject to availability and may change until the group reservation is confirmed with a deposit. In case of delayed payments, prices may be adjusted due to currency fluctuations or updated supplier rates.",
+      "• Deposits are non-refundable. The remaining balance must be paid according to the specified deadlines.",
+      "• Prices do not include visa processing fees or travel insurance. Each traveler is responsible for obtaining the necessary visa and health insurance.",
+      "• All passengers must have valid travel documents in good condition. It is the traveler's responsibility to verify passport, visa, and health requirements. A passport valid for at least 6 months is recommended.",
+      "• The organizer acts solely as an intermediary and is not responsible for delays, changes, or cancellations due to weather, third parties, or force majeure.",
+      "• Participation in all activities implies voluntary acceptance of associated risks.",
+    ];
+
+    termsAndConditions.forEach((condition) => {
+      checkPageBreak(8);
+      const conditionLines = doc.splitTextToSize(condition, contentWidth - 16);
+      conditionLines.forEach((line) => {
+        doc.text(line, margin + 8, yPosition);
+        yPosition += 4;
+      });
+      yPosition += 3;
+    });
+
+    yPosition += 20;
+
     // === FOOTER ===
     yPosition = Math.max(yPosition, pageHeight - 35);
 
@@ -672,264 +795,205 @@ const PaymentDetailsDisplay = ({
         </p>
         {submissionResult?.rowNumber && (
           <div className="order-number">
-            <p>
-              Order Number: <strong>#{submissionResult.rowNumber}</strong>
-            </p>
+            Order Number: <strong>#{submissionResult.rowNumber}</strong>
           </div>
         )}
       </div>
 
       <PricingSummary pricing={pricing} formData={formData} />
 
-      <div className="payment-instructions" style={{ marginTop: "2rem" }}>
+      <div className="payment-section">
         <h3>💳 Payment Information</h3>
-        <div className="payment-method-details">
-          {/* Bank Transfer Details - Only show if bank transfer was selected */}
-          {formData[FORM_FIELDS.PAYMENT_METHOD] === "bank" && (
-            <div className="bank-payment-section">
-              <h4>Bank Transfer Details</h4>
-              <div className="banking-info">
-                <div className="bank-details">
-                  {BANK_DETAILS.map((detail, index) => (
-                    <div key={index} className="detail-row">
-                      <span className="label">{detail.label}:</span>
-                      <div className="value-container">
-                        <span
-                          className="value"
-                          data-type={
-                            detail.label.toLowerCase().includes("iban")
-                              ? "iban"
-                              : undefined
-                          }
-                        >
-                          {detail.value}
-                        </span>
-                        <button
-                          type="button"
-                          className="copy-btn"
-                          onClick={(e) => handleCopyClick(detail.value, e)}
-                          title="Copy to clipboard"
-                        >
-                          <i className="fas fa-copy"></i>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Transfer Instructions */}
-                <div className="transfer-instructions">
-                  <h4>
-                    <i className="fas fa-exclamation-circle"></i> Important
-                    Transfer Instructions
-                  </h4>
+        {/* Bank Transfer Details */}
+        {formData[FORM_FIELDS.PAYMENT_METHOD] === "bank" && (
+          <div className="payment-content">
+            <h4>Bank Transfer Details</h4>
+            <div className="bank-details">
+              {BANK_DETAILS.map((detail, index) => (
+                <div key={index} className="detail-row">
+                  <span className="label">{detail.label}:</span>
+                  <div className="value-container">
+                    <span
+                      className="value"
+                      data-type={
+                        detail.label.toLowerCase().includes("iban")
+                          ? "iban"
+                          : undefined
+                      }
+                    >
+                      {detail.value}
+                    </span>
+                    <button
+                      type="button"
+                      className="copy-btn"
+                      onClick={(e) => handleCopyClick(detail.value, e)}
+                      title="Copy to clipboard"
+                    >
+                      <i className="fas fa-copy"></i>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="important-notes">
+              <h4>Important Instructions</h4>
+              <ul>
+                <li>
+                  Select the option to cover ALL transfer fees on your end
+                  (often listed as "OUR")
+                </li>
+                <li>Include your full name in the transfer reference</li>
+                <li>Any unaccounted fees will be deducted from your payment</li>
+                <li>
+                  Send transfer confirmation to{" "}
+                  <a href={`mailto:${EMAIL_CONFIG.MADDIE}`}>
+                    {EMAIL_CONFIG.MADDIE}
+                  </a>
+                </li>
+              </ul>
+
+              <div className="revolut-note">
+                <strong>💡 Tip:</strong> Use{" "}
+                <a
+                  href="https://revolut.com/referral/?referral-code=mbaklayan!JUN2-25-VR-ES-AE&geo-redirect"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Revolut
+                </a>{" "}
+                for free international transfers
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Crypto Payment Details */}
+        {formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto" &&
+          formData[FORM_FIELDS.CRYPTO_CURRENCY] &&
+          formData[FORM_FIELDS.CRYPTO_NETWORK] && (
+            <div className="payment-content">
+              <h4>Cryptocurrency Payment Details</h4>
+              <div className="crypto-details">
+                <div className="detail-row">
+                  <span className="label">Network:</span>
+                  <span
+                    className="value"
+                    style={{
+                      color:
+                        NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]
+                          ?.color,
+                    }}
+                  >
+                    {NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.name}
+                  </span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Currency:</span>
+                  <span className="value">
+                    {formData[FORM_FIELDS.CRYPTO_CURRENCY]}
+                  </span>
+                </div>
+                <div className="detail-row">
+                  <span className="label">Wallet Address:</span>
+                  <div className="value-container">
+                    <span className="value crypto-address">
+                      {(() => {
+                        const networkKey =
+                          formData[FORM_FIELDS.CRYPTO_NETWORK] === "ARB"
+                            ? "ETH"
+                            : formData[FORM_FIELDS.CRYPTO_NETWORK];
+                        return CRYPTO_WALLETS[networkKey];
+                      })()}
+                    </span>
+                    <button
+                      type="button"
+                      className="copy-btn"
+                      onClick={(e) => {
+                        const networkKey =
+                          formData[FORM_FIELDS.CRYPTO_NETWORK] === "ARB"
+                            ? "ETH"
+                            : formData[FORM_FIELDS.CRYPTO_NETWORK];
+                        handleCopyClick(CRYPTO_WALLETS[networkKey], e);
+                      }}
+                      title="Copy wallet address"
+                    >
+                      <i className="fas fa-copy"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="important-notes">
+                <h4>Important Instructions</h4>
+                <ul>
+                  <li>
+                    Ensure you're sending on the correct network (
+                    {NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.name})
+                  </li>
+                  <li>
+                    Only send {formData[FORM_FIELDS.CRYPTO_CURRENCY]} to this
+                    address
+                  </li>
+                  <li>
+                    Include your full name in the transaction memo if possible
+                  </li>
+                  <li>
+                    Send transaction hash and confirmation to{" "}
+                    <a href={`mailto:${EMAIL_CONFIG.MADDIE}`}>
+                      {EMAIL_CONFIG.MADDIE}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+        {/* Credit Card Payment Details */}
+        {formData[FORM_FIELDS.PAYMENT_METHOD] === "credit" && (
+          <div className="payment-content">
+            <h4>Credit Card Payment</h4>
+            <p className="payment-timeline">
+              Your secure payment link will be sent to your email address within{" "}
+              <strong>24 hours</strong> once Maddie processes your registration.
+            </p>
+
+            <div className="important-notes">
+              <h4>What to Expect</h4>
+              <ul>
+                <li>
+                  <strong>Timeline:</strong> Payment links distributed ASAP
+                </li>
+                <li>
+                  <strong>Email Delivery:</strong> Check spam/junk folder if not
+                  received
+                </li>
+                <li>
+                  <strong>Link Validity:</strong> Payment link active for 24
+                  hours
+                </li>
+                <li>
+                  <strong>Support:</strong> Contact Maddie for assistance
                   <ul>
                     <li>
-                      <strong>Fee Coverage:</strong> Select the option to cover
-                      ALL transfer fees on your end (often listed as "OUR" in
-                      your bank's transfer settings)
-                    </li>
-                    <li>
-                      <strong>Reference:</strong> Please include your full name
-                      in the transfer reference
-                    </li>
-                    <li>
-                      <strong>Note:</strong> Any unaccounted fees will be
-                      deducted from your payment
-                    </li>
-                    <li>
-                      <strong>Confirmation:</strong> Please send any
-                      transfer/receipt confirmation to Maddie via email to{" "}
-                      <a href={`mailto:${EMAIL_CONFIG.MADDIE}`}>
-                        {EMAIL_CONFIG.MADDIE}
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Revolut Recommendation */}
-                <div className="revolut-recommendation">
-                  <div className="revolut-highlight">
-                    <i className="fas fa-star"></i>
-                    <div>
-                      <h4>Recommended: Use Revolut for Free Transfers</h4>
-                      <p>
-                        Transfers between Revolut users are free and instant,
-                        even internationally
-                      </p>
                       <a
-                        href="https://revolut.com/referral/?referral-code=mbaklayan!JUN2-25-VR-ES-AE&geo-redirect"
+                        href="https://wa.me/5491169729783"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="revolut-link"
                       >
-                        Create Revolut Account{" "}
-                        <i className="fas fa-external-link-alt"></i>
+                        WhatsApp
                       </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Crypto Payment Details - Only show if crypto was selected */}
-          {formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto" &&
-            formData[FORM_FIELDS.CRYPTO_CURRENCY] &&
-            formData[FORM_FIELDS.CRYPTO_NETWORK] && (
-              <div className="crypto-payment-section">
-                <h4>Cryptocurrency Payment Details</h4>
-                <div className="wallet-info">
-                  <div className="wallet-address-container">
-                    <div className="wallet-details">
-                      <div className="detail-row">
-                        <span className="label">Network:</span>
-                        <span
-                          className="value"
-                          style={{
-                            color:
-                              NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]
-                                ?.color,
-                          }}
-                        >
-                          {
-                            NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]
-                              ?.name
-                          }
-                        </span>
-                      </div>
-                      <div className="detail-row">
-                        <span className="label">Currency:</span>
-                        <span className="value">
-                          {formData[FORM_FIELDS.CRYPTO_CURRENCY]}
-                        </span>
-                      </div>
-                      <div className="detail-row">
-                        <span className="label">
-                          Address:
-                          <button
-                            type="button"
-                            className="copy-btn"
-                            onClick={(e) => {
-                              // ARB uses the same wallet as ETH
-                              const networkKey =
-                                formData[FORM_FIELDS.CRYPTO_NETWORK] === "ARB"
-                                  ? "ETH"
-                                  : formData[FORM_FIELDS.CRYPTO_NETWORK];
-                              handleCopyClick(CRYPTO_WALLETS[networkKey], e);
-                            }}
-                            title="Copy wallet address"
-                          >
-                            <i className="fas fa-copy"></i>
-                          </button>
-                        </span>
-                        <span className="value crypto-address">
-                          {(() => {
-                            // ARB uses the same wallet as ETH
-                            const networkKey =
-                              formData[FORM_FIELDS.CRYPTO_NETWORK] === "ARB"
-                                ? "ETH"
-                                : formData[FORM_FIELDS.CRYPTO_NETWORK];
-                            return CRYPTO_WALLETS[networkKey];
-                          })()}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Crypto Instructions */}
-                  <div className="crypto-instructions">
-                    <h4>
-                      <i className="fas fa-exclamation-circle"></i> Important
-                      Instructions
-                    </h4>
-                    <ul>
-                      <li>
-                        <strong>Network Verification:</strong> Ensure you're
-                        sending on the correct network (
-                        {
-                          NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]
-                            ?.name
-                        }
-                        )
-                      </li>
-                      <li>
-                        <strong>Currency Match:</strong> Only send{" "}
-                        {formData[FORM_FIELDS.CRYPTO_CURRENCY]} to this address
-                      </li>
-                      <li>
-                        <strong>Transaction Reference:</strong> Include your
-                        full name in the transaction memo if possible
-                      </li>
-                      <li>
-                        <strong>Confirmation:</strong> Please send transaction
-                        hash and any receipt confirmation to Maddie via email to{" "}
-                        <a href={`mailto:${EMAIL_CONFIG.MADDIE}`}>
-                          {EMAIL_CONFIG.MADDIE}
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
-
-          {/* Credit Card Payment Details - Only show if credit card was selected */}
-          {formData[FORM_FIELDS.PAYMENT_METHOD] === "credit" && (
-            <div className="credit-card-payment-section">
-              <h4>Credit Card Payment</h4>
-              <div className="credit-card-info">
-                {/* Credit Card Instructions */}
-                <div className="credit-card-instructions">
-                  <h4>
-                    <i className="fas fa-info-circle"></i> What to Expect
-                  </h4>
-                  <p>
-                    Your secure payment link will be sent to your email address
-                    within <strong>24 hours</strong> once Maddie processes your
-                    registration.
-                  </p>
-                  <ul style={{ marginTop: "1rem" }}>
-                    <li>
-                      <strong>Timeline:</strong> Maddie will distribute payment
-                      links ASAP
                     </li>
                     <li>
-                      <strong>Email Delivery:</strong> Check your spam/junk
-                      folder if you don't receive it
-                    </li>
-                    <li>
-                      <strong>Link Validity:</strong> Payment link will remain
-                      active for 24 hours
-                    </li>
-                    <li>
-                      <strong>Support:</strong> Contact Maddie if you need
-                      assistance
-                      <ul style={{ marginTop: "0.5rem", marginLeft: "1rem" }}>
-                        <li>
-                          <a
-                            href="https://wa.me/5491169729783"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              color: "#059669",
-                              textDecoration: "underline",
-                            }}
-                          >
-                            WhatsApp
-                          </a>
-                        </li>
-                        <li>
-                          Email: <strong>{EMAIL_CONFIG.MADDIE}</strong>
-                        </li>
-                      </ul>
+                      Email: <strong>{EMAIL_CONFIG.MADDIE}</strong>
                     </li>
                   </ul>
-                </div>
-              </div>
+                </li>
+              </ul>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="print-section">
