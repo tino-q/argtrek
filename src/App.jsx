@@ -120,6 +120,19 @@ function App() {
   // Handle successful login
   const handleLoginSuccess = (userData) => {
     setUserRSVP(userData);
+
+    // Clean up URL parameters from magic link
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("email") && urlParams.get("password")) {
+      // Remove email and password parameters from URL
+      urlParams.delete("email");
+      urlParams.delete("password");
+      const newUrl =
+        window.location.pathname +
+        (urlParams.toString() ? "?" + urlParams.toString() : "");
+      window.history.replaceState({}, "", newUrl);
+    }
+
     navigateToStep(STEPS.WELCOME);
   };
 
@@ -225,6 +238,18 @@ function App() {
           setFormData(result.data.formData);
           setSubmissionResult(result.data.submissionResult);
           setIsFormSubmitted(true);
+
+          // Clean up URL parameters from magic link
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get("email") && urlParams.get("password")) {
+            // Remove email and password parameters from URL
+            urlParams.delete("email");
+            urlParams.delete("password");
+            const newUrl =
+              window.location.pathname +
+              (urlParams.toString() ? "?" + urlParams.toString() : "");
+            window.history.replaceState({}, "", newUrl);
+          }
 
           // Navigate directly to payment details
           navigateToStep(STEPS.PAYMENT_DETAILS);

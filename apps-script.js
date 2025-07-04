@@ -933,13 +933,21 @@ function sendPasswordEmail(email, password, name) {
         <p>You're all set to confirm your spot on our amazing Argentina adventure. Use the details below to access your trip registration:</p>
         
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #495057;">Your Trip Access Details:</h3>
-          <p><strong>Website:</strong> <a href="https://argtrek.sonsolesstays.com" style="color: #007bff;">argtrek.sonsolesstays.com</a></p>
-          <p><strong>Your Email:</strong> ${email}</p>
-          <p><strong>Your Password:</strong> <code style="background-color: #e9ecef; padding: 4px 8px; border-radius: 4px; font-weight: bold;">${password}</code></p>
+          <h3 style="margin-top: 0; color: #495057;">Ready to confirm your trip?</h3>
+          <div style="text-align: center;">
+            <a href="https://argtrek.sonsolesstays.com?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}" 
+               style="display: inline-block; background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">
+              🇦🇷 Access My Argentina Trip 🇦🇷
+            </a>
+          </div>
+          <p style="margin-top: 15px; font-size: 14px; color: #6c757d;">
+            <strong>Backup credentials (if needed):</strong><br>
+            Email: ${email}<br>
+            Password: <code style="background-color: #e9ecef; padding: 2px 6px; border-radius: 3px;">${password}</code>
+          </p>
         </div>
         
-        <p>Click the link above and use your email and password to:</p>
+        <p>Click the magic link above to instantly access your trip registration, or use the backup credentials if needed to:</p>
         <ul>
           <li>✅ Confirm your trip details</li>
           <li>🏠 Select your accommodation preferences</li>
@@ -948,7 +956,7 @@ function sendPasswordEmail(email, password, name) {
         </ul>
         
         <p><strong>Important:</strong> Please complete your registration as soon as possible to secure your spot!</p>
-        
+                
         <p>If you have any questions or need assistance, don't hesitate to reach out to Maddie on WhatsApp.</p>
         
         <p style="margin-top: 30px;">¡Nos vemos en Argentina!</p>
@@ -966,14 +974,17 @@ function sendPasswordEmail(email, password, name) {
 
 Argentina awaits you! 🇦🇷✈️
 
-You're all set to confirm your spot on our amazing Argentina adventure. Use the details below to access your trip registration:
+You're all set to confirm your spot on our amazing Argentina adventure. 
 
-Your Trip Access Details:
+🇦🇷 MAGIC LINK - Click to access instantly (no login needed):
+https://argtrek.sonsolesstays.com?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}
+
+Backup credentials (if needed):
 Website: https://argtrek.sonsolesstays.com
 Your Email: ${email}
 Your Password: ${password}
 
-Visit the website and use your email and password to:
+Use the magic link above or visit the website manually to:
 ✅ Confirm your trip details
 🏠 Select your accommodation preferences  
 🎯 Choose your activities
@@ -981,22 +992,25 @@ Visit the website and use your email and password to:
 
 Important: Please complete your registration as soon as possible to secure your spot!
 
+💡 Pro tip: The magic link above will automatically log you in - no need to type anything!
+
 If you have any questions or need assistance, don't hesitate to reach out to Maddie on WhatsApp.
 
 ¡Nos vemos en Argentina!
-The Argentina Trek Team
+Sonsoles Stays
 
 ---
 This email contains your personal access credentials. Please keep them secure and don't share them with others.
     `;
-
-    // Send the email using Gmail API
-    // MailApp.sendEmail({
-    //   to: email,
-    //   subject: subject,
-    //   htmlBody: htmlBody,
-    //   body: textBody,
-    // });
+    if (email === "tinqueija@gmail.com") {
+      // Send the email using Gmail API
+      MailApp.sendEmail({
+        to: email,
+        subject: subject,
+        htmlBody: htmlBody,
+        body: textBody,
+      });
+    }
 
     console.log("Email sent successfully to", email);
 

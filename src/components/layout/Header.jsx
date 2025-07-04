@@ -5,7 +5,7 @@ const Header = () => {
   return (
     <header className="header">
       <div className="header-content">
-        <div className="superset">by Sonsoles Travel</div>
+        <div className="superset">by Sonsoles Stays</div>
         <h1>
           <i className="fas fa-mountain"></i> Argentina Trek
         </h1>

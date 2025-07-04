@@ -31,20 +31,59 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
     };
   }, [location.pathname, onLogout]);
 
-  // Auto-prefill dev credentials on localhost or 192.x networks
+  // Check for magic link parameters and auto-fill/auto-submit
   useEffect(() => {
-    const hostname = window.location.hostname;
-    if (
-      hostname === "localhost" ||
-      hostname === "127.0.0.1" ||
-      hostname.startsWith("192.")
-    ) {
-      // setEmail("dev@test.com");
-      // setPassword("dev123");
-      // setEmail("solo@gmail.com");
-      setPassword("password");
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailParam = urlParams.get("email");
+    const passwordParam = urlParams.get("password");
+
+    if (emailParam && passwordParam) {
+      // Magic link detected - auto-fill credentials
+      setEmail(emailParam);
+      setPassword(passwordParam);
+
+      // Auto-submit after a brief delay to allow state to update
+      const autoSubmit = setTimeout(async () => {
+        if (onEmailSubmit && !isLoading) {
+          setIsLoading(true);
+          try {
+            await onEmailSubmit(emailParam.trim(), passwordParam.trim());
+          } catch (error) {
+            // Check if this is an email not found error
+            if (
+              error &&
+              error.message &&
+              error.message.includes("Email not found")
+            ) {
+              // Navigate to new email step instead of showing modal
+              if (onEmailNotFound) {
+                onEmailNotFound(emailParam.trim());
+              }
+            } else {
+              // Re-throw other errors to be handled by the parent component
+              throw error;
+            }
+          }
+          setIsLoading(false);
+        }
+      }, 500);
+
+      return () => clearTimeout(autoSubmit);
+    } else {
+      // Auto-prefill dev credentials on localhost or 192.x networks
+      const hostname = window.location.hostname;
+      if (
+        hostname === "localhost" ||
+        hostname === "127.0.0.1" ||
+        hostname.startsWith("192.")
+      ) {
+        // setEmail("dev@test.com");
+        // setPassword("dev123");
+        // setEmail("solo@gmail.com");
+        setPassword("password");
+      }
     }
-  }, []);
+  }, [onEmailSubmit, onEmailNotFound, isLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,10 +123,19 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
         </h2>
 
         <div className="login-description">
-          <p>
-            Enter your email address and password to access your confirmed
-            Argentina trip itinerary and pricing information.
-          </p>
+          {new URLSearchParams(window.location.search).get("email") &&
+          new URLSearchParams(window.location.search).get("password") ? (
+            <p>
+              <i className="fas fa-magic" style={{ marginRight: "8px" }}></i>
+              Magic link detected! Automatically logging you in with your
+              credentials...
+            </p>
+          ) : (
+            <p>
+              Enter your email address and password to access your confirmed
+              Argentina trip itinerary and pricing information.
+            </p>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="email-login-form">
