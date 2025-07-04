@@ -118,10 +118,6 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
   return (
     <>
       <section className="form-section">
-        <h2>
-          <i className="fas fa-sign-in-alt"></i> Log in
-        </h2>
-
         <form onSubmit={handleSubmit} className="email-login-form">
           <div className="form-group">
             <label htmlFor="loginEmail">
