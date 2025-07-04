@@ -45,6 +45,7 @@ function App() {
   const [userRSVP, setUserRSVP] = useState(null);
   const [formData, setFormData] = useState(getDefaultFormData());
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [submissionResult, setSubmissionResult] = useState(null);
 
   // React Router hooks
   const navigate = useNavigate();
@@ -201,6 +202,9 @@ function App() {
       const result = await submitForm(submissionData, userRSVP, pricing);
 
       if (result.success) {
+        // Store the submission result (including rowNumber)
+        setSubmissionResult(result.data);
+
         // Mark form as submitted and navigate to payment details
         setIsFormSubmitted(true);
         navigateToStep(STEPS.PAYMENT_DETAILS);
@@ -226,6 +230,7 @@ function App() {
     setUserRSVP(null);
     setFormData(getDefaultFormData()); // Reset to default form state
     setIsFormSubmitted(false);
+    setSubmissionResult(null);
 
     showSuccess(
       "Logged out successfully. You can now login with different credentials."
@@ -275,6 +280,7 @@ function App() {
                   onLogout={handleLogout}
                   onRSVPContinue={handleRSVPContinue}
                   isFormSubmitted={isFormSubmitted}
+                  submissionResult={submissionResult}
                 />
               }
             />
@@ -292,6 +298,7 @@ function App() {
                   onLogout={handleLogout}
                   onRSVPContinue={handleRSVPContinue}
                   isFormSubmitted={isFormSubmitted}
+                  submissionResult={submissionResult}
                 />
               }
             />
@@ -309,6 +316,7 @@ function App() {
                   onLogout={handleLogout}
                   onRSVPContinue={handleRSVPContinue}
                   isFormSubmitted={isFormSubmitted}
+                  submissionResult={submissionResult}
                 />
               }
             />
@@ -326,6 +334,7 @@ function App() {
                   onLogout={handleLogout}
                   onRSVPContinue={handleRSVPContinue}
                   isFormSubmitted={isFormSubmitted}
+                  submissionResult={submissionResult}
                 />
               }
             />
@@ -343,6 +352,7 @@ function App() {
                   onLogout={handleLogout}
                   onRSVPContinue={handleRSVPContinue}
                   isFormSubmitted={isFormSubmitted}
+                  submissionResult={submissionResult}
                 />
               }
             />
@@ -360,6 +370,7 @@ function App() {
                   onLogout={handleLogout}
                   onRSVPContinue={handleRSVPContinue}
                   isFormSubmitted={isFormSubmitted}
+                  submissionResult={submissionResult}
                 />
               }
             />
@@ -377,6 +388,7 @@ function App() {
                   onLogout={handleLogout}
                   onRSVPContinue={handleRSVPContinue}
                   isFormSubmitted={isFormSubmitted}
+                  submissionResult={submissionResult}
                 />
               }
             />
@@ -395,6 +407,7 @@ function App() {
                   onLogout={handleLogout}
                   onRSVPContinue={handleRSVPContinue}
                   isFormSubmitted={isFormSubmitted}
+                  submissionResult={submissionResult}
                 />
               }
             />

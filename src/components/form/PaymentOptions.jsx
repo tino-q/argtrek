@@ -222,6 +222,7 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
                 <h3>Credit Card</h3>
                 <p className="price">+4% processing fee</p>
                 <p className="description">Pay through a secure link</p>
+                <p className="description">Supports Apple & Google Pay</p>
               </div>
             </label>
           </div>
@@ -240,9 +241,9 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
             />
             <label htmlFor="bankTransfer">
               <div className="option-content">
-                <h3>Bank Transfer</h3>
+                <h3>Bank Transfer (USD)</h3>
                 <p className="price" style={{ whiteSpace: "nowrap" }}>
-                  0% via Revolut
+                  0% via Revolut,
                   <a
                     href="https://revolut.com/referral/?referral-code=martin1h7!NOV1AR"
                     target="_blank"
@@ -253,11 +254,13 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
                       marginLeft: "4px",
                     }}
                   >
-                    , sign up!
+                    sign up!
                   </a>
                 </p>
                 <p className="description">
-                  Sender must be sure to account for all fees
+                  Free via Revolut. Other banks: select "sender pays all fees"
+                  and add any additional fees to ensure we receive the full
+                  amount
                 </p>
               </div>
             </label>
@@ -279,7 +282,9 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
               <div className="option-content">
                 <h3>Crypto</h3>
                 <p className="price">0%</p>
-                <p className="description">USDT/USDC on ETH, ARB, or SOLANA</p>
+                <p className="description">
+                  USDT or USDC on ETH, ARB, or SOLANA blockchains
+                </p>
               </div>
             </label>
           </div>

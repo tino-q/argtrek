@@ -3,14 +3,15 @@
  * Handles both GET requests for RSVP lookup and POST requests for form submissions
  * Single webapp managing both "RSVP" and "Trip Registrations" sheets
  *
- * Google Apps Script globals: ContentService, SpreadsheetApp
+ * Google Apps Script globals: ContentService, SpreadsheetApp, Utilities
  */
 
-/* global ContentService, SpreadsheetApp */
+/* global ContentService, SpreadsheetApp, Utilities */
 
 // Configuration
 const TRIP_REGISTRATIONS_SHEET_NAME = "Trip Registrations";
 const RSVP_SHEET_NAME = "RSVP"; // Sheet containing RSVP data
+const TPV_PAYMENTS_SHEET_NAME = "TPV PAYMENTS"; // Sheet for REDSYS TPV payment callbacks
 const PRICING = {
   // These base prices will be overridden by RSVP data
   tripOption1: 2250,
@@ -83,7 +84,7 @@ function doGet(e) {
 }
 
 /**
- * Main function to handle POST requests for form submissions
+ * Main function to handle POST requests for form submissions and REDSYS TPV callbacks
  */
 // eslint-disable-next-line no-unused-vars
 function doPost(e) {
@@ -91,7 +92,12 @@ function doPost(e) {
     // Get data from FormData (comes through e.parameter)
     const data = e.parameter;
 
-    // Process and save data
+    // Check if this is a REDSYS TPV callback
+    if (data.Ds_MerchantParameters) {
+      return handleRedsysCallback(data);
+    }
+
+    // Continue with existing form submission logic
     const result = saveToSheet(data);
 
     if (result.success) {
@@ -130,6 +136,128 @@ function doOptions() {
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     });
+}
+
+/**
+ * Handle REDSYS TPV payment callback
+ */
+function handleRedsysCallback(data) {
+  try {
+    console.log("Processing REDSYS TPV callback");
+
+    // Extract the required fields from the callback
+    const dsSignatureVersion = data.Ds_SignatureVersion || "";
+    const dsMerchantParameters = data.Ds_MerchantParameters || "";
+    const dsSignature = data.Ds_Signature || "";
+
+    // Decode the Base64 encoded merchant parameters
+    let decodedJson = "";
+    try {
+      const decodedBytes = Utilities.base64Decode(dsMerchantParameters);
+      decodedJson = Utilities.newBlob(decodedBytes).getDataAsString();
+    } catch (decodeError) {
+      console.error("Error decoding Ds_MerchantParameters:", decodeError);
+      decodedJson = "ERROR: Could not decode Base64 data";
+    }
+
+    // Create the payment record
+    const paymentRecord = {
+      timestamp: new Date().toISOString(),
+      decoded_json: decodedJson,
+      raw_ds_merchant_parameters: dsMerchantParameters,
+      ds_signature_version: dsSignatureVersion,
+      ds_signature: dsSignature,
+    };
+
+    // Save to TPV PAYMENTS sheet
+    const result = saveToTpvPaymentsSheet(paymentRecord);
+
+    if (result.success) {
+      console.log(
+        "REDSYS callback processed successfully, row:",
+        result.rowNumber
+      );
+
+      // Return HTTP 200 OK to REDSYS to confirm receipt
+      return ContentService.createTextOutput("OK").setMimeType(
+        ContentService.MimeType.TEXT
+      );
+    } else {
+      throw new Error(result.error || "Failed to save TPV payment data");
+    }
+  } catch (error) {
+    console.error("Error processing REDSYS callback:", error);
+
+    // Still return HTTP 200 OK to avoid REDSYS retries
+    // Log the error for manual review
+    return ContentService.createTextOutput(
+      "ERROR: " + error.message
+    ).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+/**
+ * Save TPV payment data to the TPV PAYMENTS sheet
+ */
+function saveToTpvPaymentsSheet(paymentRecord) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = spreadsheet.getSheetByName(TPV_PAYMENTS_SHEET_NAME);
+
+    // Create the sheet if it doesn't exist
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(TPV_PAYMENTS_SHEET_NAME);
+      console.log("Created new TPV PAYMENTS sheet");
+    }
+
+    // Define the headers (fixed structure)
+    const headers = [
+      "timestamp",
+      "decoded_json",
+      "raw_ds_merchant_parameters",
+      "ds_signature_version",
+      "ds_signature",
+    ];
+
+    // Check if this is the first row (no data yet)
+    if (sheet.getLastRow() === 0) {
+      // Add headers
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+
+      // Format header row
+      const headerRange = sheet.getRange(1, 1, 1, headers.length);
+      headerRange.setFontWeight("bold");
+      headerRange.setBackground("#f0f0f0");
+
+      console.log("Added headers to TPV PAYMENTS sheet");
+    }
+
+    // Prepare the values in the same order as headers
+    const values = [
+      paymentRecord.timestamp,
+      paymentRecord.decoded_json,
+      paymentRecord.raw_ds_merchant_parameters,
+      paymentRecord.ds_signature_version,
+      paymentRecord.ds_signature,
+    ];
+
+    // Add the payment record
+    sheet.appendRow(values);
+    const rowNumber = sheet.getLastRow();
+
+    console.log("TPV payment record saved to row:", rowNumber);
+
+    return {
+      success: true,
+      rowNumber: rowNumber,
+    };
+  } catch (error) {
+    console.error("Error saving TPV payment data:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
 }
 
 /**
@@ -342,14 +470,63 @@ function saveToSheet(data) {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
 
-    // Generate headers and values dynamically from data object
-    const headers = Object.keys(data).sort();
-    const values = headers.map((header) => data[header]);
+    const HEADERS_IN_ORDER = [
+      "formData.argentineCitizen",
+      "formData.cooking",
+      "formData.cryptoCurrency",
+      "formData.cryptoNetwork",
+      "formData.dietaryMessage",
+      "formData.dietaryRestrictions",
+      "formData.email",
+      "formData.fullName",
+      "formData.horseback",
+      "formData.paymentMethod",
+      "formData.paymentSchedule",
+      "formData.privateRoomUpgrade",
+      "formData.rafting",
+      "formData.roommateName",
+      "formData.roommatePreference",
+      "pricing.activities",
+      "pricing.activitiesPrice",
+      "pricing.basePrice",
+      "pricing.installmentAmount",
+      "pricing.privateRoomUpgrade",
+      "pricing.processingFee",
+      "pricing.subtotal",
+      "pricing.total",
+      "pricing.vatAmount",
+      "rsvpData.22Nov_BSAS",
+      "rsvpData.23Nov_BSAS",
+      "rsvpData.23Nov_Dinner_Welcome",
+      "rsvpData.23Nov_Tour",
+      "rsvpData.24Nov_BARI",
+      "rsvpData.25Nov_BARI",
+      "rsvpData.26Nov_BARI",
+      "rsvpData.27Nov_MDZ",
+      "rsvpData.28Nov_MDZ",
+      "rsvpData.29Nov_BSAS",
+      "rsvpData.AEP-BRC",
+      "rsvpData.BRC-MDZ",
+      "rsvpData.IVAALOJ",
+      "rsvpData.MDZ-AEP",
+      "rsvpData.PACKPRICE",
+      "rsvpData.PRIVATEROOM",
+      "rsvpData.Timestamp",
+      "rsvpData.VALIJA",
+      "rsvpData.comments",
+      "rsvpData.email",
+      "rsvpData.email2",
+      "rsvpData.name",
+      "rsvpData.option",
+      "rsvpData.party",
+      "rsvpData.plus1",
+    ];
 
-    // Always ensure headers are written in row 1
-    // Check if row 1 exists and has the correct headers
+    // Use the hardcoded headers to ensure consistent ordering
+    const headers = HEADERS_IN_ORDER;
+    const values = headers.map((header) => data[header] || ""); // Use empty string for missing data
 
-    // Clear row 1 and write headers
+    // Always rewrite the header row to ensure consistency
     if (sheet.getLastRow() > 0) {
       sheet.getRange(1, 1, 1, headers.length).clearContent();
     }
@@ -368,7 +545,7 @@ function saveToSheet(data) {
       };
     }
 
-    // Add row to sheet using the dynamically generated values
+    // Add row to sheet using the hardcoded header order
     sheet.appendRow(values);
     const rowNumber = sheet.getLastRow();
 

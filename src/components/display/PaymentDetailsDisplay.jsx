@@ -4,6 +4,7 @@
 import { getTravelerName } from "../../utils/rsvpData";
 import { FORM_FIELDS } from "../../utils/config";
 import { copyToClipboard } from "../../utils/clipboard";
+import PricingSummary from "../layout/PricingSummary";
 import "../../styles/PaymentDetailsDisplay.css";
 
 const BANK_DETAILS = [
@@ -55,7 +56,13 @@ const NETWORK_INFO = {
   },
 };
 
-const PaymentDetailsDisplay = ({ rsvpData, formData, pricing, onLogout }) => {
+const PaymentDetailsDisplay = ({
+  rsvpData,
+  formData,
+  pricing,
+  onLogout,
+  submissionResult,
+}) => {
   const travelerName = getTravelerName(rsvpData);
 
   const handleCopyClick = async (value, event) => {
@@ -79,9 +86,18 @@ const PaymentDetailsDisplay = ({ rsvpData, formData, pricing, onLogout }) => {
           Thank you {travelerName}! Your trip registration has been successfully
           submitted.
         </p>
+        {submissionResult?.rowNumber && (
+          <div className="order-number">
+            <p>
+              Order Number: <strong>#{submissionResult.rowNumber}</strong>
+            </p>
+          </div>
+        )}
       </div>
 
-      <div className="payment-instructions">
+      <PricingSummary pricing={pricing} formData={formData} />
+
+      <div className="payment-instructions" style={{ marginTop: "2rem" }}>
         <h3>💳 Payment Information</h3>
         <div className="payment-method-details">
           {/* Bank Transfer Details - Only show if bank transfer was selected */}

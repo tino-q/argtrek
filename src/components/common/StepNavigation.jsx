@@ -67,7 +67,7 @@ const StepNavigation = ({
               !formData[FORM_FIELDS.PAYMENT_SCHEDULE] ||
               !formData[FORM_FIELDS.PAYMENT_METHOD]
             }
-            confirmText="Send"
+            confirmText="You can only submit once, continue?"
             confirmDuration={3000}
           >
             <i className="fas fa-check"></i> Submit Registration

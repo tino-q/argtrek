@@ -19,6 +19,7 @@ const StepRenderer = ({
   onLogout,
   onRSVPContinue,
   isFormSubmitted,
+  submissionResult,
 }) => {
   const stepConfig = getStepConfig(currentStep);
 
@@ -84,6 +85,7 @@ const StepRenderer = ({
           formData={formData}
           pricing={pricing}
           onLogout={onLogout}
+          submissionResult={submissionResult}
         />
       );
 
