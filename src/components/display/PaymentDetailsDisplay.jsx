@@ -2,7 +2,7 @@
 // Shows payment information after successful trip registration
 
 import { getTravelerName } from "../../utils/rsvpData";
-import { FORM_FIELDS } from "../../utils/config";
+import { FORM_FIELDS, EMAIL_CONFIG } from "../../utils/config";
 import { copyToClipboard } from "../../utils/clipboard";
 import PricingSummary from "../layout/PricingSummary";
 import "../../styles/PaymentDetailsDisplay.css";
@@ -276,59 +276,63 @@ const PaymentDetailsDisplay = ({
                 </div>
               </div>
             )}
-        </div>
 
-        <div className="payment-schedule">
-          <h4>Payment Schedule</h4>
-          <div className="schedule-details">
-            {formData.paymentSchedule === "full" ? (
-              <p>
-                Full payment is due <strong>15th September</strong>
-              </p>
-            ) : (
-              <div>
-                <p>
-                  50% deposit due: <strong>Within 7 days</strong>
-                </p>
-                <p>
-                  Remaining balance due:{" "}
-                  <strong>15 days before departure</strong>
-                </p>
+          {/* Credit Card Payment Details - Only show if credit card was selected */}
+          {formData[FORM_FIELDS.PAYMENT_METHOD] === "credit" && (
+            <div className="credit-card-payment-section">
+              <h4>Credit Card Payment</h4>
+              <div className="credit-card-info">
+                {/* Credit Card Instructions */}
+                <div className="credit-card-instructions">
+                  <h4>
+                    <i className="fas fa-info-circle"></i> What to Expect
+                  </h4>
+                  <p>
+                    Your secure payment link will be sent to your email address
+                    within <strong>24 hours</strong> once Maddie processes your
+                    registration.
+                  </p>
+                  <ul style={{ marginTop: "1rem" }}>
+                    <li>
+                      <strong>Timeline:</strong> Maddie will distribute payment
+                      links ASAP
+                    </li>
+                    <li>
+                      <strong>Email Delivery:</strong> Check your spam/junk
+                      folder if you don't receive it
+                    </li>
+                    <li>
+                      <strong>Link Validity:</strong> Payment link will remain
+                      active for 24 hours
+                    </li>
+                    <li>
+                      <strong>Support:</strong> Contact Maddie if you need
+                      assistance
+                      <ul style={{ marginTop: "0.5rem", marginLeft: "1rem" }}>
+                        <li>
+                          <a
+                            href="https://wa.me/34689200162"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              color: "#059669",
+                              textDecoration: "underline",
+                            }}
+                          >
+                            WhatsApp
+                          </a>
+                        </li>
+                        <li>
+                          Email: <strong>{EMAIL_CONFIG.MADDIE}</strong>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-
-        <div className="total-amount">
-          <h4>Total Amount</h4>
-          <p className="amount">
-            <strong>USD ${pricing.total.toLocaleString()}</strong>
-          </p>
-        </div>
-      </div>
-
-      <div className="next-steps">
-        <h3>📋 Next Steps</h3>
-        <ul>
-          <li>Complete payment using your preferred method above</li>
-          <li>
-            Send payment confirmation to{" "}
-            <strong>maddie@argentinatrek.com</strong>
-          </li>
-          <li>You'll receive a detailed itinerary within 48 hours</li>
-          <li>Passport and visa requirements will be sent separately</li>
-        </ul>
-      </div>
-
-      <div className="contact-info">
-        <h3>📞 Questions?</h3>
-        <p>Contact Maddie at:</p>
-        <p>
-          Email: <strong>maddie@argentinatrek.com</strong>
-        </p>
-        <p>
-          WhatsApp: <strong>+54 9 11 1234-5678</strong>
-        </p>
       </div>
 
       <div className="logout-section">

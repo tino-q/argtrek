@@ -593,7 +593,180 @@
 }
 
 .revolut-link:hover {
-  text-decoration: underline;
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-1px);
+  background-color: #e0e7ff;
+  color: #3730a3;
+}
+
+/* Credit Card Payment Section */
+.credit-card-payment-section {
+  margin-bottom: 2rem;
+}
+
+.credit-card-info {
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.payment-link-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: #dbeafe;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #93c5fd;
+  margin-bottom: 1.5rem;
+}
+
+.notice-icon {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.notice-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: #1e40af;
+  font-size: 1.1rem;
+}
+
+.notice-content p {
+  margin: 0;
+  color: #1e40af;
+  line-height: 1.5;
+}
+
+.credit-card-details {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1.5rem;
+}
+
+.credit-card-details h4 {
+  margin: 0 0 1rem 0;
+  color: #374151;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.details-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-item .label {
+  font-weight: 500;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.detail-item .value {
+  color: #111827;
+  text-align: right;
+  font-weight: 500;
+}
+
+.credit-card-instructions {
+  background: #f0f9ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #bae6fd;
+}
+
+.credit-card-instructions h4 {
+  margin: 0 0 1rem 0;
+  color: #0369a1;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.credit-card-instructions ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.credit-card-instructions li {
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  color: #0369a1;
+}
+
+.credit-card-instructions li:last-child {
+  margin-bottom: 0;
+}
+
+.credit-card-instructions li::marker {
+  color: #0369a1;
+}
+
+/* Mobile Responsive Styles for Credit Card Section */
+@media (max-width: 768px) {
+  .payment-link-notice {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .notice-icon {
+    align-self: center;
+  }
+
+  .details-grid {
+    gap: 1rem;
+  }
+
+  .detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .detail-item .value {
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .credit-card-info {
+    padding: 1rem;
+  }
+
+  .payment-link-notice {
+    padding: 1rem;
+  }
+
+  .credit-card-details {
+    padding: 1rem;
+  }
+
+  .credit-card-instructions {
+    padding: 1rem;
+  }
 }

@@ -221,7 +221,9 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
               <div className="option-content">
                 <h3>Credit Card</h3>
                 <p className="price">+4% processing fee</p>
-                <p className="description">Pay through a secure link</p>
+                <p className="description">
+                  Pay through a secure link sent to your email
+                </p>
                 <p className="description">Supports Apple & Google Pay</p>
               </div>
             </label>

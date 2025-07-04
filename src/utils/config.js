@@ -86,6 +86,11 @@ export const CONTACTS = [
   },
 ];
 
+// Email Configuration
+export const EMAIL_CONFIG = {
+  MADDIE: "sonsolesstays+argtrek@gmail.com",
+};
+
 // Form Field Names - Direct 1:1 mapping to backend
 export const FORM_FIELDS = {
   EMAIL: "email",
