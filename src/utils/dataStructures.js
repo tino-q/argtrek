@@ -85,6 +85,22 @@ export const FORM_DATA_STRUCTURE = {
     description: "Full name of traveler",
     required: true,
   },
+  firstName: {
+    type: "string",
+    description: "Traveler's first name",
+    required: true,
+  },
+  lastName: {
+    type: "string",
+    description: "Traveler's last name",
+    required: true,
+  },
+  phoneNumber: {
+    type: "string",
+    description: "Traveler's phone number",
+    required: true,
+    validation: "phone",
+  },
 
   // Accommodation
   privateRoomUpgrade: {
@@ -117,6 +133,13 @@ export const FORM_DATA_STRUCTURE = {
   cooking: {
     type: "boolean",
     description: "Cooking class activity selection",
+    required: true,
+  },
+
+  // Luggage
+  checkedLuggage: {
+    type: "boolean",
+    description: "Whether user wants checked luggage (not recommended)",
     required: true,
   },
 
@@ -198,11 +221,11 @@ export const RSVP_DATA_STRUCTURE = {
     description: "VAT amount for accommodation",
     required: true,
   },
-  VALIJA: {
-    type: "number",
-    description: "Checked luggage price",
-    required: true,
-  },
+  // VALIJA: {
+  //   type: "number",
+  //   description: "Checked luggage price",
+  //   required: true,
+  // }, // Removed - no longer pricing luggage
 };
 
 // ========================================
@@ -374,12 +397,16 @@ export const SAFE_PRICING_FIELDS = {
 export const SAFE_FORM_FIELDS = {
   EMAIL: "email",
   FULL_NAME: "fullName",
+  FIRST_NAME: "firstName",
+  LAST_NAME: "lastName",
+  PHONE_NUMBER: "phoneNumber",
   PRIVATE_ROOM_UPGRADE: "privateRoomUpgrade",
   ROOMMATE_PREFERENCE: "roommatePreference",
   ROOMMATE_NAME: "roommateName",
   RAFTING: "rafting",
   HORSEBACK: "horseback",
   COOKING: "cooking",
+  CHECKED_LUGGAGE: "checkedLuggage",
   PAYMENT_SCHEDULE: "paymentSchedule",
   PAYMENT_METHOD: "paymentMethod",
   CRYPTO_CURRENCY: "cryptoCurrency",

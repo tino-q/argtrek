@@ -63,12 +63,15 @@ export const LUGGAGE = {
     included: true,
   },
   checked: {
-    name: "Add Checked luggage to all of your flights",
+    name: "Checked Luggage (Not Recommended)",
     description:
-      "Price includes luggage charges for all confirmed flights. It must not exceed 158 cm in total linear dimensions.",
+      "Large suitcase or bag. It must not exceed 158 cm in total linear dimensions and 23kg maximum weight.",
     maxWeight: "23kg",
     icon: "fas fa-suitcase",
     included: false,
+    discouraged: true,
+    warningMessage:
+      "We highly recommend traveling light, as we'll be changing cities every two days. If you think bringing a larger suitcase will be unavoidable, no problem! Just let us know and we'll help you arrange the extra checked luggage. 😊",
   },
 };
 
@@ -100,6 +103,9 @@ export const EMAIL_CONFIG = {
 export const FORM_FIELDS = {
   EMAIL: "email",
   FULL_NAME: "fullName",
+  FIRST_NAME: "firstName",
+  LAST_NAME: "lastName",
+  PHONE_NUMBER: "phoneNumber",
   PRIVATE_ROOM_UPGRADE: "privateRoomUpgrade",
   ROOMMATE_PREFERENCE: "roommatePreference",
   ROOMMATE_NAME: "roommateName",
@@ -107,6 +113,8 @@ export const FORM_FIELDS = {
   RAFTING: "rafting",
   HORSEBACK: "horseback",
   COOKING: "cooking",
+  // Luggage
+  CHECKED_LUGGAGE: "checkedLuggage",
   // Payment options
   PAYMENT_SCHEDULE: "paymentSchedule",
   PAYMENT_METHOD: "paymentMethod",

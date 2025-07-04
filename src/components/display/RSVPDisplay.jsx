@@ -1,10 +1,9 @@
-import { useState } from "react";
-import { LUGGAGE } from "../../utils/config";
+import { useState, useEffect } from "react";
+import { LUGGAGE, FORM_FIELDS } from "../../utils/config";
 import {
   getPersonalInfo,
   getPricingInfo,
   getTripItinerary,
-  getCheckedLuggagePrice,
   getExcludedTripServices,
 } from "../../utils/rsvpData";
 
@@ -17,19 +16,93 @@ const RSVPDisplay = ({
   hideNavigation = false,
 }) => {
   const [showAllDetails, setShowAllDetails] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   // Extract data using centralized utilities
   const personalInfo = getPersonalInfo(rsvpData);
   const pricingInfo = getPricingInfo(rsvpData);
   const tripItinerary = getTripItinerary(rsvpData);
   const excludedServices = getExcludedTripServices(rsvpData);
-  const checkedLuggagePrice = getCheckedLuggagePrice(rsvpData);
+
+  // Initialize form data with RSVP data if not already set
+  useEffect(() => {
+    if (!formData[FORM_FIELDS.FIRST_NAME] && personalInfo.firstName) {
+      updateFormData(FORM_FIELDS.FIRST_NAME, personalInfo.firstName);
+    }
+    if (!formData[FORM_FIELDS.LAST_NAME] && personalInfo.lastName) {
+      updateFormData(FORM_FIELDS.LAST_NAME, personalInfo.lastName);
+    }
+  }, [personalInfo.firstName, personalInfo.lastName, formData, updateFormData]);
+
+  // Validation function
+  const validateRequiredFields = () => {
+    const errors = {};
+
+    if (!formData[FORM_FIELDS.FIRST_NAME]?.trim()) {
+      errors[FORM_FIELDS.FIRST_NAME] = true;
+    }
+
+    if (!formData[FORM_FIELDS.LAST_NAME]?.trim()) {
+      errors[FORM_FIELDS.LAST_NAME] = true;
+    }
+
+    if (!formData[FORM_FIELDS.PHONE_NUMBER]?.trim()) {
+      errors[FORM_FIELDS.PHONE_NUMBER] = true;
+    }
+
+    setValidationErrors(errors);
+
+    // Check if travel document confirmation is checked
+    const hasFieldErrors = Object.keys(errors).length > 0;
+    const hasConfirmationError = !formData.travelDocumentConfirmed;
+
+    // If confirmation checkbox is not checked, ALWAYS scroll to it (regardless of field errors)
+    if (hasConfirmationError) {
+      const confirmationElement = document.getElementById(
+        "travel-document-confirmation"
+      );
+      if (confirmationElement) {
+        confirmationElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        // Add a visual flash effect
+        confirmationElement.classList.add("highlight-error");
+        setTimeout(() => {
+          confirmationElement.classList.remove("highlight-error");
+        }, 2000);
+      }
+    }
+
+    return hasFieldErrors === false && hasConfirmationError === false;
+  };
+
+  // Handle continue with validation
+  const handleContinueClick = () => {
+    if (validateRequiredFields()) {
+      onContinue();
+    }
+  };
+
+  // Handle input change and clear validation error
+  const handleInputChange = (field, value) => {
+    updateFormData(field, value);
+
+    // Clear validation error for this field if it now has a value
+    if (value?.trim() && validationErrors[field]) {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
 
   // Handle checked luggage selection
-  const isLuggageSelected = Boolean(formData?.luggage);
+  const isLuggageSelected = Boolean(formData[FORM_FIELDS.CHECKED_LUGGAGE]);
 
   const handleLuggageToggle = () => {
-    updateFormData("luggage", !isLuggageSelected);
+    updateFormData(FORM_FIELDS.CHECKED_LUGGAGE, !isLuggageSelected);
   };
 
   // Helper function to get generic hotel description
@@ -270,26 +343,100 @@ const RSVPDisplay = ({
       <div className="rsvp-personal-info">
         <div className="info-card">
           <h3>Traveler Information</h3>
+
+          {/* Email - Always read-only, first */}
           <div className="info-row">
-            <span className="label">Name:</span>
-            <span className="value">{personalInfo.name}</span>
+            <span className="label">Email:</span>
+            <span className="value">{personalInfo.email}</span>
           </div>
+
+          {/* First Name - Editable */}
+          <div className="info-row">
+            <span className="label">First Name:</span>
+            <input
+              type="text"
+              value={formData[FORM_FIELDS.FIRST_NAME] || ""}
+              onChange={(e) =>
+                handleInputChange(FORM_FIELDS.FIRST_NAME, e.target.value)
+              }
+              placeholder="Enter your first name"
+              className={`editable-input ${validationErrors[FORM_FIELDS.FIRST_NAME] ? "error" : ""}`}
+              required
+            />
+          </div>
+
+          {/* Last Name - Editable */}
+          <div className="info-row">
+            <span className="label">Last Name:</span>
+            <input
+              type="text"
+              value={formData[FORM_FIELDS.LAST_NAME] || ""}
+              onChange={(e) =>
+                handleInputChange(FORM_FIELDS.LAST_NAME, e.target.value)
+              }
+              placeholder="Enter your last name"
+              className={`editable-input ${validationErrors[FORM_FIELDS.LAST_NAME] ? "error" : ""}`}
+              required
+            />
+          </div>
+
+          {/* Phone Number - Editable */}
+          <div className="info-row">
+            <span className="label">Phone Number:</span>
+            <input
+              type="text"
+              value={formData[FORM_FIELDS.PHONE_NUMBER] || ""}
+              onChange={(e) =>
+                handleInputChange(FORM_FIELDS.PHONE_NUMBER, e.target.value)
+              }
+              placeholder="Enter your phone number"
+              className={`editable-input ${validationErrors[FORM_FIELDS.PHONE_NUMBER] ? "error" : ""}`}
+              required
+            />
+          </div>
+
+          {/* Plus One - Read-only, at bottom */}
           {personalInfo.plusOneName && (
             <div className="info-row">
               <span className="label">Plus One:</span>
               <span className="value">{personalInfo.plusOneName}</span>
             </div>
           )}
-          <div className="info-row">
-            <span className="label">Email:</span>
-            <span className="value">{personalInfo.email}</span>
-          </div>
 
-          <div className="info-row">
-            <span className="label">Room Type:</span>
-            <span className="value">
-              {personalInfo.plusOneName ? "Shared Room" : "Solo Traveler"}
-            </span>
+          {/* Room Type - Read-only, at bottom */}
+        </div>
+
+        {/* Travel Document Confirmation */}
+        <div
+          id="travel-document-confirmation"
+          className="travel-document-confirmation"
+        >
+          <div className="confirmation-checkbox">
+            <input
+              type="checkbox"
+              id="travel-document-check"
+              checked={formData.travelDocumentConfirmed}
+              onChange={(e) =>
+                updateFormData("travelDocumentConfirmed", e.target.checked)
+              }
+            />
+            <label htmlFor="travel-document-check">
+              <span className="checkmark"></span>
+              <div className="confirmation-text">
+                <strong>I confirm that:</strong>
+                <ul>
+                  <li>
+                    The name and surname above <strong>exactly match</strong> my
+                    travel document (passport/ID) for this trip
+                  </li>
+                  <li>
+                    I have <strong>double-checked</strong> all my traveler
+                    information above
+                  </li>
+                  <li>All information provided is accurate and complete</li>
+                </ul>
+              </div>
+            </label>
           </div>
         </div>
       </div>
@@ -457,7 +604,7 @@ const RSVPDisplay = ({
         {/* Checked Luggage - Optional addon */}
 
         <div
-          className={`luggage-addon-card ${isLuggageSelected ? "selected" : ""}`}
+          className={`luggage-addon-card discouraged ${isLuggageSelected ? "selected" : ""}`}
           onClick={handleLuggageToggle}
           style={{ cursor: "pointer" }}
         >
@@ -477,10 +624,15 @@ const RSVPDisplay = ({
             <div className="luggage-description">
               {LUGGAGE.checked.description} (max {LUGGAGE.checked.maxWeight})
             </div>
+            {isLuggageSelected && LUGGAGE.checked.warningMessage && (
+              <div className="luggage-warning">
+                {LUGGAGE.checked.warningMessage}
+              </div>
+            )}
           </div>
           <div className="luggage-price">
-            <span className="price-amount">${checkedLuggagePrice}</span>
-            <span className="price-currency">USD</span>
+            <span className="price-amount on-demand">$ On demand</span>
+            <span className="price-currency"></span>
           </div>
         </div>
       </div>
@@ -491,7 +643,11 @@ const RSVPDisplay = ({
           <button type="button" className="btn-secondary" onClick={onLogout}>
             <i className="fas fa-arrow-left"></i> Go Back
           </button>
-          <button type="button" className="submit-btn" onClick={onContinue}>
+          <button
+            type="button"
+            className="submit-btn"
+            onClick={handleContinueClick}
+          >
             <i className="fas fa-arrow-right"></i> Continue to Add-ons
           </button>
         </div>

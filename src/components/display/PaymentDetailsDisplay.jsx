@@ -379,7 +379,8 @@ const PaymentDetailsDisplay = ({
       );
       yPosition += 5;
       doc.text(
-        "• Confirmation: Send transfer receipt to Maddie via email",
+        "• Confirmation: Send transfer receipt to Maddie via email to " +
+          EMAIL_CONFIG.MADDIE,
         20,
         yPosition
       );
@@ -470,7 +471,8 @@ const PaymentDetailsDisplay = ({
       );
       yPosition += 5;
       doc.text(
-        "• Confirmation: Send transaction hash to Maddie via email",
+        "• Confirmation: Send transaction hash to Maddie via email to " +
+          EMAIL_CONFIG.MADDIE,
         20,
         yPosition
       );
@@ -663,7 +665,10 @@ const PaymentDetailsDisplay = ({
                     </li>
                     <li>
                       <strong>Confirmation:</strong> Please send any
-                      transfer/receipt confirmation to Maddie via email
+                      transfer/receipt confirmation to Maddie via email to{" "}
+                      <a href={`mailto:${EMAIL_CONFIG.MADDIE}`}>
+                        {EMAIL_CONFIG.MADDIE}
+                      </a>
                     </li>
                   </ul>
                 </div>
@@ -781,7 +786,10 @@ const PaymentDetailsDisplay = ({
                       </li>
                       <li>
                         <strong>Confirmation:</strong> Please send transaction
-                        hash and any receipt confirmation to Maddie via email
+                        hash and any receipt confirmation to Maddie via email to{" "}
+                        <a href={`mailto:${EMAIL_CONFIG.MADDIE}`}>
+                          {EMAIL_CONFIG.MADDIE}
+                        </a>
                       </li>
                     </ul>
                   </div>

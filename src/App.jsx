@@ -36,6 +36,7 @@ function App() {
       [FORM_FIELDS.RAFTING]: false,
       [FORM_FIELDS.HORSEBACK]: false,
       [FORM_FIELDS.COOKING]: false,
+      [FORM_FIELDS.CHECKED_LUGGAGE]: false,
       [FORM_FIELDS.CRYPTO_CURRENCY]: "USDT",
       [FORM_FIELDS.CRYPTO_NETWORK]: "ETH",
       [FORM_FIELDS.ROOMMATE_PREFERENCE]: "",
@@ -43,6 +44,12 @@ function App() {
       [FORM_FIELDS.DIETARY_MESSAGE]: "",
       [FORM_FIELDS.EMAIL]: "",
       [FORM_FIELDS.FULL_NAME]: "",
+      [FORM_FIELDS.FIRST_NAME]: "",
+      [FORM_FIELDS.LAST_NAME]: "",
+      [FORM_FIELDS.PHONE_NUMBER]: "",
+
+      // Travel document confirmation
+      travelDocumentConfirmed: false,
     };
   };
 
@@ -263,7 +270,59 @@ function App() {
 
   // Handle RSVP continue - proceed to next step
   const handleRSVPContinue = () => {
-    // No need to copy RSVP data to formData - pricing hook will handle it
+    // Validate required fields before continuing
+    const errors = {};
+
+    if (!formData[FORM_FIELDS.FIRST_NAME]?.trim()) {
+      errors[FORM_FIELDS.FIRST_NAME] = true;
+    }
+
+    if (!formData[FORM_FIELDS.LAST_NAME]?.trim()) {
+      errors[FORM_FIELDS.LAST_NAME] = true;
+    }
+
+    if (!formData[FORM_FIELDS.PHONE_NUMBER]?.trim()) {
+      errors[FORM_FIELDS.PHONE_NUMBER] = true;
+    }
+
+    // Check if travel document confirmation is checked
+    const hasFieldErrors = Object.keys(errors).length > 0;
+    const hasConfirmationError = !formData.travelDocumentConfirmed;
+
+    // If there are validation errors, show error message and scroll to checkbox if needed
+    if (hasFieldErrors || hasConfirmationError) {
+      if (hasFieldErrors) {
+        showError(
+          "Please fill in all required fields: First Name, Last Name, and Phone Number."
+        );
+      } else if (hasConfirmationError) {
+        showError(
+          "Please confirm that your travel document information is correct."
+        );
+      }
+
+      // Scroll to the travel document confirmation checkbox if it's the issue
+      if (hasConfirmationError) {
+        const confirmationElement = document.getElementById(
+          "travel-document-confirmation"
+        );
+        if (confirmationElement) {
+          confirmationElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+          // Add a visual flash effect
+          confirmationElement.classList.add("highlight-error");
+          setTimeout(() => {
+            confirmationElement.classList.remove("highlight-error");
+          }, 2000);
+        }
+      }
+
+      return; // Stop navigation
+    }
+
+    // All validation passed, proceed to next step
     navigateToStep(STEPS.ADDONS);
   };
 

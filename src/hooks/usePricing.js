@@ -7,7 +7,6 @@ import {
   getBasePrice,
   getPrivateRoomUpgradePrice,
   getVATAmount,
-  getCheckedLuggagePrice,
 } from "../utils/rsvpData";
 
 export const usePricing = (rsvpData, formData) => {
@@ -34,12 +33,10 @@ export const usePricing = (rsvpData, formData) => {
       const vatAmount = formData[FORM_FIELDS.ARGENTINE_CITIZEN]
         ? getVATAmount(rsvpData)
         : 0;
-      const checkedLuggagePrice = getCheckedLuggagePrice(rsvpData);
 
       // === USER SELECTIONS FROM FORM ===
       const paymentMethod = formData[FORM_FIELDS.PAYMENT_METHOD];
       const paymentSchedule = formData[FORM_FIELDS.PAYMENT_SCHEDULE];
-      const wantsCheckedLuggage = formData.luggage?.checked;
 
       // === CALCULATE ACCOMMODATION PRICE ===
       let privateRoomUpgrade = 0;
@@ -73,15 +70,6 @@ export const usePricing = (rsvpData, formData) => {
         selectedActivities.push({
           name: ACTIVITIES.cooking.name,
           price: ACTIVITIES.cooking.price,
-        });
-      }
-
-      // Add checked luggage if selected
-      if (wantsCheckedLuggage) {
-        activitiesPrice += checkedLuggagePrice;
-        selectedActivities.push({
-          name: "Checked Luggage",
-          price: checkedLuggagePrice,
         });
       }
 

@@ -22,6 +22,8 @@ const PRICING = {
   cookingClass: 140,
   rafting: 75,
 
+  // Note: Luggage is no longer priced, only tracked as boolean preference
+
   creditCardFeeRate: 0.04,
   installmentRate: 0.35,
   vatRate: 0.21,
@@ -582,16 +584,20 @@ function saveToSheet(data) {
 
     const HEADERS_IN_ORDER = [
       "formData.argentineCitizen",
+      "formData.checkedLuggage",
       "formData.cooking",
       "formData.cryptoCurrency",
       "formData.cryptoNetwork",
       "formData.dietaryMessage",
       "formData.dietaryRestrictions",
       "formData.email",
+      "formData.firstName",
       "formData.fullName",
       "formData.horseback",
+      "formData.lastName",
       "formData.paymentMethod",
       "formData.paymentSchedule",
+      "formData.phoneNumber",
       "formData.privateRoomUpgrade",
       "formData.rafting",
       "formData.roommateName",
@@ -622,7 +628,7 @@ function saveToSheet(data) {
       "rsvpData.PACKPRICE",
       "rsvpData.PRIVATEROOM",
       "rsvpData.Timestamp",
-      "rsvpData.VALIJA",
+      // "rsvpData.VALIJA", // Removed - no longer pricing luggage
       "rsvpData.comments",
       "rsvpData.email",
       "rsvpData.email2",

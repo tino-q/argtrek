@@ -16,7 +16,7 @@ export const RSVP_FIELDS = {
   PACK_PRICE: "PACKPRICE",
   PRIVATE_ROOM_UPGRADE: "PRIVATEROOM",
   IVA_ALOJ: "IVAALOJ",
-  CHECKED_LUGGAGE: "VALIJA",
+  // CHECKED_LUGGAGE: "VALIJA", // Removed - no longer pricing luggage
 
   // Trip Configuration
   TRIP_OPTION: "option",
@@ -116,16 +116,6 @@ export const getVATAmount = (rsvpData) => {
 
   const vatAmount = rsvpData[RSVP_FIELDS.IVA_ALOJ];
   return parseFloat(vatAmount) || 0;
-};
-
-/**
- * Get checked luggage price from RSVP data
- */
-export const getCheckedLuggagePrice = (rsvpData) => {
-  if (!rsvpData) return 0;
-
-  const price = rsvpData[RSVP_FIELDS.CHECKED_LUGGAGE];
-  return parseFloat(price) || 0;
 };
 
 /**
@@ -235,26 +225,13 @@ export const getExcludedAccommodations = (rsvpData) => {
   console.log("🔍 getExcludedAccommodations called with:", rsvpData);
 
   if (!rsvpData) {
-    console.log("❌ No rsvpData provided, returning empty array");
     return [];
   }
 
   const accommodations = [];
-  console.log("📋 Starting accommodation exclusion check...");
 
   // Buenos Aires - Arrival (Nov 22-23)
   const buenosAiresArrivalFields = [RSVP_FIELDS.NOV_22, RSVP_FIELDS.NOV_23];
-  console.log(
-    "🏨 Buenos Aires arrival fields to check:",
-    buenosAiresArrivalFields
-  );
-  console.log(
-    "🏨 Buenos Aires arrival values:",
-    buenosAiresArrivalFields.map((field) => ({
-      field,
-      value: rsvpData[field],
-    }))
-  );
 
   const buenosAiresArrivalExcluded = buenosAiresArrivalFields.filter(
     (field) => rsvpData[field] === false
@@ -536,15 +513,43 @@ export const shouldEnforceArgentineCitizenship = (rsvpData) => {
 };
 
 /**
+ * Split traveler name into first name and last name
+ */
+export const splitTravelerName = (rsvpData) => {
+  const fullName = getTravelerName(rsvpData);
+
+  if (!fullName || fullName === "Name not found") {
+    return { firstName: "", lastName: "" };
+  }
+
+  const nameParts = fullName.trim().split(" ");
+
+  if (nameParts.length === 1) {
+    return { firstName: nameParts[0], lastName: "" };
+  }
+
+  // First part is first name, rest is last name
+  const firstName = nameParts[0];
+  const lastName = nameParts.slice(1).join(" ");
+
+  return { firstName, lastName };
+};
+
+/**
  * Get all personal information in one object
  */
 export const getPersonalInfo = (rsvpData) => {
+  const { firstName, lastName } = splitTravelerName(rsvpData);
+
   return {
     name: getTravelerName(rsvpData),
+    firstName,
+    lastName,
     plusOneName: getPlusOneName(rsvpData),
     email: getEmail(rsvpData),
     isSolo: isSoloTraveler(rsvpData),
     hasPlusOne: hasPlusOne(rsvpData),
+    phoneNumber: "", // Not available in RSVP data, will be empty initially
   };
 };
 
@@ -556,7 +561,6 @@ export const getPricingInfo = (rsvpData) => {
     basePrice: getBasePrice(rsvpData),
     privateRoomUpgrade: getPrivateRoomUpgradePrice(rsvpData),
     vatAmount: getVATAmount(rsvpData),
-    checkedLuggage: getCheckedLuggagePrice(rsvpData),
   };
 };
 

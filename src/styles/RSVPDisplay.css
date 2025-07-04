@@ -9,40 +9,30 @@
   border: 2px solid var(--border-light);
   border-radius: 12px;
   padding: 1.5rem;
+  position: relative;
 }
 
 .info-card h3 {
-  margin: 0 0 1rem 0;
-  color: var(--text-primary);
+  margin-bottom: 1rem;
   font-size: 1.2rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  color: var(--text-color, #333);
 }
 
 .info-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.info-row:last-child {
-  border-bottom: none;
+  margin-bottom: 0.75rem;
 }
 
 .info-row .label {
+  min-width: 120px;
   font-weight: 500;
-  color: var(--text-secondary);
-  min-width: 100px;
+  color: var(--text-color, #333);
 }
 
 .info-row .value {
-  font-weight: 600;
-  color: var(--text-primary);
-  text-align: right;
+  flex: 1;
+  color: var(--text-muted, #666);
 }
 
 .info-row .value.trip-option {
@@ -311,6 +301,47 @@
   font-weight: 500;
 }
 
+/* On-demand luggage pricing styling */
+.luggage-price .price-amount.on-demand {
+  color: #6c757d;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.luggage-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  color: #856404;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.luggage-warning i {
+  color: #ffc107;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+}
+
+.luggage-addon-card.discouraged {
+  border-color: #ffc107;
+  background: #fffbf0;
+}
+
+.luggage-addon-card.discouraged:hover {
+  border-color: #ffb302;
+  background: #fff8e1;
+}
+
+.luggage-addon-card.discouraged.selected {
+  border-color: #ff9800;
+  background: #fff3e0;
+}
+
 /* Carry-on luggage (included) styling */
 .luggage-addon-card.included {
   background: #f0f9f0;
@@ -498,8 +529,15 @@
     gap: 0.25rem;
   }
 
-  .info-row .value {
-    text-align: left;
+  .info-row .label {
+    min-width: auto;
+    font-size: 0.9rem;
+  }
+
+  .editable-input {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
   }
 
   .service-item {
@@ -1100,4 +1138,198 @@
 
 .service-item.excluded .hotel-address i {
   color: var(--error-color);
+}
+
+.editable-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 4px;
+  font-size: 1rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.editable-input:focus {
+  outline: none;
+  border-color: var(--primary-color, #007bff);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.editable-input.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.2);
+}
+
+.editable-input.error:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.3);
+}
+
+.editable-input::placeholder {
+  color: var(--text-muted, #666);
+  font-style: italic;
+}
+
+/* Large screen adjustments */
+@media (min-width: 768px) {
+  .info-row {
+    justify-content: space-between;
+  }
+
+  .info-row .value {
+    text-align: right;
+    max-width: 280px;
+    margin-left: auto;
+  }
+
+  .editable-input {
+    flex: none;
+    max-width: 280px;
+    margin-left: auto;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .info-row .label {
+    min-width: auto;
+    font-size: 0.9rem;
+  }
+
+  .editable-input {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
+  }
+}
+
+/* Travel Document Confirmation */
+.travel-document-confirmation {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.travel-document-confirmation.highlight-error {
+  background: #fff5f5;
+  border-color: #fecaca;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+  animation: pulseError 0.6s ease-in-out;
+}
+
+@keyframes pulseError {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.confirmation-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.confirmation-checkbox input[type="checkbox"] {
+  display: none;
+}
+
+.confirmation-checkbox label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.checkmark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #dee2e6;
+  border-radius: 4px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.confirmation-checkbox input[type="checkbox"]:checked + label .checkmark {
+  background: #007bff;
+  border-color: #007bff;
+}
+
+.confirmation-checkbox
+  input[type="checkbox"]:checked
+  + label
+  .checkmark::after {
+  content: "✓";
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.confirmation-text {
+  flex: 1;
+  color: #495057;
+}
+
+.confirmation-text strong {
+  color: #212529;
+}
+
+.confirmation-text ul {
+  margin: 0.5rem 0 0 1rem;
+  padding: 0;
+}
+
+.confirmation-text li {
+  margin-bottom: 0.375rem;
+  font-size: 0.95rem;
+}
+
+.confirmation-text li:last-child {
+  margin-bottom: 0;
+}
+
+/* Mobile adjustments for confirmation */
+@media (max-width: 768px) {
+  .travel-document-confirmation {
+    margin-top: 1rem;
+    padding: 0.75rem;
+  }
+
+  .confirmation-checkbox {
+    gap: 0.5rem;
+  }
+
+  .confirmation-checkbox label {
+    gap: 0.5rem;
+  }
+
+  .confirmation-text {
+    font-size: 0.9rem;
+  }
+
+  .confirmation-text li {
+    font-size: 0.85rem;
+  }
 }
