@@ -43,21 +43,24 @@ export const ACTIVITIES = {
 export const LUGGAGE = {
   personalItem: {
     name: "Personal Item",
-    description: "Small backpack or purse",
-    maxWeight: "8kg",
+    description:
+      "Small backpack or purse. It must not exceed the following dimensions: 45 cm x 35 cm x 25 cm",
+    // maxWeight: "8kg",
     icon: "fas fa-hiking",
     included: true,
   },
   carryOn: {
     name: "Carry-on Luggage",
-    description: "Small suitcase or bag",
+    description:
+      "Small suitcase or bag. It must not exceed the following dimensions: 55 cm x 35 cm x 25 cm",
     maxWeight: "10kg",
     icon: "fas fa-suitcase-rolling",
     included: true,
   },
   checked: {
-    name: "Checked Luggage",
-    description: "Add checked luggage to all your flights",
+    name: "Add Checked luggage to all of your flights",
+    description:
+      "Price includes luggage charges for all confirmed flights. It must not exceed 158 cm in total linear dimensions.",
     maxWeight: "23kg",
     icon: "fas fa-suitcase",
     included: false,

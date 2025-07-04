@@ -267,7 +267,7 @@ const PaymentDetailsDisplay = ({ rsvpData, formData, pricing, onLogout }) => {
           <div className="schedule-details">
             {formData.paymentSchedule === "full" ? (
               <p>
-                Full payment due: <strong>15 days before departure</strong>
+                Full payment is due <strong>15th September</strong>
               </p>
             ) : (
               <div>

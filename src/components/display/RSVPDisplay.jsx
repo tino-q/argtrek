@@ -194,6 +194,72 @@ const RSVPDisplay = ({
     false
   );
 
+  // Reusable service card component
+  const ServiceCard = ({ service, index, isIncluded }) => (
+    <div
+      key={isIncluded ? index : `excluded-${index}`}
+      className={`service-item ${isIncluded ? "included" : "excluded"}`}
+    >
+      <div className="service-icon">
+        <i
+          className={
+            service.type === "accommodation" ? "fas fa-bed" : "fas fa-plane"
+          }
+        ></i>
+      </div>
+      <div className="service-details">
+        {service.type === "accommodation" ? (
+          <>
+            <div className="accommodation-single-line">
+              <div className="accommodation-info-line">
+                <span className="hotel-name-simple">
+                  {getGenericHotelDescription(service.location)}
+                </span>
+              </div>
+              <div className="accommodation-dates">
+                {service.nights.length === 1
+                  ? service.nights[0].date
+                  : `${service.nights[0].date} - ${service.nights[service.nights.length - 1].date}`}
+              </div>
+              <div className="accommodation-dates">
+                * per person based on double occupancy
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Flight - Single Line Format */}
+            <div className="flight-single-line">
+              {(() => {
+                const cities = extractCityNames(service.route);
+                return (
+                  <div className="flight-route-line">
+                    <span className="flight-segment">
+                      {cities.origin} ({service.departure.airport}){" "}
+                      {service.departure.time}
+                    </span>
+                    <span className="flight-arrow"> → </span>
+                    <span className="flight-segment">
+                      {cities.destination} ({service.arrival.airport}){" "}
+                      {service.arrival.time}
+                    </span>
+                  </div>
+                );
+              })()}
+              <div className="flight-date">
+                {service.date} - {service.code} - {service.airline}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+      <div className={`service-status ${isIncluded ? "included" : "excluded"}`}>
+        <i className={`fas fa-${isIncluded ? "check" : "times"}`}></i>
+        <span>{isIncluded ? "Included" : "Not Included"}</span>
+      </div>
+    </div>
+  );
+
   return (
     <section className="form-section">
       <h2>
@@ -259,67 +325,12 @@ const RSVPDisplay = ({
         <div className="services-grid">
           {includedServices.map((service, index) => {
             return (
-              <div key={index} className="service-item included">
-                <div className="service-icon">
-                  <i
-                    className={
-                      service.type === "accommodation"
-                        ? "fas fa-bed"
-                        : "fas fa-plane"
-                    }
-                  ></i>
-                </div>
-                <div className="service-details">
-                  {service.type === "accommodation" ? (
-                    <>
-                      <div className="accommodation-single-line">
-                        <div className="accommodation-info-line">
-                          <span className="hotel-name-simple">
-                            {getGenericHotelDescription(service.location)}
-                          </span>
-                        </div>
-                        <div className="accommodation-dates">
-                          {service.nights.length === 1
-                            ? service.nights[0].date
-                            : `${service.nights[0].date} - ${service.nights[service.nights.length - 1].date}`}
-                        </div>
-                        <div className="accommodation-dates">
-                          * per person based on double occupancy
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      {/* Flight - Single Line Format */}
-                      <div className="flight-single-line">
-                        {(() => {
-                          const cities = extractCityNames(service.route);
-                          return (
-                            <div className="flight-route-line">
-                              <span className="flight-segment">
-                                {cities.origin} ({service.departure.airport}){" "}
-                                {service.departure.time}
-                              </span>
-                              <span className="flight-arrow"> → </span>
-                              <span className="flight-segment">
-                                {cities.destination} ({service.arrival.airport}){" "}
-                                {service.arrival.time}
-                              </span>
-                            </div>
-                          );
-                        })()}
-                        <div className="flight-date">
-                          {service.date} - {service.code} - {service.airline}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-                <div className="service-status included">
-                  <i className="fas fa-check"></i>
-                  <span>Included</span>
-                </div>
-              </div>
+              <ServiceCard
+                key={index}
+                service={service}
+                index={index}
+                isIncluded={true}
+              />
             );
           })}
         </div>
@@ -354,71 +365,12 @@ const RSVPDisplay = ({
           <div className="services-grid">
             {excludedProcessedServices.map((service, index) => {
               return (
-                <div
+                <ServiceCard
                   key={`excluded-${index}`}
-                  className="service-item excluded"
-                >
-                  <div className="service-icon">
-                    <i
-                      className={
-                        service.type === "accommodation"
-                          ? "fas fa-bed"
-                          : "fas fa-plane"
-                      }
-                    ></i>
-                  </div>
-                  <div className="service-details">
-                    {service.type === "accommodation" ? (
-                      <>
-                        <div className="accommodation-single-line">
-                          <div className="accommodation-info-line">
-                            <span className="hotel-name-simple">
-                              {getGenericHotelDescription(service.location)}
-                            </span>
-                          </div>
-                          <div className="accommodation-dates">
-                            {service.nights.length === 1
-                              ? service.nights[0].date
-                              : `${service.nights[0].date} - ${service.nights[service.nights.length - 1].date}`}
-                          </div>
-                          <div className="accommodation-dates">
-                            * per person based on double occupancy
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        {/* Flight - Single Line Format */}
-                        <div className="flight-single-line">
-                          {(() => {
-                            const cities = extractCityNames(service.route);
-                            return (
-                              <div className="flight-route-line">
-                                <span className="flight-segment">
-                                  {cities.origin} ({service.departure.airport}){" "}
-                                  {service.departure.time}
-                                </span>
-                                <span className="flight-arrow"> → </span>
-                                <span className="flight-segment">
-                                  {cities.destination} (
-                                  {service.arrival.airport}){" "}
-                                  {service.arrival.time}
-                                </span>
-                              </div>
-                            );
-                          })()}
-                          <div className="flight-date">
-                            {service.date} - {service.code} - {service.airline}
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <div className="service-status excluded">
-                    <i className="fas fa-times"></i>
-                    <span>Not Included</span>
-                  </div>
-                </div>
+                  service={service}
+                  index={index}
+                  isIncluded={false}
+                />
               );
             })}
           </div>
@@ -468,8 +420,9 @@ const RSVPDisplay = ({
           <div className="luggage-details">
             <div className="luggage-title">{LUGGAGE.personalItem.name}</div>
             <div className="luggage-description">
-              {LUGGAGE.personalItem.description} (max{" "}
-              {LUGGAGE.personalItem.maxWeight})
+              {LUGGAGE.personalItem.description}
+              {LUGGAGE.personalItem.maxWeight &&
+                ` (max ${LUGGAGE.personalItem.maxWeight})`}
             </div>
           </div>
           <div className="luggage-price included">

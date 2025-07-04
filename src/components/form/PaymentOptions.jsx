@@ -256,7 +256,9 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
                     , sign up!
                   </a>
                 </p>
-                <p className="description">2% via SWIFT</p>
+                <p className="description">
+                  Sender must be sure to account for all fees
+                </p>
               </div>
             </label>
           </div>
