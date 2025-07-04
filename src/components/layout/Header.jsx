@@ -8,7 +8,7 @@ const Header = () => {
         <h1>
           <i className="fas fa-mountain"></i> Argentina Trek
         </h1>
-        <p className="subtitle">November 2025</p>
+        <p className="subtitle">November 22-29, 2025</p>
       </div>
     </header>
   );

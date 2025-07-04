@@ -371,20 +371,20 @@ export const getIncludedFlights = (rsvpData) => {
 
   if (rsvpData[RSVP_FIELDS.FLIGHT_AEP_BRC]) {
     flights.push({
-      code: "JA3045",
+      code: "JA3047",
       airline: "JetSMART Argentina",
       route: "Buenos Aires → Bariloche",
       departure: {
         airport: "AEP",
         city: "Buenos Aires",
         name: "Jorge Newbery Airfield",
-        time: "09:15",
+        time: "11:15",
       },
       arrival: {
         airport: "BRC",
         city: "Bariloche",
         name: "Bariloche Airport",
-        time: "11:45",
+        time: "13:45",
       },
       date: "Nov 24",
       duration: "2h 30m",
@@ -401,16 +401,16 @@ export const getIncludedFlights = (rsvpData) => {
         airport: "BRC",
         city: "Bariloche",
         name: "Bariloche Airport",
-        time: "13:20",
+        time: "10:15",
       },
       arrival: {
         airport: "MDZ",
         city: "Mendoza",
         name: "Governor Francisco Gabrielli International Airport",
-        time: "15:10",
+        time: "12:15",
       },
       date: "Nov 27",
-      duration: "1h 50m",
+      duration: "2h 00m",
       aircraft: "Airbus A320",
     });
   }
@@ -424,16 +424,16 @@ export const getIncludedFlights = (rsvpData) => {
         airport: "MDZ",
         city: "Mendoza",
         name: "Governor Francisco Gabrielli International Airport",
-        time: "16:45",
+        time: "13:00",
       },
       arrival: {
         airport: "AEP",
         city: "Buenos Aires",
         name: "Jorge Newbery Airfield",
-        time: "18:20",
+        time: "15:00",
       },
       date: "Nov 29",
-      duration: "1h 35m",
+      duration: "2h 00m",
       aircraft: "Airbus A320",
     });
   }
@@ -451,20 +451,20 @@ export const getExcludedFlights = (rsvpData) => {
 
   if (rsvpData[RSVP_FIELDS.FLIGHT_AEP_BRC] === false) {
     flights.push({
-      code: "JA3045",
+      code: "JA3047",
       airline: "JetSMART Argentina",
       route: "Buenos Aires → Bariloche",
       departure: {
         airport: "AEP",
         city: "Buenos Aires",
         name: "Jorge Newbery Airfield",
-        time: "09:15",
+        time: "11:15",
       },
       arrival: {
         airport: "BRC",
         city: "Bariloche",
         name: "Bariloche Airport",
-        time: "11:45",
+        time: "13:45",
       },
       date: "Nov 24",
       duration: "2h 30m",
@@ -481,16 +481,16 @@ export const getExcludedFlights = (rsvpData) => {
         airport: "BRC",
         city: "Bariloche",
         name: "Bariloche Airport",
-        time: "13:20",
+        time: "10:15",
       },
       arrival: {
         airport: "MDZ",
         city: "Mendoza",
         name: "Governor Francisco Gabrielli International Airport",
-        time: "15:10",
+        time: "12:15",
       },
       date: "Nov 27",
-      duration: "1h 50m",
+      duration: "2h 00m",
       aircraft: "Airbus A320",
     });
   }
@@ -504,16 +504,16 @@ export const getExcludedFlights = (rsvpData) => {
         airport: "MDZ",
         city: "Mendoza",
         name: "Governor Francisco Gabrielli International Airport",
-        time: "16:45",
+        time: "13:00",
       },
       arrival: {
         airport: "AEP",
         city: "Buenos Aires",
         name: "Jorge Newbery Airfield",
-        time: "18:20",
+        time: "15:00",
       },
       date: "Nov 29",
-      duration: "1h 35m",
+      duration: "2h 00m",
       aircraft: "Airbus A320",
     });
   }

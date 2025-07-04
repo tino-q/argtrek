@@ -2,22 +2,24 @@
 // Migrated from original index.html welcome section
 
 import { CONTACTS } from "../../utils/config";
-import barilocheImage from "../../assets/bariloche-rafting.png";
+import { getTravelerName } from "../../utils/rsvpData";
+import barilocheImage from "../../assets/bariloche.png";
 import buenosAiresImage from "../../assets/buenos-aires.png";
 import mendozaImage from "../../assets/mendoza.png";
 
-const WelcomeSection = () => {
+const WelcomeSection = ({ userRSVP }) => {
   const destinations = [
-    {
-      name: "Bariloche",
-      description: "Adventure & Rafting",
-      image: barilocheImage,
-    },
     {
       name: "Buenos Aires",
       description: "Culture & Tango",
       image: buenosAiresImage,
     },
+    {
+      name: "Bariloche",
+      description: "Adventure & Rafting",
+      image: barilocheImage,
+    },
+
     {
       name: "Mendoza",
       description: "Wine & Mountains",
@@ -25,12 +27,19 @@ const WelcomeSection = () => {
     },
   ];
 
+  // Get the user's name for personalization
+  const travelerName = getTravelerName(userRSVP);
+  const firstName =
+    travelerName && travelerName !== "Name not found"
+      ? travelerName.split(" ")[0] // Get first name for a more personal touch
+      : "Traveler"; // Fallback if name is not available
+
   return (
     <section className="welcome-hero">
       {/* Main Hero Content */}
       <div className="hero-content">
         <div className="hero-text">
-          <h1 className="hero-title">Welcome to Your Argentina Adventure!</h1>
+          <h1 className="hero-title">Welcome {firstName}!</h1>
           <p className="hero-subtitle">
             We're excited that you want to join us on this incredible journey
             through Argentina's most breathtaking destinations!

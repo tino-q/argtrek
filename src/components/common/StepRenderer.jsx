@@ -43,7 +43,7 @@ const StepRenderer = ({
       return <NewEmailStep updateFormData={updateFormData} />;
 
     case "welcome":
-      return <WelcomeSection onLogout={onLogout} />;
+      return <WelcomeSection userRSVP={userRSVP} />;
 
     case "rsvp":
       if (!userRSVP) return null;

@@ -14,12 +14,8 @@ export const PRICING_CONFIG = {
     Mendoza: 45, // Nov 27, 28
   },
 
-  // Flights (per person)
-  flights: {
-    "JA3045 AEP - BRC": 200, // Buenos Aires → Bariloche
-    "JA3725 BRC MDZ": 180, // Bariloche → Mendoza
-    "JA3073 MDZ AEP": 200, // Mendoza → Buenos Aires
-  },
+  // Note: Individual flight prices are not displayed to users
+  // Users only see the total package price from their RSVP data
 
   // Optional Activities (will be used later for add-ons)
   activities: {
@@ -55,14 +51,8 @@ export const getprivateRoomUpgrade = (location, period = null) => {
   return typeof config === "number" ? config : config.arrival || 0;
 };
 
-/**
- * Get price for flight
- * @param {string} flightCode - Flight code like "JA3045 AEP - BRC"
- * @returns {number} Flight price in USD
- */
-export const getFlightPrice = (flightCode) => {
-  return PRICING_CONFIG.flights[flightCode] || 0;
-};
+// Note: Individual flight pricing removed - users only see total package price
+// Flight costs are bundled into the base package price from RSVP data
 
 /**
  * Format price for display

@@ -63,7 +63,7 @@ const RSVPDisplay = ({
     }
 
     // Nov 24: Flight Buenos Aires → Bariloche
-    const flightToBRC = flights.find((flight) => flight.code === "JA3045");
+    const flightToBRC = flights.find((flight) => flight.code === "JA3047");
     if (flightToBRC) {
       services.push({
         type: "flight",
