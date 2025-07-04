@@ -86,6 +86,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  word-break: keep-all; /* Prevents words from breaking */
 }
 
 html {
@@ -134,9 +135,9 @@ body {
   max-width: min(700px, calc(100vw - 40px));
   margin: 0 auto;
   padding: 0 20px;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
+  word-wrap: normal;
+  overflow-wrap: normal;
+  hyphens: none;
 }
 
 /* Progressive responsive adjustments */
@@ -165,7 +166,7 @@ body {
   .form-content-wrapper * {
     max-width: 100%;
     overflow: hidden;
-    word-wrap: break-word;
+    word-wrap: normal;
   }
 
   /* Specific input field optimizations */
