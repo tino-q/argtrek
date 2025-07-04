@@ -758,7 +758,7 @@ const PaymentDetailsDisplay = ({
                         even internationally
                       </p>
                       <a
-                        href="Join me and over 50 million users who love Revolut. Sign up with my link below:  https://revolut.com/referral/?referral-code=mbaklayan!JUN2-25-VR-ES-AE&geo-redirect"
+                        href="https://revolut.com/referral/?referral-code=mbaklayan!JUN2-25-VR-ES-AE&geo-redirect"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="revolut-link"
