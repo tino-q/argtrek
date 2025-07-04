@@ -17,14 +17,17 @@ import "../../styles/PaymentDetailsDisplay.css";
 
 const BANK_DETAILS = [
   { label: "Bank Name", value: "Revolut" },
+  { label: "Revolut Handle", value: "sonsol1a9x" },
   { label: "Account Holder", value: "SONSOLES RKT SL" },
   { label: "IBAN", value: "ES51 1583 0001 1093 9530 1696" },
-  { label: "BIC/SWIFT", value: "CHASGB2L" },
+  { label: "BIC", value: "REVOESM2" },
+  { label: "SWIFT", value: "CHASGB2L" },
   { label: "Currency", value: "USD" },
   {
     label: "Holder address",
     value: "CALLE BERNARDO LOPEZ GARCIA, 18 - BJ, 03013, ALICANTE",
   },
+
   { label: "Country", value: "Spain" },
 ];
 
@@ -809,33 +812,31 @@ const PaymentDetailsDisplay = ({
         {formData[FORM_FIELDS.PAYMENT_METHOD] === "bank" && (
           <div className="payment-content">
             <h4>Bank Transfer Details</h4>
-            <div className="bank-details">
-              {BANK_DETAILS.map((detail, index) => (
-                <div key={index} className="detail-row">
-                  <span className="label">{detail.label}:</span>
-                  <div className="value-container">
-                    <span
-                      className="value"
-                      data-type={
-                        detail.label.toLowerCase().includes("iban")
-                          ? "iban"
-                          : undefined
-                      }
-                    >
-                      {detail.value}
-                    </span>
-                    <button
-                      type="button"
-                      className="copy-btn"
-                      onClick={(e) => handleCopyClick(detail.value, e)}
-                      title="Copy to clipboard"
-                    >
-                      <i className="fas fa-copy"></i>
-                    </button>
-                  </div>
+            {BANK_DETAILS.map((detail, index) => (
+              <div key={index} className="detail-row">
+                <span className="label">{detail.label}:</span>
+                <div className="value-container">
+                  <span
+                    className="value"
+                    data-type={
+                      detail.label.toLowerCase().includes("iban")
+                        ? "iban"
+                        : undefined
+                    }
+                  >
+                    {detail.value}
+                  </span>
+                  <button
+                    type="button"
+                    className="copy-btn"
+                    onClick={(e) => handleCopyClick(detail.value, e)}
+                    title="Copy to clipboard"
+                  >
+                    <i className="fas fa-copy"></i>
+                  </button>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
 
             <div className="important-notes">
               <h4>Important Instructions</h4>
