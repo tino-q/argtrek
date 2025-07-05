@@ -10,12 +10,8 @@ import {
   getPrivateRoomUpgradePrice,
   getTripItinerary,
 } from "../../utils/rsvpData";
-import {
-  FORM_FIELDS,
-  EMAIL_CONFIG,
-  ACTIVITIES,
-  APPS_SCRIPT_URL,
-} from "../../utils/config";
+import { FORM_FIELDS, EMAIL_CONFIG, APPS_SCRIPT_URL } from "../../utils/config";
+import { getActivityByFormField } from "../../utils/activities";
 import { copyToClipboard } from "../../utils/clipboard";
 import PricingSummary from "../layout/PricingSummary";
 import jsPDF from "jspdf";
@@ -371,27 +367,40 @@ const PaymentDetailsDisplay = ({
 
       // Activities
       const activities = [];
-      if (formData[FORM_FIELDS.RAFTING])
+      if (formData[FORM_FIELDS.RAFTING]) {
+        const activity = getActivityByFormField(FORM_FIELDS.RAFTING);
         activities.push({
-          name: ACTIVITIES.rafting.name,
-          price: ACTIVITIES.rafting.price,
+          name: activity.name,
+          price: activity.price,
         });
-      if (formData[FORM_FIELDS.HORSEBACK])
+      }
+      if (formData[FORM_FIELDS.HORSEBACK]) {
+        const activity = getActivityByFormField(FORM_FIELDS.HORSEBACK);
         activities.push({
-          name: ACTIVITIES.horseback.name,
-          price: ACTIVITIES.horseback.price,
+          name: "Horseback Riding (Optional Activity)", // Clean name for PDF
+          price: activity.price,
         });
-      if (formData[FORM_FIELDS.COOKING])
+      }
+      if (formData[FORM_FIELDS.COOKING]) {
+        const activity = getActivityByFormField(FORM_FIELDS.COOKING);
         activities.push({
-          name: ACTIVITIES.cooking.name,
-          price: ACTIVITIES.cooking.price,
+          name: activity.name,
+          price: activity.price,
         });
+      }
+      if (formData[FORM_FIELDS.TANGO]) {
+        const activity = getActivityByFormField(FORM_FIELDS.TANGO);
+        activities.push({
+          name: "Tango Night", // Clean name for PDF
+          price: activity.price,
+        });
+      }
 
       if (activities.length > 0) {
         activities.forEach((activity) => {
           yPosition = addKeyValue(
             activity.name,
-            `$${activity.price}`,
+            activity.price > 0 ? `$${activity.price}` : "pending",
             yPosition,
             8
           );
@@ -400,7 +409,7 @@ const PaymentDetailsDisplay = ({
 
       // Checked luggage - informational line
       if (formData[FORM_FIELDS.CHECKED_LUGGAGE]) {
-        yPosition = addKeyValue("Checked Luggage", "(pending)", yPosition, 8);
+        yPosition = addKeyValue("Checked Luggage", "pending", yPosition, 8);
       }
 
       // Subtotal

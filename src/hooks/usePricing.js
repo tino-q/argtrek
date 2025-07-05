@@ -2,8 +2,9 @@
 // Shows pricing preview to user, but all actual calculations happen in backend
 
 import { useState, useEffect } from "react";
-import { FORM_FIELDS, ACTIVITIES } from "../utils/config";
+import { FORM_FIELDS } from "../utils/config";
 import { getBasePrice, getPrivateRoomUpgradePrice } from "../utils/rsvpData";
+import { getActivityByFormField } from "../utils/activities";
 
 export const usePricing = (rsvpData, formData) => {
   const [pricing, setPricing] = useState({
@@ -41,39 +42,23 @@ export const usePricing = (rsvpData, formData) => {
       const selectedActivities = [];
 
       // Check each activity boolean field
-      if (formData[FORM_FIELDS.RAFTING]) {
-        activitiesPrice += ACTIVITIES.rafting.price;
-        selectedActivities.push({
-          name: ACTIVITIES.rafting.name,
-          price: ACTIVITIES.rafting.price,
-        });
-      }
+      const activityFields = [
+        FORM_FIELDS.RAFTING,
+        FORM_FIELDS.HORSEBACK,
+        FORM_FIELDS.COOKING,
+        FORM_FIELDS.TANGO,
+      ];
 
-      if (formData[FORM_FIELDS.HORSEBACK]) {
-        if (ACTIVITIES.horseback.price > 0) {
-          activitiesPrice += ACTIVITIES.horseback.price;
+      activityFields.forEach((fieldName) => {
+        if (formData[fieldName]) {
+          const activity = getActivityByFormField(fieldName);
+          activitiesPrice += activity.price;
+          selectedActivities.push({
+            name: activity.name,
+            price: activity.price,
+          });
         }
-        selectedActivities.push({
-          name: ACTIVITIES.horseback.name,
-          price: ACTIVITIES.horseback.price,
-        });
-      }
-
-      if (formData[FORM_FIELDS.COOKING]) {
-        activitiesPrice += ACTIVITIES.cooking.price;
-        selectedActivities.push({
-          name: ACTIVITIES.cooking.name,
-          price: ACTIVITIES.cooking.price,
-        });
-      }
-
-      if (formData[FORM_FIELDS.TANGO]) {
-        activitiesPrice += ACTIVITIES.tango.price;
-        selectedActivities.push({
-          name: ACTIVITIES.tango.name,
-          price: ACTIVITIES.tango.price,
-        });
-      }
+      });
 
       // === CALCULATE SUBTOTAL ===
       const subtotal = basePrice + privateRoomUpgrade + activitiesPrice;
@@ -111,11 +96,6 @@ export const usePricing = (rsvpData, formData) => {
 // Helper function to format currency
 export const formatCurrency = (amount) => {
   return `$${Math.round(amount).toLocaleString()}`;
-};
-
-// Helper function to get activity by ID (for backward compatibility)
-export const getActivityById = (activityId) => {
-  return ACTIVITIES[activityId] || { name: activityId, price: 0 };
 };
 
 // Helper function to validate pricing data

@@ -831,10 +831,9 @@ const RSVPDisplay = ({
         <div
           className={`luggage-addon-card discouraged ${isLuggageSelected ? "selected" : ""}`}
           onClick={(e) => {
-            // Only allow the checkbox itself to be clicked
+            // Allow clicking the whole card to toggle, but not if clicking the checkbox directly
             if (e.target.id !== "checked-luggage-checkbox") {
-              e.preventDefault();
-              e.stopPropagation();
+              handleLuggageToggle();
             }
           }}
         >

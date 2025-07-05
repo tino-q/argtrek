@@ -79,8 +79,8 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
       ) {
         // setEmail("dev@test.com");
         // setPassword("dev123");
-        // setEmail("solo@gmail.com");
-        setPassword("password");
+        setEmail("madibakla@gmail.com");
+        setPassword("dima");
       }
     }
   }, [onEmailSubmit, onEmailNotFound, isLoading]);

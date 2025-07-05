@@ -52,7 +52,10 @@ const PricingSummary = ({ pricing, formData }) => {
                 <span>{activity.name}</span>
                 <span>
                   {formatCurrency(activity.price)}
-                  <small> (optional)</small>
+                  <small>
+                    {" "}
+                    ({`${activity.price > 0 ? "optional" : "pending"}`})
+                  </small>
                 </span>
               </div>
             ))}

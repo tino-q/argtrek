@@ -22,34 +22,6 @@ export const PRICES = {
   installmentRate: 0.35,
 };
 
-// Activity Information
-export const ACTIVITIES = {
-  horseback: {
-    id: "horseback",
-    name: "Horse Back Riding",
-    price: PRICES.horseback,
-    location: "Mendoza",
-  },
-  cooking: {
-    id: "cooking",
-    name: "Empanadas Cooking Class",
-    price: PRICES.cooking,
-    location: "Mendoza",
-  },
-  rafting: {
-    id: "rafting",
-    name: "Rafting Adventure",
-    price: PRICES.rafting,
-    location: "Bariloche",
-  },
-  tango: {
-    id: "tango",
-    name: "Tango Night – Hidden Milonga in Palermo",
-    price: PRICES.tango,
-    location: "Buenos Aires",
-  },
-};
-
 // Luggage Configuration
 export const LUGGAGE = {
   personalItem: {
