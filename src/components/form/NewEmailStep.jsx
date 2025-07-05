@@ -53,7 +53,8 @@ const NewEmailStep = ({ updateFormData }) => {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email address"
             required
-            disabled
+            disabled={!!emailFromUrl}
+            autoFocus={!emailFromUrl}
           />
         </div>
 
@@ -70,7 +71,7 @@ const NewEmailStep = ({ updateFormData }) => {
             onChange={(e) => setName(e.target.value)}
             placeholder="Enter your full name"
             required
-            autoFocus
+            autoFocus={!!emailFromUrl}
           />
         </div>
 
