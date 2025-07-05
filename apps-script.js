@@ -6,7 +6,7 @@
  * Google Apps Script globals: ContentService, SpreadsheetApp, Utilities
  */
 
-/* global ContentService, SpreadsheetApp, Utilities, MailApp */
+/* global ContentService, SpreadsheetApp, Utilities, MailApp, DriveApp */
 
 // Configuration
 const TRIP_REGISTRATIONS_SHEET_NAME = "Trip Registrations";
@@ -119,6 +119,11 @@ function doPost(e) {
     // Check if this is a new email request
     if (data.action === "new_email") {
       return handleNewEmailRequest(data);
+    }
+
+    // Check if this is a PDF upload request
+    if (data.action === "upload_pdf") {
+      return handlePdfUpload(e);
     }
 
     // Continue with existing form submission logic
@@ -1006,6 +1011,8 @@ This email contains your personal access credentials. Please keep them secure an
       // Send the email using Gmail API
       MailApp.sendEmail({
         to: email,
+        from: "sonsolesstays+argtrek@gmail.com",
+        bcc: "sonsolesstays+argtrek@gmail.com",
         subject: subject,
         htmlBody: htmlBody,
         body: textBody,
@@ -1023,5 +1030,193 @@ This email contains your personal access credentials. Please keep them secure an
       success: false,
       error: error.message,
     };
+  }
+}
+
+/**
+ * Handle PDF upload requests
+ */
+function handlePdfUpload(e) {
+  try {
+    const data = e.parameter;
+
+    // YOU MUST PASTE YOUR DRIVE FOLDER ID HERE
+    const DRIVE_FOLDER_ID = "12Tlr-aeKBSSJuzf8GxepYbePC5vY_HCh";
+
+    if (!data.pdfData) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: "PDF data is required",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (!data.filename) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: "Filename is required",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    if (!data.clientEmail) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: "Client email is required",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Decode the base64 PDF data
+    const pdfBlob = Utilities.base64Decode(data.pdfData);
+    const blob = Utilities.newBlob(pdfBlob, "application/pdf", data.filename);
+
+    // Check if file already exists in Google Drive
+    const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+    const existingFiles = folder.getFilesByName(data.filename);
+
+    // If file exists, do nothing
+    if (existingFiles.hasNext()) {
+      const existingFile = existingFiles.next();
+      console.log(
+        `File already exists: ${data.filename} (ID: ${existingFile.getId()})`
+      );
+
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: true,
+          message: "File already exists, no action taken",
+          fileId: existingFile.getId(),
+          filename: data.filename,
+          driveUrl: existingFile.getUrl(),
+          emailSent: false,
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // File doesn't exist, create new file
+    const file = folder.createFile(blob);
+
+    console.log(`PDF uploaded successfully: ${data.filename}`);
+    console.log(`File ID: ${file.getId()}`);
+
+    // Send email with PDF attachment (only for new files)
+    try {
+      sendPdfEmail(data.clientEmail, data.filename, blob, data.travelerName);
+      console.log(`Email sent to ${data.clientEmail} with PDF attachment`);
+    } catch (emailError) {
+      console.error(`Failed to send email to ${data.clientEmail}:`, emailError);
+      // Don't fail the upload if email fails
+    }
+
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: true,
+        message: "PDF uploaded successfully",
+        fileId: file.getId(),
+        filename: data.filename,
+        driveUrl: file.getUrl(),
+        emailSent: true,
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    console.error("Error uploading PDF:", error);
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: "Failed to upload PDF: " + error.message,
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Send email with PDF attachment to client
+ */
+function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
+  try {
+    const subject = "Your Argentina Trek Registration Voucher";
+    const travelerDisplayName = travelerName || "Traveler";
+
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2c3e50;">¡Hola ${travelerDisplayName}!</h2>
+        
+        <p>Your Argentina Trek registration voucher is ready! 🇦🇷✈️</p>
+        
+        <p>Please find attached your comprehensive trip registration summary containing:</p>
+        <ul>
+          <li>✅ Your confirmed flight details</li>
+          <li>🏨 Hotel accommodations</li>
+          <li>💰 Pricing breakdown</li>
+          <li>💳 Payment information</li>
+          <li>📋 Terms and conditions</li>
+        </ul>
+        
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #495057;">Important:</h3>
+          <p>Please save this voucher for your records. You may need it for travel documentation.</p>
+        </div>
+        
+        <p>If you have any questions about your registration or need to make changes, please contact Maddie:</p>
+        <ul>
+          <li>📧 Email: sonsolesstays+argtrek@gmail.com</li>
+          <li>📱 WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a></li>
+        </ul>
+        
+        <p style="margin-top: 30px;">¡Nos vemos en Argentina!</p>
+        <p style="color: #6c757d; font-style: italic;">The Argentina Trek Team</p>
+        
+        <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
+        <p style="font-size: 12px; color: #6c757d;">
+          This is an automated email. Please do not reply to this message.
+        </p>
+      </div>
+    `;
+
+    const textBody = `
+¡Hola ${travelerDisplayName}!
+
+Your Argentina Trek registration voucher is ready! 🇦🇷✈️
+
+Please find attached your comprehensive trip registration summary containing:
+- Your confirmed flight details
+- Hotel accommodations  
+- Pricing breakdown
+- Payment information
+- Terms and conditions
+
+Important: Please save this voucher for your records. You may need it for travel documentation.
+
+If you have any questions about your registration or need to make changes, please contact Maddie:
+- Email: sonsolesstays+argtrek@gmail.com
+- WhatsApp: +54 911 6972 9783
+
+¡Nos vemos en Argentina!
+The Argentina Trek Team
+
+---
+This is an automated email. Please do not reply to this message.
+    `;
+
+    // Send email with PDF attachment
+    MailApp.sendEmail({
+      to: clientEmail,
+      bcc: "sonsolesstays+argtrek@gmail.com",
+      from: "sonsolesstays+argtrek@gmail.com",
+      subject: subject,
+      htmlBody: htmlBody,
+      body: textBody,
+      attachments: [pdfBlob],
+    });
+
+    console.log(`PDF email sent successfully to ${clientEmail}`);
+    return true;
+  } catch (error) {
+    console.error(`Error sending PDF email to ${clientEmail}:`, error);
+    throw error;
   }
 }
