@@ -19,9 +19,9 @@ export const PRICING_CONFIG = {
 
   // Optional Activities (will be used later for add-ons)
   activities: {
-    horsebackRiding: 45,
+    horsebackRiding: 0,
     cookingClass: 140,
-    rafting: 75,
+    rafting: 140,
   },
 
   // Payment Processing Fees

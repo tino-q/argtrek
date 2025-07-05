@@ -21,7 +21,7 @@ const PRICING = {
   privateRoomUpgrade: 350,
   horsebackRiding: 0,
   cookingClass: 140,
-  rafting: 75,
+  rafting: 140,
   tango: 85,
 
   // Note: Luggage is no longer priced, only tracked as boolean preference

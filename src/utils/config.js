@@ -3,7 +3,7 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbywv9w3VXd2CbpSY68WbxgB9tphUPomTpwIkCY_SSQPbsF6Gf9As5e0wErg3H65u1rq/exec";
+  "https://script.google.com/macros/s/AKfycbxivVSa-vuNqyO-7FQnvAPCc1qQy5SxYZX9n0UvJnYQ3zmI0p4j1KvVruCNZN-lpi41/exec";
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {
@@ -16,7 +16,7 @@ export const PRICES = {
   privateRoom: 0, // Dynamic price from RSVP data
   horseback: 0,
   cooking: 140,
-  rafting: 75,
+  rafting: 140,
   tango: 25,
   creditCardFeeRate: 0.0285,
   installmentRate: 0.35,

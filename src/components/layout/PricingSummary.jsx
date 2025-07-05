@@ -51,11 +51,10 @@ const PricingSummary = ({ pricing, formData }) => {
               <div key={index} className="summary-row activity-row">
                 <span>{activity.name}</span>
                 <span>
-                  {formatCurrency(activity.price)}
-                  <small>
-                    {" "}
-                    ({`${activity.price > 0 ? "optional" : "pending"}`})
-                  </small>
+                  {activity.price === 0
+                    ? "pending"
+                    : formatCurrency(activity.price)}
+                  <small> (optional)</small>
                 </span>
               </div>
             ))}
