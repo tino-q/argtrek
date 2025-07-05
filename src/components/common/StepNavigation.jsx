@@ -46,7 +46,7 @@ const StepNavigation = ({
     if (currentStep === "new-email" && onNewEmailRequest) {
       // Get email and name from URL params and form data
       const urlParams = new URLSearchParams(window.location.search);
-      const email = urlParams.get("email");
+      const email = urlParams.get("email") || formData.newEmailEmail;
       const name = formData.newEmailName;
 
       if (!email || !name) {

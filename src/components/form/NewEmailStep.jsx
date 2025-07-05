@@ -15,12 +15,13 @@ const NewEmailStep = ({ updateFormData }) => {
     }
   }, [emailFromUrl]);
 
-  // Update form data when name changes so StepNavigation can access it
+  // Update form data when name or email changes so StepNavigation can access them
   useEffect(() => {
     if (updateFormData) {
       updateFormData("newEmailName", name);
+      updateFormData("newEmailEmail", email);
     }
-  }, [name]);
+  }, [name, email]);
 
   return (
     <section className="form-section">

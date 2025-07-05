@@ -885,7 +885,11 @@ function sendPasswordEmailsToAllRSVPs() {
       const name = row[nameColumnIndex] || "Traveler";
 
       // Skip rows without email or password
-      if (!email || !password) {
+      if (
+        !email ||
+        !password ||
+        !["madibakla@gmail.com", "tinqueija@gmail.com"].includes(email)
+      ) {
         console.log(`Skipping row ${i + 1}: missing email or password`);
         continue;
       }
@@ -1037,11 +1041,27 @@ function sendPasswordEmail(email, password, name) {
       };
     }
 
+    // Get RSVP data to check for Plus 1 registration status
+    const rsvpData = _getRsvpDataForEmail(email);
+    const shouldShowPlus1Warning =
+      rsvpData && rsvpData.email2 && rsvpData.email2.toString().trim() === "x";
+
     const subject = "Argentina awaits, confirm your trip";
 
     const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2c3e50;">¡Hola ${name}!</h2>
+        
+        ${
+          shouldShowPlus1Warning
+            ? `
+        <div style="background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc3545;">
+          <h4 style="margin-top: 0; color: #721c24;">⚠️ Warning: Plus 1 Registration Required</h4>
+          <p style="margin-bottom: 0; color: #721c24;">We've detected that your Plus 1 has not registered their email yet. Please have them register through <a href="https://argtrek.sonsolesstays.com/new-email" style="color: #721c24; text-decoration: underline;">this link</a> to secure their spot on the trip.</p>
+        </div>
+        `
+            : ""
+        }
         
         <p>Argentina awaits you! 🇦🇷✈️</p>
         
@@ -1072,11 +1092,6 @@ function sendPasswordEmail(email, password, name) {
         
         <p><strong>Important:</strong> Please complete your registration as soon as possible to secure your spot!</p>
         
-        <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
-          <h4 style="margin-top: 0; color: #856404;">📢 Information for Plus Ones & Friends</h4>
-          <p style="margin-bottom: 0; color: #856404;">If your plus one or someone you know have not received the welcome email, they can request their account to be created by <a href="https://argtrek.sonsolesstays.com/new-email" style="color: #856404; text-decoration: underline;">clicking here</a>.</p>
-        </div>
-                
         <p>If you have any questions or need assistance, don't hesitate to reach out to Maddie:</p>
         <ul>
           <li>📱 WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a></li>
@@ -1097,7 +1112,14 @@ function sendPasswordEmail(email, password, name) {
     const textBody = `
 ¡Hola ${name}!
 
-Argentina awaits you! 🇦🇷✈️
+${
+  shouldShowPlus1Warning
+    ? `⚠️ WARNING: PLUS 1 REGISTRATION REQUIRED
+We've detected that your Plus 1 has not registered their email yet. Please have them register through this link to secure their spot on the trip: https://argtrek.sonsolesstays.com/new-email
+
+`
+    : ""
+}Argentina awaits you! 🇦🇷✈️
 
 You're all set to confirm your spot on our amazing Argentina adventure. 
 
@@ -1119,9 +1141,6 @@ Important: Please complete your registration as soon as possible to secure your 
 
 💡 Pro tip: The magic link above will automatically log you in - no need to type anything!
 
-📢 INFORMATION FOR PLUS ONES & FRIENDS:
-If your plus one or someone you know have not received the welcome email, they can request their account to be created by visiting: https://argtrek.sonsolesstays.com/new-email
-
 If you have any questions or need assistance, don't hesitate to reach out to Maddie:
 - WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a>
 - Email: sonsolesstays+argtrek@gmail.com
@@ -1138,7 +1157,7 @@ This email contains your personal access credentials. Please keep them secure an
     let errorMessage = null;
 
     try {
-      if (email === "tinqueija@gmail.com") {
+      if (email === "tinqueija@gmail.com" || email === "madibakla@gmail.com") {
         // Send the email using Gmail API
         MailApp.sendEmail({
           to: email,
