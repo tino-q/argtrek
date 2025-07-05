@@ -225,7 +225,7 @@ const PaymentOptions = ({ formData, updateFormData }) => {
             />
             <label htmlFor="bankTransfer">
               <div className="option-content">
-                <h3>Bank Transfer (USD)</h3>
+                <h3>Bank Transfer</h3>
                 <p className="price" style={{ whiteSpace: "nowrap" }}>
                   0% via Revolut,
                   <a
