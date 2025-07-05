@@ -202,7 +202,11 @@ const ActivitySelection = ({ formData, updateFormData }) => {
                       </div>
                     )}
 
-                    <p className="price">${activity.price} USD</p>
+                    <p className="price">
+                      {activity.price === 0
+                        ? "I'm interested"
+                        : `$${activity.price} USD`}
+                    </p>
                   </div>
                 </div>
               </div>

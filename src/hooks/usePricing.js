@@ -50,7 +50,9 @@ export const usePricing = (rsvpData, formData) => {
       }
 
       if (formData[FORM_FIELDS.HORSEBACK]) {
-        activitiesPrice += ACTIVITIES.horseback.price;
+        if (ACTIVITIES.horseback.price > 0) {
+          activitiesPrice += ACTIVITIES.horseback.price;
+        }
         selectedActivities.push({
           name: ACTIVITIES.horseback.name,
           price: ACTIVITIES.horseback.price,

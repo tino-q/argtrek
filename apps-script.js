@@ -18,7 +18,7 @@ const PRICING = {
   tripOption1: 2250,
   tripOption2: 2600,
   privateRoomUpgrade: 350,
-  horsebackRiding: 45,
+  horsebackRiding: 0,
   cookingClass: 140,
   rafting: 75,
   tango: 85,

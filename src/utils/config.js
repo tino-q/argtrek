@@ -14,10 +14,10 @@ export const ACTION_TYPES = {
 export const PRICES = {
   // Base price comes from RSVP data
   privateRoom: 0, // Dynamic price from RSVP data
-  horseback: 45,
+  horseback: 0,
   cooking: 140,
   rafting: 75,
-  tango: 85,
+  tango: 25,
   creditCardFeeRate: 0.0285,
   installmentRate: 0.35,
 };
