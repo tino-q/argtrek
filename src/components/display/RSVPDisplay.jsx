@@ -467,7 +467,7 @@ const RSVPDisplay = ({
               onBlur={(e) =>
                 handleInputBlur(FORM_FIELDS.PHONE_NUMBER, e.target.value)
               }
-              placeholder="Enter your phone number"
+              placeholder="Include country code"
               className={`editable-input ${validationErrors[FORM_FIELDS.PHONE_NUMBER] ? "error" : ""}`}
               required
             />
