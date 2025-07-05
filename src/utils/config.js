@@ -3,7 +3,7 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwTZyn6nzHm0pN_U0lv-xuCD1DvRoRtODZjRDM7RAK17fs-o8osVr944e6DgoWGFO2F/exec";
+  "https://script.google.com/macros/s/AKfycbwi_Yz7QIdR7FeP4LVFCYhx7c0VEqcw2A-m6Kg5V0RRS21PXlbIZWhk_kbFV3cX1tue/exec";
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {
@@ -59,16 +59,6 @@ export const CONTACTS = [
     name: "Maddie (Travel Coordinator)",
     phone: "+54 (911) 6972 9783",
     whatsapp: "https://wa.me/5491169729783",
-  },
-  // {
-  //   name: "Nati",
-  //   phone: "+1 (469) 612 2335",
-  //   whatsapp: "https://wa.me/14696122335",
-  // },
-  {
-    name: "Facu",
-    phone: "+1 (650) 512 6902",
-    whatsapp: "https://wa.me/16505126902",
   },
 ];
 

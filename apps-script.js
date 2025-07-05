@@ -122,7 +122,9 @@ function doPost(e) {
         !data.name ||
         !data.surname ||
         !data.orderNumber ||
-        !data.timestamp
+        !data.timestamp ||
+        !data.installments_0 ||
+        !data.installments_1
       ) {
         return ContentService.createTextOutput(
           JSON.stringify({
@@ -138,7 +140,7 @@ function doPost(e) {
         var extension = data.fileName.split(".").pop();
         var safeName = data.name.replace(/[^a-zA-Z0-9]/g, "");
         var safeSurname = data.surname.replace(/[^a-zA-Z0-9]/g, "");
-        var fileName = `proof_${data.orderNumber}_${safeSurname}_${safeName}_${data.timestamp}.${extension}`;
+        var fileName = `proof_${data.orderNumber}_${safeSurname}_${safeName}_${data.timestamp}_${data.installments_0}_${data.installments_1}.${extension}`;
         var decoded = Utilities.base64Decode(data.fileData);
         var blob = Utilities.newBlob(decoded, data.fileType, fileName);
         var file = folder.createFile(blob);
@@ -650,7 +652,6 @@ function saveToSheet(data) {
 
       "formData.cooking",
       "formData.horseback",
-      "formData.fishing",
 
       "formData.paymentSchedule",
       "formData.paymentMethod",

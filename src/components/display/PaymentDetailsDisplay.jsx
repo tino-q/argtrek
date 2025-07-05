@@ -1107,11 +1107,12 @@ const PaymentDetailsDisplay = ({
       {/* Bank Transfer Proof of Payment Upload */}
       {submissionResult?.rowNumber &&
         formData[FORM_FIELDS.PAYMENT_METHOD] === "bank" && (
-          <div className="form-group">
+          <div className="form-group center-upload">
             <ProofOfPaymentUpload
               name={formData[FORM_FIELDS.FIRST_NAME] || ""}
               surname={formData[FORM_FIELDS.LAST_NAME] || ""}
               orderNumber={submissionResult.rowNumber}
+              installments={pricing.installments}
             />
           </div>
         )}
@@ -1119,11 +1120,12 @@ const PaymentDetailsDisplay = ({
       {/* Crypto Proof of Payment Upload */}
       {submissionResult?.rowNumber &&
         formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto" && (
-          <div className="form-group">
+          <div className="form-group center-upload">
             <ProofOfPaymentUpload
               name={formData[FORM_FIELDS.FIRST_NAME] || ""}
               surname={formData[FORM_FIELDS.LAST_NAME] || ""}
               orderNumber={submissionResult.rowNumber}
+              installments={pricing.installments}
             />
           </div>
         )}

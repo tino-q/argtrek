@@ -4,7 +4,7 @@ import { APPS_SCRIPT_URL } from "../../utils/config";
 const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 const MAX_SIZE_MB = 10;
 
-const ProofOfPaymentUpload = ({ name, surname, orderNumber }) => {
+const ProofOfPaymentUpload = ({ name, surname, orderNumber, installments }) => {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
@@ -46,6 +46,8 @@ const ProofOfPaymentUpload = ({ name, surname, orderNumber }) => {
         formData.append("surname", surname);
         formData.append("orderNumber", orderNumber);
         formData.append("timestamp", timestamp);
+        formData.append("installments_0", installments[0]);
+        formData.append("installments_1", installments[1]);
         const res = await fetch(APPS_SCRIPT_URL, {
           method: "POST",
           body: formData,

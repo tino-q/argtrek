@@ -84,6 +84,7 @@ export const usePricing = (rsvpData, formData) => {
         total,
         installmentAmount,
         activities: selectedActivities,
+        installments: [installmentAmount, total - installmentAmount],
       });
     };
 

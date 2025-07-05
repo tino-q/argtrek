@@ -334,3 +334,8 @@
     font-size: 0.7rem;
   }
 }
+
+.center-upload {
+  display: flex;
+  justify-content: center;
+}
