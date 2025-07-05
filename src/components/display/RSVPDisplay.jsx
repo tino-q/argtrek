@@ -697,11 +697,15 @@ const RSVPDisplay = ({
       {/* Included Services */}
       <div className="services-section">
         <h3>
-          <i className="fas fa-star"></i> Your Confirmed Services
+          <i className="fas fa-star"></i> Accomodation & Flights
         </h3>
         <p className="services-description">
+          * Included activities will be listed in the agenda, coming soon.
+          <br />
+          <br />
           These flights and accommodations are confirmed for your trip:
         </p>
+        <p className="services-description"></p>
 
         <div className="services-grid">
           {includedServices.map((service, index) => {
