@@ -48,7 +48,11 @@ export const ACTIVITY_LIST = [
     formField: FORM_FIELDS.COOKING,
     icon: "fas fa-utensils",
     name: "Empanadas Cooking Class",
-    subtitles: ["3 Course lunch menu", "Wine pairing at iconic Mendoza winery"],
+    subtitles: [
+      "3 Course lunch menu",
+      "with wine pairing at",
+      "Mendoza winery",
+    ],
     location: "Mendoza",
     date: "November 28th - Midday",
     price: PRICES.cooking,

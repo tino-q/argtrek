@@ -12,9 +12,10 @@ import horseback2 from "../assets/horseback-riding/horseback-riding-mendoza-1.jp
 import horseback3 from "../assets/horseback-riding/horseback-riding-mendoza-2.jpeg";
 
 // Import milonga images
-import milonga1 from "../assets/milonga/milonga-1.png";
+import milonga1 from "../assets/milonga/milonga-1.jpg";
 import milonga2 from "../assets/milonga/milonga-2.jpg";
 import milonga3 from "../assets/milonga/milonga-3.jpg";
+import milonga4 from "../assets/milonga/milonga-4.jpeg";
 
 // Import rafting images (keeping existing structure for now)
 import rafting1 from "../assets/rafting/rafting1.jpeg";
@@ -65,6 +66,7 @@ const IMAGE_COLLECTIONS = {
     additional: [
       { index: 2, image: milonga2 },
       { index: 3, image: milonga3 },
+      { index: 4, image: milonga4 },
     ],
   },
 };
