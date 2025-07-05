@@ -717,6 +717,14 @@ function handleNewEmailRequest(data) {
     const result = saveToNewEmailsSheet(data);
 
     if (result.success) {
+      // Send notification email to admin
+      try {
+        sendNewAccountNotificationEmail(data.email, data.name);
+      } catch (notificationError) {
+        console.error("Failed to send notification email:", notificationError);
+        // Don't fail the request if notification email fails
+      }
+
       return ContentService.createTextOutput(
         JSON.stringify({
           success: true,
@@ -1063,6 +1071,11 @@ function sendPasswordEmail(email, password, name) {
         </ul>
         
         <p><strong>Important:</strong> Please complete your registration as soon as possible to secure your spot!</p>
+        
+        <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+          <h4 style="margin-top: 0; color: #856404;">📢 Information for Plus Ones & Friends</h4>
+          <p style="margin-bottom: 0; color: #856404;">If your plus one or someone you know have not received the welcome email, they can request their account to be created by <a href="https://argtrek.sonsolesstays.com/new-email" style="color: #856404; text-decoration: underline;">clicking here</a>.</p>
+        </div>
                 
         <p>If you have any questions or need assistance, don't hesitate to reach out to Maddie:</p>
         <ul>
@@ -1105,6 +1118,9 @@ Use the magic link above or visit the website manually to:
 Important: Please complete your registration as soon as possible to secure your spot!
 
 💡 Pro tip: The magic link above will automatically log you in - no need to type anything!
+
+📢 INFORMATION FOR PLUS ONES & FRIENDS:
+If your plus one or someone you know have not received the welcome email, they can request their account to be created by visiting: https://argtrek.sonsolesstays.com/new-email
 
 If you have any questions or need assistance, don't hesitate to reach out to Maddie:
 - WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a>
@@ -1266,6 +1282,81 @@ function handlePdfUpload(e) {
         error: "Failed to upload PDF: " + error.message,
       })
     ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Send notification email to admin when someone requests a new account
+ */
+function sendNewAccountNotificationEmail(email, name) {
+  try {
+    const subject = "New Account Request - Argentina Trek";
+    const adminEmail = "sonsolesstays+argtrek@gmail.com";
+
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #2c3e50;">🆕 New Account Request</h2>
+        
+        <p>Someone has requested a new account for the Argentina Trek registration system.</p>
+        
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #495057;">Request Details:</h3>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
+        </div>
+        
+        <p>To process this request, you'll need to:</p>
+        <ul>
+          <li>✅ Add their details to the RSVP sheet</li>
+          <li>🔐 Generate a password for them</li>
+          <li>📧 Send them a welcome email with their credentials</li>
+        </ul>
+        
+        <p>The request has been automatically logged in the "NEW EMAILS" sheet for your reference.</p>
+        
+        <p style="margin-top: 30px; color: #6c757d; font-style: italic;">
+          This is an automated notification from the Argentina Trek registration system.
+        </p>
+      </div>
+    `;
+
+    const textBody = `
+🆕 NEW ACCOUNT REQUEST - Argentina Trek
+
+Someone has requested a new account for the Argentina Trek registration system.
+
+Request Details:
+- Name: ${name}
+- Email: ${email}
+- Timestamp: ${new Date().toLocaleString()}
+
+To process this request, you'll need to:
+✅ Add their details to the RSVP sheet
+🔐 Generate a password for them
+📧 Send them a welcome email with their credentials
+
+The request has been automatically logged in the "NEW EMAILS" sheet for your reference.
+
+---
+This is an automated notification from the Argentina Trek registration system.
+    `;
+
+    // Send notification email to admin
+    MailApp.sendEmail({
+      to: adminEmail,
+      from: "sonsolesstays+argtrek@gmail.com",
+      subject: subject,
+      htmlBody: htmlBody,
+      body: textBody,
+    });
+
+    console.log(`New account notification email sent to ${adminEmail}`);
+    return true;
+  } catch (error) {
+    console.error(`Error sending new account notification email:`, error);
+    // Don't fail the request if notification email fails
+    return false;
   }
 }
 
