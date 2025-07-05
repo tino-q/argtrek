@@ -126,6 +126,11 @@ export const FORM_DATA_STRUCTURE = {
     description: "Whether user selected cooking class",
     required: true,
   },
+  tango: {
+    type: "boolean",
+    description: "Whether user selected tango night",
+    required: true,
+  },
 
   // Luggage
   checkedLuggage: {
@@ -386,6 +391,7 @@ export const SAFE_FORM_FIELDS = {
   RAFTING: "rafting",
   HORSEBACK: "horseback",
   COOKING: "cooking",
+  TANGO: "tango",
   CHECKED_LUGGAGE: "checkedLuggage",
   PAYMENT_SCHEDULE: "paymentSchedule",
   PAYMENT_METHOD: "paymentMethod",

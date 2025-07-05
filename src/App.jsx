@@ -35,6 +35,7 @@ function App() {
       [FORM_FIELDS.RAFTING]: false,
       [FORM_FIELDS.HORSEBACK]: false,
       [FORM_FIELDS.COOKING]: false,
+      [FORM_FIELDS.TANGO]: false,
       [FORM_FIELDS.CHECKED_LUGGAGE]: false,
       [FORM_FIELDS.CRYPTO_CURRENCY]: "USDT",
       [FORM_FIELDS.CRYPTO_NETWORK]: "ETH",

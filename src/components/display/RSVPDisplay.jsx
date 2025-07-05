@@ -70,6 +70,14 @@ const RSVPDisplay = ({
     formData[FORM_FIELDS.PHONE_NUMBER],
   ]);
 
+  // Focus on phone number input when component loads
+  useEffect(() => {
+    const phoneInput = document.getElementById("phone-number-input");
+    if (phoneInput) {
+      phoneInput.focus();
+    }
+  }, []); // Empty dependency array means this runs once when component mounts
+
   // Validation function
   const validateRequiredFields = () => {
     const errors = {};
