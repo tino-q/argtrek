@@ -603,8 +603,7 @@ function saveToSheet(data) {
 
       "formData.cooking",
       "formData.horseback",
-      "formData.rafting",
-      "formData.tango",
+      "formData.fishing",
 
       "formData.paymentSchedule",
       "formData.paymentMethod",
@@ -1057,7 +1056,7 @@ function sendPasswordEmail(email, password, name) {
             ? `
         <div style="background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc3545;">
           <h4 style="margin-top: 0; color: #721c24;">⚠️ Warning: Plus 1 Registration Required</h4>
-          <p style="margin-bottom: 0; color: #721c24;">We've detected that your Plus 1 has not registered their email yet. Please have them register through <a href="https://argtrek.sonsolesstays.com/new-email" style="color: #721c24; text-decoration: underline;">this link</a> to secure their spot on the trip.</p>
+          <p style="margin-bottom: 0; color: #721c24;">We've detected that your Plus 1 has not registered their email yet. Please have them register through <a href="https://argtrip.sonsolesstays.com/new-email" style="color: #721c24; text-decoration: underline;">this link</a> to secure their spot on the trip.</p>
         </div>
         `
             : ""
@@ -1070,7 +1069,7 @@ function sendPasswordEmail(email, password, name) {
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #495057;">Ready to confirm your trip?</h3>
           <div style="text-align: center;">
-            <a href="https://argtrek.sonsolesstays.com?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}" 
+            <a href="https://argtrip.sonsolesstays.com?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}" 
                style="display: inline-block; background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">
               🇦🇷 Access My Argentina Trip 🇦🇷
             </a>
@@ -1095,7 +1094,7 @@ function sendPasswordEmail(email, password, name) {
         <p>If you have any questions or need assistance, don't hesitate to reach out to Maddie:</p>
         <ul>
           <li>📱 WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a></li>
-          <li>📧 Email: sonsolesstays+argtrek@gmail.com</li>
+          <li>📧 Email: sonsolesstays+argtrip@gmail.com</li>
           <li>↩️ Or simply reply to this email</li>
         </ul>
         
@@ -1115,7 +1114,7 @@ function sendPasswordEmail(email, password, name) {
 ${
   shouldShowPlus1Warning
     ? `⚠️ WARNING: PLUS 1 REGISTRATION REQUIRED
-We've detected that your Plus 1 has not registered their email yet. Please have them register through this link to secure their spot on the trip: https://argtrek.sonsolesstays.com/new-email
+We've detected that your Plus 1 has not registered their email yet. Please have them register through this link to secure their spot on the trip: https://argtrip.sonsolesstays.com/new-email
 
 `
     : ""
@@ -1124,10 +1123,10 @@ We've detected that your Plus 1 has not registered their email yet. Please have 
 You're all set to confirm your spot on our amazing Argentina adventure. 
 
 🇦🇷 MAGIC LINK - Click to access instantly (no login needed):
-https://argtrek.sonsolesstays.com?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}
+https://argtrip.sonsolesstays.com?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}
 
 Backup credentials (if needed):
-Website: https://argtrek.sonsolesstays.com
+Website: https://argtrip.sonsolesstays.com
 Your Email: ${email}
 Your Password: ${password}
 
@@ -1143,7 +1142,7 @@ Important: Please complete your registration as soon as possible to secure your 
 
 If you have any questions or need assistance, don't hesitate to reach out to Maddie:
 - WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a>
-- Email: sonsolesstays+argtrek@gmail.com
+- Email: sonsolesstays+argtrip@gmail.com
 - Or simply reply to this email
 
 ¡Nos vemos en Argentina!
@@ -1161,8 +1160,8 @@ This email contains your personal access credentials. Please keep them secure an
         // Send the email using Gmail API
         MailApp.sendEmail({
           to: email,
-          from: "sonsolesstays+argtrek@gmail.com",
-          bcc: "sonsolesstays+argtrek@gmail.com",
+          from: "sonsolesstays+argtrip@gmail.com",
+          bcc: "sonsolesstays+argtrip@gmail.com",
           subject: subject,
           htmlBody: htmlBody,
           body: textBody,
@@ -1309,14 +1308,14 @@ function handlePdfUpload(e) {
  */
 function sendNewAccountNotificationEmail(email, name) {
   try {
-    const subject = "New Account Request - Argentina Trek";
-    const adminEmail = "sonsolesstays+argtrek@gmail.com";
+    const subject = "New Account Request - Argentina Trip";
+    const adminEmail = "sonsolesstays+argtrip@gmail.com";
 
     const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2c3e50;">🆕 New Account Request</h2>
         
-        <p>Someone has requested a new account for the Argentina Trek registration system.</p>
+        <p>Someone has requested a new account for the Argentina Trip registration system.</p>
         
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #495057;">Request Details:</h3>
@@ -1335,15 +1334,15 @@ function sendNewAccountNotificationEmail(email, name) {
         <p>The request has been automatically logged in the "NEW EMAILS" sheet for your reference.</p>
         
         <p style="margin-top: 30px; color: #6c757d; font-style: italic;">
-          This is an automated notification from the Argentina Trek registration system.
+          This is an automated notification from the Argentina Trip registration system.
         </p>
       </div>
     `;
 
     const textBody = `
-🆕 NEW ACCOUNT REQUEST - Argentina Trek
+🆕 NEW ACCOUNT REQUEST - Argentina Trip
 
-Someone has requested a new account for the Argentina Trek registration system.
+Someone has requested a new account for the Argentina Trip registration system.
 
 Request Details:
 - Name: ${name}
@@ -1358,13 +1357,13 @@ To process this request, you'll need to:
 The request has been automatically logged in the "NEW EMAILS" sheet for your reference.
 
 ---
-This is an automated notification from the Argentina Trek registration system.
+This is an automated notification from the Argentina Trip registration system.
     `;
 
     // Send notification email to admin
     MailApp.sendEmail({
       to: adminEmail,
-      from: "sonsolesstays+argtrek@gmail.com",
+      from: "sonsolesstays+argtrip@gmail.com",
       subject: subject,
       htmlBody: htmlBody,
       body: textBody,
@@ -1384,14 +1383,14 @@ This is an automated notification from the Argentina Trek registration system.
  */
 function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
   try {
-    const subject = "Your Argentina Trek Registration Voucher";
+    const subject = "Your Argentina Trip Registration Voucher";
     const travelerDisplayName = travelerName || "Traveler";
 
     const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2c3e50;">¡Hola ${travelerDisplayName}!</h2>
         
-        <p>Your Argentina Trek registration voucher is ready! 🇦🇷✈️</p>
+        <p>Your Argentina Trip registration voucher is ready! 🇦🇷✈️</p>
         
         <p>Please find attached your comprehensive trip registration summary (<strong>${filename}</strong>) containing:</p>
         <ul>
@@ -1409,7 +1408,7 @@ function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
         
         <p>If you have any questions about your registration or need to make changes, please contact Maddie:</p>
         <ul>
-          <li>📧 Email: sonsolesstays+argtrek@gmail.com</li>
+          <li>📧 Email: sonsolesstays+argtrip@gmail.com</li>
           <li>📱 WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a></li>
           <li>↩️ Or simply reply to this email</li>
         </ul>
@@ -1427,7 +1426,7 @@ function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
     const textBody = `
 ¡Hola ${travelerDisplayName}!
 
-Your Argentina Trek registration voucher is ready! 🇦🇷✈️
+Your Argentina Trip registration voucher is ready! 🇦🇷✈️
 
 Please find attached your comprehensive trip registration summary (${filename}) containing:
 - Your confirmed flight details
@@ -1440,7 +1439,7 @@ Important: Please save this voucher for your records. You may need it for travel
 
 If you have any questions about your registration or need to make changes, please contact Maddie:
 - WhatsApp: +54 911 6972 9783
-- Email: sonsolesstays+argtrek@gmail.com
+- Email: sonsolesstays+argtrip@gmail.com
 - Or simply reply to this email
 
 ¡Nos vemos en Argentina!
@@ -1453,8 +1452,8 @@ This is an automated email. Please do not reply to this message.
     // Send email with PDF attachment
     MailApp.sendEmail({
       to: clientEmail,
-      bcc: "sonsolesstays+argtrek@gmail.com",
-      from: "sonsolesstays+argtrek@gmail.com",
+      bcc: "sonsolesstays+argtrip@gmail.com",
+      from: "sonsolesstays+argtrip@gmail.com",
       subject: subject,
       htmlBody: htmlBody,
       body: textBody,

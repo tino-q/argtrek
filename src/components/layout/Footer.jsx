@@ -27,7 +27,7 @@ const Footer = () => {
           <p>
             🔮{" "}
             <a
-              href="https://github.com/tino-q/argtrek"
+              href="https://github.com/tino-q/argtrip"
               target="_blank"
               rel="noopener noreferrer"
               className="footer-link"

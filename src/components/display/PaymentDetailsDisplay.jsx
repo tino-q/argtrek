@@ -153,7 +153,7 @@ const PaymentDetailsDisplay = ({
       doc.setFont("helvetica", "bold");
       doc.setFontSize(24);
       doc.setTextColor(255, 255, 255);
-      doc.text("ARGENTINA TREK", pageWidth / 2, 25, { align: "center" });
+      doc.text("ARGENTINA TRIP", pageWidth / 2, 25, { align: "center" });
 
       doc.setFont("helvetica", "normal");
       doc.setFontSize(12);
@@ -783,7 +783,7 @@ const PaymentDetailsDisplay = ({
       doc.setFontSize(10);
       doc.setTextColor(255, 255, 255);
       doc.text(
-        "Thank you for choosing Argentina Trek!",
+        "Thank you for choosing Argentina Trip!",
         pageWidth / 2,
         yPosition + 8,
         { align: "center" }

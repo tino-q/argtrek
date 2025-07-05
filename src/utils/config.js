@@ -3,7 +3,7 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxivVSa-vuNqyO-7FQnvAPCc1qQy5SxYZX9n0UvJnYQ3zmI0p4j1KvVruCNZN-lpi41/exec";
+  "https://script.google.com/macros/s/AKfycbwbD34_mR-eWJPvblp1-U-tVsZdU-xZ-sbcErsklsFxmc2l2bEC-jlZf_cgzotx38aQ/exec";
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {
@@ -60,11 +60,11 @@ export const CONTACTS = [
     phone: "+54 (911) 6972 9783",
     whatsapp: "https://wa.me/5491169729783",
   },
-  {
-    name: "Nati",
-    phone: "+1 (469) 612 2335",
-    whatsapp: "https://wa.me/14696122335",
-  },
+  // {
+  //   name: "Nati",
+  //   phone: "+1 (469) 612 2335",
+  //   whatsapp: "https://wa.me/14696122335",
+  // },
   {
     name: "Facu",
     phone: "+1 (650) 512 6902",
@@ -74,7 +74,7 @@ export const CONTACTS = [
 
 // Email Configuration
 export const EMAIL_CONFIG = {
-  MADDIE: "sonsolesstays+argtrek@gmail.com",
+  MADDIE: "sonsolesstays+argtrip@gmail.com",
 };
 
 // Form Field Names - Direct 1:1 mapping to backend

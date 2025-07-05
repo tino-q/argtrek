@@ -146,16 +146,16 @@ function App() {
   // Update document title based on current step
   useEffect(() => {
     const stepTitles = {
-      [STEPS.LOGIN]: "Login - Argentina Trek",
-      [STEPS.NEW_EMAIL]: "Request Account - Argentina Trek",
-      [STEPS.WELCOME]: "Welcome - Argentina Trek",
-      [STEPS.RSVP]: "Trip Details - Argentina Trek",
-      [STEPS.ADDONS]: "Select Experiences - Argentina Trek",
-      [STEPS.PAYMENT]: "Payment - Argentina Trek",
-      [STEPS.PAYMENT_DETAILS]: "Payment Details - Argentina Trek",
+      [STEPS.LOGIN]: "Login - Argentina Trip",
+      [STEPS.NEW_EMAIL]: "Request Account - Argentina Trip",
+      [STEPS.WELCOME]: "Welcome - Argentina Trip",
+      [STEPS.RSVP]: "Trip Details - Argentina Trip",
+      [STEPS.ADDONS]: "Select Experiences - Argentina Trip",
+      [STEPS.PAYMENT]: "Payment - Argentina Trip",
+      [STEPS.PAYMENT_DETAILS]: "Payment Details - Argentina Trip",
     };
 
-    document.title = stepTitles[currentStep] || "Argentina Trek";
+    document.title = stepTitles[currentStep] || "Argentina Trip";
   }, [currentStep]);
 
   // Generic navigation handler using React Router
