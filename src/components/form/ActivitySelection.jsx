@@ -111,7 +111,16 @@ const ActivitySelection = ({ formData, updateFormData }) => {
                       style={{ pointerEvents: "none", marginRight: "12px" }}
                     />
                     <i className={activity.icon}></i>
-                    <h3>{activity.name}</h3>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      <h3>{activity.name}</h3>
+                      {activity.subtitles && activity.subtitles.length > 0 && (
+                        <div className="activity-subtitles">
+                          {activity.subtitles.map((subtitle, i) => (
+                            <div key={i}>{subtitle}</div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="activity-details">

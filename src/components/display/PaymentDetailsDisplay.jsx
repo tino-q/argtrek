@@ -370,7 +370,7 @@ const PaymentDetailsDisplay = ({
       if (formData[FORM_FIELDS.RAFTING]) {
         const activity = getActivityByFormField(FORM_FIELDS.RAFTING);
         activities.push({
-          name: activity.name,
+          name: activity.titles[0],
           price: activity.price,
         });
       }
@@ -384,7 +384,7 @@ const PaymentDetailsDisplay = ({
       if (formData[FORM_FIELDS.COOKING]) {
         const activity = getActivityByFormField(FORM_FIELDS.COOKING);
         activities.push({
-          name: activity.name,
+          name: activity.titles[0],
           price: activity.price,
         });
       }

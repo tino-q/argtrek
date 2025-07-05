@@ -349,6 +349,7 @@ const RSVPDisplay = ({
                   {getGenericHotelDescription(service.location)}
                 </span>
               </div>
+              <div className="accommodation-breakfast">Breakfast included</div>
               <div className="accommodation-dates">
                 {service.nights.length === 1
                   ? service.nights[0].date
