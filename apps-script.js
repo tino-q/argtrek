@@ -110,8 +110,55 @@ function doGet(e) {
 // eslint-disable-next-line no-unused-vars
 function doPost(e) {
   try {
-    // Get data from FormData (comes through e.parameter)
     const data = e.parameter;
+
+    // === Proof of Payment Upload Handler ===
+    if (data.action === "upload_proof_of_payment") {
+      // Required fields: fileData (base64), fileName, fileType, name, surname, orderNumber, timestamp
+      if (
+        !data.fileData ||
+        !data.fileName ||
+        !data.fileType ||
+        !data.name ||
+        !data.surname ||
+        !data.orderNumber ||
+        !data.timestamp
+      ) {
+        return ContentService.createTextOutput(
+          JSON.stringify({
+            success: false,
+            error: "Missing required fields for proof of payment upload.",
+          })
+        ).setMimeType(ContentService.MimeType.JSON);
+      }
+      try {
+        var folder = DriveApp.getFolderById(
+          "11OIHpYcakL5G08Z2B10mJNHkKjl0ID78"
+        );
+        var extension = data.fileName.split(".").pop();
+        var safeName = data.name.replace(/[^a-zA-Z0-9]/g, "");
+        var safeSurname = data.surname.replace(/[^a-zA-Z0-9]/g, "");
+        var fileName = `proof_${data.orderNumber}_${safeSurname}_${safeName}_${data.timestamp}.${extension}`;
+        var decoded = Utilities.base64Decode(data.fileData);
+        var blob = Utilities.newBlob(decoded, data.fileType, fileName);
+        var file = folder.createFile(blob);
+        return ContentService.createTextOutput(
+          JSON.stringify({
+            success: true,
+            fileId: file.getId(),
+            fileUrl: file.getUrl(),
+            fileName: fileName,
+          })
+        ).setMimeType(ContentService.MimeType.JSON);
+      } catch (err) {
+        return ContentService.createTextOutput(
+          JSON.stringify({
+            success: false,
+            error: err.message,
+          })
+        ).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
 
     // Check if this is a REDSYS TPV callback
     if (data.Ds_MerchantParameters) {

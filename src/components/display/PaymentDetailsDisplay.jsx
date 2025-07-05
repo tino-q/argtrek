@@ -17,6 +17,8 @@ import PricingSummary from "../layout/PricingSummary";
 import jsPDF from "jspdf";
 import "../../styles/PaymentDetailsDisplay.css";
 
+import ProofOfPaymentUpload from "../form/ProofOfPaymentUpload";
+
 const BANK_DETAILS = [
   { label: "Bank Name", value: "Revolut" },
   { label: "Revolut Handle", value: "sonsol1a9x" },
@@ -1101,6 +1103,30 @@ const PaymentDetailsDisplay = ({
           all confirmed flights, hotels, and payment details.
         </p>
       </div>
+
+      {/* Bank Transfer Proof of Payment Upload */}
+      {submissionResult?.rowNumber &&
+        formData[FORM_FIELDS.PAYMENT_METHOD] === "bank" && (
+          <div className="form-group">
+            <ProofOfPaymentUpload
+              name={formData[FORM_FIELDS.FIRST_NAME] || ""}
+              surname={formData[FORM_FIELDS.LAST_NAME] || ""}
+              orderNumber={submissionResult.rowNumber}
+            />
+          </div>
+        )}
+
+      {/* Crypto Proof of Payment Upload */}
+      {submissionResult?.rowNumber &&
+        formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto" && (
+          <div className="form-group">
+            <ProofOfPaymentUpload
+              name={formData[FORM_FIELDS.FIRST_NAME] || ""}
+              surname={formData[FORM_FIELDS.LAST_NAME] || ""}
+              orderNumber={submissionResult.rowNumber}
+            />
+          </div>
+        )}
     </div>
   );
 };
