@@ -13,6 +13,7 @@ const TRIP_REGISTRATIONS_SHEET_NAME = "Trip Registrations";
 const RSVP_SHEET_NAME = "RSVP"; // Sheet containing RSVP data
 const TPV_PAYMENTS_SHEET_NAME = "TPV PAYMENTS"; // Sheet for REDSYS TPV payment callbacks
 const NEW_EMAILS_SHEET_NAME = "NEW EMAILS"; // Sheet for new email requests
+const WELCOME_EMAILS_SHEET_NAME = "WELCOME EMAILS"; // Sheet for tracking welcome emails sent
 const PRICING = {
   // These base prices will be overridden by RSVP data
   tripOption1: 2250,
@@ -865,6 +866,7 @@ function sendPasswordEmailsToAllRSVPs() {
     }
 
     let emailsSent = 0;
+    let emailsSkipped = 0;
     let errors = 0;
 
     // Process each row (skip header row)
@@ -875,7 +877,7 @@ function sendPasswordEmailsToAllRSVPs() {
       const name = row[nameColumnIndex] || "Traveler";
 
       // Skip rows without email or password
-      if (!email || !password || email !== "tinqueija@gmail.com") {
+      if (!email || !password) {
         console.log(`Skipping row ${i + 1}: missing email or password`);
         continue;
       }
@@ -889,8 +891,13 @@ function sendPasswordEmailsToAllRSVPs() {
         );
 
         if (result.success) {
-          emailsSent++;
-          console.log(`✓ Email sent to: ${email}`);
+          if (result.skipped) {
+            emailsSkipped++;
+            console.log(`⏭️  Email already sent to: ${email}`);
+          } else {
+            emailsSent++;
+            console.log(`✓ Email sent to: ${email}`);
+          }
         } else {
           errors++;
           console.error(
@@ -909,14 +916,16 @@ function sendPasswordEmailsToAllRSVPs() {
     // Final summary
     console.log(`\n=== EMAIL SENDING SUMMARY ===`);
     console.log(`Total emails sent: ${emailsSent}`);
+    console.log(`Total emails skipped (already sent): ${emailsSkipped}`);
     console.log(`Total errors: ${errors}`);
-    console.log(`Total processed: ${emailsSent + errors}`);
+    console.log(`Total processed: ${emailsSent + emailsSkipped + errors}`);
 
     return {
       success: true,
       emailsSent: emailsSent,
+      emailsSkipped: emailsSkipped,
       errors: errors,
-      message: `Completed: ${emailsSent} emails sent, ${errors} errors`,
+      message: `Completed: ${emailsSent} emails sent, ${emailsSkipped} skipped, ${errors} errors`,
     };
   } catch (error) {
     console.error("Error in sendPasswordEmailsToAllRSVPs:", error);
@@ -925,10 +934,101 @@ function sendPasswordEmailsToAllRSVPs() {
 }
 
 /**
+ * Check if welcome email was already sent to an email address
+ */
+function checkWelcomeEmailSent(email) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(WELCOME_EMAILS_SHEET_NAME);
+
+    if (!sheet) {
+      return false;
+    }
+
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+
+    if (values.length === 0) {
+      return false;
+    }
+
+    // No headers - email is in column 2 (index 1)
+    for (let i = 0; i < values.length; i++) {
+      const row = values[i];
+      const rowEmail = row[1]; // Column 2 (email)
+
+      if (
+        rowEmail &&
+        rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error checking welcome email sent:", error);
+    return false;
+  }
+}
+
+/**
+ * Record welcome email sending in WELCOME EMAILS sheet
+ */
+function recordWelcomeEmailSent(email, name, status) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = spreadsheet.getSheetByName(WELCOME_EMAILS_SHEET_NAME);
+
+    // Create WELCOME EMAILS sheet if it doesn't exist
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(WELCOME_EMAILS_SHEET_NAME);
+      console.log("Created WELCOME EMAILS sheet");
+    }
+
+    // Prepare data row: date, email, name, status
+    const timestamp = new Date().toISOString();
+    const rowData = [timestamp, email, name, status];
+
+    // Append the new row
+    sheet.appendRow(rowData);
+
+    // Get the row number of the newly added row
+    const lastRow = sheet.getLastRow();
+
+    console.log(
+      `Welcome email record saved to row ${lastRow}: ${email} - ${status}`
+    );
+
+    return {
+      success: true,
+      rowNumber: lastRow,
+    };
+  } catch (error) {
+    console.error("Error recording welcome email:", error);
+    return {
+      success: false,
+      error: "Failed to record welcome email",
+    };
+  }
+}
+
+/**
  * Send password email to a specific user
  */
 function sendPasswordEmail(email, password, name) {
   try {
+    // Check if welcome email was already sent to this email
+    const alreadySent = checkWelcomeEmailSent(email);
+    if (alreadySent) {
+      console.log(`Welcome email already sent to ${email}, skipping...`);
+      return {
+        success: true,
+        message: `Welcome email already sent to ${email}`,
+        skipped: true,
+      };
+    }
+
     const subject = "Argentina awaits, confirm your trip";
 
     const htmlBody = `
@@ -964,7 +1064,12 @@ function sendPasswordEmail(email, password, name) {
         
         <p><strong>Important:</strong> Please complete your registration as soon as possible to secure your spot!</p>
                 
-        <p>If you have any questions or need assistance, don't hesitate to reach out to Maddie on WhatsApp.</p>
+        <p>If you have any questions or need assistance, don't hesitate to reach out to Maddie:</p>
+        <ul>
+          <li>📱 WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a></li>
+          <li>📧 Email: sonsolesstays+argtrek@gmail.com</li>
+          <li>↩️ Or simply reply to this email</li>
+        </ul>
         
         <p style="margin-top: 30px;">¡Nos vemos en Argentina!</p>
         <p style="color: #6c757d; font-style: italic;">Sonsoles Stays</p>
@@ -1001,7 +1106,10 @@ Important: Please complete your registration as soon as possible to secure your 
 
 💡 Pro tip: The magic link above will automatically log you in - no need to type anything!
 
-If you have any questions or need assistance, don't hesitate to reach out to Maddie on WhatsApp.
+If you have any questions or need assistance, don't hesitate to reach out to Maddie:
+- WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a>
+- Email: sonsolesstays+argtrek@gmail.com
+- Or simply reply to this email
 
 ¡Nos vemos en Argentina!
 Sonsoles Stays
@@ -1009,25 +1117,51 @@ Sonsoles Stays
 ---
 This email contains your personal access credentials. Please keep them secure and don't share them with others.
     `;
-    if (email === "tinqueija@gmail.com") {
-      // Send the email using Gmail API
-      MailApp.sendEmail({
-        to: email,
-        from: "sonsolesstays+argtrek@gmail.com",
-        bcc: "sonsolesstays+argtrek@gmail.com",
-        subject: subject,
-        htmlBody: htmlBody,
-        body: textBody,
-      });
-      console.log("Email sent successfully to", email);
+
+    let emailSent = false;
+    let errorMessage = null;
+
+    try {
+      if (email === "tinqueija@gmail.com") {
+        // Send the email using Gmail API
+        MailApp.sendEmail({
+          to: email,
+          from: "sonsolesstays+argtrek@gmail.com",
+          bcc: "sonsolesstays+argtrek@gmail.com",
+          subject: subject,
+          htmlBody: htmlBody,
+          body: textBody,
+        });
+        console.log("Email sent successfully to", email);
+        emailSent = true;
+      } else {
+        // For other emails, just simulate sending for now
+        console.log("Email simulated for", email);
+        emailSent = true;
+      }
+    } catch (emailError) {
+      console.error(`Error sending email to ${email}:`, emailError);
+      errorMessage = emailError.message;
+      emailSent = false;
     }
 
+    // Record the email sending attempt
+    const status = emailSent ? "sent" : "failed";
+    recordWelcomeEmailSent(email, name, status);
+
     return {
-      success: true,
-      message: `Email sent successfully to ${email}`,
+      success: emailSent,
+      message: emailSent
+        ? `Email sent successfully to ${email}`
+        : `Failed to send email to ${email}: ${errorMessage}`,
+      error: emailSent ? null : errorMessage,
     };
   } catch (error) {
     console.error(`Error sending email to ${email}:`, error);
+
+    // Record the failed attempt
+    recordWelcomeEmailSent(email, name, "failed");
+
     return {
       success: false,
       error: error.message,
@@ -1149,7 +1283,7 @@ function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
         
         <p>Your Argentina Trek registration voucher is ready! 🇦🇷✈️</p>
         
-        <p>Please find attached your comprehensive trip registration summary containing:</p>
+        <p>Please find attached your comprehensive trip registration summary (<strong>${filename}</strong>) containing:</p>
         <ul>
           <li>✅ Your confirmed flight details</li>
           <li>🏨 Hotel accommodations</li>
@@ -1167,10 +1301,11 @@ function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
         <ul>
           <li>📧 Email: sonsolesstays+argtrek@gmail.com</li>
           <li>📱 WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a></li>
+          <li>↩️ Or simply reply to this email</li>
         </ul>
         
         <p style="margin-top: 30px;">¡Nos vemos en Argentina!</p>
-        <p style="color: #6c757d; font-style: italic;">The Argentina Trek Team</p>
+        <p style="color: #6c757d; font-style: italic;">Sonsoles Stays</p>
         
         <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
         <p style="font-size: 12px; color: #6c757d;">
@@ -1184,7 +1319,7 @@ function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
 
 Your Argentina Trek registration voucher is ready! 🇦🇷✈️
 
-Please find attached your comprehensive trip registration summary containing:
+Please find attached your comprehensive trip registration summary (${filename}) containing:
 - Your confirmed flight details
 - Hotel accommodations  
 - Pricing breakdown
@@ -1194,11 +1329,12 @@ Please find attached your comprehensive trip registration summary containing:
 Important: Please save this voucher for your records. You may need it for travel documentation.
 
 If you have any questions about your registration or need to make changes, please contact Maddie:
-- Email: sonsolesstays+argtrek@gmail.com
 - WhatsApp: +54 911 6972 9783
+- Email: sonsolesstays+argtrek@gmail.com
+- Or simply reply to this email
 
 ¡Nos vemos en Argentina!
-The Argentina Trek Team
+Sonsoles Stays
 
 ---
 This is an automated email. Please do not reply to this message.

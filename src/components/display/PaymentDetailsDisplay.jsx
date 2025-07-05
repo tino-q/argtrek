@@ -344,7 +344,7 @@ const PaymentDetailsDisplay = ({
       yPosition += 10;
 
       // Pricing box - extended height to accommodate all content including checked luggage
-      addBox(margin, yPosition, contentWidth, 80, [248, 252, 255]);
+      addBox(margin, yPosition, contentWidth, 85, [248, 252, 255]);
       yPosition += 8;
 
       // Base price
