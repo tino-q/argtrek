@@ -167,6 +167,11 @@ function App() {
   const handleLoginSuccess = (userData) => {
     setUserRSVP(userData);
 
+    // Clear form data for new user login to prevent cross-user data persistence
+    setFormData(getDefaultFormData());
+    setIsFormSubmitted(false);
+    setSubmissionResult(null);
+
     // Clean up URL parameters from magic link
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("email") && urlParams.get("password")) {
