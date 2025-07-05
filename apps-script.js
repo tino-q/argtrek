@@ -652,6 +652,8 @@ function saveToSheet(data) {
 
       "formData.cooking",
       "formData.horseback",
+      "formData.rafting",
+      "formData.tango",
 
       "formData.paymentSchedule",
       "formData.paymentMethod",
