@@ -65,6 +65,14 @@ export const usePricing = (rsvpData, formData) => {
         });
       }
 
+      if (formData[FORM_FIELDS.TANGO]) {
+        activitiesPrice += ACTIVITIES.tango.price;
+        selectedActivities.push({
+          name: ACTIVITIES.tango.name,
+          price: ACTIVITIES.tango.price,
+        });
+      }
+
       // === CALCULATE SUBTOTAL ===
       const subtotal = basePrice + privateRoomUpgrade + activitiesPrice;
 

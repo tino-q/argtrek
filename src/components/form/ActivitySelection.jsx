@@ -17,7 +17,22 @@ const ACTIVITY_LIST = [
     location: "Bariloche",
     date: "November 26th - All Day",
     price: 75,
-    description: "",
+    descriptionLines: [
+      "Approx. 70 km from Bariloche (1 hour by bus)",
+      "📍 Located halfway between Bariloche and El Bolsón",
+      "🕒 Total duration: ~5 hours",
+      "",
+      "Includes exclusive rafts for the group and full river gear (helmet, life jacket, paddle, wetsuit, etc.).",
+      "",
+      "Not everyone needs to raft! If someone prefers not to get on the river, they can still join the group — they'll be taken in a pickup truck (~25 min ride) to the meeting point.",
+      "",
+      "Activity breakdown:",
+      "• ~1 hour prep & safety briefing",
+      "• ~1 hour 15 min on the water (duration may vary depending on water level and optional swim stops)",
+      "• ~1 hour snack & hangout at the riverside field/camp",
+      "",
+      "⚠️ Important: Water shoes are required (or sturdy footwear that can get wet).",
+    ],
     image: getMainActivityImage("rafting"),
   },
   {
@@ -28,7 +43,7 @@ const ACTIVITY_LIST = [
     location: "Mendoza",
     date: "November 27th - Afternoon",
     price: 45,
-    description: "1-hour guided horseback riding experience",
+    descriptionLines: ["1-hour guided horseback riding experience"],
     image: getMainActivityImage("horseback"),
   },
   {
@@ -39,9 +54,28 @@ const ACTIVITY_LIST = [
     location: "Mendoza",
     date: "November 28th - Midday",
     price: 140,
-    description:
-      "Exclusive cooking class with Casa del Visitante chefs. Learn to make traditional empanadas using regional products, followed by a 3-course lunch with wine pairing.",
+    descriptionLines: [
+      "Exclusive cooking class with Casa del Visitante chefs.",
+      "Learn to make traditional empanadas using regional products, followed by a 3-course lunch with wine pairing.",
+    ],
     image: getMainActivityImage("empanadas"),
+  },
+  {
+    id: "tango",
+    formField: FORM_FIELDS.TANGO,
+    icon: "fas fa-music",
+    name: "💃 Tango Night – Hidden Milonga in Palermo",
+    location: "Buenos Aires",
+    date: "November 23rd - Evening",
+    price: 85,
+    descriptionLines: [
+      "After dinner, we'll head to a traditional milonga tucked away in Palermo — a spot mostly known by those who live in the city.",
+      "",
+      "We'll start with a beginner-friendly tango class, then stay to enjoy the early part of the night with a glass of Argentine wine and take in the atmosphere as the dancing begins.",
+      "",
+      "A unique way to experience Buenos Aires beyond the usual path.",
+    ],
+    image: getMainActivityImage("milonga"),
   },
 ];
 
@@ -60,7 +94,8 @@ const ActivitySelection = ({ formData, updateFormData }) => {
     if (
       activity.id === "horseback" ||
       activity.id === "rafting" ||
-      activity.id === "cooking"
+      activity.id === "cooking" ||
+      activity.id === "tango"
     ) {
       setCarouselState({
         isOpen: true,
@@ -85,6 +120,8 @@ const ActivitySelection = ({ formData, updateFormData }) => {
         return getActivityImageSources("rafting");
       case "cooking":
         return getActivityImageSources("empanadas");
+      case "tango":
+        return getActivityImageSources("milonga");
       default:
         return [];
     }
@@ -95,7 +132,8 @@ const ActivitySelection = ({ formData, updateFormData }) => {
     return (
       activityId === "horseback" ||
       activityId === "rafting" ||
-      activityId === "cooking"
+      activityId === "cooking" ||
+      activityId === "tango"
     );
   };
 
@@ -153,9 +191,17 @@ const ActivitySelection = ({ formData, updateFormData }) => {
                   <div className="activity-details">
                     <p className="location">{activity.location}</p>
                     <p className="date">{activity.date}</p>
-                    {activity.description && (
-                      <p className="description">{activity.description}</p>
+
+                    {activity.descriptionLines && (
+                      <div className="description">
+                        {activity.descriptionLines.map((line, index) => (
+                          <p key={index} className="description-line">
+                            {line || "\u00A0"}
+                          </p>
+                        ))}
+                      </div>
                     )}
+
                     <p className="price">${activity.price} USD</p>
                   </div>
                 </div>

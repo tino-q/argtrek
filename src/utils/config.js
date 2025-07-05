@@ -17,6 +17,7 @@ export const PRICES = {
   horseback: 45,
   cooking: 140,
   rafting: 75,
+  tango: 85,
   creditCardFeeRate: 0.0285,
   installmentRate: 0.35,
 };
@@ -26,20 +27,26 @@ export const ACTIVITIES = {
   horseback: {
     id: "horseback",
     name: "Horse Back Riding",
-    price: 45,
+    price: PRICES.horseback,
     location: "Mendoza",
   },
   cooking: {
     id: "cooking",
     name: "Empanadas Cooking Class",
-    price: 140,
+    price: PRICES.cooking,
     location: "Mendoza",
   },
   rafting: {
     id: "rafting",
     name: "Rafting Adventure",
-    price: 75,
+    price: PRICES.rafting,
     location: "Bariloche",
+  },
+  tango: {
+    id: "tango",
+    name: "Tango Night – Hidden Milonga in Palermo",
+    price: PRICES.tango,
+    location: "Buenos Aires",
   },
 };
 
@@ -111,6 +118,7 @@ export const FORM_FIELDS = {
   RAFTING: "rafting",
   HORSEBACK: "horseback",
   COOKING: "cooking",
+  TANGO: "tango",
   // Luggage
   CHECKED_LUGGAGE: "checkedLuggage",
   // Payment options

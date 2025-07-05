@@ -21,6 +21,7 @@ const PRICING = {
   horsebackRiding: 45,
   cookingClass: 140,
   rafting: 75,
+  tango: 85,
 
   // Note: Luggage is no longer priced, only tracked as boolean preference
 
@@ -602,6 +603,7 @@ function saveToSheet(data) {
       "formData.cooking",
       "formData.horseback",
       "formData.rafting",
+      "formData.tango",
 
       "formData.paymentSchedule",
       "formData.paymentMethod",
