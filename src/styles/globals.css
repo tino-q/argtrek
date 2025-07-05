@@ -252,108 +252,164 @@ input[type="checkbox"]:hover {
   transform: translateY(-1px);
 }
 
-/* Footer WhatsApp Link - More specific to override footer-link */
-.footer-link.whatsapp-link {
-  color: #25d366 !important;
-  text-decoration: underline;
-  background: none;
-  padding: 0;
-}
-
-.footer-link.whatsapp-link:hover {
-  color: #128c7e !important;
-  background: none;
-  text-decoration: underline;
-}
-
-.whatsapp-link i {
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
-
-/* Footer Styles */
-.app-footer {
-  margin-top: 60px;
-  padding: 30px 0;
-  text-align: center;
+/* Footer Styles - Mobile First */
+.footer {
+  margin-top: 40px;
+  padding: 30px 20px 20px;
   border-top: 1px solid var(--border-light);
-  background: linear-gradient(135deg, var(--white-95) 0%, var(--white-40) 100%);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   border-radius: 15px;
+  position: relative;
+  animation: footerSlideIn 0.8s ease-out;
 }
 
-.footer-section {
+.footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background: var(--primary);
+  border-radius: 2px;
+  opacity: 0.3;
+  animation: footerIndicator 2s ease-in-out infinite;
+}
+
+@keyframes footerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes footerIndicator {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: translateX(-50%) scaleX(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateX(-50%) scaleX(1.2);
+  }
+}
+
+.footer-content {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-item {
   margin-bottom: 16px;
-  padding: 0 60px;
+  padding: 0 10px;
 }
 
-.footer-section:last-child {
+.footer-item:last-child {
   margin-bottom: 0;
 }
 
-.footer-line {
+.footer-item p {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.9rem;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-}
-
-.footer-emoji {
-  font-size: 1.1rem;
-  margin: 0 8px;
-  display: inline-block;
-  animation: footerPulse 3s ease-in-out infinite;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  font-weight: 400;
 }
 
 .footer-link {
-  color: var(--primary);
+  color: var(--primary-dark);
   text-decoration: none;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-  position: relative;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  padding: 1px 3px;
+  border-radius: 3px;
+  display: inline-block;
 }
 
 .footer-link:hover {
-  color: var(--primary-dark);
+  color: var(--primary-darker);
   background: var(--focus-primary);
   transform: translateY(-1px);
 }
 
-/* Footer animation */
-@keyframes footerPulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.8;
+/* WhatsApp link styling */
+.footer-link.whatsapp-link {
+  color: #25d366;
+  font-weight: 600;
+  background: rgba(37, 211, 102, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.footer-link.whatsapp-link:hover {
+  color: #128c7e;
+  background: rgba(37, 211, 102, 0.2);
+}
+
+/* Small devices */
+@media (max-width: 480px) {
+  .footer {
+    margin-top: 30px;
+    padding: 24px 16px 16px;
   }
-  50% {
-    transform: scale(1.1);
-    opacity: 1;
+
+  .footer-item {
+    margin-bottom: 14px;
+    padding: 0 5px;
+  }
+
+  .footer-item p {
+    font-size: 0.8rem;
   }
 }
 
-/* Mobile footer adjustments */
-@media (max-width: 768px) {
-  .app-footer {
-    margin-top: 40px;
-    padding: 20px 0;
+/* Tablet and up */
+@media (min-width: 768px) {
+  .footer {
+    margin-top: 50px;
+    padding: 40px 30px 30px;
   }
 
-  .footer-section {
-    margin-bottom: 12px;
-    padding: 0 40px;
+  .footer-content {
+    text-align: center;
   }
 
-  .footer-line {
-    font-size: 0.85rem;
+  .footer-item {
+    margin-bottom: 18px;
+    padding: 0 20px;
   }
 
-  .footer-emoji {
-    font-size: 1rem;
-    margin: 0 6px;
+  .footer-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .footer-item p {
+    font-size: 0.9rem;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1024px) {
+  .footer {
+    margin-top: 60px;
+    padding: 45px 40px 35px;
+  }
+
+  .footer-item {
+    margin-bottom: 20px;
+    padding: 0 30px;
+  }
+
+  .footer-item p {
+    font-size: 0.95rem;
   }
 }
 
