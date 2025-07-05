@@ -20,6 +20,12 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
     if (onLogout && !hasLoggedOut.current && isNavigatingToLogin) {
       hasLoggedOut.current = true;
       onLogout();
+
+      // Also clear localStorage to ensure clean state
+      localStorage.removeItem("userRSVP");
+      localStorage.removeItem("formData");
+      localStorage.removeItem("isFormSubmitted");
+      localStorage.removeItem("submissionResult");
     }
 
     // Update previous location

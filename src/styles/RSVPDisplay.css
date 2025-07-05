@@ -208,7 +208,7 @@
 .luggage-addon-section h3 {
   margin: 0 0 1.5rem 0;
   color: var(--text-dark);
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -274,7 +274,7 @@
 }
 
 .luggage-title {
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-dark);
   margin-bottom: 4px;
@@ -282,7 +282,7 @@
 
 .luggage-description {
   color: #666;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
 .luggage-price {
@@ -293,14 +293,14 @@
 }
 
 .luggage-price .price-amount {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 600;
   color: #28a745;
   line-height: 1;
 }
 
 .luggage-price .price-currency {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #28a745;
   font-weight: 500;
 }
@@ -308,7 +308,7 @@
 /* On-demand luggage pricing styling */
 .luggage-price .price-amount.on-demand {
   color: #6c757d;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   margin-top: 20px;
 }
@@ -375,7 +375,7 @@
 
 .luggage-price.included .price-amount {
   color: #28a745;
-  font-size: 1.2rem;
+  font-size: 0.8rem;
   font-weight: 600;
 }
 
@@ -636,15 +636,15 @@
   }
 
   .luggage-title {
-    font-size: 1.1rem;
-  }
-
-  .luggage-description {
     font-size: 0.9rem;
   }
 
+  .luggage-description {
+    font-size: 0.8rem;
+  }
+
   .luggage-price .price-amount {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
   }
 
   .flight-times {

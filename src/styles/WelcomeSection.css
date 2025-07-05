@@ -320,37 +320,35 @@
     font-size: 1.5rem;
   }
 
-  /* Enhanced mobile contact cards */
+  /* Enhanced mobile contact cards - maintain horizontal layout */
   .contacts-grid {
     gap: 16px;
   }
 
   .contact-row {
     padding: 20px;
-    flex-direction: column;
-    text-align: center;
-    gap: 16px;
+    /* Keep horizontal layout: removed flex-direction: column and text-align: center */
   }
 
   .contact-info {
     gap: 8px;
-    align-items: center;
+    /* Keep left alignment: removed align-items: center */
   }
 
   .contact-name {
     font-size: 1rem;
-    justify-content: center;
+    /* Keep left alignment: removed justify-content: center */
   }
 
   .contact-phone {
     font-size: 0.9rem;
-    align-self: center;
+    /* Keep natural alignment: removed align-self: center */
   }
 
   .whatsapp-btn {
     width: 44px;
     height: 44px;
-    align-self: center;
+    /* Keep right alignment: removed align-self: center */
   }
 
   .whatsapp-btn i {
@@ -389,15 +387,15 @@
     margin-bottom: 20px;
   }
 
-  /* Compact contact cards for very small screens */
+  /* Compact contact cards for very small screens - maintain horizontal layout */
   .contacts-grid {
     gap: 12px;
   }
 
   .contact-row {
     padding: 16px;
-    gap: 14px;
     border-radius: 12px;
+    /* Keep horizontal layout: removed gap override */
   }
 
   .contact-info {
@@ -426,7 +424,7 @@
   }
 }
 
-/* Static layout for screens 375px and below */
+/* Maintain horizontal layout for screens 375px and below */
 @media (max-width: 375px) {
   .contacts-grid {
     gap: 10px;
@@ -437,8 +435,8 @@
 
   .contact-row {
     padding: 14px;
-    gap: 12px;
     width: 100%;
+    /* Keep horizontal layout: removed gap override */
   }
 
   .contact-name {

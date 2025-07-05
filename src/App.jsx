@@ -52,15 +52,60 @@ function App() {
     };
   };
 
-  // Application state - Simple initialization without localStorage
-  const [userRSVP, setUserRSVP] = useState(null);
-  const [formData, setFormData] = useState(getDefaultFormData());
-  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-  const [submissionResult, setSubmissionResult] = useState(null);
+  // Helper function to safely get from localStorage
+  const getFromStorage = (key, defaultValue) => {
+    try {
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : defaultValue;
+    } catch (error) {
+      console.warn(`Error reading from localStorage for key ${key}:`, error);
+      return defaultValue;
+    }
+  };
+
+  // Helper function to safely set to localStorage
+  const setToStorage = (key, value) => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.warn(`Error writing to localStorage for key ${key}:`, error);
+    }
+  };
+
+  // Application state - Now with localStorage persistence
+  const [userRSVP, setUserRSVP] = useState(() =>
+    getFromStorage("userRSVP", null)
+  );
+  const [formData, setFormData] = useState(() =>
+    getFromStorage("formData", getDefaultFormData())
+  );
+  const [isFormSubmitted, setIsFormSubmitted] = useState(() =>
+    getFromStorage("isFormSubmitted", false)
+  );
+  const [submissionResult, setSubmissionResult] = useState(() =>
+    getFromStorage("submissionResult", null)
+  );
 
   // React Router hooks
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    setToStorage("userRSVP", userRSVP);
+  }, [userRSVP]);
+
+  useEffect(() => {
+    setToStorage("formData", formData);
+  }, [formData]);
+
+  useEffect(() => {
+    setToStorage("isFormSubmitted", isFormSubmitted);
+  }, [isFormSubmitted]);
+
+  useEffect(() => {
+    setToStorage("submissionResult", submissionResult);
+  }, [submissionResult]);
 
   // Custom hooks
   const {
@@ -427,6 +472,12 @@ function App() {
     setFormData(getDefaultFormData()); // Reset to default form state
     setIsFormSubmitted(false);
     setSubmissionResult(null);
+
+    // Clear localStorage
+    localStorage.removeItem("userRSVP");
+    localStorage.removeItem("formData");
+    localStorage.removeItem("isFormSubmitted");
+    localStorage.removeItem("submissionResult");
 
     showSuccess(
       "Logged out successfully. You can now login with different credentials."
