@@ -7,7 +7,7 @@ import { getBasePrice, getPrivateRoomUpgradePrice } from "../utils/rsvpData";
 import { getActivityByFormField } from "../utils/activities";
 
 // Exchange rate for USD to EUR (used for credit card payments)
-export const USD_TO_EUR_EXCHANGE_RATE = 0.84;
+export const USD_TO_EUR_EXCHANGE_RATE = 0.85;
 
 export const usePricing = (rsvpData, formData) => {
   const [pricing, setPricing] = useState({
