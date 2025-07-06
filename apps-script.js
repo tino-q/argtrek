@@ -751,6 +751,17 @@ function handleNewEmailRequest(data) {
       ).setMimeType(ContentService.MimeType.JSON);
     }
 
+    // Check if email already exists in RSVP data
+    if (_getRsvpDataForEmail(data.email)) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error:
+            "This email is already registered. Please try logging in instead.",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
     // Check if email already requested in NEW EMAILS sheet
     const alreadyRequested = checkEmailInNewEmails(data.email);
     if (alreadyRequested) {
@@ -1060,7 +1071,7 @@ function checkWelcomeEmailSent(email) {
 /**
  * Record welcome email sending in WELCOME EMAILS sheet
  */
-function recordWelcomeEmailSent(email, name, status) {
+function recordWelcomeEmailSent(email, name, status, htmlBody) {
   try {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = spreadsheet.getSheetByName(WELCOME_EMAILS_SHEET_NAME);
@@ -1069,14 +1080,25 @@ function recordWelcomeEmailSent(email, name, status) {
     if (!sheet) {
       sheet = spreadsheet.insertSheet(WELCOME_EMAILS_SHEET_NAME);
       console.log("Created WELCOME EMAILS sheet");
+      // Add headers including htmlBody
+      const headers = ["timestamp", "email", "name", "status", "htmlBody"];
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    } else {
+      // If sheet exists but doesn't have htmlBody column, add it
+      const headers = sheet
+        .getRange(1, 1, 1, sheet.getLastColumn())
+        .getValues()[0];
+      if (!headers.includes("htmlBody")) {
+        sheet.insertColumnAfter(headers.length);
+        sheet.getRange(1, headers.length + 1).setValue("htmlBody");
+      }
     }
 
-    // Prepare data row: date, email, name, status
+    // Prepare data row: date, email, name, status, htmlBody
     const timestamp = new Date().toISOString();
-    const rowData = [timestamp, email, name, status];
 
     // Append the new row
-    sheet.appendRow(rowData);
+    sheet.appendRow([timestamp, email, name, status, htmlBody]);
 
     // Get the row number of the newly added row
     const lastRow = sheet.getLastRow();
@@ -1251,9 +1273,9 @@ This email contains your personal access credentials. Please keep them secure an
       emailSent = false;
     }
 
-    // Record the email sending attempt
+    // Record the email sending attempt, always save the HTML
     const status = emailSent ? "sent" : "failed";
-    recordWelcomeEmailSent(email, name, status);
+    recordWelcomeEmailSent(email, name, status, htmlBody);
 
     return {
       success: emailSent,
@@ -1265,8 +1287,8 @@ This email contains your personal access credentials. Please keep them secure an
   } catch (error) {
     console.error(`Error sending email to ${email}:`, error);
 
-    // Record the failed attempt
-    recordWelcomeEmailSent(email, name, "failed");
+    // Record the failed attempt, save HTML if possible
+    recordWelcomeEmailSent(email, name, "failed", "");
 
     return {
       success: false,
