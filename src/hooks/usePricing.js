@@ -6,6 +6,9 @@ import { FORM_FIELDS } from "../utils/config";
 import { getBasePrice, getPrivateRoomUpgradePrice } from "../utils/rsvpData";
 import { getActivityByFormField } from "../utils/activities";
 
+// Exchange rate for USD to EUR (used for credit card payments)
+export const USD_TO_EUR_EXCHANGE_RATE = 0.84;
+
 export const usePricing = (rsvpData, formData) => {
   const [pricing, setPricing] = useState({
     basePrice: 0,
@@ -75,6 +78,12 @@ export const usePricing = (rsvpData, formData) => {
       const installmentAmount =
         paymentSchedule === "installments" ? Math.round(total * 0.35) : total;
 
+      // EUR conversions (only relevant for credit card payments)
+      const totalEUR = pricing.total * USD_TO_EUR_EXCHANGE_RATE;
+      const installmentAmountEUR = pricing.installmentAmount
+        ? pricing.installmentAmount * USD_TO_EUR_EXCHANGE_RATE
+        : 0;
+
       setPricing({
         basePrice,
         privateRoomUpgrade,
@@ -85,11 +94,13 @@ export const usePricing = (rsvpData, formData) => {
         installmentAmount,
         activities: selectedActivities,
         installments: [installmentAmount, total - installmentAmount],
+        totalEUR,
+        installmentAmountEUR,
       });
     };
 
     calculatePricing();
-  }, [rsvpData, formData]);
+  }, [rsvpData, formData, pricing.installmentAmount, pricing.total]);
 
   return pricing;
 };

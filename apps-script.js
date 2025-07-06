@@ -692,6 +692,9 @@ function saveToSheet(data) {
       "rsvpData.option",
       "rsvpData.party",
       "rsvpData.plus1",
+
+      "pricing.totalEUR",
+      "pricing.installmentAmountEUR",
     ];
 
     // Use the hardcoded headers to ensure consistent ordering

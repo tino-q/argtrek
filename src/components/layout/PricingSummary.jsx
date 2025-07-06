@@ -4,8 +4,8 @@
 import { FORM_FIELDS } from "../../utils/config";
 
 const PricingSummary = ({ pricing, formData }) => {
-  const formatCurrency = (amount) => {
-    return `$${Math.round(amount).toLocaleString()}`;
+  const formatCurrency = (amount, currency = "$") => {
+    return `${currency}${Math.round(amount).toLocaleString()}`;
   };
 
   const hasAccommodationUpgrade =
@@ -87,29 +87,40 @@ const PricingSummary = ({ pricing, formData }) => {
         )}
 
         {/* Total Amount */}
-        <div className="summary-row total">
+        <div className="summary-row subtotal">
           <span>Total Amount</span>
-          <span>{formatCurrency(pricing.total)}</span>
+          {isInstallmentPlan || !hasProcessingFee ? (
+            <span>{formatCurrency(pricing.total)}</span>
+          ) : (
+            <div>
+              {formatCurrency(pricing.totalEUR, "€")} (
+              {formatCurrency(pricing.total)})
+            </div>
+          )}
         </div>
 
         {/* Amount Due Now */}
         {isInstallmentPlan && (
-          <div className="payment-amount">
+          <div className="summary-row subtotal">
             <span>Amount Due Now (35%)</span>
-            <span>{formatCurrency(pricing.installmentAmount)}</span>
+            <span>
+              {formatCurrency(pricing.installmentAmountEUR, "€")} (
+              {formatCurrency(pricing.installmentAmount)})
+            </span>
           </div>
         )}
 
         {/* Installment Note */}
         {isInstallmentPlan && (
-          <div
-            className="summary-row"
-            style={{ fontSize: "0.9rem", color: "var(--text-secondary)" }}
-          >
-            <span>Remaining due September 15th</span>
-            <span>
-              {formatCurrency(pricing.total - pricing.installmentAmount)}
-            </span>
+          <div className="installments">
+            {
+              <div className="summary-row">
+                <span>Remaining due September 15th</span>
+                <span>
+                  {formatCurrency(pricing.total - pricing.installmentAmount)}
+                </span>
+              </div>
+            }
           </div>
         )}
       </div>
