@@ -147,36 +147,14 @@ const PaymentDetailsDisplay = ({
         {/* Bank Transfer Details */}
         {formData[FORM_FIELDS.PAYMENT_METHOD] === "bank" && (
           <div className="payment-content">
-            <h4>Bank Transfer Details</h4>
-            {BANK_DETAILS.map((detail, index) => (
-              <div key={index} className="detail-row">
-                <span className="label">{detail.label}:</span>
-                <div className="value-container">
-                  <span
-                    className="value"
-                    data-type={
-                      detail.label.toLowerCase().includes("iban")
-                        ? "iban"
-                        : undefined
-                    }
-                  >
-                    {detail.value}
-                  </span>
-                  <button
-                    type="button"
-                    className="copy-btn"
-                    onClick={(e) => handleCopyClick(detail.value, e)}
-                    title="Copy to clipboard"
-                  >
-                    <i className="fas fa-copy"></i>
-                  </button>
-                </div>
-              </div>
-            ))}
-
             <div className="important-notes">
               <h4>Important Instructions</h4>
               <ul>
+                <li>
+                  Feel free to group transfers with other travelers to save on
+                  fees, just make sure to reference all the travelers in the
+                  transfer receipt
+                </li>
                 <li>Include your full name in the transfer reference</li>
                 <li>
                   Configure the transfer to cover all fees on your end,
@@ -203,6 +181,33 @@ const PaymentDetailsDisplay = ({
                 for free international transfers
               </div>
             </div>
+            <br />
+            <h4>Bank Transfer Details</h4>
+            {BANK_DETAILS.map((detail, index) => (
+              <div key={index} className="detail-row">
+                <span className="label">{detail.label}:</span>
+                <div className="value-container">
+                  <span
+                    className="value"
+                    data-type={
+                      detail.label.toLowerCase().includes("iban")
+                        ? "iban"
+                        : undefined
+                    }
+                  >
+                    {detail.value}
+                  </span>
+                  <button
+                    type="button"
+                    className="copy-btn"
+                    onClick={(e) => handleCopyClick(detail.value, e)}
+                    title="Copy to clipboard"
+                  >
+                    <i className="fas fa-copy"></i>
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
