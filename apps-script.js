@@ -1095,6 +1095,8 @@ function sendPasswordEmail(email, password, name) {
     const shouldShowPlus1Warning =
       rsvpData && rsvpData.email2 && rsvpData.email2.toString().trim() === "x";
 
+    const hasPlusOne = rsvpData && rsvpData.party === "Plus one";
+
     const subject = "Argentina awaits, confirm your trip";
 
     const htmlBody = `
@@ -1111,6 +1113,17 @@ function sendPasswordEmail(email, password, name) {
         `
             : ""
         }
+
+        ${
+          hasPlusOne
+            ? `
+        <div style="background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc3545;">
+          <h4 style="margin-top: 0; color: #721c24;">⚠️ Attention: Every participant must fill its own form</h4>
+        </div>
+        `
+            : ""
+        }
+
         
         <p>Argentina awaits you! 🇦🇷✈️</p>
         

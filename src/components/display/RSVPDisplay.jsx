@@ -694,15 +694,29 @@ const RSVPDisplay = ({
         </div>
       )}
 
+      {/* Readonly Notice */}
+      <div className="readonly-notice">
+        <div className="notice-content">
+          <i className="fas fa-info-circle"></i>
+          <div>
+            <h4>
+              Included activities will be listed in the agenda, coming soon.
+            </h4>
+            <p>
+              From gourmet meals and city strolls to summit views, sunset winery
+              dinners, and vineyard tours, an extraordinary experience
+              awaits—your detailed daily itinerary will be delivered shortly!
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Included Services */}
       <div className="services-section">
         <h3>
           <i className="fas fa-star"></i> Accomodation & Flights
         </h3>
         <p className="services-description">
-          * Included activities will be listed in the agenda, coming soon.
-          <br />
-          <br />
           These flights and accommodations are confirmed for your trip:
         </p>
         <p className="services-description"></p>
