@@ -1260,14 +1260,17 @@ This email contains your personal access credentials. Please keep them secure an
 
     try {
       // Send the email using Gmail API
-      MailApp.sendEmail({
-        to: email,
-        from: "sonsolesstays+argtrip@gmail.com",
-        bcc: "sonsolesstays+argtrip@gmail.com",
-        subject: subject,
-        htmlBody: htmlBody,
-        body: textBody,
-      });
+      // MailApp.sendEmail({
+      //   to: email,
+      //   from: "sonsolesstays+argtrip@gmail.com",
+      //   bcc: "sonsolesstays+argtrip@gmail.com",
+      //   subject: subject,
+      //   htmlBody: htmlBody,
+      //   body: textBody,
+      // });
+
+      sendMailGunEmail(email, subject, htmlBody);
+
       console.log("Email sent successfully to", email);
       emailSent = true;
     } catch (emailError) {
@@ -1458,13 +1461,7 @@ This is an automated notification from the Argentina Trip registration system.
     `;
 
     // Send notification email to admin
-    MailApp.sendEmail({
-      to: adminEmail,
-      from: "sonsolesstays+argtrip@gmail.com",
-      subject: subject,
-      htmlBody: htmlBody,
-      body: textBody,
-    });
+    sendMailGunEmail(adminEmail, subject, htmlBody);
 
     console.log(`New account notification email sent to ${adminEmail}`);
     return true;
@@ -1547,15 +1544,7 @@ This is an automated email. Please do not reply to this message.
     `;
 
     // Send email with PDF attachment
-    MailApp.sendEmail({
-      to: clientEmail,
-      bcc: "sonsolesstays+argtrip@gmail.com",
-      from: "sonsolesstays+argtrip@gmail.com",
-      subject: subject,
-      htmlBody: htmlBody,
-      body: textBody,
-      attachments: [pdfBlob],
-    });
+    sendMailGunEmail(clientEmail, subject, htmlBody, [pdfBlob]);
 
     console.log(`PDF email sent successfully to ${clientEmail}`);
     return true;
@@ -1563,4 +1552,53 @@ This is an automated email. Please do not reply to this message.
     console.error(`Error sending PDF email to ${clientEmail}:`, error);
     throw error;
   }
+}
+
+/**
+ * Sends an email via Mailgun.
+ *
+ * @param {string|string[]} to         – single address or an array
+ * @param {string}           subject
+ * @param {string}           htmlContent
+ * @param {string}           [plainText]   – optional text fallback
+ * @param {Array<Blob>}      [attachments] – optional Drive/AppScript blobs
+ */
+function sendMailGunEmail(to, subject, htmlContent, attachments = []) {
+  const MG_KEY = "<MAILGUN_API_KEY>";
+  const MG_DOMAIN = "mailing.sonsolesstays.com";
+  if (!MG_KEY || !MG_DOMAIN) throw new Error("Missing Mailgun credentials");
+
+  // Build the form payload
+  const form = {
+    from: "Sonsoles Stays<no-reply@" + MG_DOMAIN + ">",
+    to: Array.isArray(to) ? to.join(",") : to,
+    subject: subject,
+    html: htmlContent,
+    "h:Reply-To": "sonsolestays@gmail.com",
+  };
+
+  // Attachments, if provided
+  if (attachments && attachments.length) {
+    attachments.forEach((blob, i) => {
+      form["attachment[" + i + "]"] = blob;
+    });
+  }
+
+  // Send with HTTP Basic Auth (user “api”)
+  const options = {
+    method: "post",
+    payload: form,
+    headers: {
+      Authorization: "Basic " + Utilities.base64Encode("api:" + MG_KEY),
+    },
+    muteHttpExceptions: true,
+  };
+  const url = "https://api.eu.mailgun.net/v3/" + MG_DOMAIN + "/messages";
+  const res = UrlFetchApp.fetch(url, options);
+
+  if (res.getResponseCode() < 200 || res.getResponseCode() > 299) {
+    console.error("Mailgun error:", res.getContentText());
+    throw new Error("Email send failed (" + res.getResponseCode() + ")");
+  }
+  console.log(JSON.parse(res.getContentText()));
 }
