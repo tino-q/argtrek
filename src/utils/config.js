@@ -3,7 +3,7 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycby_WCj8VoP2Z_J_jCas3SK0ncL5ZIlp3XP342oVlgujgckiyAyYIKeXvMD97L6pAfv5/exec";
+  "https://script.google.com/macros/s/AKfycbyXi2uYwlz290KBqdhwU8fojjsln-XimT3zay7w6mZWzuQIatWeRUN920dhRUZ0nCJj/exec";
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {

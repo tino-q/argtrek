@@ -937,7 +937,15 @@ function sendPasswordEmailsToAllRSVPs() {
       if (
         !email ||
         !password ||
-        !["madibakla@gmail.com", "tinqueija@gmail.com"].includes(email)
+        ![
+          "guidoh@stanford.edu",
+          "talves@stanford.edu",
+          "verdaromjulieta@gmail.com",
+          "ftosi@stanford.edu",
+          "carocuestamarrero@gmail.com",
+          "madibakla@gmail.com",
+          "tinqueija@gmail.com",
+        ].includes(email)
       ) {
         console.log(`Skipping row ${i + 1}: missing email or password`);
         continue;
@@ -1210,23 +1218,17 @@ This email contains your personal access credentials. Please keep them secure an
     let errorMessage = null;
 
     try {
-      if (email === "tinqueija@gmail.com" || email === "madibakla@gmail.com") {
-        // Send the email using Gmail API
-        MailApp.sendEmail({
-          to: email,
-          from: "sonsolesstays+argtrip@gmail.com",
-          bcc: "sonsolesstays+argtrip@gmail.com",
-          subject: subject,
-          htmlBody: htmlBody,
-          body: textBody,
-        });
-        console.log("Email sent successfully to", email);
-        emailSent = true;
-      } else {
-        // For other emails, just simulate sending for now
-        console.log("Email simulated for", email);
-        emailSent = true;
-      }
+      // Send the email using Gmail API
+      MailApp.sendEmail({
+        to: email,
+        from: "sonsolesstays+argtrip@gmail.com",
+        bcc: "sonsolesstays+argtrip@gmail.com",
+        subject: subject,
+        htmlBody: htmlBody,
+        body: textBody,
+      });
+      console.log("Email sent successfully to", email);
+      emailSent = true;
     } catch (emailError) {
       console.error(`Error sending email to ${email}:`, emailError);
       errorMessage = emailError.message;
