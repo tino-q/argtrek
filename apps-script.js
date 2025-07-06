@@ -945,6 +945,22 @@ function sendPasswordEmailsToAllRSVPs() {
           "carocuestamarrero@gmail.com",
           "madibakla@gmail.com",
           "tinqueija@gmail.com",
+          "jeronimo.llacay@gmail.com",
+          "nnavas@stanford.edu",
+          "dzhang6@stanford.edu",
+          "Tkim1993@stanford.edu",
+          "vizitiv@stanford.edu",
+          "rochekapoor@gmail.com",
+          "amur@stanford.edu",
+          "stayara@stanford.edu",
+          "yhouamed@stanford.edu",
+          "lukasa@stanford.edu",
+          "zteiger@stanford.edu",
+          "Gilly@stanford.edu",
+          "yravid@stanford.edu",
+          "Hochdorf@stanford.edu",
+          "Dchou8@stanford.edu",
+          "emilyl33@stanford.edu",
         ].includes(email)
       ) {
         console.log(`Skipping row ${i + 1}: missing email or password`);

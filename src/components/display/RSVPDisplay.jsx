@@ -547,10 +547,11 @@ const RSVPDisplay = ({
                         <h4>TERMS & CONDITIONS</h4>
                         <ul>
                           <li>
-                            This proposal is subject to availability and may
-                            change until the group reservation is confirmed with
-                            a deposit. In case of delayed payments, prices may
-                            be adjusted due to currency fluctuations or updated
+                            Quotation is based on RSVP submissions. This
+                            proposal is subject to availability and may change
+                            until the group reservation is confirmed with a
+                            deposit. In case of delayed payments, prices may be
+                            adjusted due to currency fluctuations or updated
                             supplier rates.
                           </li>
                           <li>

@@ -751,8 +751,7 @@ const PaymentDetailsDisplay = ({
       setBody(9);
       const termsAndConditions = [
         "• A 21% VAT will be added to accommodation expenses for Argentinean guests.",
-        "• Quotation is based on 60 participants. Any changes in group size will require a revised quotation.",
-        "• This proposal is subject to availability and may change until the group reservation is confirmed with a deposit. In case of delayed payments, prices may be adjusted due to currency fluctuations or updated supplier rates.",
+        "• Quotation is based on RSVP submissions. This proposal is subject to availability and may change until the group reservation is confirmed with a deposit. In case of delayed payments, prices may be adjusted due to currency fluctuations or updated supplier rates.",
         "• Deposits are non-refundable. The remaining balance must be paid according to the specified deadlines.",
         "• Prices do not include visa processing fees or travel insurance. Each traveler is responsible for obtaining the necessary visa and health insurance.",
         "• All passengers must have valid travel documents in good condition. It is the traveler's responsibility to verify passport, visa, and health requirements. A passport valid for at least 6 months is recommended.",
