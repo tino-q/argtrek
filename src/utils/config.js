@@ -170,3 +170,45 @@ export const UI_CONSTANTS = {
   ERROR_COLOR: "#ef4444",
   WARNING_COLOR: "#f59e0b",
 };
+
+export const BANK_DETAILS = [
+  { label: "Bank Name", value: "Revolut" },
+  { label: "Revolut Handle", value: "sonsol1a9x" },
+  { label: "Account Holder", value: "SONSOLES RKT SL" },
+  { label: "IBAN", value: "ES51 1583 0001 1093 9530 1696" },
+  { label: "BIC", value: "REVOESM2" },
+  { label: "SWIFT", value: "CHASGB2L" },
+  { label: "Currency", value: "USD" },
+  {
+    label: "Holder address",
+    value: "CALLE BERNARDO LOPEZ GARCIA, 18 - BJ, 03013, ALICANTE",
+  },
+
+  { label: "Country", value: "Spain" },
+];
+
+export const CRYPTO_WALLETS = {
+  ETH: "0xB15E94F7eDD9bB738E5Ba0991ee173E4Fb40d6B3", // Used for both ETH and ARB
+  SOL: "6GtbPf58peWCT2EQEpbPdvAx4XuRAGmCW4vQszt1vqjy", // Used for SOL
+};
+
+export const NETWORK_INFO = {
+  ETH: {
+    name: "Ethereum",
+    symbol: "ETH",
+    color: "#627EEA",
+    icon: "fab fa-ethereum",
+  },
+  ARB: {
+    name: "Arbitrum",
+    symbol: "ARB",
+    color: "#28A0F0",
+    icon: "fas fa-layer-group",
+  },
+  SOL: {
+    name: "Solana",
+    symbol: "SOL",
+    color: "#9945FF",
+    icon: "fas fa-sun",
+  },
+};
