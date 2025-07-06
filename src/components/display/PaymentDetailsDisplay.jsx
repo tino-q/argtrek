@@ -442,10 +442,25 @@ const PaymentDetailsDisplay = ({
 
       setLabel(12);
       // doc.setTextColor(...colors.success);
-      doc.text("TOTAL:", margin + 8, yPosition);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(14);
-      doc.text(`$${pricing.total}`, margin + 8 + 56, yPosition);
+      // Show EUR for credit card, USD for others
+      const paymentMethod = formData[FORM_FIELDS.PAYMENT_METHOD];
+      const isInstallmentPlan =
+        formData[FORM_FIELDS.PAYMENT_SCHEDULE] === "installments";
+      if (paymentMethod === "credit" && !isInstallmentPlan) {
+        doc.text("TOTAL:", margin + 8, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text(
+          `€${Math.round(pricing.totalEUR).toLocaleString()} ($${Math.round(pricing.total).toLocaleString()})`,
+          margin + 8 + 56,
+          yPosition
+        );
+      } else {
+        doc.text("TOTAL:", margin + 8, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text(`$${pricing.total}`, margin + 8 + 56, yPosition);
+      }
 
       yPosition += 55;
 
@@ -454,8 +469,6 @@ const PaymentDetailsDisplay = ({
       setSubtitle(16);
       doc.text("Payment Information", margin, yPosition);
       yPosition += 10;
-
-      const paymentMethod = formData[FORM_FIELDS.PAYMENT_METHOD];
 
       // Payment method header
       addBox(margin, yPosition, contentWidth, 15, colors.primary);
@@ -591,13 +604,17 @@ const PaymentDetailsDisplay = ({
         doc.text("INSTALLMENT PLAN", margin + 8, yPosition);
         yPosition += 6;
 
-        const firstPayment =
-          pricing.installmentAmount || Math.round(pricing.total * 0.35);
+        const firstPayment = pricing.installmentAmount;
+
+        const firstPaymentEur = pricing.installmentAmountEUR;
+
         const secondPayment = pricing.total - firstPayment;
 
         yPosition = addKeyValue(
           "1st Payment (35%)",
-          `$${firstPayment}`,
+          paymentMethod === "credit"
+            ? `€${firstPaymentEur} ($${firstPayment})`
+            : `$${firstPayment}`,
           yPosition,
           8
         );
