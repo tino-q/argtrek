@@ -103,10 +103,14 @@ const PricingSummary = ({ pricing, formData }) => {
         {isInstallmentPlan && (
           <div className="summary-row subtotal">
             <span>Amount Due Now (35%)</span>
-            <span>
-              {formatCurrency(pricing.installmentAmountEUR, "€")} (
-              {formatCurrency(pricing.installmentAmount)})
-            </span>
+            {formData[FORM_FIELDS.PAYMENT_METHOD] === "credit" ? (
+              <span>
+                {formatCurrency(pricing.installmentAmountEUR, "€")} (
+                {formatCurrency(pricing.installmentAmount)})
+              </span>
+            ) : (
+              <span>{formatCurrency(pricing.installmentAmount)}</span>
+            )}
           </div>
         )}
 
