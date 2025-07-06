@@ -180,30 +180,6 @@ const PaymentOptions = ({ formData, updateFormData }) => {
           <div className="radio-option">
             <input
               type="radio"
-              id="creditCard"
-              name="paymentMethod"
-              value="credit"
-              checked={formData[FORM_FIELDS.PAYMENT_METHOD] === "credit"}
-              onChange={(e) =>
-                updateFormData(FORM_FIELDS.PAYMENT_METHOD, e.target.value)
-              }
-              required
-            />
-            <label htmlFor="creditCard">
-              <div className="option-content">
-                <h3>Credit Card</h3>
-                <p className="price">+2.85% processing fee</p>
-                <p className="description">
-                  Pay through a secure link sent to your email
-                </p>
-                <p className="description">Supports Apple & Google Pay</p>
-              </div>
-            </label>
-          </div>
-
-          <div className="radio-option">
-            <input
-              type="radio"
               id="bankTransfer"
               name="paymentMethod"
               value="bank"
@@ -236,6 +212,30 @@ const PaymentOptions = ({ formData, updateFormData }) => {
                   and add any additional fees to ensure we receive the full
                   amount
                 </p>
+              </div>
+            </label>
+          </div>
+
+          <div className="radio-option">
+            <input
+              type="radio"
+              id="creditCard"
+              name="paymentMethod"
+              value="credit"
+              checked={formData[FORM_FIELDS.PAYMENT_METHOD] === "credit"}
+              onChange={(e) =>
+                updateFormData(FORM_FIELDS.PAYMENT_METHOD, e.target.value)
+              }
+              required
+            />
+            <label htmlFor="creditCard">
+              <div className="option-content">
+                <h3>Credit Card</h3>
+                <p className="price">+2.85% processing fee</p>
+                <p className="description">
+                  Pay through a secure link sent to your email
+                </p>
+                <p className="description">Supports Apple & Google Pay</p>
               </div>
             </label>
           </div>

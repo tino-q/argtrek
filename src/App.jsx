@@ -29,7 +29,7 @@ function App() {
   const getDefaultFormData = () => {
     return {
       [FORM_FIELDS.PAYMENT_SCHEDULE]: "full",
-      [FORM_FIELDS.PAYMENT_METHOD]: "credit",
+      [FORM_FIELDS.PAYMENT_METHOD]: "bank",
       [FORM_FIELDS.DIETARY_RESTRICTIONS]: "none",
       [FORM_FIELDS.PRIVATE_ROOM_UPGRADE]: false, // Default to shared room
       [FORM_FIELDS.RAFTING]: false,
