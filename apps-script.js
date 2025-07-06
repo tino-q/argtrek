@@ -1103,32 +1103,23 @@ function sendPasswordEmail(email, password, name) {
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #2c3e50;">¡Hola ${name}!</h2>
         
-        ${
-          shouldShowPlus1Warning
-            ? `
         <div style="background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc3545;">
-          <h4 style="margin-top: 0; color: #721c24;">⚠️ Warning: Plus 1 Registration Required</h4>
-          <p style="margin-bottom: 0; color: #721c24;">We've detected that your Plus 1 has not registered their email yet. Please have them register through <a href="https://argtrip.sonsolesstays.com/new-email" style="color: #721c24; text-decoration: underline;">this link</a> to secure their spot on the trip.</p>
+          <h4 style="margin-top: 0; color: #721c24;">⚠️ Attention</h4>
+          <p style="margin-bottom: 0; color: #721c24;">Please complete payment within the next 48 hours to secure your spot.</p>
+          ${
+            shouldShowPlus1Warning
+              ? `<p style="margin-bottom: 0; color: #721c24;">We've detected that your Plus 1 has not registered their email yet. Please have them register through <a href="https://argtrip.sonsolesstays.com/new-email" style="color: #721c24; text-decoration: underline;">this link</a> to secure their spot on the trip.</p>`
+              : ""
+          }
+          ${
+            hasPlusOne
+              ? `<p style="margin-bottom: 0; color: #721c24;">Every participant must fill its own form</p>`
+              : ""
+          }
         </div>
-        `
-            : ""
-        }
 
-        ${
-          hasPlusOne
-            ? `
-        <div style="background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc3545;">
-          <h4 style="margin-top: 0; color: #721c24;">⚠️ Attention: Every participant must fill its own form</h4>
-        </div>
-        `
-            : ""
-        }
-
-        
         <p>Argentina awaits you! 🇦🇷✈️</p>
-        
         <p>You're all set to confirm your spot on our amazing Argentina adventure. Use the details below to access your trip registration:</p>
-        
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #495057;">Ready to confirm your trip?</h3>
           <div style="text-align: center;">
