@@ -105,22 +105,18 @@ const PaymentOptions = ({ formData, updateFormData }) => {
           <h3>Important</h3>
           <ul>
             <li>
-              <strong>Group Size Impact:</strong> Our rates are based on
+              <strong>Transferable Spots:</strong> While refunds are not
+              possible, your spot is fully transferable (until Sept. 15th) to
+              another person if your plans change
+            </li>
+            <li>
+              <strong>Commitment Required:</strong> Our rates are based on
               confirmed group size. Unregistering from the trip impacts pricing
               for all remaining participants
             </li>
             <li>
-              <strong>Transferable Spots:</strong> While refunds are not
-              possible, your spot is fully transferable to another person if
-              your plans change
-            </li>
-            <li>
-              <strong>Commitment Required:</strong> Please only register if
-              you're committed to the full trip experience
-            </li>
-            <li>
-              A 21% VAT will be added to accommodation expenses for Argentinean
-              guests.
+              A 21% VAT will be added to accommodation expenses only for
+              Argentinean guests.
             </li>
           </ul>
         </div>
