@@ -81,7 +81,7 @@ export const usePricing = (rsvpData, formData) => {
       // EUR conversions (only relevant for credit card payments)
       const totalEUR = pricing.total * USD_TO_EUR_EXCHANGE_RATE;
       const installmentAmountEUR = pricing.installmentAmount
-        ? pricing.installmentAmount * USD_TO_EUR_EXCHANGE_RATE
+        ? Math.round(pricing.installmentAmount * USD_TO_EUR_EXCHANGE_RATE)
         : 0;
 
       setPricing({
