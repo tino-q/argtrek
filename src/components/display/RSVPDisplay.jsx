@@ -544,6 +544,57 @@ const RSVPDisplay = ({
                       </div>
 
                       <div className="terms-section">
+                        <h4>TERMS & CONDITIONS</h4>
+                        <ul>
+                          <li>
+                            This proposal is subject to availability and may
+                            change until the group reservation is confirmed with
+                            a deposit. In case of delayed payments, prices may
+                            be adjusted due to currency fluctuations or updated
+                            supplier rates.
+                          </li>
+                          <li>
+                            Deposits are non-refundable. The remaining balance
+                            must be paid according to the specified deadlines.
+                          </li>
+                          <li>
+                            Prices do not include visa processing fees or travel
+                            insurance. Each traveler is responsible for
+                            obtaining the necessary visa and health insurance.
+                          </li>
+                          <li>
+                            All passengers must have valid travel documents in
+                            good condition. It is the traveler's responsibility
+                            to verify passport, visa, and health requirements. A
+                            passport valid for at least 6 months is recommended.
+                          </li>
+                          <li>
+                            The organizer acts solely as an intermediary and is
+                            not responsible for delays, changes, or
+                            cancellations due to weather, third parties, or
+                            force majeure.
+                          </li>
+                          <li>
+                            Participation in all activities implies voluntary
+                            acceptance of associated risks.
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="terms-section">
+                        <h4>TRAVEL INSURANCE</h4>
+                        <ul>
+                          <li>
+                            I am responsible for obtaining my own travel
+                            insurance. The organizers are not liable for any
+                            lost, damaged, or stolen property at any time during
+                            the trip. Lost luggage must be claimed directly with
+                            the airline.
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="terms-section">
                         <h4>HEALTH INSURANCE</h4>
                         <ul>
                           <li>
@@ -627,44 +678,6 @@ const RSVPDisplay = ({
                             </div>
                           )}
                         </div>
-                      </div>
-
-                      <div className="terms-section">
-                        <h4>TERMS & CONDITIONS</h4>
-                        <ul>
-                          <li>
-                            This proposal is subject to availability and may
-                            change until the group reservation is confirmed with
-                            a deposit. In case of delayed payments, prices may
-                            be adjusted due to currency fluctuations or updated
-                            supplier rates.
-                          </li>
-                          <li>
-                            Deposits are non-refundable. The remaining balance
-                            must be paid according to the specified deadlines.
-                          </li>
-                          <li>
-                            Prices do not include visa processing fees or travel
-                            insurance. Each traveler is responsible for
-                            obtaining the necessary visa and health insurance.
-                          </li>
-                          <li>
-                            All passengers must have valid travel documents in
-                            good condition. It is the traveler's responsibility
-                            to verify passport, visa, and health requirements. A
-                            passport valid for at least 6 months is recommended.
-                          </li>
-                          <li>
-                            The organizer acts solely as an intermediary and is
-                            not responsible for delays, changes, or
-                            cancellations due to weather, third parties, or
-                            force majeure.
-                          </li>
-                          <li>
-                            Participation in all activities implies voluntary
-                            acceptance of associated risks.
-                          </li>
-                        </ul>
                       </div>
                     </div>
                   )}
