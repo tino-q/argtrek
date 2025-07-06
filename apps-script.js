@@ -896,6 +896,37 @@ function saveToNewEmailsSheet(data) {
 }
 
 /**
+ * Helper to load all emails that have already received a welcome email
+ */
+function getAllWelcomeEmailsSent() {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(WELCOME_EMAILS_SHEET_NAME);
+    if (!sheet) {
+      return new Set();
+    }
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    if (values.length === 0) {
+      return new Set();
+    }
+    // No headers - email is in column 2 (index 1)
+    const emailSet = new Set();
+    for (let i = 0; i < values.length; i++) {
+      const row = values[i];
+      const rowEmail = row[1]; // Column 2 (email)
+      if (rowEmail) {
+        emailSet.add(rowEmail.toString().toLowerCase().trim());
+      }
+    }
+    return emailSet;
+  } catch (error) {
+    console.error("Error loading all welcome emails sent:", error);
+    return new Set();
+  }
+}
+
+/**
  * Manual trigger function to send password emails to all RSVP users
  * Run this function manually from the Apps Script editor when needed
  */
@@ -940,6 +971,9 @@ function sendPasswordEmailsToAllRSVPs() {
     let emailsSkipped = 0;
     let errors = 0;
 
+    // Load all sent welcome emails into memory ONCE
+    const sentWelcomeEmails = getAllWelcomeEmailsSent();
+
     // Process each row (skip header row)
     for (let i = 1; i < values.length; i++) {
       const row = values[i];
@@ -954,6 +988,17 @@ function sendPasswordEmailsToAllRSVPs() {
       }
 
       try {
+        // Check if welcome email was already sent to this email (use in-memory set)
+        const alreadySent = sentWelcomeEmails.has(
+          email.toString().toLowerCase().trim()
+        );
+
+        if (alreadySent) {
+          emailsSkipped++;
+          console.log(`⏭️  Email already sent to: ${email}`);
+          continue;
+        }
+
         // Send the email
         const result = sendPasswordEmail(
           email.toString().trim(),
@@ -1001,45 +1046,6 @@ function sendPasswordEmailsToAllRSVPs() {
   } catch (error) {
     console.error("Error in sendPasswordEmailsToAllRSVPs:", error);
     throw error;
-  }
-}
-
-/**
- * Check if welcome email was already sent to an email address
- */
-function checkWelcomeEmailSent(email) {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = spreadsheet.getSheetByName(WELCOME_EMAILS_SHEET_NAME);
-
-    if (!sheet) {
-      return false;
-    }
-
-    const dataRange = sheet.getDataRange();
-    const values = dataRange.getValues();
-
-    if (values.length === 0) {
-      return false;
-    }
-
-    // No headers - email is in column 2 (index 1)
-    for (let i = 0; i < values.length; i++) {
-      const row = values[i];
-      const rowEmail = row[1]; // Column 2 (email)
-
-      if (
-        rowEmail &&
-        rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  } catch (error) {
-    console.error("Error checking welcome email sent:", error);
-    return false;
   }
 }
 
@@ -1100,17 +1106,6 @@ function recordWelcomeEmailSent(email, name, status, htmlBody) {
  */
 function sendPasswordEmail(email, password, name) {
   try {
-    // Check if welcome email was already sent to this email
-    const alreadySent = checkWelcomeEmailSent(email);
-    if (alreadySent) {
-      console.log(`Welcome email already sent to ${email}, skipping...`);
-      return {
-        success: true,
-        message: `Welcome email already sent to ${email}`,
-        skipped: true,
-      };
-    }
-
     // Get RSVP data to check for Plus 1 registration status
     const rsvpData = _getRsvpDataForEmail(email);
     const shouldShowPlus1Warning =
@@ -1197,7 +1192,8 @@ function sendPasswordEmail(email, password, name) {
       //   body: textBody,
       // });
 
-      // sendMailGunEmail(email, subject, htmlBody);
+      const bcc = "sonsolesstays+argtrip@gmail.com";
+      sendMailGunEmail(email, subject, htmlBody, [], bcc);
 
       console.log("Email sent successfully to", email);
       emailSent = true;
@@ -1424,8 +1420,9 @@ function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
       </div>
     `;
 
+    const bcc = "sonsolesstays+argtrip@gmail.com";
     // Send email with PDF attachment
-    sendMailGunEmail(clientEmail, subject, htmlBody, [pdfBlob]);
+    sendMailGunEmail(clientEmail, subject, htmlBody, [pdfBlob], bcc);
 
     console.log(`PDF email sent successfully to ${clientEmail}`);
     return true;
@@ -1444,7 +1441,7 @@ function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
  * @param {string}           [plainText]   – optional text fallback
  * @param {Array<Blob>}      [attachments] – optional Drive/AppScript blobs
  */
-function sendMailGunEmail(to, subject, htmlContent, attachments = []) {
+function sendMailGunEmail(to, subject, htmlContent, attachments = [], bcc) {
   const MG_KEY = "<MAILGUN_API_KEY>";
   const MG_DOMAIN = "mailing.sonsolesstays.com";
   if (!MG_KEY || !MG_DOMAIN) throw new Error("Missing Mailgun credentials");
@@ -1458,6 +1455,10 @@ function sendMailGunEmail(to, subject, htmlContent, attachments = []) {
     "h:Reply-To": "sonsolestays@gmail.com",
   };
 
+  if (bcc) {
+    form.bcc = bcc;
+  }
+
   // Attachments, if provided
   if (attachments && attachments.length) {
     attachments.forEach((blob, i) => {
@@ -1465,7 +1466,7 @@ function sendMailGunEmail(to, subject, htmlContent, attachments = []) {
     });
   }
 
-  // Send with HTTP Basic Auth (user “api”)
+  // Send with HTTP Basic Auth (user "api")
   const options = {
     method: "post",
     payload: form,
