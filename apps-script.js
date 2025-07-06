@@ -948,35 +948,7 @@ function sendPasswordEmailsToAllRSVPs() {
       const name = row[nameColumnIndex] || "Traveler";
 
       // Skip rows without email or password
-      if (
-        !email ||
-        !password ||
-        ![
-          "guidoh@stanford.edu",
-          "talves@stanford.edu",
-          "verdaromjulieta@gmail.com",
-          "ftosi@stanford.edu",
-          "carocuestamarrero@gmail.com",
-          "madibakla@gmail.com",
-          "tinqueija@gmail.com",
-          "jeronimo.llacay@gmail.com",
-          "nnavas@stanford.edu",
-          "dzhang6@stanford.edu",
-          "Tkim1993@stanford.edu",
-          "vizitiv@stanford.edu",
-          "rochekapoor@gmail.com",
-          "amur@stanford.edu",
-          "stayara@stanford.edu",
-          "yhouamed@stanford.edu",
-          "lukasa@stanford.edu",
-          "zteiger@stanford.edu",
-          "Gilly@stanford.edu",
-          "yravid@stanford.edu",
-          "Hochdorf@stanford.edu",
-          "Dchou8@stanford.edu",
-          "emilyl33@stanford.edu",
-        ].includes(email)
-      ) {
+      if (!email || !password) {
         console.log(`Skipping row ${i + 1}: missing email or password`);
         continue;
       }
@@ -1211,50 +1183,6 @@ function sendPasswordEmail(email, password, name) {
       </div>
     `;
 
-    const textBody = `
-¡Hola ${name}!
-
-${
-  shouldShowPlus1Warning
-    ? `⚠️ WARNING: PLUS 1 REGISTRATION REQUIRED
-We've detected that your Plus 1 has not registered their email yet. Please have them register through this link to secure their spot on the trip: https://argtrip.sonsolesstays.com/new-email
-
-`
-    : ""
-}Argentina awaits you! 🇦🇷✈️
-
-You're all set to confirm your spot on our amazing Argentina adventure. 
-
-🇦🇷 MAGIC LINK - Click to access instantly (no login needed):
-https://argtrip.sonsolesstays.com?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}
-
-Backup credentials (if needed):
-Website: https://argtrip.sonsolesstays.com
-Your Email: ${email}
-Your Password: ${password}
-
-Use the magic link above or visit the website manually to:
-✅ Confirm your trip details
-🏠 Select your accommodation preferences  
-🎯 Choose your activities
-💳 Complete your payment
-
-Important: Please complete your registration as soon as possible to secure your spot!
-
-💡 Pro tip: The magic link above will automatically log you in - no need to type anything!
-
-If you have any questions or need assistance, don't hesitate to reach out to Maddie:
-- WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a>
-- Email: sonsolesstays+argtrip@gmail.com
-- Or simply reply to this email
-
-¡Nos vemos en Argentina!
-Sonsoles Stays
-
----
-This email contains your personal access credentials. Please keep them secure and don't share them with others.
-    `;
-
     let emailSent = false;
     let errorMessage = null;
 
@@ -1269,7 +1197,7 @@ This email contains your personal access credentials. Please keep them secure an
       //   body: textBody,
       // });
 
-      sendMailGunEmail(email, subject, htmlBody);
+      // sendMailGunEmail(email, subject, htmlBody);
 
       console.log("Email sent successfully to", email);
       emailSent = true;
@@ -1439,27 +1367,6 @@ function sendNewAccountNotificationEmail(email, name) {
       </div>
     `;
 
-    const textBody = `
-🆕 NEW ACCOUNT REQUEST - Argentina Trip
-
-Someone has requested a new account for the Argentina Trip registration system.
-
-Request Details:
-- Name: ${name}
-- Email: ${email}
-- Timestamp: ${new Date().toLocaleString()}
-
-To process this request, you'll need to:
-✅ Add their details to the RSVP sheet
-🔐 Generate a password for them
-📧 Send them a welcome email with their credentials
-
-The request has been automatically logged in the "NEW EMAILS" sheet for your reference.
-
----
-This is an automated notification from the Argentina Trip registration system.
-    `;
-
     // Send notification email to admin
     sendMailGunEmail(adminEmail, subject, htmlBody);
 
@@ -1515,32 +1422,6 @@ function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
           This is an automated email. Please do not reply to this message.
         </p>
       </div>
-    `;
-
-    const textBody = `
-¡Hola ${travelerDisplayName}!
-
-Your Argentina Trip registration voucher is ready! 🇦🇷✈️
-
-Please find attached your comprehensive trip registration summary (${filename}) containing:
-- Your confirmed flight details
-- Hotel accommodations  
-- Pricing breakdown
-- Payment information
-- Terms and conditions
-
-Important: Please save this voucher for your records. You may need it for travel documentation.
-
-If you have any questions about your registration or need to make changes, please contact Maddie:
-- WhatsApp: +54 911 6972 9783
-- Email: sonsolesstays+argtrip@gmail.com
-- Or simply reply to this email
-
-¡Nos vemos en Argentina!
-Sonsoles Stays
-
----
-This is an automated email. Please do not reply to this message.
     `;
 
     // Send email with PDF attachment
