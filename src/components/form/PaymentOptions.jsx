@@ -105,9 +105,6 @@ const PaymentOptions = ({ formData, updateFormData }) => {
           <h3>Important</h3>
           <ul>
             <li>
-              All rates are <strong>non-refundable</strong> - no exceptions
-            </li>
-            <li>
               <strong>Group Size Impact:</strong> Our rates are based on
               confirmed group size. Unregistering from the trip impacts pricing
               for all remaining participants
