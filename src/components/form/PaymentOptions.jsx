@@ -276,16 +276,20 @@ const PaymentOptions = ({ formData, updateFormData }) => {
                 Credit card payments are to be denominated in EUR, as Sonsoles
                 Stays is a business operating from 🇪🇸 Spain.
               </li>
-
               <li>
                 Bank transfers & crypto payments are denominated and handled in
                 USD.
               </li>
-
               <li>Payment link supports local currencies</li>
               <li>
                 <div className="exchange-rate-note">
                   Current exchange rate: 1 USD = {USD_TO_EUR_EXCHANGE_RATE} EUR
+                </div>
+              </li>
+              <li>
+                <div className="variable-rate-warning">
+                  The final amount charged in your local currency may vary
+                  slightly depending on your credit card’s exchange rate.
                 </div>
               </li>
               <li>
@@ -295,12 +299,14 @@ const PaymentOptions = ({ formData, updateFormData }) => {
                   cannot change
                 </div>
               </li>
-              <li>
-                <div className="variable-rate-warning">
-                  The final amount charged in your local currency may vary
-                  slightly depending on your credit card’s exchange rate.
-                </div>
-              </li>
+              {formData[FORM_FIELDS.PAYMENT_SCHEDULE] === "installments" && (
+                <li>
+                  <div className="variable-rate-warning">
+                    The rate for your second installment will be determined
+                    closer to the due date.
+                  </div>
+                </li>
+              )}
             </ul>
           </div>
         </div>
