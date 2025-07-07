@@ -6,7 +6,13 @@
  * Google Apps Script globals: ContentService, SpreadsheetApp, Utilities
  */
 
-/* global ContentService, SpreadsheetApp, Utilities, MailApp, DriveApp */
+/* global ContentService, SpreadsheetApp, Utilities, DriveApp, UrlFetchApp */
+
+const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycby3wvHgCAwW3WDXgI59NRIV3HlGaWEcjMLmGh2sGL15RWS0NEEb4PltoAW9gv5zUNuN/exec";
+const MG_KEY = "<REDACTED>";
+const REDSYS_USER = "<REDACTED>";
+const REDSYS_PASS = "<REDACTED>"; // Note: \u0021 is '!'
 
 // Configuration
 const TRIP_REGISTRATIONS_SHEET_NAME = "Trip Registrations";
@@ -14,21 +20,7 @@ const RSVP_SHEET_NAME = "RSVP"; // Sheet containing RSVP data
 const TPV_PAYMENTS_SHEET_NAME = "TPV PAYMENTS"; // Sheet for REDSYS TPV payment callbacks
 const NEW_EMAILS_SHEET_NAME = "NEW EMAILS"; // Sheet for new email requests
 const WELCOME_EMAILS_SHEET_NAME = "WELCOME EMAILS"; // Sheet for tracking welcome emails sent
-const PRICING = {
-  // These base prices will be overridden by RSVP data
-  tripOption1: 2250,
-  tripOption2: 2600,
-  privateRoomUpgrade: 350,
-  horsebackRiding: 0,
-  cookingClass: 140,
-  rafting: 140,
-  tango: 85,
-
-  // Note: Luggage is no longer priced, only tracked as boolean preference
-
-  creditCardFeeRate: 0.0285,
-  installmentRate: 0.35,
-};
+const PAYMENTLINKSDB_SHEET_NAME = "PAYMENTLINKSDB";
 
 /**
  * Handle GET requests for RSVP lookup
@@ -76,6 +68,7 @@ function doGet(e) {
         responseData.pricing = existingSubmission.pricing;
         responseData.submissionResult = {
           rowNumber: existingSubmission.rowNumber,
+          paymentLinkUrl: existingSubmission.paymentLink?.url,
         };
       }
 
@@ -114,7 +107,7 @@ function doPost(e) {
 
     // === Proof of Payment Upload Handler ===
     if (data.action === "upload_proof_of_payment") {
-      // Required fields: fileData (base64), fileName, fileType, name, surname, orderNumber, timestamp
+      // Required fields: fileData (base64), fileName, fileType, name, surname, orderNumber, timestamp, installments_0, installments_1
       if (
         !data.fileData ||
         !data.fileName ||
@@ -186,6 +179,7 @@ function doPost(e) {
           success: true,
           message: "Registration saved successfully",
           rowNumber: result.rowNumber,
+          paymentLinkUrl: result.paymentLinkUrl,
         })
       ).setMimeType(ContentService.MimeType.JSON);
     } else {
@@ -530,10 +524,19 @@ function getExistingSubmission(email) {
           }
         });
 
+        const paymentLink = {};
+        Object.keys(rawData).forEach((key) => {
+          if (key.startsWith("paymentLink.")) {
+            const paymentLinkKey = key.replace("paymentLink.", "");
+            paymentLink[paymentLinkKey] = rawData[key];
+          }
+        });
+
         return {
           formData,
           pricing,
           rsvpData,
+          paymentLink,
           rowNumber: i + 1, // +1 because sheet rows are 1-indexed
         };
       }
@@ -695,11 +698,11 @@ function saveToSheet(data) {
 
       "pricing.totalEUR",
       "pricing.installmentAmountEUR",
+      "paymentLink.url",
     ];
 
     // Use the hardcoded headers to ensure consistent ordering
     const headers = HEADERS_IN_ORDER;
-    const values = headers.map((header) => data[header] || ""); // Use empty string for missing data
 
     // Always rewrite the header row to ensure consistency
     if (sheet.getLastRow() > 0) {
@@ -720,13 +723,46 @@ function saveToSheet(data) {
       };
     }
 
+    // --- Payment Link Creation ---
+    let paymentLinkData = null;
+    let paymentLinkError = null;
+
+    if (
+      data["formData.paymentMethod"] === "credit" &&
+      data["formData.email"] === "tinqueija@gmail.com"
+    ) {
+      paymentLinkData = createPaymentLinkOrderForRow(
+        data,
+        sheet.getLastRow() + 1
+      );
+
+      // Log the attempt to the PAYMENTLINKSDB sheet
+      saveToPaymentLinksSheet({
+        timestamp: new Date().toISOString(),
+        email: data["formData.email"],
+        link: paymentLinkData ? paymentLinkData.urlPaygold : "",
+        jsonResponse: paymentLinkData ? JSON.stringify(paymentLinkData) : "",
+        status: paymentLinkData ? "success" : "failed",
+        error: paymentLinkError ? paymentLinkError.toString() : "",
+      });
+    }
+    // --- End Payment Link Creation ---
+
     // Add row to sheet using the hardcoded header order
-    sheet.appendRow(values);
+    const finalValues = headers.map((header) => {
+      if (header === "paymentLink.url") {
+        return paymentLinkData ? paymentLinkData.urlPaygold : "";
+      }
+      return data[header] || "";
+    });
+
+    sheet.appendRow(finalValues);
     const rowNumber = sheet.getLastRow();
 
     return {
       success: true,
       rowNumber: rowNumber,
+      paymentLinkUrl: paymentLinkData ? paymentLinkData.urlPaygold : "",
     };
   } catch (error) {
     console.error("Error saving to sheet:", error);
@@ -1442,7 +1478,6 @@ function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
  * @param {Array<Blob>}      [attachments] – optional Drive/AppScript blobs
  */
 function sendMailGunEmail(to, subject, htmlContent, attachments = [], bcc) {
-  const MG_KEY = "<MAILGUN_API_KEY>";
   const MG_DOMAIN = "mailing.sonsolesstays.com";
   if (!MG_KEY || !MG_DOMAIN) throw new Error("Missing Mailgun credentials");
 
@@ -1483,4 +1518,318 @@ function sendMailGunEmail(to, subject, htmlContent, attachments = [], bcc) {
     throw new Error("Email send failed (" + res.getResponseCode() + ")");
   }
   console.log(JSON.parse(res.getContentText()));
+}
+
+/**
+ * Save payment link creation attempt data to the PAYMENTLINKSDB sheet
+ */
+function saveToPaymentLinksSheet(logData) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = spreadsheet.getSheetByName(PAYMENTLINKSDB_SHEET_NAME);
+
+    // Create the sheet if it doesn't exist
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(PAYMENTLINKSDB_SHEET_NAME);
+      const headers = [
+        "timestamp",
+        "email",
+        "link",
+        "jsonResponse",
+        "status",
+        "error",
+      ];
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+    }
+
+    // Prepare the values in the same order as headers
+    const values = [
+      logData.timestamp,
+      logData.email,
+      logData.link,
+      logData.jsonResponse,
+      logData.status,
+      logData.error,
+    ];
+
+    // Add the payment record
+    sheet.appendRow(values);
+    return { success: true };
+  } catch (error) {
+    console.error("Error saving to PAYMENTLINKSDB sheet:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+function getExistingPaymentLink(email) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(PAYMENTLINKSDB_SHEET_NAME);
+
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return null;
+    }
+
+    const headers = sheet
+      .getRange(1, 1, 1, sheet.getLastColumn())
+      .getValues()[0];
+    const emailColumnIndex = headers.indexOf("email");
+    const statusColumnIndex = headers.indexOf("status");
+    const jsonResponseColumnIndex = headers.indexOf("jsonResponse");
+
+    if (
+      emailColumnIndex === -1 ||
+      statusColumnIndex === -1 ||
+      jsonResponseColumnIndex === -1
+    ) {
+      console.error(
+        "PAYMENTLINKSDB sheet is missing required columns (email, status, jsonResponse)."
+      );
+      return null;
+    }
+
+    const data = sheet
+      .getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn())
+      .getValues();
+
+    // Search from the bottom up to get the latest one
+    for (let i = data.length - 1; i >= 0; i--) {
+      const row = data[i];
+      const rowEmail = row[emailColumnIndex];
+      const rowStatus = row[statusColumnIndex];
+
+      if (
+        rowEmail &&
+        rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
+      ) {
+        if (rowStatus === "success") {
+          const jsonResponse = row[jsonResponseColumnIndex];
+          if (jsonResponse) {
+            try {
+              console.log(
+                `Found existing successful payment link record for ${email}.`
+              );
+              return JSON.parse(jsonResponse);
+            } catch (e) {
+              console.error(
+                `Failed to parse existing payment link JSON for ${email}:`,
+                e
+              );
+            }
+          }
+        }
+      }
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error checking for existing payment link:", error);
+    return null;
+  }
+}
+
+function createPaymentLinkOrderForRow(data, rowNumber) {
+  try {
+    const orderId = `ARG-${rowNumber}`;
+
+    const isInstallments = data["formData.paymentSchedule"] === "installments";
+
+    const order = {
+      id: orderId,
+      user: {
+        name: `${data["formData.firstName"]} ${data["formData.lastName"]}`,
+        email: data["formData.email"],
+      },
+      total: data["pricing.installmentAmountEUR"],
+      subject: isInstallments
+        ? "Argentina Trip Payment - First installment"
+        : "Argentina Trip Payment",
+    };
+    return createPaymentLink(order);
+  } catch (e) {
+    console.error("Failed to create payment link:", e);
+    return null;
+  }
+}
+
+/**
+ * Redsys API client for creating payment links.
+ */
+const REDSYS_BASE_URL = "https://canales.redsys.es/admincanales-web/services";
+
+/**
+ *
+ * Logs into the Redsys platform and returns an authentication token.
+ *
+ * @returns {string} A promise that resolves with the authentication token.
+ * @throws {Error} If login fails or the response does not contain a token.
+ */
+function login() {
+  const url = `${REDSYS_BASE_URL}/usuarios/login`;
+  const options = {
+    method: "post",
+    contentType: "application/json;charset=UTF-8",
+    headers: {
+      Accept: "application/json, text/plain, */*",
+    },
+    payload: JSON.stringify({ username: REDSYS_USER, password: REDSYS_PASS }),
+    muteHttpExceptions: true,
+  };
+
+  try {
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    const responseBody = response.getContentText();
+
+    if (responseCode < 200 || responseCode >= 300) {
+      throw new Error(
+        `Login failed with status: ${responseCode}. Response: ${responseBody}`
+      );
+    }
+
+    const data = JSON.parse(responseBody);
+    const token = data.token;
+    console.log("token", token);
+    if (!token) {
+      throw new Error(
+        `Login response did not include a token. Response: ${responseBody}`
+      );
+    }
+    console.log("Successfully logged in to Redsys.");
+    return token;
+  } catch (error) {
+    console.error("Error during Redsys login:", error);
+    throw error;
+  }
+}
+
+/**
+ * Creates a Paygold payment link. It handles login automatically.
+ *
+ * {
+  comercio: '51628063',
+  terminal: '1',
+  numeroPedido: 'TEST_422',
+  codigoAutorizacion: '',
+  importe: '10.00',
+  importeEuros: '10.00',
+  descripcion: '',
+  nombreComercio: 'SONSOLES STAYS',
+  moneda: '978',
+  urlPaygold: 'https://sis.redsys.es/sis/p2f?t=84149B5A0DE60194B3E0A8445345F92BD6B3007D'
+}
+ * 
+ * 
+ * @param {object} paymentData - The data for the payment link.
+ * @returns {object} A promise that resolves with the payment operation details.
+ * @throws {Error} If the payment link creation fails.
+ */
+function createPaymentLink(order) {
+  try {
+    const paymentData = {
+      comercio: "051628063",
+      terminal: 1,
+      ds_merchant_order: order.id,
+      moneda: "978",
+      descripcion: "",
+      ds_merchant_p2f_expirydate_type: "",
+      ds_merchant_p2f_expirydate_minutos: "",
+      ds_merchant_p2f_expirydate_dias: "1",
+      ds_merchant_p2f_expirydate: "",
+      ds_merchant_consumerlanguage: "2",
+      nombrecliente: order.user.name,
+      direccionComprador: "",
+      correo: order.user.email,
+      subjectMailCliente: order.subject,
+      telefono: "",
+      ds_merchant_customer_sms_text: "",
+      fecha: "",
+      mes: "",
+      hora: "",
+      minu: "",
+      anno: "",
+      dia: "",
+      referencia: "",
+      urlNotificacion: APPS_SCRIPT_URL,
+      idCliente: "",
+      altTransType: "",
+      importe: order.total,
+    };
+
+    const authToken = login();
+
+    console.log("authToken", authToken);
+
+    const url = `${REDSYS_BASE_URL}/operaciones/new/realizar_operacion_paygold`;
+    const options = {
+      method: "post",
+      contentType: "application/json;charset=UTF-8",
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        "admincanales-auth-token": authToken,
+        "admincanales-language": "es",
+      },
+      payload: JSON.stringify(paymentData),
+      muteHttpExceptions: true,
+    };
+
+    const response = UrlFetchApp.fetch(url, options);
+    const responseCode = response.getResponseCode();
+    const responseBody = response.getContentText();
+
+    if (responseCode < 200 || responseCode >= 300) {
+      throw new Error(
+        `Failed to create payment link with status: ${responseCode}. Response: ${responseBody}`
+      );
+    }
+
+    const data = JSON.parse(responseBody);
+    if (data.autorizada !== "true") {
+      throw new Error(
+        `Payment link not authorized. Response: ${JSON.stringify(data)}`
+      );
+    }
+    console.log("Successfully created payment link.");
+    return data ? data.operacion : null;
+  } catch (error) {
+    console.error("Error creating payment link:", error, error.stack);
+    return null;
+  }
+}
+
+function demoPaymentHSeet() {
+  const email = "tinqueija@gmail.com";
+
+  const existingLinkOperation = getExistingPaymentLink(email);
+  if (existingLinkOperation) {
+    console.log(`Found existing payment link for ${email}. Skipping creation.`);
+    return existingLinkOperation;
+  }
+
+  let paymentLinkError = null;
+  let paymentLinkData = null;
+  try {
+    paymentLinkData = createPaymentLinkOrderForRow(
+      {
+        ["formData.firstName"]: "martin queija",
+        ["formData.lastName"]: "queija",
+        ["formData.email"]: "tinqueija@gmail.com",
+        ["pricing.totalEUR"]: "10",
+      },
+      120
+    );
+  } catch (e) {
+    paymentLinkError = e;
+  }
+
+  // Log the attempt to the PAYMENTLINKSDB sheet
+  saveToPaymentLinksSheet({
+    timestamp: new Date().toISOString(),
+    email: "tinqueija@gmail.com",
+    link: paymentLinkData ? paymentLinkData.urlPaygold : "",
+    jsonResponse: paymentLinkData ? JSON.stringify(paymentLinkData) : "",
+    status: paymentLinkData ? "success" : "failed",
+    error: paymentLinkError ? paymentLinkError.toString() : "",
+  });
 }

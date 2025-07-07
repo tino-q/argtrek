@@ -296,44 +296,64 @@ const PaymentDetailsDisplay = ({
         {formData[FORM_FIELDS.PAYMENT_METHOD] === "credit" && (
           <div className="payment-content">
             <h4>Credit Card Payment</h4>
-            <p className="payment-timeline">
-              Your secure payment link will be sent to your email address within{" "}
-              <strong>24 hours</strong> once Maddie processes your registration.
-            </p>
+            {submissionResult?.paymentLinkUrl ? (
+              <div className="payment-link-section">
+                <p>
+                  Your secure payment link is ready! Click the button below to
+                  complete your payment.
+                </p>
+                <a
+                  href={submissionResult.paymentLinkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="payment-link-button"
+                >
+                  Proceed to Payment
+                </a>
+              </div>
+            ) : (
+              <>
+                <p className="payment-timeline">
+                  Your secure payment link will be sent to your email address
+                  within <strong>24 hours</strong> once Maddie processes your
+                  registration.
+                </p>
 
-            <div className="important-notes">
-              <h4>What to Expect</h4>
-              <ul>
-                <li>
-                  <strong>Timeline:</strong> Payment links distributed ASAP
-                </li>
-                <li>
-                  <strong>Email Delivery:</strong> Check spam/junk folder if not
-                  received
-                </li>
-                <li>
-                  <strong>Link Validity:</strong> Payment link active for 24
-                  hours
-                </li>
-                <li>
-                  <strong>Support:</strong> Contact Maddie for assistance
+                <div className="important-notes">
+                  <h4>What to Expect</h4>
                   <ul>
                     <li>
-                      <a
-                        href="https://wa.me/5491169729783"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        WhatsApp
-                      </a>
+                      <strong>Timeline:</strong> Payment links distributed ASAP
                     </li>
                     <li>
-                      Email: <strong>{EMAIL_CONFIG.MADDIE}</strong>
+                      <strong>Email Delivery:</strong> Check spam/junk folder if
+                      not received
+                    </li>
+                    <li>
+                      <strong>Link Validity:</strong> Payment link active for 24
+                      hours
+                    </li>
+                    <li>
+                      <strong>Support:</strong> Contact Maddie for assistance
+                      <ul>
+                        <li>
+                          <a
+                            href="https://wa.me/5491169729783"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            WhatsApp
+                          </a>
+                        </li>
+                        <li>
+                          Email: <strong>{EMAIL_CONFIG.MADDIE}</strong>
+                        </li>
+                      </ul>
                     </li>
                   </ul>
-                </li>
-              </ul>
-            </div>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>
