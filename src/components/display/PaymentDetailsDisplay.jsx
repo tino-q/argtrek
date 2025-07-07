@@ -12,8 +12,10 @@ import { buildPDfDoc } from "./generatePdf";
 import "../../styles/PaymentDetailsDisplay.css";
 
 import ProofOfPaymentUpload from "../form/ProofOfPaymentUpload";
+import CreditCardWarning from "../common/CreditCardWarning";
 
 import { BANK_DETAILS, CRYPTO_WALLETS, NETWORK_INFO } from "../../utils/config";
+import { USD_TO_EUR_EXCHANGE_RATE } from "../../hooks/usePricing";
 
 const PaymentDetailsDisplay = ({
   rsvpData,
@@ -318,7 +320,6 @@ const PaymentDetailsDisplay = ({
                   within <strong>24 hours</strong> once Maddie processes your
                   registration.
                 </p>
-
                 <div className="important-notes">
                   <h4>What to Expect</h4>
                   <ul>
@@ -352,6 +353,11 @@ const PaymentDetailsDisplay = ({
                     </li>
                   </ul>
                 </div>
+                <br />
+                <CreditCardWarning
+                  paymentSchedule={formData[FORM_FIELDS.PAYMENT_SCHEDULE]}
+                  exchangeRate={USD_TO_EUR_EXCHANGE_RATE}
+                />
               </>
             )}
           </div>
