@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
 
 const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { email, setEmail, password, setPassword, isLoading, setIsLoading } =
+    useAuth();
   const hasLoggedOut = useRef(false);
   const location = useLocation();
   const previousLocation = useRef(location.pathname);

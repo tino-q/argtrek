@@ -23,69 +23,89 @@ const WELCOME_EMAILS_SHEET_NAME = "WELCOME EMAILS"; // Sheet for tracking welcom
 const PAYMENTLINKSDB_SHEET_NAME = "PAYMENTLINKSDB";
 
 /**
+ * Validates user credentials by checking for presence of email and password,
+ * and then verifying them against the RSVP sheet.
+ * @param {string} email The user's email.
+ * @param {string} password The user's password.
+ * @returns {{success: boolean, response?: object, rsvpData?: object}} Validation result.
+ */
+function validateCredentials(email, password) {
+  if (!email) {
+    return {
+      success: false,
+      response: ContentService.createTextOutput(
+        JSON.stringify({ success: false, error: "Email is required." })
+      ).setMimeType(ContentService.MimeType.JSON),
+    };
+  }
+
+  if (!password) {
+    return {
+      success: false,
+      response: ContentService.createTextOutput(
+        JSON.stringify({ success: false, error: "Password is required." })
+      ).setMimeType(ContentService.MimeType.JSON),
+    };
+  }
+
+  const rsvpResult = lookupRSVP(email.trim(), password.trim());
+
+  if (!rsvpResult.success) {
+    return {
+      success: false,
+      response: ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: rsvpResult.error,
+        })
+      ).setMimeType(ContentService.MimeType.JSON),
+    };
+  }
+
+  return {
+    success: true,
+    rsvpData: rsvpResult.data,
+  };
+}
+
+/**
  * Handle GET requests for RSVP lookup
  */
 // eslint-disable-next-line no-unused-vars
 function doGet(e) {
   try {
-    // Get email and password parameters from query string
     const email = e.parameter.email;
     const password = e.parameter.password;
 
-    if (!email) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: "Email parameter is required",
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
+    const validation = validateCredentials(email, password);
+    if (!validation.success) {
+      return validation.response;
     }
 
-    if (!password) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: "Password parameter is required",
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
+    // Check if there's an existing submission for this email
+    const existingSubmission = getExistingSubmission(email.trim());
 
-    // Look up RSVP data with password validation
-    const rsvpResult = lookupRSVP(email.trim(), password.trim());
+    const responseData = {
+      rsvpData: validation.rsvpData,
+      hasExistingSubmission: existingSubmission !== null,
+    };
 
-    if (rsvpResult.success) {
-      // Check if there's an existing submission for this email
-      const existingSubmission = getExistingSubmission(email.trim());
-
-      const responseData = {
-        rsvpData: rsvpResult.data,
-        hasExistingSubmission: existingSubmission !== null,
+    // If there's an existing submission, include all the data
+    if (existingSubmission) {
+      responseData.formData = existingSubmission.formData;
+      responseData.pricing = existingSubmission.pricing;
+      responseData.submissionResult = {
+        rowNumber: existingSubmission.rowNumber,
+        paymentLinkUrl: existingSubmission.paymentLink?.url,
       };
-
-      // If there's an existing submission, include all the data
-      if (existingSubmission) {
-        responseData.formData = existingSubmission.formData;
-        responseData.pricing = existingSubmission.pricing;
-        responseData.submissionResult = {
-          rowNumber: existingSubmission.rowNumber,
-          paymentLinkUrl: existingSubmission.paymentLink?.url,
-        };
-      }
-
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: true,
-          data: responseData,
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    } else {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: rsvpResult.error,
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
     }
+
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: true,
+        data: responseData,
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     console.error("Error processing RSVP lookup request:", error);
     return ContentService.createTextOutput(
@@ -1562,76 +1582,106 @@ function saveToPaymentLinksSheet(logData) {
   }
 }
 
-function getExistingPaymentLink(email) {
+/**
+ * Retrieves payment link information for a given email.
+ * It checks for a valid, non-expired payment link and also counts how many expired links exist for that email.
+ *
+ * @param {string} email The email to look up.
+ * @returns {{activeLink: object|null, expiredCount: number}} An object containing the active link (if any) and the count of expired links.
+ */
+function getPaymentLinkInfo(email) {
   try {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = spreadsheet.getSheetByName(PAYMENTLINKSDB_SHEET_NAME);
 
     if (!sheet || sheet.getLastRow() <= 1) {
-      return null;
+      return { activeLink: null, expiredCount: 0 };
     }
 
-    const headers = sheet
-      .getRange(1, 1, 1, sheet.getLastColumn())
-      .getValues()[0];
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    const headers = values.shift(); // Get and remove header row
+
     const emailColumnIndex = headers.indexOf("email");
     const statusColumnIndex = headers.indexOf("status");
     const jsonResponseColumnIndex = headers.indexOf("jsonResponse");
+    const timestampColumnIndex = headers.indexOf("timestamp");
 
     if (
       emailColumnIndex === -1 ||
       statusColumnIndex === -1 ||
-      jsonResponseColumnIndex === -1
+      jsonResponseColumnIndex === -1 ||
+      timestampColumnIndex === -1
     ) {
       console.error(
-        "PAYMENTLINKSDB sheet is missing required columns (email, status, jsonResponse)."
+        "PAYMENTLINKSDB sheet is missing required columns (email, status, jsonResponse, timestamp)."
       );
-      return null;
+      return { activeLink: null, expiredCount: 0 };
     }
 
-    const data = sheet
-      .getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn())
-      .getValues();
+    let expiredCount = 0;
+    let activeLink = null;
+    let activeLinkTimestamp = null;
 
-    // Search from the bottom up to get the latest one
-    for (let i = data.length - 1; i >= 0; i--) {
-      const row = data[i];
+    // Iterate over all payment link records
+    for (const row of values) {
       const rowEmail = row[emailColumnIndex];
       const rowStatus = row[statusColumnIndex];
 
       if (
         rowEmail &&
-        rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
+        rowEmail.toString().toLowerCase().trim() === email.toLowerCase() &&
+        rowStatus === "success"
       ) {
-        if (rowStatus === "success") {
-          const jsonResponse = row[jsonResponseColumnIndex];
-          if (jsonResponse) {
-            try {
-              console.log(
-                `Found existing successful payment link record for ${email}.`
-              );
-              return JSON.parse(jsonResponse);
-            } catch (e) {
-              console.error(
-                `Failed to parse existing payment link JSON for ${email}:`,
-                e
-              );
+        const timestampStr = row[timestampColumnIndex];
+        if (timestampStr) {
+          const linkTimestamp = new Date(timestampStr);
+          const now = new Date();
+          const hoursDifference = (now - linkTimestamp) / (1000 * 60 * 60);
+
+          if (hoursDifference > 24) {
+            expiredCount++;
+          } else {
+            // This is an active link. We want to store only the latest one.
+            if (!activeLinkTimestamp || linkTimestamp > activeLinkTimestamp) {
+              const jsonResponse = row[jsonResponseColumnIndex];
+              if (jsonResponse) {
+                try {
+                  activeLink = JSON.parse(jsonResponse);
+                  activeLinkTimestamp = linkTimestamp;
+                } catch (e) {
+                  /* ignore parse errors */
+                  console.error(
+                    `Failed to parse existing payment link JSON for ${email}:`,
+                    e
+                  );
+                }
+              }
             }
           }
         }
       }
     }
 
-    return null;
+    if (activeLink) {
+      console.log(
+        `Found active payment link for ${email}, created at ${activeLinkTimestamp.toISOString()}.`
+      );
+    }
+    if (expiredCount > 0) {
+      console.log(`Found ${expiredCount} expired links for ${email}.`);
+    }
+
+    return { activeLink: activeLink, expiredCount: expiredCount };
   } catch (error) {
-    console.error("Error checking for existing payment link:", error);
-    return null;
+    console.error("Error in getPaymentLinkInfo:", error);
+    return { activeLink: null, expiredCount: 0 };
   }
 }
 
-function createPaymentLinkOrderForRow(data, rowNumber) {
+function createPaymentLinkOrderForRow(data, rowNumber, authToken, linkNumber) {
   try {
-    const orderId = `ARG-${rowNumber}`;
+    const orderId = `ARG_${rowNumber}_${linkNumber}`;
 
     const isInstallments = data["formData.paymentSchedule"] === "installments";
 
@@ -1646,7 +1696,7 @@ function createPaymentLinkOrderForRow(data, rowNumber) {
         ? "Argentina Trip Payment - First installment"
         : "Argentina Trip Payment",
     };
-    return createPaymentLink(order);
+    return createPaymentLink(order, authToken);
   } catch (e) {
     console.error("Failed to create payment link:", e);
     return null;
@@ -1725,7 +1775,7 @@ function login() {
  * @returns {object} A promise that resolves with the payment operation details.
  * @throws {Error} If the payment link creation fails.
  */
-function createPaymentLink(order) {
+function createPaymentLink(order, authToken) {
   try {
     const paymentData = {
       comercio: "051628063",
@@ -1757,9 +1807,11 @@ function createPaymentLink(order) {
       importe: order.total,
     };
 
-    const authToken = login();
+    const tokenToUse = authToken || login();
 
-    console.log("authToken", authToken);
+    if (!tokenToUse) {
+      throw new Error("Could not obtain Redsys auth token.");
+    }
 
     const url = `${REDSYS_BASE_URL}/operaciones/new/realizar_operacion_paygold`;
     const options = {
@@ -1767,7 +1819,7 @@ function createPaymentLink(order) {
       contentType: "application/json;charset=UTF-8",
       headers: {
         Accept: "application/json, text/plain, */*",
-        "admincanales-auth-token": authToken,
+        "admincanales-auth-token": tokenToUse,
         "admincanales-language": "es",
       },
       payload: JSON.stringify(paymentData),
@@ -1798,38 +1850,102 @@ function createPaymentLink(order) {
   }
 }
 
-function demoPaymentHSeet() {
-  const email = "tinqueija@gmail.com";
+/**
+ * Manually-triggered function to generate Redsys payment links in batch for a predefined list of users.
+ * This function logs into Redsys once, then for each email, it looks up the registration data,
+ * and creates a payment link if one doesn't already exist.
+ * Results are logged to the PAYMENTLINKSDB sheet.
+ */
+function generatePaymentLinksBatch() {
+  const emailsToProcess = [
+    "tinqueija@gmail.com",
+    // Add other user emails here, for example:
+    // "another-user@example.com",
+  ];
 
-  const existingLinkOperation = getExistingPaymentLink(email);
-  if (existingLinkOperation) {
-    console.log(`Found existing payment link for ${email}. Skipping creation.`);
-    return existingLinkOperation;
-  }
-
-  let paymentLinkError = null;
-  let paymentLinkData = null;
+  let authToken;
   try {
-    paymentLinkData = createPaymentLinkOrderForRow(
-      {
-        ["formData.firstName"]: "martin queija",
-        ["formData.lastName"]: "queija",
-        ["formData.email"]: "tinqueija@gmail.com",
-        ["pricing.totalEUR"]: "10",
-      },
-      120
+    authToken = login();
+    if (!authToken) {
+      console.error("Failed to get auth token from Redsys. Aborting batch.");
+      return;
+    }
+    console.log(
+      "Successfully obtained Redsys auth token for batch processing."
     );
   } catch (e) {
-    paymentLinkError = e;
+    console.error("Redsys login failed, cannot proceed with batch.", e);
+    return;
   }
 
-  // Log the attempt to the PAYMENTLINKSDB sheet
-  saveToPaymentLinksSheet({
-    timestamp: new Date().toISOString(),
-    email: "tinqueija@gmail.com",
-    link: paymentLinkData ? paymentLinkData.urlPaygold : "",
-    jsonResponse: paymentLinkData ? JSON.stringify(paymentLinkData) : "",
-    status: paymentLinkData ? "success" : "failed",
-    error: paymentLinkError ? paymentLinkError.toString() : "",
-  });
+  for (const email of emailsToProcess) {
+    try {
+      console.log(`Processing user: ${email}`);
+
+      const submission = getExistingSubmission(email);
+      if (!submission) {
+        console.error(
+          `Could not find trip registration for email: ${email}. Skipping.`
+        );
+        continue;
+      }
+
+      const paymentInfo = getPaymentLinkInfo(email);
+      if (paymentInfo.activeLink) {
+        console.log(
+          `Skipping ${email}: an active payment link already exists.`
+        );
+        continue;
+      }
+
+      let paymentLinkData = null;
+      let paymentLinkError = null;
+
+      try {
+        const flatData = {
+          "formData.firstName": submission.formData.firstName,
+          "formData.lastName": submission.formData.lastName,
+          "formData.email": submission.formData.email,
+          "formData.paymentSchedule": submission.formData.paymentSchedule,
+          "pricing.installmentAmountEUR":
+            submission.pricing.installmentAmountEUR,
+        };
+
+        const linkNumber = paymentInfo.expiredCount + 1;
+        paymentLinkData = createPaymentLinkOrderForRow(
+          flatData,
+          submission.rowNumber,
+          authToken,
+          linkNumber
+        );
+      } catch (e) {
+        paymentLinkError = e;
+      }
+
+      saveToPaymentLinksSheet({
+        timestamp: new Date().toISOString(),
+        email: email,
+        link: paymentLinkData ? paymentLinkData.urlPaygold : "",
+        jsonResponse: paymentLinkData ? JSON.stringify(paymentLinkData) : "",
+        status: paymentLinkData ? "success" : "failed",
+        error: paymentLinkError ? paymentLinkError.toString() : "",
+      });
+
+      console.log(
+        `Finished processing for ${email}. Status: ${
+          paymentLinkData ? "success" : "failed"
+        }`
+      );
+    } catch (loopError) {
+      console.error(
+        `An unexpected error occurred processing ${email}:`,
+        loopError
+      );
+    }
+
+    // Add a small delay to avoid overwhelming the API
+    Utilities.sleep(500); // 500ms delay
+  }
+
+  console.log("Batch payment link generation complete.");
 }
