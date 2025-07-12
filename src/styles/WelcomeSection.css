@@ -74,7 +74,6 @@
   text-align: center;
   margin-top: 50px;
   border-bottom: 1px solid var(--border-light);
-  border: 1px solid red;
 }
 
 .content-section:last-child {
