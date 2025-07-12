@@ -16,6 +16,18 @@
   margin-bottom: 20px;
   flex-wrap: wrap;
   gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payment-summary__header:hover {
+  opacity: 0.8;
+}
+
+.payment-summary__header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .payment-summary__title {
@@ -187,4 +199,15 @@
   color: var(--warning-text);
   font-size: 0.875rem;
   line-height: 1.4;
+}
+
+.payment-summary__chevron {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  transition: transform 0.2s ease;
+  user-select: none;
+}
+
+.payment-summary__chevron--expanded {
+  transform: rotate(180deg);
 }
