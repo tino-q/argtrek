@@ -22,24 +22,24 @@
   color: var(--text-color, #333);
 }
 
-.info-row {
+.info-row-rsvp {
   display: flex;
   align-items: center;
   margin-bottom: 0.75rem;
 }
 
-.info-row .label {
+.info-row-rsvp .label {
   min-width: 120px;
   font-weight: 500;
   color: var(--text-color, #333);
 }
 
-.info-row .value {
+.info-row-rsvp .value {
   flex: 1;
   color: var(--text-muted, #666);
 }
 
-.info-row .value.trip-option {
+.info-row-rsvp .value.trip-option {
   background: var(--gradient-primary);
   color: white;
   padding: 0.25rem 0.75rem;
@@ -528,13 +528,13 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .info-row {
+  .info-row-rsvp {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
   }
 
-  .info-row .label {
+  .info-row-rsvp .label {
     min-width: auto;
     font-size: 0.9rem;
   }
@@ -1286,11 +1286,11 @@
 
 /* Large screen adjustments */
 @media (min-width: 768px) {
-  .info-row {
+  .info-row-rsvp {
     justify-content: space-between;
   }
 
-  .info-row .value {
+  .info-row-rsvp .value {
     text-align: right;
     max-width: 280px;
     margin-left: auto;
@@ -1305,13 +1305,13 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .info-row {
+  .info-row-rsvp {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
   }
 
-  .info-row .label {
+  .info-row-rsvp .label {
     min-width: auto;
     font-size: 0.9rem;
   }

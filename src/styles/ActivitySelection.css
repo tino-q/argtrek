@@ -2,11 +2,10 @@
 
 /* Activities Container */
 .activities-container {
+  /* Use standardized container for activities layout */
   display: flex;
   flex-direction: column;
   gap: 24px;
-  max-width: 900px;
-  margin: 0 auto;
 }
 
 /* Activity Card Base */

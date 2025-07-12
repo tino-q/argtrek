@@ -13,7 +13,6 @@
 /* Form components */
 @import "./Form.css";
 
-@import "./AccommodationSelector.css";
 @import "./ActivitySelection.css";
 @import "./PrivateRoomUpgrade.css";
 @import "./PaymentOptions.css";
@@ -23,3 +22,8 @@
 @import "./SafeSubmitButton.css";
 @import "./NotificationContainer.css";
 @import "./ImageCarousel.css";
+
+/* Participant pages */
+@import "./participant.css";
+
+@import "./Footer.css";

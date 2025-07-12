@@ -9,6 +9,11 @@ export const STEPS = {
   ADDONS: "addons",
   PAYMENT: "payment",
   PAYMENT_DETAILS: "payment-details",
+  // Participant pages
+  HOME: "home",
+  PAYMENTS: "payments",
+  PROFILE: "profile",
+  ITINERARY: "itinerary",
 };
 
 export const STEP_CONFIG = {
@@ -77,6 +82,35 @@ export const STEP_CONFIG = {
     showBack: false,
     showForward: false,
     component: "PaymentDetailsDisplay",
+  },
+  // Participant pages
+  [STEPS.HOME]: {
+    id: "home",
+    showNavigation: false,
+    showBack: false,
+    showForward: false,
+    component: "Home",
+  },
+  [STEPS.PAYMENTS]: {
+    id: "payments",
+    showNavigation: false,
+    showBack: false,
+    showForward: false,
+    component: "Payments",
+  },
+  [STEPS.PROFILE]: {
+    id: "profile",
+    showNavigation: false,
+    showBack: false,
+    showForward: false,
+    component: "Profile",
+  },
+  [STEPS.ITINERARY]: {
+    id: "itinerary",
+    showNavigation: false,
+    showBack: false,
+    showForward: false,
+    component: "Itinerary",
   },
 };
 

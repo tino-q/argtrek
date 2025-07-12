@@ -1,30 +1,28 @@
 // Generic Step Renderer Component
 // Renders the appropriate step component based on current step
 
+import { useTripContext } from "../../hooks/useTripContext";
 import EmailLogin from "../auth/EmailLogin";
 import WelcomeSection from "../layout/WelcomeSection";
 import RSVPDisplay from "../display/RSVPDisplay";
 import AddonsStep from "../form/AddonsStep";
 import PaymentStep from "../form/PaymentStep";
-import PaymentDetailsDisplay from "../display/PaymentDetailsDisplay";
 import NewEmailStep from "../form/NewEmailStep";
+import Home from "../participant/Home";
+import Payments from "../participant/Payments";
 import { getStepConfig } from "../../utils/stepConfig";
 
 const StepRenderer = ({
   currentStep,
-  userRSVP,
-  formData,
-  updateFormData,
   pricing,
-  onEmailSubmit,
+  onLoginSuccess,
+  onExistingSubmission,
   onLogout,
   onRSVPContinue,
-  isFormSubmitted,
-  submissionResult,
   onEmailNotFound,
-  showSuccess,
-  showError,
+  onNavigate,
 }) => {
+  const { userRSVP, formData, updateFormData } = useTripContext();
   const stepConfig = getStepConfig(currentStep);
 
   if (!stepConfig) {
@@ -36,7 +34,8 @@ const StepRenderer = ({
       case "login":
         return (
           <EmailLogin
-            onEmailSubmit={onEmailSubmit}
+            onLoginSuccess={onLoginSuccess}
+            onExistingSubmission={onExistingSubmission}
             onLogout={onLogout}
             onEmailNotFound={onEmailNotFound}
           />
@@ -46,13 +45,7 @@ const StepRenderer = ({
         return <NewEmailStep updateFormData={updateFormData} />;
 
       case "welcome":
-        return (
-          <WelcomeSection
-            userRSVP={userRSVP}
-            showSuccess={showSuccess}
-            showError={showError}
-          />
-        );
+        return <WelcomeSection userRSVP={userRSVP} />;
 
       case "rsvp":
         if (!userRSVP) return null;
@@ -86,27 +79,38 @@ const StepRenderer = ({
           />
         );
 
-      case "payment-details":
-        // Protect payment details - only show if form has been submitted
-        if (!isFormSubmitted) {
-          return (
-            <div className="access-denied">
-              <h2>Access Denied</h2>
-              <p>
-                Payment details are only available after completing your
-                registration.
-              </p>
-            </div>
-          );
-        }
+      case "home":
+        return <Home onLogout={onLogout} onNavigate={onNavigate} />;
+
+      case "payments":
+        return <Payments pricing={pricing} onNavigate={onNavigate} />;
+
+      case "profile":
         return (
-          <PaymentDetailsDisplay
-            rsvpData={userRSVP}
-            formData={formData}
-            pricing={pricing}
-            onLogout={onLogout}
-            submissionResult={submissionResult}
-          />
+          <div className="placeholder-page">
+            <h2>Profile & Trip Details</h2>
+            <p>Coming soon - manage your profile and trip preferences here.</p>
+            <button
+              className="btn btn-primary"
+              onClick={() => onNavigate("home")}
+            >
+              Back to Home
+            </button>
+          </div>
+        );
+
+      case "itinerary":
+        return (
+          <div className="placeholder-page">
+            <h2>Trip Itinerary</h2>
+            <p>Coming soon - view your complete Argentina itinerary here.</p>
+            <button
+              className="btn btn-primary"
+              onClick={() => onNavigate("home")}
+            >
+              Back to Home
+            </button>
+          </div>
         );
 
       default:
@@ -114,7 +118,7 @@ const StepRenderer = ({
     }
   };
 
-  return <div className="form-content-wrapper">{renderStepContent()}</div>;
+  return renderStepContent();
 };
 
 export default StepRenderer;

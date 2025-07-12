@@ -9,7 +9,7 @@
 /* global ContentService, SpreadsheetApp, Utilities, DriveApp, UrlFetchApp */
 
 const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycby3wvHgCAwW3WDXgI59NRIV3HlGaWEcjMLmGh2sGL15RWS0NEEb4PltoAW9gv5zUNuN/exec";
+  "https://script.google.com/macros/s/AKfycbziRQK-OafA9kTX7uno20h16MrgHipqKnpz1Y6Evyrzjk8pTFAUz_XpBLfGYSBRR6O3/exec";
 const MG_KEY = "<REDACTED>";
 const REDSYS_USER = "<REDACTED>";
 const REDSYS_PASS = "<REDACTED>"; // Note: \u0021 is '!'
@@ -87,18 +87,9 @@ function doGet(e) {
 
     const responseData = {
       rsvpData: validation.rsvpData,
-      hasExistingSubmission: existingSubmission !== null,
+      row: existingSubmission?.row || null,
+      rowNumber: existingSubmission?.rowNumber || null,
     };
-
-    // If there's an existing submission, include all the data
-    if (existingSubmission) {
-      responseData.formData = existingSubmission.formData;
-      responseData.pricing = existingSubmission.pricing;
-      responseData.submissionResult = {
-        rowNumber: existingSubmission.rowNumber,
-        paymentLinkUrl: existingSubmission.paymentLink?.url,
-      };
-    }
 
     return ContentService.createTextOutput(
       JSON.stringify({
@@ -517,46 +508,8 @@ function getExistingSubmission(email) {
           rawData[headers[j]] = row[j];
         }
 
-        // Reconstruct formData object
-        const formData = {};
-        Object.keys(rawData).forEach((key) => {
-          if (key.startsWith("formData.")) {
-            const formKey = key.replace("formData.", "");
-            formData[formKey] = rawData[key];
-          }
-        });
-
-        // Reconstruct pricing object
-        const pricing = {};
-        Object.keys(rawData).forEach((key) => {
-          if (key.startsWith("pricing.")) {
-            const pricingKey = key.replace("pricing.", "");
-            pricing[pricingKey] = rawData[key];
-          }
-        });
-
-        // Reconstruct rsvpData object
-        const rsvpData = {};
-        Object.keys(rawData).forEach((key) => {
-          if (key.startsWith("rsvpData.")) {
-            const rsvpKey = key.replace("rsvpData.", "");
-            rsvpData[rsvpKey] = rawData[key];
-          }
-        });
-
-        const paymentLink = {};
-        Object.keys(rawData).forEach((key) => {
-          if (key.startsWith("paymentLink.")) {
-            const paymentLinkKey = key.replace("paymentLink.", "");
-            paymentLink[paymentLinkKey] = rawData[key];
-          }
-        });
-
         return {
-          formData,
-          pricing,
-          rsvpData,
-          paymentLink,
+          row: rawData,
           rowNumber: i + 1, // +1 because sheet rows are 1-indexed
         };
       }
@@ -747,10 +700,7 @@ function saveToSheet(data) {
     let paymentLinkData = null;
     let paymentLinkError = null;
 
-    if (
-      data["formData.paymentMethod"] === "credit" &&
-      data["formData.email"] === "tinqueija@gmail.com"
-    ) {
+    if (data["formData.paymentMethod"] === "credit" && false) {
       paymentLinkData = createPaymentLinkOrderForRow(
         data,
         sheet.getLastRow() + 1
@@ -1903,12 +1853,13 @@ function generatePaymentLinksBatch() {
 
       try {
         const flatData = {
-          "formData.firstName": submission.formData.firstName,
-          "formData.lastName": submission.formData.lastName,
-          "formData.email": submission.formData.email,
-          "formData.paymentSchedule": submission.formData.paymentSchedule,
+          "formData.firstName": submission.row["formData.firstName"],
+          "formData.lastName": submission.row["formData.lastName"],
+          "formData.email": submission.row["formData.email"],
+          "formData.paymentSchedule":
+            submission.row["formData.paymentSchedule"],
           "pricing.installmentAmountEUR":
-            submission.pricing.installmentAmountEUR,
+            submission.row["pricing.installmentAmountEUR"],
         };
 
         const linkNumber = paymentInfo.expiredCount + 1;

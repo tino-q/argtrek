@@ -1,9 +1,11 @@
 /* Payment Details Display Styles */
 .payment-details-section {
-  max-width: 800px;
-  margin: 0 auto;
+  /* Use standardized content container for payment details */
   padding: 2rem;
-  background: transparent;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px var(--shadow-dark);
+  margin: 1rem 0;
 }
 
 .confirmation-header {
@@ -22,11 +24,9 @@
 .confirmation-message {
   font-size: 1.1rem;
   color: #374151;
-  margin: 0;
+  margin: 0 auto;
   line-height: 1.6;
   text-align: center;
-  max-width: 600px;
-  margin: 0 auto;
   word-wrap: break-word;
   hyphens: none;
 }
@@ -82,7 +82,6 @@
 }
 
 /* Detail Rows */
-.bank-details,
 .crypto-details {
   margin-bottom: 1.5rem;
 }
@@ -362,4 +361,227 @@
 
 .payment-link-button:hover {
   background-color: #45a049;
+}
+
+/* Payment Summary Section */
+.payment-summary-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.payment-summary-section h3 {
+  color: #111827;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.payment-method-info {
+  margin-bottom: 1.5rem;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.info-row .label {
+  font-weight: 600;
+  color: #475569;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.info-row .value {
+  color: #1e293b;
+  font-weight: 500;
+  flex: 1;
+}
+
+.installment-breakdown,
+.full-payment-breakdown {
+  margin-top: 1.5rem;
+}
+
+.installment-breakdown h4,
+.full-payment-breakdown h4 {
+  color: #374151;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.payment-plan {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.payment-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.payment-item:last-child {
+  border-bottom: none;
+}
+
+.payment-item.first-payment {
+  background: #f0fdf4;
+  border-left: 4px solid #10b981;
+}
+
+.payment-item.second-payment {
+  background: #fefce8;
+  border-left: 4px solid #eab308;
+}
+
+.payment-item.full-payment {
+  background: #f0f9ff;
+  border-left: 4px solid #3b82f6;
+}
+
+.payment-item.payment-total {
+  background: #f3f4f6;
+  border-left: 4px solid #6b7280;
+  font-weight: 600;
+}
+
+.payment-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.payment-label {
+  font-weight: 600;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.payment-note {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.payment-amount {
+  text-align: right;
+}
+
+.payment-amount .amount {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #111827;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.usd-equivalent {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.currency-note {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #f0f9ff;
+  border-radius: 6px;
+  border: 1px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.currency-note i {
+  color: #3b82f6;
+  font-size: 0.875rem;
+}
+
+.currency-note span {
+  color: #1e40af;
+  font-size: 0.875rem;
+}
+
+/* Mobile Responsive for Payment Summary */
+@media (max-width: 768px) {
+  .payment-summary-section {
+    padding: 1rem;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .info-row .label {
+    min-width: unset;
+  }
+
+  .payment-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .payment-amount {
+    text-align: left;
+    width: 100%;
+  }
+
+  .payment-amount .amount {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-summary-section h3 {
+    font-size: 1.2rem;
+  }
+
+  .payment-label {
+    font-size: 0.9rem;
+  }
+
+  .payment-amount .amount {
+    font-size: 1rem;
+  }
+}
+
+/* Payment Completion States */
+.payment-item.payment-complete {
+  background: #f0fdf4 !important;
+  border-left: 4px solid #10b981 !important;
+  opacity: 0.9;
+}
+
+.payment-check {
+  color: #10b981;
+  margin-left: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.status-complete {
+  color: #10b981 !important;
+  font-weight: 600;
+}
+
+.status-pending {
+  color: #eab308 !important;
+  font-weight: 600;
 }

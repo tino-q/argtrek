@@ -1,111 +1,48 @@
-// Main Trip Form React App
+// Main Argentina Trip Management App
 // Enhanced with browser navigation integration using React Router
+// Supports both registration flow and participant management
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { useNotifications } from "./hooks/useNotifications";
+import { useNotificationContext } from "./hooks/useNotificationContext";
 import { injectAnimationStyles } from "./hooks/useAnimations";
 import { usePricing } from "./hooks/usePricing";
-import { useFormSubmission } from "./hooks/useFormSubmission";
-import { useRouteProtection } from "./hooks/useRouteProtection";
-import { FORM_FIELDS, APPS_SCRIPT_URL, ACTION_TYPES } from "./utils/config";
-import { getEmail } from "./utils/rsvpData";
+import { useTripContext } from "./hooks/useTripContext";
+import TripProvider from "./context/TripContext.jsx";
+import NotificationProvider from "./context/NotificationContext.jsx";
+import { APPS_SCRIPT_URL, ACTION_TYPES } from "./utils/config";
 
 // Import components
 import Header from "./components/layout/Header";
-import StepRenderer from "./components/common/StepRenderer";
-import StepNavigation from "./components/common/StepNavigation";
 import NotificationContainer from "./components/common/NotificationContainer";
 import Footer from "./components/layout/Footer";
+import FormFlow from "./components/flows/FormFlow";
+import Home from "./components/participant/Home";
+import Payments from "./components/participant/Payments";
+import EmailLogin from "./components/auth/EmailLogin";
+import NewEmailStep from "./components/form/NewEmailStep";
 import { STEPS } from "./utils/stepConfig";
 
-// Wrapper component to handle step rendering with common props
-function StepWrapper({ step, commonProps }) {
-  return <StepRenderer currentStep={step} {...commonProps} />;
-}
+// Define registration flow paths (after authentication)
+const REGISTRATION_FLOW_PATHS = ["/welcome", "/rsvp", "/addons", "/payment"];
 
-function App() {
-  // Get default form data state
-  const getDefaultFormData = () => {
-    return {
-      [FORM_FIELDS.PAYMENT_SCHEDULE]: "full",
-      [FORM_FIELDS.PAYMENT_METHOD]: "bank",
-      [FORM_FIELDS.DIETARY_RESTRICTIONS]: "none",
-      [FORM_FIELDS.PRIVATE_ROOM_UPGRADE]: false, // Default to shared room
-      [FORM_FIELDS.RAFTING]: false,
-      [FORM_FIELDS.HORSEBACK]: false,
-      [FORM_FIELDS.COOKING]: false,
-      [FORM_FIELDS.TANGO]: false,
-      [FORM_FIELDS.CHECKED_LUGGAGE]: false,
-      [FORM_FIELDS.CRYPTO_CURRENCY]: "USDT",
-      [FORM_FIELDS.CRYPTO_NETWORK]: "ETH",
-      [FORM_FIELDS.ROOMMATE_PREFERENCE]: "",
-      [FORM_FIELDS.ROOMMATE_NAME]: "",
-      [FORM_FIELDS.DIETARY_MESSAGE]: "",
-      [FORM_FIELDS.EMAIL]: "",
-      [FORM_FIELDS.FIRST_NAME]: "",
-      [FORM_FIELDS.LAST_NAME]: "",
-      [FORM_FIELDS.PHONE_NUMBER]: "",
-
-      // Travel document confirmation
-      travelDocumentConfirmed: false,
-    };
-  };
-
-  // Helper function to safely get from localStorage
-  const getFromStorage = (key, defaultValue) => {
-    try {
-      const stored = localStorage.getItem(key);
-      return stored ? JSON.parse(stored) : defaultValue;
-    } catch (error) {
-      console.warn(`Error reading from localStorage for key ${key}:`, error);
-      return defaultValue;
-    }
-  };
-
-  // Helper function to safely set to localStorage
-  const setToStorage = (key, value) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.warn(`Error writing to localStorage for key ${key}:`, error);
-    }
-  };
-
-  // Application state - Now with localStorage persistence
-  const [userRSVP, setUserRSVP] = useState(() =>
-    getFromStorage("userRSVP", null)
-  );
-  const [formData, setFormData] = useState(() =>
-    getFromStorage("formData", getDefaultFormData())
-  );
-  const [isFormSubmitted, setIsFormSubmitted] = useState(() =>
-    getFromStorage("isFormSubmitted", false)
-  );
-  const [submissionResult, setSubmissionResult] = useState(() =>
-    getFromStorage("submissionResult", null)
-  );
-
+function AppContent() {
   // React Router hooks
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Save state to localStorage whenever it changes
-  useEffect(() => {
-    setToStorage("userRSVP", userRSVP);
-  }, [userRSVP]);
-
-  useEffect(() => {
-    setToStorage("formData", formData);
-  }, [formData]);
-
-  useEffect(() => {
-    setToStorage("isFormSubmitted", isFormSubmitted);
-  }, [isFormSubmitted]);
-
-  useEffect(() => {
-    setToStorage("submissionResult", submissionResult);
-  }, [submissionResult]);
+  // Trip context
+  const {
+    userRSVP,
+    formData,
+    isFormSubmitted,
+    setUserRSVP,
+    setFormData,
+    setSubmissionResult,
+    setIsFormSubmitted,
+    clearTripData,
+    resetFormData,
+  } = useTripContext();
 
   // Custom hooks
   const {
@@ -114,24 +51,9 @@ function App() {
     showError,
     showWarning,
     removeNotification,
-  } = useNotifications();
+  } = useNotificationContext();
+
   const pricing = usePricing(userRSVP, formData);
-  const { submitForm, isSubmitting } = useFormSubmission();
-
-  // Route protection (automatically handles redirects)
-  const { isAuthorized, currentStep: protectedCurrentStep } =
-    useRouteProtection(userRSVP, isFormSubmitted);
-
-  // Form reference for validation feedback
-  const formRef = useRef(null);
-
-  // Get current step from URL path
-  const getCurrentStepFromPath = () => {
-    const path = location.pathname.slice(1); // Remove leading slash
-    return path || STEPS.LOGIN; // Default to login if no path
-  };
-
-  const currentStep = getCurrentStepFromPath();
 
   // Initialize animations when component mounts
   useEffect(() => {
@@ -143,7 +65,7 @@ function App() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
 
-  // Update document title based on current step
+  // Update document title based on current route
   useEffect(() => {
     const stepTitles = {
       [STEPS.LOGIN]: "Login - Argentina Trip",
@@ -153,38 +75,54 @@ function App() {
       [STEPS.ADDONS]: "Select Experiences - Argentina Trip",
       [STEPS.PAYMENT]: "Payment - Argentina Trip",
       [STEPS.PAYMENT_DETAILS]: "Payment Details - Argentina Trip",
+      [STEPS.HOME]: "Home - Argentina Trip",
+      [STEPS.PAYMENTS]: "Payments - Argentina Trip",
+      [STEPS.PROFILE]: "Profile - Argentina Trip",
+      [STEPS.ITINERARY]: "Itinerary - Argentina Trip",
     };
 
-    document.title = stepTitles[currentStep] || "Argentina Trip";
-  }, [currentStep]);
+    const currentPath = location.pathname.slice(1) || STEPS.LOGIN;
+    document.title = stepTitles[currentPath] || "Argentina Trip";
+  }, [location.pathname]);
 
-  // Generic navigation handler using React Router
+  // Generic navigation handler
   const navigateToStep = (step) => {
     navigate(`/${step}`);
   };
 
-  // Handle successful login
+  // Handle successful login for new registrations
   const handleLoginSuccess = (userData) => {
     setUserRSVP(userData);
-
-    // Clear form data for new user login to prevent cross-user data persistence
-    setFormData(getDefaultFormData());
+    resetFormData();
     setIsFormSubmitted(false);
     setSubmissionResult(null);
-
-    // Clean up URL parameters from magic link
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("email") && urlParams.get("password")) {
-      // Remove email and password parameters from URL
-      urlParams.delete("email");
-      urlParams.delete("password");
-      const newUrl =
-        window.location.pathname +
-        (urlParams.toString() ? "?" + urlParams.toString() : "");
-      window.history.replaceState({}, "", newUrl);
-    }
-
+    // Navigate to welcome step to start the registration flow
     navigateToStep(STEPS.WELCOME);
+  };
+
+  // Handle existing submission found during login
+  const handleExistingSubmission = (submissionData, formData) => {
+    setUserRSVP(submissionData.rsvpData);
+    setFormData(formData);
+    setSubmissionResult(submissionData);
+    setIsFormSubmitted(true);
+    // Navigate to participant home
+    navigateToStep(STEPS.HOME);
+  };
+
+  // Handle form submission completion
+  const handleFormSubmitted = (submissionData) => {
+    setSubmissionResult(submissionData);
+    setIsFormSubmitted(true);
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    navigateToStep(STEPS.LOGIN);
+    clearTripData();
+    showSuccess(
+      "Logged out successfully. You can now login with different credentials."
+    );
   };
 
   // Handle email not found - navigate to new email step
@@ -240,392 +178,116 @@ function App() {
     }
   };
 
-  // Handle email and password login submission
-  const handleEmailLogin = async (email, password) => {
-    try {
-      // Make GET request to RSVP Apps Script
-      const response = await fetch(
-        `${APPS_SCRIPT_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
-        {
-          method: "GET",
-        }
-      );
-
-      const result = await response.json();
-
-      if (result.error) {
-        // Handle specific error types
-        if (
-          result.error.includes("password") ||
-          result.error.includes("Invalid password")
-        ) {
-          showError(
-            "Invalid password. Please check your password and try again."
-          );
-        } else if (
-          result.error.includes("email") ||
-          result.error.includes("Email not found")
-        ) {
-          // Let the EmailLogin component handle the "email not found" error
-          // by throwing an error that it can catch
-          throw new Error("Email not found in our RSVP database");
-        } else {
-          showError(result.error);
-        }
-      } else {
-        // Valid RSVP found - check if there's an existing submission
-        console.log("✅ USER LOGIN SUCCESS - Complete Response Payload:");
-        console.log("===============================================");
-        console.table(result.data);
-        console.log("Raw JSON Data:", JSON.stringify(result.data, null, 2));
-        console.log("===============================================");
-
-        if (result.data.hasExistingSubmission) {
-          // User has already submitted - load their existing data and show payment details
-          console.log("🔄 EXISTING SUBMISSION FOUND - Loading previous data");
-
-          // Set all the data from the existing submission
-          setUserRSVP(result.data.rsvpData);
-          setFormData(result.data.formData);
-          setSubmissionResult(result.data.submissionResult);
-          setIsFormSubmitted(true);
-
-          // Clean up URL parameters from magic link
-          const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get("email") && urlParams.get("password")) {
-            // Remove email and password parameters from URL
-            urlParams.delete("email");
-            urlParams.delete("password");
-            const newUrl =
-              window.location.pathname +
-              (urlParams.toString() ? "?" + urlParams.toString() : "");
-            window.history.replaceState({}, "", newUrl);
-          }
-
-          // Navigate directly to payment details
-          navigateToStep(STEPS.PAYMENT_DETAILS);
-          showSuccess(
-            "Welcome back! Your previous registration has been loaded.",
-            {
-              duration: 4000,
-              autoClose: true,
-            }
-          );
-        } else {
-          // No existing submission - proceed with normal flow
-          handleLoginSuccess(result.data.rsvpData);
-        }
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-
-      // Re-throw "Email not found" errors so EmailLogin component can handle them
-      if (error.message && error.message.includes("Email not found")) {
-        throw error;
-      }
-
-      showError(
-        "Failed to retrieve trip details. Please check your internet connection and try again."
-      );
-    }
-  };
-
-  // Form data management functions
-  const updateFormData = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  // Handle RSVP continue - proceed to next step
-  const handleRSVPContinue = () => {
-    // Validate required fields before continuing
-    const errors = {};
-
-    if (!formData[FORM_FIELDS.FIRST_NAME]?.trim()) {
-      errors[FORM_FIELDS.FIRST_NAME] = true;
-    }
-
-    if (!formData[FORM_FIELDS.LAST_NAME]?.trim()) {
-      errors[FORM_FIELDS.LAST_NAME] = true;
-    }
-
-    if (!formData[FORM_FIELDS.PHONE_NUMBER]?.trim()) {
-      errors[FORM_FIELDS.PHONE_NUMBER] = true;
-    }
-
-    // Check if travel document confirmation is checked
-    const hasFieldErrors = Object.keys(errors).length > 0;
-    const hasConfirmationError = !formData.travelDocumentConfirmed;
-
-    // If there are validation errors, show error message and scroll to first error
-    if (hasFieldErrors || hasConfirmationError) {
-      // Determine which field to scroll to based on priority order
-      let scrollTarget = null;
-      let errorMessage = "";
-
-      // Check in priority order: First Name → Last Name → Phone Number → Checkbox
-      if (errors[FORM_FIELDS.FIRST_NAME]) {
-        scrollTarget = document.getElementById("first-name-input");
-        errorMessage = "Please enter your first name.";
-      } else if (errors[FORM_FIELDS.LAST_NAME]) {
-        scrollTarget = document.getElementById("last-name-input");
-        errorMessage = "Please enter your last name.";
-      } else if (errors[FORM_FIELDS.PHONE_NUMBER]) {
-        scrollTarget = document.getElementById("phone-number-input");
-        errorMessage = "Please enter your phone number.";
-      } else if (hasConfirmationError) {
-        scrollTarget = document.getElementById("travel-document-confirmation");
-        errorMessage =
-          "Please confirm that your travel document information is correct.";
-      }
-
-      // Show appropriate error message
-      if (hasFieldErrors) {
-        showError(
-          errorMessage ||
-            "Please fill in all required fields: First Name, Last Name, and Phone Number."
-        );
-      } else if (hasConfirmationError) {
-        showError(errorMessage);
-      }
-
-      // Scroll to the first error field
-      if (scrollTarget) {
-        scrollTarget.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-
-        // Add highlight effect for checkbox, focus for input fields
-        if (scrollTarget.id === "travel-document-confirmation") {
-          scrollTarget.classList.add("highlight-error");
-          setTimeout(() => {
-            scrollTarget.classList.remove("highlight-error");
-          }, 2000);
-        } else {
-          // Focus the input field
-          setTimeout(() => {
-            scrollTarget.focus();
-          }, 300);
-        }
-      }
-
-      return; // Stop navigation
-    }
-
-    // All validation passed, proceed to next step
-    navigateToStep(STEPS.ADDONS);
-  };
-
-  // Handle form submission
-  const handleSubmitForm = async () => {
-    try {
-      // Validate required fields
-      if (!formData[FORM_FIELDS.PAYMENT_SCHEDULE]) {
-        showError("Please select a payment schedule.");
-        return;
-      }
-
-      if (!formData[FORM_FIELDS.PAYMENT_METHOD]) {
-        showError("Please select a payment method.");
-        return;
-      }
-
-      // Create submission data with user info from RSVP (simplified 1:1 mapping)
-      const submissionData = {
-        ...formData,
-        email: getEmail(userRSVP),
-      };
-
-      console.log("🚀 SUBMITTING FORM DATA:");
-      console.log("========================");
-      console.table(submissionData);
-      console.log("Raw form data:", JSON.stringify(submissionData, null, 2));
-      console.log("========================");
-
-      const result = await submitForm(submissionData, userRSVP, pricing);
-
-      if (result.success) {
-        // Store the submission result (including rowNumber)
-        setSubmissionResult(result.data);
-
-        // Mark form as submitted and navigate to payment details
-        setIsFormSubmitted(true);
-        navigateToStep(STEPS.PAYMENT_DETAILS);
-        showSuccess(
-          "Registration confirmed! Check your payment details below.",
-          {
-            duration: 3000,
-            autoClose: true,
-          }
-        );
-      } else {
-        showError(result.message, result.options);
-      }
-    } catch (error) {
-      console.error("Form submission error:", error);
-      showError("An unexpected error occurred. Please try again.");
-    }
-  };
-
-  // Handle logout - goes back to login and clears all data
-  const handleLogout = () => {
-    navigateToStep(STEPS.LOGIN);
-    setUserRSVP(null);
-    setFormData(getDefaultFormData()); // Reset to default form state
-    setIsFormSubmitted(false);
-    setSubmissionResult(null);
-
-    // Clear localStorage
-    localStorage.removeItem("userRSVP");
-    localStorage.removeItem("formData");
-    localStorage.removeItem("isFormSubmitted");
-    localStorage.removeItem("submissionResult");
-
-    showSuccess(
-      "Logged out successfully. You can now login with different credentials."
-    );
-  };
-
-  // Extract common props to eliminate repetition
-  const commonStepProps = {
-    userRSVP,
-    formData,
-    updateFormData,
-    pricing,
-    onEmailSubmit: handleEmailLogin,
-    onLogout: handleLogout,
-    onRSVPContinue: handleRSVPContinue,
-    isFormSubmitted,
-    submissionResult,
-    onNewEmailRequest: handleNewEmailRequest,
-    onEmailNotFound: handleEmailNotFound,
-    onNavigate: navigateToStep,
-    showSuccess,
-    showError,
-    showWarning,
-  };
-
-  // Block rendering of protected content if not authorized
-  const shouldBlockRender =
-    !isAuthorized && protectedCurrentStep !== STEPS.LOGIN;
+  // Render placeholder components for future pages
+  const renderPlaceholderPage = (title, description) => (
+    <div className="placeholder-page">
+      <h2>{title}</h2>
+      <p>{description}</p>
+      <button
+        className="btn btn-primary"
+        onClick={() => navigateToStep(STEPS.HOME)}
+      >
+        Back to Home
+      </button>
+    </div>
+  );
 
   return (
-    <div className="container">
+    <div>
       <Header />
 
-      <div ref={formRef} className="trip-form">
-        {shouldBlockRender ? (
-          // Show loading while redirect happens
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              minHeight: "200px",
-              color: "#666",
-            }}
-          >
-            <div>
-              <i
-                className="fas fa-spinner fa-spin"
-                style={{ marginRight: "8px" }}
-              ></i>
-              Redirecting to login...
-            </div>
-          </div>
-        ) : (
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <StepWrapper step={STEPS.LOGIN} commonProps={commonStepProps} />
-              }
-            />
-            <Route
-              path="/login"
-              element={
-                <StepWrapper step={STEPS.LOGIN} commonProps={commonStepProps} />
-              }
-            />
-            <Route
-              path="/new-email"
-              element={
-                <StepWrapper
-                  step={STEPS.NEW_EMAIL}
-                  commonProps={commonStepProps}
-                />
-              }
-            />
-            <Route
-              path="/welcome"
-              element={
-                <StepWrapper
-                  step={STEPS.WELCOME}
-                  commonProps={commonStepProps}
-                />
-              }
-            />
-            <Route
-              path="/rsvp"
-              element={
-                <StepWrapper step={STEPS.RSVP} commonProps={commonStepProps} />
-              }
-            />
-            <Route
-              path="/addons"
-              element={
-                <StepWrapper
-                  step={STEPS.ADDONS}
-                  commonProps={commonStepProps}
-                />
-              }
-            />
-            <Route
-              path="/payment"
-              element={
-                <StepWrapper
-                  step={STEPS.PAYMENT}
-                  commonProps={commonStepProps}
-                />
-              }
-            />
-            <Route
-              path="/payment-details"
-              element={
-                <StepWrapper
-                  step={STEPS.PAYMENT_DETAILS}
-                  commonProps={commonStepProps}
-                />
-              }
-            />
-            {/* Catch-all route for invalid URLs */}
-            <Route
-              path="*"
-              element={
-                <StepWrapper
-                  step={userRSVP ? STEPS.WELCOME : STEPS.LOGIN}
-                  commonProps={commonStepProps}
-                />
-              }
-            />
-          </Routes>
-        )}
-
-        {!shouldBlockRender && (
-          <StepNavigation
-            currentStep={currentStep}
-            onNavigate={navigateToStep}
-            onSubmit={handleSubmitForm}
-            isSubmitting={isSubmitting}
-            formData={formData}
-            showError={showError}
-            onNewEmailRequest={handleNewEmailRequest}
-            onRSVPContinue={handleRSVPContinue}
+      <div className="main-content">
+        <Routes>
+          {/* Root path - redirect to login */}
+          <Route
+            path="/"
+            element={
+              <EmailLogin
+                onLoginSuccess={handleLoginSuccess}
+                onExistingSubmission={handleExistingSubmission}
+                onEmailNotFound={handleEmailNotFound}
+              />
+            }
           />
-        )}
+
+          {/* Authentication Routes */}
+          <Route
+            path="/login"
+            element={
+              <EmailLogin
+                onLoginSuccess={handleLoginSuccess}
+                onExistingSubmission={handleExistingSubmission}
+                onEmailNotFound={handleEmailNotFound}
+              />
+            }
+          />
+          <Route
+            path="/new-email"
+            element={
+              <NewEmailStep
+                onNavigate={navigateToStep}
+                onNewEmailRequest={handleNewEmailRequest}
+              />
+            }
+          />
+
+          {/* Registration Flow Routes */}
+          {REGISTRATION_FLOW_PATHS.map((path) => (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <FormFlow
+                  onLoginSuccess={handleLoginSuccess}
+                  onExistingSubmission={handleExistingSubmission}
+                  onFormSubmitted={handleFormSubmitted}
+                />
+              }
+            />
+          ))}
+
+          {/* Participant Flow Routes */}
+          <Route
+            path="/home"
+            element={
+              <Home onLogout={handleLogout} onNavigate={navigateToStep} />
+            }
+          />
+          <Route
+            path="/payments"
+            element={<Payments pricing={pricing} onNavigate={navigateToStep} />}
+          />
+          <Route
+            path="/profile"
+            element={renderPlaceholderPage(
+              "Profile & Trip Details",
+              "Coming soon - manage your profile and trip preferences here."
+            )}
+          />
+          <Route
+            path="/itinerary"
+            element={renderPlaceholderPage(
+              "Trip Itinerary",
+              "Coming soon - view your complete Argentina itinerary here."
+            )}
+          />
+
+          {/* Catch-all route */}
+          <Route
+            path="*"
+            element={
+              isFormSubmitted ? (
+                <Home onLogout={handleLogout} onNavigate={navigateToStep} />
+              ) : (
+                <EmailLogin
+                  onLoginSuccess={handleLoginSuccess}
+                  onExistingSubmission={handleExistingSubmission}
+                  onEmailNotFound={handleEmailNotFound}
+                />
+              )
+            }
+          />
+        </Routes>
       </div>
 
       <NotificationContainer
@@ -635,6 +297,16 @@ function App() {
 
       <Footer />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <TripProvider>
+      <NotificationProvider>
+        <AppContent />
+      </NotificationProvider>
+    </TripProvider>
   );
 }
 

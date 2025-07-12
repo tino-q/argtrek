@@ -1,12 +1,22 @@
 import { useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import { APPS_SCRIPT_URL } from "../../utils/config";
+import { STEPS } from "../../utils/stepConfig";
+import { useNotificationContext } from "../../hooks/useNotificationContext";
 
-const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
+const EmailLogin = ({
+  onLoginSuccess,
+  onLogout,
+  onEmailNotFound,
+  onExistingSubmission,
+}) => {
   const { email, setEmail, password, setPassword, isLoading, setIsLoading } =
     useAuth();
+  const { showSuccess, showError } = useNotificationContext();
   const hasLoggedOut = useRef(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const previousLocation = useRef(location.pathname);
 
   // Force logout and clear all data when navigating TO login page (not on re-renders)
@@ -37,6 +47,106 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
     };
   }, [location.pathname, onLogout]);
 
+  // Main authentication handler
+  const handleEmailLogin = async (email, password) => {
+    try {
+      const response = await fetch(
+        `${APPS_SCRIPT_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
+        {
+          method: "GET",
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.error) {
+        if (
+          result.error.includes("password") ||
+          result.error.includes("Invalid password")
+        ) {
+          showError(
+            "Invalid password. Please check your password and try again."
+          );
+        } else if (
+          result.error.includes("email") ||
+          result.error.includes("Email not found")
+        ) {
+          throw new Error("Email not found in our RSVP database");
+        } else {
+          showError(result.error);
+        }
+      } else {
+        console.log("✅ USER LOGIN SUCCESS - Complete Response Payload:");
+        console.log("===============================================");
+        console.table(result.data);
+        console.log("Raw JSON Data:", JSON.stringify(result.data, null, 2));
+        console.log("===============================================");
+
+        if (result.data.row) {
+          // User has already submitted - load their existing data and show home
+          console.log("🔄 EXISTING SUBMISSION FOUND - Loading previous data");
+
+          const keys = Object.keys(result.data.row);
+          const formDataKeys = keys.filter((key) =>
+            key.startsWith("formData.")
+          );
+          const formData = formDataKeys.reduce((acc, key) => {
+            acc[key.replace("formData.", "")] = result.data.row[key];
+            return acc;
+          }, {});
+
+          // Clean up URL parameters
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get("email") && urlParams.get("password")) {
+            urlParams.delete("email");
+            urlParams.delete("password");
+            const newUrl =
+              window.location.pathname +
+              (urlParams.toString() ? "?" + urlParams.toString() : "");
+            window.history.replaceState({}, "", newUrl);
+          }
+
+          // Navigate to home for registered participants and notify parent
+          navigate(`/${STEPS.HOME}`);
+          if (onExistingSubmission) {
+            onExistingSubmission(result.data, formData);
+          }
+          showSuccess("Welcome back! Your registration is complete.", {
+            duration: 4000,
+            autoClose: true,
+          });
+        } else {
+          // No existing submission - start registration flow
+          // Clean up URL parameters
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get("email") && urlParams.get("password")) {
+            urlParams.delete("email");
+            urlParams.delete("password");
+            const newUrl =
+              window.location.pathname +
+              (urlParams.toString() ? "?" + urlParams.toString() : "");
+            window.history.replaceState({}, "", newUrl);
+          }
+
+          navigate(`/${STEPS.WELCOME}`);
+          if (onLoginSuccess) {
+            onLoginSuccess(result.data.rsvpData);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+
+      if (error.message && error.message.includes("Email not found")) {
+        throw error;
+      }
+
+      showError(
+        "Failed to retrieve trip details. Please check your internet connection and try again."
+      );
+    }
+  };
+
   // Check for magic link parameters and auto-fill/auto-submit
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -50,10 +160,10 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
 
       // Auto-submit after a brief delay to allow state to update
       const autoSubmit = setTimeout(async () => {
-        if (onEmailSubmit && !isLoading) {
+        if (!isLoading) {
           setIsLoading(true);
           try {
-            await onEmailSubmit(emailParam.trim(), passwordParam.trim());
+            await handleEmailLogin(emailParam.trim(), passwordParam.trim());
           } catch (error) {
             // Check if this is an email not found error
             if (
@@ -89,7 +199,7 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
         // setPassword("dima");
       }
     }
-  }, [onEmailSubmit, onEmailNotFound, isLoading]);
+  }, [isLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -101,10 +211,7 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
     setIsLoading(true);
 
     try {
-      // Pass both email and password to the callback
-      if (onEmailSubmit) {
-        await onEmailSubmit(email.trim(), password.trim());
-      }
+      await handleEmailLogin(email.trim(), password.trim());
     } catch (error) {
       // Check if this is an email not found error
       if (error && error.message && error.message.includes("Email not found")) {
@@ -122,67 +229,64 @@ const EmailLogin = ({ onEmailSubmit, onLogout, onEmailNotFound }) => {
   };
 
   return (
-    <>
-      <section className="form-section">
-        <form onSubmit={handleSubmit} className="email-login-form">
-          <div className="form-group">
-            <label htmlFor="loginEmail">
-              <i className="fas fa-envelope"></i>
-              Email Address *
-            </label>
-            <input
-              type="email"
-              id="loginEmail"
-              name="loginEmail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your registration email"
-              required
-              disabled={isLoading}
-            />
-          </div>
+    <div className="container">
+      <div className="trip-form">
+        <section className="form-section">
+          <form onSubmit={handleSubmit} className="email-login-form">
+            <div className="form-group">
+              <label htmlFor="loginEmail">
+                <i className="fas fa-envelope"></i>
+                Email Address *
+              </label>
+              <input
+                type="email"
+                id="loginEmail"
+                name="loginEmail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your registration email"
+                required
+                disabled={isLoading}
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="loginPassword">
-              <i className="fas fa-lock"></i>
-              Password *
-            </label>
-            <input
-              type="password"
-              id="loginPassword"
-              name="loginPassword"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-              disabled={isLoading}
-            />
-            <small className="password-help">
-              Check your email for your login link
-            </small>
-          </div>
+            <div className="form-group">
+              <label htmlFor="loginPassword">
+                <i className="fas fa-lock"></i>
+                Password *
+              </label>
+              <input
+                type="password"
+                id="loginPassword"
+                name="loginPassword"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                required
+                disabled={isLoading}
+              />
+            </div>
 
-          <div className="form-actions">
-            <button
-              type="submit"
-              className={`login-btn ${isLoading ? "loading" : ""}`}
-              disabled={isLoading || !email.trim() || !password.trim()}
-              style={{ marginBottom: "30px" }}
-            >
-              {isLoading ? (
-                <>
-                  <i className="fas fa-spinner fa-spin"></i> Retrieving...
-                </>
-              ) : (
-                <>
-                  <i className="fas fa-search"></i> Retrieve My Trip Details
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </section>
-    </>
+            <div className="form-actions">
+              <button
+                type="submit"
+                className={`login-btn ${isLoading ? "loading" : ""}`}
+                disabled={isLoading || !email.trim() || !password.trim()}
+                style={{ marginBottom: "30px" }}
+              >
+                {isLoading ? (
+                  <>
+                    <i className="fas fa-spinner fa-spin"></i> Loading...
+                  </>
+                ) : (
+                  <>Login</>
+                )}
+              </button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </div>
   );
 };
 

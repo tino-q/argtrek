@@ -35,9 +35,8 @@
 
 /* Form styling following app patterns */
 .new-email-form {
+  /* Use standardized narrow container for focused form */
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
 }
 
 .new-email-form .form-group {
@@ -182,7 +181,8 @@
 /* Responsive design following app patterns */
 @media (max-width: 768px) {
   .new-email-form {
-    max-width: 100%;
+    /* Container padding handled by standardized containers */
+    width: 100%;
   }
 
   .email-not-found-notice {

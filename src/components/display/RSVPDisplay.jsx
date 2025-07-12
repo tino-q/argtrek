@@ -412,13 +412,13 @@ const RSVPDisplay = ({
           <h3>Traveler Information</h3>
 
           {/* Email - Always read-only, first */}
-          <div className="info-row">
+          <div className="info-row-rsvp">
             <span className="label">Email:</span>
             <span className="value">{personalInfo.email}</span>
           </div>
 
           {/* First Name - Editable */}
-          <div className="info-row">
+          <div className="info-row-rsvp">
             <span className="label">First Name:</span>
             <input
               id="first-name-input"
@@ -437,7 +437,7 @@ const RSVPDisplay = ({
           </div>
 
           {/* Last Name - Editable */}
-          <div className="info-row">
+          <div className="info-row-rsvp">
             <span className="label">Last Name:</span>
             <input
               id="last-name-input"
@@ -456,7 +456,7 @@ const RSVPDisplay = ({
           </div>
 
           {/* Phone Number - Editable */}
-          <div className="info-row">
+          <div className="info-row-rsvp">
             <span className="label">Phone Number:</span>
             <input
               id="phone-number-input"
@@ -476,7 +476,7 @@ const RSVPDisplay = ({
 
           {/* Plus One - Read-only, at bottom */}
           {personalInfo.plusOneName && (
-            <div className="info-row">
+            <div className="info-row-rsvp">
               <span className="label">Plus One:</span>
               <span className="value">{personalInfo.plusOneName}</span>
             </div>

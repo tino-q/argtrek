@@ -72,81 +72,84 @@ const ActivitySelection = ({ formData, updateFormData }) => {
       </div>
 
       <section className="form-section">
-        <div className="activities-container">
-          {ACTIVITY_LIST.map((activity) => {
-            const isSelected = Boolean(formData[activity.formField]);
+        <div className="container">
+          <div className="activities-container">
+            {ACTIVITY_LIST.map((activity) => {
+              const isSelected = Boolean(formData[activity.formField]);
 
-            return (
-              <div
-                key={activity.id}
-                className={`activity-card ${isSelected ? "activity-selected" : ""}`}
-                onClick={() => handleActivityToggle(activity, !isSelected)}
-                style={{ cursor: "pointer" }}
-              >
+              return (
                 <div
-                  className="activity-image"
-                  onClick={(e) => handleImageClick(e, activity)}
-                  style={{
-                    cursor: hasCarousel(activity.id) ? "zoom-in" : "pointer",
-                    position: "relative",
-                  }}
+                  key={activity.id}
+                  className={`activity-card ${isSelected ? "activity-selected" : ""}`}
+                  onClick={() => handleActivityToggle(activity, !isSelected)}
+                  style={{ cursor: "pointer" }}
                 >
-                  <img src={activity.image} alt={activity.name} />
-                  {hasCarousel(activity.id) && (
-                    <div className="image-overlay-hint">
-                      <i className="fas fa-search-plus"></i>
-                      <span>View Gallery</span>
-                    </div>
-                  )}
-                </div>
+                  <div
+                    className="activity-image"
+                    onClick={(e) => handleImageClick(e, activity)}
+                    style={{
+                      cursor: hasCarousel(activity.id) ? "zoom-in" : "pointer",
+                      position: "relative",
+                    }}
+                  >
+                    <img src={activity.image} alt={activity.name} />
+                    {hasCarousel(activity.id) && (
+                      <div className="image-overlay-hint">
+                        <i className="fas fa-search-plus"></i>
+                        <span>View Gallery</span>
+                      </div>
+                    )}
+                  </div>
 
-                <div className="activity-content">
-                  <div className="activity-header">
-                    <input
-                      type="checkbox"
-                      id={activity.id}
-                      name="activities"
-                      checked={isSelected}
-                      onChange={() => {}} // Handled by card click
-                      style={{ pointerEvents: "none", marginRight: "12px" }}
-                    />
-                    <i className={activity.icon}></i>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                      <h3>{activity.name}</h3>
-                      {activity.subtitles && activity.subtitles.length > 0 && (
-                        <div className="activity-subtitles">
-                          {activity.subtitles.map((subtitle, i) => (
-                            <div key={i}>{subtitle}</div>
+                  <div className="activity-content">
+                    <div className="activity-header">
+                      <input
+                        type="checkbox"
+                        id={activity.id}
+                        name="activities"
+                        checked={isSelected}
+                        onChange={() => {}} // Handled by card click
+                        style={{ pointerEvents: "none", marginRight: "12px" }}
+                      />
+                      <i className={activity.icon}></i>
+                      <div style={{ display: "flex", flexDirection: "column" }}>
+                        <h3>{activity.name}</h3>
+                        {activity.subtitles &&
+                          activity.subtitles.length > 0 && (
+                            <div className="activity-subtitles">
+                              {activity.subtitles.map((subtitle, i) => (
+                                <div key={i}>{subtitle}</div>
+                              ))}
+                            </div>
+                          )}
+                      </div>
+                    </div>
+
+                    <div className="activity-details">
+                      <p className="location">{activity.location}</p>
+                      <p className="date">{activity.date}</p>
+
+                      {activity.descriptionLines && (
+                        <div className="description">
+                          {activity.descriptionLines.map((line, index) => (
+                            <p key={index} className="description-line">
+                              {line || "\u00A0"}
+                            </p>
                           ))}
                         </div>
                       )}
+
+                      <p className="price">
+                        {activity.price === 0
+                          ? "I'm interested"
+                          : `$${activity.price} USD`}
+                      </p>
                     </div>
                   </div>
-
-                  <div className="activity-details">
-                    <p className="location">{activity.location}</p>
-                    <p className="date">{activity.date}</p>
-
-                    {activity.descriptionLines && (
-                      <div className="description">
-                        {activity.descriptionLines.map((line, index) => (
-                          <p key={index} className="description-line">
-                            {line || "\u00A0"}
-                          </p>
-                        ))}
-                      </div>
-                    )}
-
-                    <p className="price">
-                      {activity.price === 0
-                        ? "I'm interested"
-                        : `$${activity.price} USD`}
-                    </p>
-                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </section>
 

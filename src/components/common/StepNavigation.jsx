@@ -6,6 +6,7 @@ import Navigation from "./Navigation";
 import SafeSubmitButton from "./SafeSubmitButton";
 import { getStepConfig } from "../../utils/stepConfig";
 import { FORM_FIELDS } from "../../utils/config";
+import { useNotificationContext } from "../../hooks/useNotificationContext";
 
 const StepNavigation = ({
   currentStep,
@@ -13,11 +14,11 @@ const StepNavigation = ({
   onSubmit,
   isSubmitting,
   formData,
-  showError,
   onNewEmailRequest,
   onRSVPContinue,
 }) => {
   const [isNewEmailLoading, setIsNewEmailLoading] = useState(false);
+  const { showError } = useNotificationContext();
   const stepConfig = getStepConfig(currentStep);
 
   if (!stepConfig?.showNavigation) {
@@ -46,8 +47,9 @@ const StepNavigation = ({
     if (currentStep === "new-email" && onNewEmailRequest) {
       // Get email and name from URL params and form data
       const urlParams = new URLSearchParams(window.location.search);
-      const email = urlParams.get("email") || formData.newEmailEmail;
-      const name = formData.newEmailName;
+      const email =
+        urlParams.get("email") || (formData && formData.newEmailEmail);
+      const name = formData && formData.newEmailName;
 
       if (!email || !name) {
         showError("Please provide both email and name.");
@@ -69,12 +71,12 @@ const StepNavigation = ({
   const handleSubmit = async () => {
     // Validate required fields for payment step
     if (currentStep === "payment") {
-      if (!formData[FORM_FIELDS.PAYMENT_SCHEDULE]) {
+      if (!formData || !formData[FORM_FIELDS.PAYMENT_SCHEDULE]) {
         showError("Please select a payment schedule.");
         return;
       }
 
-      if (!formData[FORM_FIELDS.PAYMENT_METHOD]) {
+      if (!formData || !formData[FORM_FIELDS.PAYMENT_METHOD]) {
         showError("Please select a payment method.");
         return;
       }
@@ -98,6 +100,7 @@ const StepNavigation = ({
             onSubmit={handleSubmit}
             isLoading={isSubmitting}
             disabled={
+              !formData ||
               !formData[FORM_FIELDS.PAYMENT_SCHEDULE] ||
               !formData[FORM_FIELDS.PAYMENT_METHOD]
             }
@@ -123,7 +126,7 @@ const StepNavigation = ({
           <SafeSubmitButton
             onSubmit={handleNewEmailSubmit}
             isLoading={isNewEmailLoading}
-            disabled={!formData.newEmailName}
+            disabled={!formData || !formData.newEmailName}
             confirmText="Submit account request?"
             confirmDuration={3000}
           >

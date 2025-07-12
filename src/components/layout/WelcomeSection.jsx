@@ -4,12 +4,14 @@
 import { CONTACTS } from "../../utils/config";
 import { getTravelerName } from "../../utils/rsvpData";
 import { useClipboard } from "../../utils/clipboard";
+import { useNotificationContext } from "../../hooks/useNotificationContext";
 import barilocheImage from "../../assets/bariloche.png";
 import buenosAiresImage from "../../assets/buenos-aires.png";
 import mendozaImage from "../../assets/mendoza.png";
 
-const WelcomeSection = ({ userRSVP, showSuccess, showError }) => {
+const WelcomeSection = ({ userRSVP }) => {
   const { copy } = useClipboard();
+  const { showSuccess, showError } = useNotificationContext();
 
   const destinations = [
     {
@@ -52,86 +54,89 @@ const WelcomeSection = ({ userRSVP, showSuccess, showError }) => {
   };
 
   return (
-    <section className="form-section">
-      {/* Welcome Header */}
-      <div className="welcome-header">
-        <h1 className="welcome-title">Welcome {firstName}!</h1>
-        <p className="welcome-subtitle">
-          We're excited that you want to join us on this incredible journey
-          through Argentina's most breathtaking destinations!
-        </p>
-      </div>
-
-      {/* Destination Images */}
-      <div className="destinations-stack">
-        {destinations.map((destination, index) => (
-          <div key={index} className="destination-card">
-            <div className="destination-image">
-              <img src={destination.image} alt={destination.name} />
-              <div className="destination-overlay">
-                <h3>{destination.name}</h3>
-                <p>{destination.description}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Itinerary Section */}
-      <div className="itinerary-section">
-        <div className="section-icon">
-          <i className="fas fa-map-marked-alt"></i>
+    <div className="container">
+      <section>
+        {/* Welcome Header */}
+        <div className="welcome-step-header">
+          <h1 className="welcome-title">Welcome {firstName}!</h1>
+          <p className="welcome-subtitle">
+            We're excited that you want to join us on this incredible journey
+            through Argentina's most breathtaking destinations!
+          </p>
         </div>
-        <h3>Explore the Full Itinerary</h3>
-        <p>
-          Full agenda coming soon! Until then, check out our RSVP presentation
-          to get excited about your Argentina adventure.
-        </p>
-        <a
-          href="https://docs.google.com/presentation/d/164WBfbVElZFp-EVOFWNsplV9U8s5IltaFy4t9rmcpO4/edit?usp=sharing"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="action-button primary"
-        >
-          View Presentation <i className="fas fa-external-link-alt"></i>
-        </a>
-      </div>
 
-      {/* Contact Section */}
-      <div className="contact-section">
-        <div className="section-icon">
-          <i className="fas fa-headset"></i>
-        </div>
-        <h3>Need Assistance?</h3>
-        <p>Our team is here to help with any questions</p>
-        <div className="contacts-grid">
-          {CONTACTS.map((contact, index) => (
-            <div key={index} className="contact-row">
-              <div className="contact-info">
-                <span className="contact-name">{contact.name}</span>
-                <button
-                  className="contact-phone clickable"
-                  onClick={() => handlePhoneCopy(contact.phone, contact.name)}
-                  title={`Copy ${contact.name}'s phone number`}
-                >
-                  {contact.phone}
-                  <i className="fas fa-copy"></i>
-                </button>
+        {/* Destination Images */}
+        <div className="destinations-stack">
+          {destinations.map((destination, index) => (
+            <div key={index} className="destination-card">
+              <div className="destination-image">
+                <img src={destination.image} alt={destination.name} />
+                <div className="destination-overlay">
+                  <h3>{destination.name}</h3>
+                  <p>{destination.description}</p>
+                </div>
               </div>
-              <a
-                href={contact.whatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="whatsapp-btn"
-                title={`Message ${contact.name} on WhatsApp`}
-              >
-                <i className="fab fa-whatsapp"></i>
-              </a>
             </div>
           ))}
         </div>
-      </div>
-    </section>
+
+        {/* Itinerary Section */}
+        <div className="content-section">
+          <div className="section-icon">
+            <i className="fas fa-map-marked-alt"></i>
+          </div>
+          <h3>Explore the Full Itinerary</h3>
+          <p>
+            Full agenda coming soon! Until then, check out our RSVP presentation
+            to get excited about your Argentina adventure.
+          </p>
+          <a
+            href="https://docs.google.com/presentation/d/164WBfbVElZFp-EVOFWNsplV9U8s5IltaFy4t9rmcpO4/edit?usp=sharing"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="action-button primary"
+          >
+            View Presentation <i className="fas fa-external-link-alt"></i>
+          </a>
+        </div>
+
+        {/* Contact Section */}
+        <div className="content-section">
+          <div className="section-icon">
+            <i className="fas fa-headset"></i>
+          </div>
+          <h3>Need Assistance?</h3>
+          <p>Our team is here to help with any questions</p>
+          <div className="contacts-grid">
+            {CONTACTS.map((contact, index) => (
+              <div key={index} className="contact-card">
+                <div className="contact-info">
+                  <span className="contact-name">{contact.name}</span>
+                  <button
+                    className="contact-phone"
+                    onClick={() => handlePhoneCopy(contact.phone, contact.name)}
+                    title={`Copy ${contact.name}'s phone number`}
+                  >
+                    {contact.phone}
+                    <i className="fas fa-copy"></i>
+                  </button>
+                </div>
+                <a
+                  href={contact.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="whatsapp-btn"
+                  title={`Message ${contact.name} on WhatsApp`}
+                >
+                  <i className="fab fa-whatsapp"></i>
+                </a>
+              </div>
+            ))}
+          </div>
+        </div>
+        <br />
+      </section>
+    </div>
   );
 };
 
