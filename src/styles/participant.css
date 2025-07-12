@@ -639,6 +639,22 @@
   background: #2980b9;
 }
 
+/* Payment Actions Container */
+.payment-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .payment-actions {
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+}
+
 /* Enhanced Responsive Styles */
 @media (max-width: 768px) {
   .home-container,

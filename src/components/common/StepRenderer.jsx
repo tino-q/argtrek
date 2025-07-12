@@ -91,9 +91,10 @@ const StepRenderer = ({
             <h2>Profile & Trip Details</h2>
             <p>Coming soon - manage your profile and trip preferences here.</p>
             <button
-              className="btn btn-primary"
+              className="btn btn-secondary"
               onClick={() => onNavigate("home")}
             >
+              <i className="fas fa-arrow-left"></i>
               Back to Home
             </button>
           </div>
@@ -105,9 +106,10 @@ const StepRenderer = ({
             <h2>Trip Itinerary</h2>
             <p>Coming soon - view your complete Argentina itinerary here.</p>
             <button
-              className="btn btn-primary"
+              className="btn btn-secondary"
               onClick={() => onNavigate("home")}
             >
+              <i className="fas fa-arrow-left"></i>
               Back to Home
             </button>
           </div>

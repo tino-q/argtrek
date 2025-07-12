@@ -184,9 +184,10 @@ function AppContent() {
       <h2>{title}</h2>
       <p>{description}</p>
       <button
-        className="btn btn-primary"
+        className="btn btn-secondary"
         onClick={() => navigateToStep(STEPS.HOME)}
       >
+        <i className="fas fa-arrow-left"></i>
         Back to Home
       </button>
     </div>

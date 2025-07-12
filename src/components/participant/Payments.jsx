@@ -96,7 +96,7 @@ const Payments = ({ pricing, onNavigate }) => {
 
         <div className="payment-actions">
           <button
-            className="btn btn-primary"
+            className="btn btn-secondary"
             onClick={() => onNavigate("home")}
           >
             <i className="fas fa-arrow-left"></i>
