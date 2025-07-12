@@ -696,6 +696,25 @@ const RSVPDisplay = ({
             <h3>
               <i className="fas fa-tag"></i> Trip Package Price
             </h3>
+
+            {/* Readonly Notice */}
+            <div className="readonly-notice">
+              <div className="notice-content">
+                <div>
+                  <h4>
+                    <i className="fas fa-info-circle"></i> Kindly wait before
+                    processing the payment until we confirm the final package
+                    pricing
+                  </h4>
+                  <p>
+                    The payment deadline has already passed, so while we'll do
+                    our best to keep the same price for you, please note that it
+                    may vary depending on availability.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="pack-price-display">
               <span className="pack-price-label">
                 Price for selected flights and accommodations
@@ -711,10 +730,10 @@ const RSVPDisplay = ({
       {/* Readonly Notice */}
       <div className="readonly-notice">
         <div className="notice-content">
-          <i className="fas fa-info-circle"></i>
           <div>
             <h4>
-              Included activities will be listed in the agenda, coming soon.
+              <i className="fas fa-info-circle"></i> Included activities will be
+              listed in the agenda, coming soon.
             </h4>
             <p>
               From gourmet meals and city strolls to summit views, sunset winery
@@ -793,9 +812,10 @@ const RSVPDisplay = ({
       {/* Readonly Notice */}
       <div className="readonly-notice">
         <div className="notice-content">
-          <i className="fas fa-info-circle"></i>
           <div>
-            <h4>Need to make changes?</h4>
+            <h4>
+              <i className="fas fa-info-circle"></i>Need to make changes?
+            </h4>
             <p>
               This information is based on your confirmed RSVP. If you need to
               modify any of these details, please contact{" "}

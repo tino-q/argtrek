@@ -9,7 +9,8 @@
 }
 
 .form-section {
-  padding: 20px 20px 0 20px; /* Only vertical padding - horizontal padding handled by container */
+  padding-left: clamp(12px, 4vw, 20px);
+  padding-right: clamp(12px, 4vw, 20px);
 }
 
 .form-section:last-child {
@@ -132,7 +133,10 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .form-section {
-    padding: 20px 0 0 0; /* Only vertical padding - horizontal padding handled by container */
+    padding-top: 20px;
+    padding-bottom: 0;
+    padding-left: clamp(10px, 3vw, 16px);
+    padding-right: clamp(10px, 3vw, 16px);
   }
 
   .radio-group {
@@ -153,7 +157,10 @@
 
 @media (max-width: 480px) {
   .form-section {
-    padding: 16px 0 0 0; /* Only vertical padding - horizontal padding handled by container */
+    padding-top: 16px;
+    padding-bottom: 0;
+    padding-left: clamp(8px, 2.5vw, 12px);
+    padding-right: clamp(8px, 2.5vw, 12px);
   }
 
   .form-section h2 {
@@ -172,7 +179,10 @@
 
 @media (max-width: 375px) {
   .form-section {
-    padding: 14px 0 0 0; /* Only vertical padding - horizontal padding handled by container */
+    padding-top: 14px;
+    padding-bottom: 0;
+    padding-left: clamp(6px, 2vw, 10px);
+    padding-right: clamp(6px, 2vw, 10px);
   }
 
   .form-section h2 {

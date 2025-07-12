@@ -207,13 +207,11 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                         </span>
                       </label>
                       {roommatePreference === "seeking" && (
-                        <div className="roommate-help-text">
-                          <i className="fas fa-info-circle"></i>
-                          <span>
-                            Once everyone completes their registration, we'll
-                            share the list with others looking for roommates
-                          </span>
-                        </div>
+                        <span className="roommate-help-text">
+                          <i className="fas fa-info-circle"></i>Once everyone
+                          completes their registration, we'll share the list
+                          with others looking for roommates
+                        </span>
                       )}
                     </div>
                   </div>

@@ -286,3 +286,7 @@ input[type="checkbox"]:hover {
   text-decoration: underline;
   transform: translateY(-1px);
 }
+
+.fa-info-circle {
+  margin-right: 0.31rem;
+}

@@ -169,9 +169,9 @@ const PaymentSummary = ({ formData, pricing, submissionResult }) => {
 
       {formData.paymentMethod === "credit" && (
         <div className="currency-note">
-          <i className="fas fa-info-circle"></i>
           <span>
-            Credit card payments are processed in EUR at current exchange rate
+            <i className="fas fa-info-circle"></i> Credit card payments are
+            processed in EUR at current exchange rate
           </span>
         </div>
       )}
