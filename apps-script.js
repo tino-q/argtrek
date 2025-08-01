@@ -14,6 +14,9 @@ const MG_KEY = "<REDACTED>";
 const REDSYS_USER = "<REDACTED>";
 const REDSYS_PASS = "<REDACTED>"; // Note: \u0021 is '!'
 
+// Email configuration
+const USE_GMAIL = true; // Set to false to use Mailgun
+
 // Configuration
 const TRIP_REGISTRATIONS_SHEET_NAME = "Trip Registrations";
 const RSVP_SHEET_NAME = "RSVP"; // Sheet containing RSVP data
@@ -1127,6 +1130,7 @@ function sendPasswordEmail(email, password, name) {
         
         <div style="background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc3545;">
           <h4 style="margin-top: 0; color: #721c24;">⚠️ Attention</h4>
+          <p style="margin-bottom: 0; color: #721c24;">The registration deadline has passed, but you're still welcome to sign up! We'll do our best to accommodate you, though we can't guarantee a spot or quote at this stage. Once you confirm your registration, Maddie will get in touch in case any adjustments to the quote need to be considered.</p>
           <p style="margin-bottom: 0; color: #721c24;">Please complete payment within the next 48 hours to secure your spot.</p>
           ${
             shouldShowPlus1Warning
@@ -1199,7 +1203,7 @@ function sendPasswordEmail(email, password, name) {
       // });
 
       const bcc = "sonsolesstays+argtrip@gmail.com";
-      sendMailGunEmail(email, subject, htmlBody, [], bcc);
+      sendEmail(email, subject, htmlBody, [], bcc);
 
       console.log("Email sent successfully to", email);
       emailSent = true;
@@ -1370,7 +1374,7 @@ function sendNewAccountNotificationEmail(email, name) {
     `;
 
     // Send notification email to admin
-    sendMailGunEmail(adminEmail, subject, htmlBody);
+    sendEmail(adminEmail, subject, htmlBody);
 
     console.log(`New account notification email sent to ${adminEmail}`);
     return true;
@@ -1428,12 +1432,56 @@ function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
 
     const bcc = "sonsolesstays+argtrip@gmail.com";
     // Send email with PDF attachment
-    sendMailGunEmail(clientEmail, subject, htmlBody, [pdfBlob], bcc);
+    sendEmail(clientEmail, subject, htmlBody, [pdfBlob], bcc);
 
     console.log(`PDF email sent successfully to ${clientEmail}`);
     return true;
   } catch (error) {
     console.error(`Error sending PDF email to ${clientEmail}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Unified email sending function that switches between Gmail and Mailgun
+ * @param {string|string[]} to - recipient email(s)
+ * @param {string} subject - email subject
+ * @param {string} htmlContent - HTML email body
+ * @param {Array<Blob>} attachments - optional attachments
+ * @param {string} bcc - optional BCC recipient
+ */
+function sendEmail(to, subject, htmlContent, attachments = [], bcc) {
+  if (USE_GMAIL) {
+    return sendGmailEmail(to, subject, htmlContent, attachments, bcc);
+  } else {
+    return sendMailGunEmail(to, subject, htmlContent, attachments, bcc);
+  }
+}
+
+/**
+ * Send email using Gmail/MailApp
+ */
+function sendGmailEmail(to, subject, htmlContent, attachments = [], bcc) {
+  try {
+    const emailOptions = {
+      to: Array.isArray(to) ? to.join(",") : to,
+      subject: subject,
+      htmlBody: htmlContent,
+      replyTo: "sonsolesstays+argtrip@gmail.com",
+    };
+
+    if (bcc) {
+      emailOptions.bcc = bcc;
+    }
+
+    if (attachments && attachments.length > 0) {
+      emailOptions.attachments = attachments;
+    }
+
+    MailApp.sendEmail(emailOptions);
+    console.log(`Gmail email sent successfully to: ${emailOptions.to}`);
+  } catch (error) {
+    console.error("Gmail email send failed:", error);
     throw error;
   }
 }
@@ -1589,7 +1637,7 @@ function getPaymentLinkInfo(email) {
           const now = new Date();
           const hoursDifference = (now - linkTimestamp) / (1000 * 60 * 60);
 
-          if (hoursDifference > 24) {
+          if (hoursDifference > 24 * 3) {
             expiredCount++;
           } else {
             // This is an active link. We want to store only the latest one.
@@ -1735,7 +1783,7 @@ function createPaymentLink(order, authToken) {
       descripcion: "",
       ds_merchant_p2f_expirydate_type: "",
       ds_merchant_p2f_expirydate_minutos: "",
-      ds_merchant_p2f_expirydate_dias: "1",
+      ds_merchant_p2f_expirydate_dias: "3",
       ds_merchant_p2f_expirydate: "",
       ds_merchant_consumerlanguage: "2",
       nombrecliente: order.user.name,
@@ -1807,11 +1855,7 @@ function createPaymentLink(order, authToken) {
  * Results are logged to the PAYMENTLINKSDB sheet.
  */
 function generatePaymentLinksBatch() {
-  const emailsToProcess = [
-    "tinqueija@gmail.com",
-    // Add other user emails here, for example:
-    // "another-user@example.com",
-  ];
+  const emailsToProcess = ["amn17@stanford.edu"];
 
   let authToken;
   try {
