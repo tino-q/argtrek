@@ -38,6 +38,9 @@ export const RSVP_FIELDS = {
   FLIGHT_AEP_BRC: "AEP-BRC",
   FLIGHT_BRC_MDZ: "BRC-MDZ",
   FLIGHT_MDZ_AEP: "MDZ-AEP",
+
+  // USD to EUR Exchange Rate
+  USD_TO_EUR_EXCHANGE_RATE: "USD_TO_EUR_EXCHANGE_RATE",
 };
 
 /**
@@ -565,4 +568,14 @@ export const getExcludedTripServices = (rsvpData) => {
     accommodations: getExcludedAccommodations(rsvpData),
     flights: getExcludedFlights(rsvpData),
   };
+};
+
+/**
+ * Get USD to EUR exchange rate from RSVP data with fallback to default
+ */
+export const getUSDToEURExchangeRate = (rsvpData) => {
+  if (!rsvpData || !rsvpData[RSVP_FIELDS.USD_TO_EUR_EXCHANGE_RATE]) {
+    return 0.86;
+  }
+  return rsvpData[RSVP_FIELDS.USD_TO_EUR_EXCHANGE_RATE];
 };

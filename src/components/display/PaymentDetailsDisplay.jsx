@@ -2,7 +2,7 @@
 // Shows payment information after successful trip registration
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { getTravelerName, getEmail } from "../../utils/rsvpData";
+import { getTravelerName, getEmail, getUSDToEURExchangeRate } from "../../utils/rsvpData";
 import { FORM_FIELDS, EMAIL_CONFIG, APPS_SCRIPT_URL } from "../../utils/config";
 
 import { copyToClipboard } from "../../utils/clipboard";
@@ -15,7 +15,6 @@ import ProofOfPaymentUpload from "../form/ProofOfPaymentUpload";
 import CreditCardWarning from "../common/CreditCardWarning";
 
 import { BANK_DETAILS, CRYPTO_WALLETS, NETWORK_INFO } from "../../utils/config";
-import { USD_TO_EUR_EXCHANGE_RATE } from "../../hooks/usePricing";
 
 const PaymentDetailsDisplay = ({
   rsvpData,
@@ -359,7 +358,7 @@ const PaymentDetailsDisplay = ({
                   <br />
                   <CreditCardWarning
                     paymentSchedule={formData[FORM_FIELDS.PAYMENT_SCHEDULE]}
-                    exchangeRate={USD_TO_EUR_EXCHANGE_RATE}
+                    exchangeRate={getUSDToEURExchangeRate(rsvpData)}
                   />
                 </>
               )}

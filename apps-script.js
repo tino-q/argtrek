@@ -1637,7 +1637,7 @@ function getPaymentLinkInfo(email) {
           const now = new Date();
           const hoursDifference = (now - linkTimestamp) / (1000 * 60 * 60);
 
-          if (hoursDifference > 24 * 3) {
+          if (hoursDifference > 24) {
             expiredCount++;
           } else {
             // This is an active link. We want to store only the latest one.
@@ -1855,7 +1855,7 @@ function createPaymentLink(order, authToken) {
  * Results are logged to the PAYMENTLINKSDB sheet.
  */
 function generatePaymentLinksBatch() {
-  const emailsToProcess = ["amn17@stanford.edu"];
+  const emailsToProcess = ["maximilian.mancini@stanford.edu"];
 
   let authToken;
   try {

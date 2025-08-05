@@ -1,7 +1,7 @@
 import React from "react";
 import { FORM_FIELDS } from "../../utils/config";
 import "../../styles/PaymentOptions.css";
-import { USD_TO_EUR_EXCHANGE_RATE } from "../../hooks/usePricing";
+import { getUSDToEURExchangeRate } from "../../utils/rsvpData";
 import CreditCardWarning from "../common/CreditCardWarning";
 
 const BANK_DETAILS = [
@@ -53,7 +53,7 @@ const CURRENCY_INFO = {
   },
 };
 
-const PaymentOptions = ({ formData, updateFormData }) => {
+const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
   const isCrypto = formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto";
 
   // Set default payment schedule to "full" (Single Payment) if not set
@@ -270,7 +270,7 @@ const PaymentOptions = ({ formData, updateFormData }) => {
       {formData[FORM_FIELDS.PAYMENT_METHOD] === "credit" && (
         <CreditCardWarning
           paymentSchedule={formData[FORM_FIELDS.PAYMENT_SCHEDULE]}
-          exchangeRate={USD_TO_EUR_EXCHANGE_RATE}
+          exchangeRate={getUSDToEURExchangeRate(rsvpData)}
         />
       )}
 
