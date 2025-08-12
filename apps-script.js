@@ -23,6 +23,7 @@ const RSVP_SHEET_NAME = "RSVP"; // Sheet containing RSVP data
 const TPV_PAYMENTS_SHEET_NAME = "TPV PAYMENTS"; // Sheet for REDSYS TPV payment callbacks
 const NEW_EMAILS_SHEET_NAME = "NEW EMAILS"; // Sheet for new email requests
 const WELCOME_EMAILS_SHEET_NAME = "WELCOME EMAILS"; // Sheet for tracking welcome emails sent
+const WHATSAPP_EMAILS_SHEET_NAME = "WHATSAPP EMAILS"; // Sheet for tracking WhatsApp invite emails sent
 const PAYMENTLINKSDB_SHEET_NAME = "PAYMENTLINKSDB";
 
 /**
@@ -1849,13 +1850,340 @@ function createPaymentLink(order, authToken) {
 }
 
 /**
+ * Send WhatsApp group invite emails to all registered participants
+ * This function reads all emails from the Trip Registrations sheet and sends invite emails
+ * Uses WHATSAPP EMAILS sheet to track sent emails and prevent duplicates
+ */
+// eslint-disable-next-line no-unused-vars
+function sendWhatsAppInviteEmails() {
+  try {
+    console.log("Starting to send WhatsApp invite emails...");
+
+    const whatsappLink = "https://chat.whatsapp.com/IYh0cLoxU4V12Njmp8CcnE"; // You'll fill this in later
+
+    // Get all emails from Trip Registrations sheet
+    const emails = getAllRegisteredEmails();
+
+    if (emails.length === 0) {
+      console.log("No registered emails found");
+      return {
+        success: false,
+        message: "No registered emails found in Trip Registrations sheet",
+      };
+    }
+
+    let emailsSent = 0;
+    let emailsSkipped = 0;
+    let errors = 0;
+
+    // Load all sent WhatsApp emails into memory
+    const sentWhatsAppEmails = getAllWhatsAppEmailsSent();
+
+    // Process each email
+    for (const emailData of emails) {
+      const email = emailData.email;
+      const name = emailData.name;
+
+      try {
+        // Check if WhatsApp invite email was already sent
+        const alreadySent = sentWhatsAppEmails.has(
+          email.toString().toLowerCase().trim()
+        );
+
+        if (alreadySent) {
+          emailsSkipped++;
+          console.log(`⏭️  WhatsApp invite already sent to: ${email}`);
+          continue;
+        }
+
+        const result = sendWhatsAppInviteEmail(
+          email.toString().trim(),
+          name.toString().trim(),
+          whatsappLink
+        );
+
+        if (result.success) {
+          emailsSent++;
+          console.log(`✓ WhatsApp invite sent to: ${email}`);
+        } else {
+          errors++;
+          console.error(
+            `✗ Failed to send WhatsApp invite to: ${email} - ${result.error}`
+          );
+        }
+
+        // Add a small delay to avoid hitting Gmail sending limits
+        Utilities.sleep(3000); // 1 second delay
+      } catch (emailError) {
+        errors++;
+        console.error(
+          `✗ Error sending WhatsApp invite to ${email}:`,
+          emailError
+        );
+      }
+    }
+
+    // Final summary
+    console.log(`\n=== WHATSAPP INVITE EMAIL SUMMARY ===`);
+    console.log(`Total emails sent: ${emailsSent}`);
+    console.log(`Total emails skipped (already sent): ${emailsSkipped}`);
+    console.log(`Total errors: ${errors}`);
+    console.log(`Total processed: ${emailsSent + emailsSkipped + errors}`);
+
+    return {
+      success: true,
+      emailsSent: emailsSent,
+      emailsSkipped: emailsSkipped,
+      errors: errors,
+      message: `Completed: ${emailsSent} emails sent, ${emailsSkipped} skipped, ${errors} errors`,
+    };
+  } catch (error) {
+    console.error("Error in sendWhatsAppInviteEmails:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get all registered emails from Trip Registrations sheet
+ */
+function getAllRegisteredEmails() {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
+
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return [];
+    }
+
+    // Get all data from the sheet
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+
+    if (values.length < 2) {
+      return [];
+    }
+
+    // Get headers (first row)
+    const headers = values[0];
+
+    // Find column indices
+    const emailColumnIndex = headers.indexOf("formData.email");
+    const firstNameColumnIndex = headers.indexOf("formData.firstName");
+    const lastNameColumnIndex = headers.indexOf("formData.lastName");
+
+    if (emailColumnIndex === -1) {
+      console.error(
+        "Email column 'formData.email' not found in Trip Registrations sheet"
+      );
+      return [];
+    }
+
+    const emails = [];
+
+    // Process each row (skip header row)
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const email = row[emailColumnIndex];
+      const firstName = row[firstNameColumnIndex] || "";
+      const lastName = row[lastNameColumnIndex] || "";
+      const fullName = `${firstName} ${lastName}`.trim() || "Traveler";
+
+      // Skip rows without email
+      if (!email) {
+        continue;
+      }
+
+      emails.push({
+        email: email.toString().trim(),
+        name: fullName,
+      });
+    }
+
+    console.log(`Found ${emails.length} registered emails`);
+    return emails;
+  } catch (error) {
+    console.error("Error getting registered emails:", error);
+    return [];
+  }
+}
+
+/**
+ * Helper to load all emails that have already received a WhatsApp invite email
+ */
+function getAllWhatsAppEmailsSent() {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(WHATSAPP_EMAILS_SHEET_NAME);
+    if (!sheet) {
+      return new Set();
+    }
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    if (values.length === 0) {
+      return new Set();
+    }
+
+    // Get headers to find email column index
+    const headers = values[0];
+    const emailColumnIndex = headers.indexOf("email");
+    const statusColumnIndex = headers.indexOf("status");
+
+    if (emailColumnIndex === -1) {
+      return new Set();
+    }
+
+    const emailSet = new Set();
+    for (let i = 1; i < values.length; i++) {
+      // Skip header row
+      const row = values[i];
+      const rowEmail = row[emailColumnIndex];
+      const rowStatus = row[statusColumnIndex];
+      if (rowEmail && rowStatus === "sent") {
+        emailSet.add(rowEmail.toString().toLowerCase().trim());
+      }
+    }
+    return emailSet;
+  } catch (error) {
+    console.error("Error loading all WhatsApp emails sent:", error);
+    return new Set();
+  }
+}
+
+/**
+ * Send WhatsApp group invite email to a specific user
+ */
+function sendWhatsAppInviteEmail(email, name, whatsappLink) {
+  try {
+    const subject = "Join our Argentina Trip WhatsApp Group! 🇦🇷";
+
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+        <h2 style="color: #2c3e50;">¡Hola ${name}!</h2>
+        
+        <p>We invite you to join our Argentina trip WhatsApp group to connect with fellow travelers and receive important trip updates.</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${whatsappLink}" 
+             style="display: inline-block; background-color: #25D366; color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; border: none;">
+            📱 Join Our WhatsApp Group
+          </a>
+        </div>
+        
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; border-left: 4px solid #25D366;">
+          <h4 style="margin-top: 0; color: #495057;">Group Guidelines:</h4>
+          <ul style="margin-bottom: 0; padding-left: 20px;">
+            <li>Keep conversations trip-related and positive</li>
+            <li>Be respectful to all group members</li>
+            <li>Feel free to share your excitement and questions!</li>
+          </ul>
+        </div>
+        
+        <p>Questions? Contact Maddie: <a href="https://wa.me/5491169729783" style="color: #25D366; text-decoration: none;">+54 911 6972 9783</a></p>
+        
+        <p style="color: #6c757d; font-style: italic; margin-top: 30px;">Sonsoles Stays</p>
+      </div>
+    `;
+
+    let emailSent = false;
+    let errorMessage = null;
+
+    try {
+      // Send the email
+      const bcc = "sonsolesstays+argtrip@gmail.com";
+
+      sendEmail(email, subject, htmlBody, [], bcc);
+
+      console.log("WhatsApp invite email sent successfully to", email);
+      emailSent = true;
+    } catch (emailError) {
+      console.error(
+        `Error sending WhatsApp invite email to ${email}:`,
+        emailError
+      );
+      errorMessage = emailError.message;
+      emailSent = false;
+    }
+
+    // Record the email sending attempt
+    const status = emailSent ? "sent" : "failed";
+    recordWhatsAppEmailSent(email, name, status);
+
+    return {
+      success: emailSent,
+      message: emailSent
+        ? `WhatsApp invite email sent successfully to ${email}`
+        : `Failed to send WhatsApp invite email to ${email}: ${errorMessage}`,
+      error: emailSent ? null : errorMessage,
+    };
+  } catch (error) {
+    console.error(`Error sending WhatsApp invite email to ${email}:`, error);
+
+    // Record the failed attempt
+    recordWhatsAppEmailSent(email, name, "failed");
+
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+}
+
+/**
+ * Record WhatsApp invite email sending in WHATSAPP EMAILS sheet
+ */
+function recordWhatsAppEmailSent(email, name, status) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = spreadsheet.getSheetByName(WHATSAPP_EMAILS_SHEET_NAME);
+
+    // Create WHATSAPP EMAILS sheet if it doesn't exist
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(WHATSAPP_EMAILS_SHEET_NAME);
+      console.log("Created WHATSAPP EMAILS sheet");
+      // Add headers
+      const headers = ["timestamp", "email", "name", "status"];
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+
+      // Format header row
+      const headerRange = sheet.getRange(1, 1, 1, headers.length);
+      headerRange.setFontWeight("bold");
+      headerRange.setBackground("#f0f0f0");
+    }
+
+    // Prepare data row
+    const timestamp = new Date().toISOString();
+
+    // Append the new row
+    sheet.appendRow([timestamp, email, name, status]);
+
+    // Get the row number of the newly added row
+    const lastRow = sheet.getLastRow();
+
+    console.log(
+      `WhatsApp email record saved to row ${lastRow}: ${email} - ${status}`
+    );
+
+    return {
+      success: true,
+      rowNumber: lastRow,
+    };
+  } catch (error) {
+    console.error("Error recording WhatsApp email:", error);
+    return {
+      success: false,
+      error: "Failed to record WhatsApp email",
+    };
+  }
+}
+
+/**
  * Manually-triggered function to generate Redsys payment links in batch for a predefined list of users.
  * This function logs into Redsys once, then for each email, it looks up the registration data,
  * and creates a payment link if one doesn't already exist.
  * Results are logged to the PAYMENTLINKSDB sheet.
  */
 function generatePaymentLinksBatch() {
-  const emailsToProcess = ["maximilian.mancini@stanford.edu"];
+  const emailsToProcess = [];
 
   let authToken;
   try {
