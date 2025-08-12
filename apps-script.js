@@ -15,7 +15,7 @@ const REDSYS_USER = "<REDACTED>";
 const REDSYS_PASS = "<REDACTED>"; // Note: \u0021 is '!'
 
 // Email configuration
-const USE_GMAIL = true; // Set to false to use Mailgun
+const USE_GMAIL = false; // Set to false to use Mailgun
 
 // Configuration
 const TRIP_REGISTRATIONS_SHEET_NAME = "Trip Registrations";
@@ -1529,7 +1529,7 @@ function sendMailGunEmail(to, subject, htmlContent, attachments = [], bcc) {
     },
     muteHttpExceptions: true,
   };
-  const url = "https://api.eu.mailgun.net/v3/" + MG_DOMAIN + "/messages";
+  const url = "https://api.mailgun.net/v3/" + MG_DOMAIN + "/messages";
   const res = UrlFetchApp.fetch(url, options);
 
   if (res.getResponseCode() < 200 || res.getResponseCode() > 299) {
