@@ -8,8 +8,8 @@ const CreditCardWarning = ({ paymentSchedule, exchangeRate }) => {
         <h3>Important</h3>
         <ul>
           <li>
-            Credit card payments are to be denominated in EUR, as Sonsoles Stays
-            is a business operating from 🇪🇸 Spain.
+            Credit card payments are to be denominated in EUR, as we are
+            a business operating from 🇪🇸 Spain.
           </li>
           <li>
             Bank transfers & crypto payments are denominated and handled in USD.
