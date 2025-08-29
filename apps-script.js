@@ -1145,7 +1145,7 @@ function sendPasswordEmail(email, password, name) {
           }
         </div>
 
-        <p>Argentina awaits you! 🇦🇷✈️</p>
+        <p>Argentina awaits you! 🇦🇷</p>
         <p>You're all set to confirm your spot on our amazing Argentina adventure. Use the details below to access your trip registration:</p>
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #495057;">Ready to confirm your trip?</h3>
@@ -1402,7 +1402,6 @@ function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
         
         <p>Please find attached your comprehensive trip registration summary (<strong>${filename}</strong>) containing:</p>
         <ul>
-          <li>✅ Your confirmed flight details</li>
           <li>🏨 Hotel accommodations</li>
           <li>💰 Pricing breakdown</li>
           <li>💳 Payment information</li>
