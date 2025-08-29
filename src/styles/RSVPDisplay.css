@@ -157,12 +157,6 @@
   font-weight: 500;
 }
 
-.flight-route-brief {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  margin-top: 0.25rem;
-}
-
 /* Service Expanded (Detailed View) */
 .service-expanded {
   margin-top: 1rem;
@@ -199,189 +193,6 @@
   background: #fafafa; /* gray-50 */
   border-color: #e5e5e5; /* gray-300 */
   opacity: 0.7;
-}
-
-/* Luggage addon styling */
-.luggage-addon-section {
-}
-
-.luggage-addon-section h3 {
-  margin: 0 0 1.5rem 0;
-  color: var(--text-dark);
-  font-size: 1.2rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.luggage-addon-card {
-  display: flex;
-  align-items: center;
-  padding: 20px;
-  border: 2px solid #e5e5e5;
-  border-radius: 12px;
-  background: #fafafa;
-  transition: all 0.3s ease;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.luggage-addon-card:hover {
-  border-color: var(--primary);
-  background: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.luggage-addon-card.selected {
-  border-color: var(--primary);
-  background: rgba(var(--primary-rgb), 0.05);
-}
-
-.luggage-checkbox {
-  display: flex;
-  align-items: center;
-}
-
-.luggage-checkbox input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
-  accent-color: var(--primary);
-}
-
-.luggage-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(
-    135deg,
-    var(--primary) 0%,
-    var(--primary-dark) 100%
-  );
-  border-radius: 12px;
-  color: white;
-}
-
-.luggage-icon i {
-  font-size: 2rem;
-}
-
-.luggage-details {
-  flex: 1;
-}
-
-.luggage-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-dark);
-  margin-bottom: 4px;
-}
-
-.luggage-description {
-  color: #666;
-  font-size: 0.85rem;
-}
-
-.luggage-price {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
-}
-
-.luggage-price .price-amount {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #28a745;
-  line-height: 1;
-}
-
-.luggage-price .price-currency {
-  font-size: 0.8rem;
-  color: #28a745;
-  font-weight: 500;
-}
-
-/* On-demand luggage pricing styling */
-.luggage-price .price-amount.on-demand {
-  color: #6c757d;
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin-top: 20px;
-}
-
-.luggage-warning {
-  background: #fff3cd;
-  border: 1px solid #ffc107;
-  border-radius: 6px;
-  padding: 0.75rem;
-  margin-top: 0.5rem;
-  color: #856404;
-  font-size: 0.9rem;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-}
-
-.luggage-warning i {
-  color: #ffc107;
-  margin-top: 0.1rem;
-  flex-shrink: 0;
-}
-
-.luggage-addon-card.discouraged {
-  border-color: #ffc107;
-  background: #fffbf0;
-}
-
-.luggage-addon-card.discouraged:hover {
-  border-color: #ffb302;
-  background: #fff8e1;
-}
-
-.luggage-addon-card.discouraged.selected {
-  border-color: #ff9800;
-  background: #fff3e0;
-}
-
-/* Carry-on luggage (included) styling */
-.luggage-addon-card.included {
-  background: #f0f9f0;
-  border-color: #28a745;
-  opacity: 1;
-}
-
-.luggage-addon-card.disabled {
-  cursor: not-allowed !important;
-}
-
-.luggage-addon-card.disabled:hover {
-  transform: none;
-  box-shadow: none;
-  background: #f0f9f0;
-  border-color: #28a745;
-}
-
-.luggage-icon.personal-item {
-  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-}
-
-.luggage-icon.carry-on {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-}
-
-.luggage-price.included .price-amount {
-  color: #28a745;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.luggage-checkbox input[type="checkbox"]:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
 }
 
 /* Service Details */
@@ -576,102 +387,9 @@
     font-size: 0.8rem;
   }
 
-  .flight-route-brief {
-    font-size: 0.85rem;
-  }
-
-  /* Ultra Simple Flight Mobile */
-  .flight-line {
-    gap: 0.5rem;
-  }
-
-  .flight-code {
-    font-size: 0.85rem;
-    padding: 0.15rem 0.3rem;
-  }
-
-  .flight-route {
-    font-size: 0.9rem;
-  }
-
-  .flight-times {
-    font-size: 0.8rem;
-  }
-
-  .flight-date {
-    font-size: 0.75rem;
-  }
-
-  .airport-times {
-    gap: 0.75rem;
-  }
-
-  .departure .code,
-  .arrival .code {
-    font-size: 1rem;
-  }
-
-  .departure .time,
-  .arrival .time {
-    font-size: 0.85rem;
-  }
-
   .notice-content {
     flex-direction: column;
     gap: 0.75rem;
-  }
-
-  .luggage-addon-card {
-    padding: 16px;
-    gap: 12px;
-  }
-
-  .luggage-icon {
-    width: 50px;
-    height: 50px;
-  }
-
-  .luggage-icon i {
-    font-size: 1.6rem;
-  }
-
-  .luggage-title {
-    font-size: 0.9rem;
-  }
-
-  .luggage-description {
-    font-size: 0.8rem;
-  }
-
-  .luggage-price .price-amount {
-    font-size: 1.1rem;
-  }
-
-  .flight-times {
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem;
-  }
-
-  .flight-departure,
-  .flight-arrival {
-    width: 100%;
-  }
-
-  .flight-duration {
-    flex-direction: row;
-    margin: 0;
-    padding: 0.5rem 1rem;
-    justify-content: center;
-  }
-
-  .flight-duration i {
-    margin-right: 0.5rem;
-  }
-
-  .airport-name {
-    max-width: none;
-    font-size: 0.8rem;
   }
 }
 
@@ -705,58 +423,6 @@
 
   .service-dates-brief {
     font-size: 0.75rem;
-  }
-
-  .flight-route-brief {
-    font-size: 0.8rem;
-  }
-
-  /* Ultra Simple Flight Small Mobile */
-  .flight-line {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .flight-code {
-    font-size: 0.8rem;
-    padding: 0.15rem 0.3rem;
-  }
-
-  .flight-route {
-    font-size: 0.85rem;
-  }
-
-  .flight-times {
-    font-size: 0.75rem;
-    margin-left: 0;
-  }
-
-  .flight-date {
-    font-size: 0.7rem;
-  }
-
-  .airport-times {
-    flex-direction: column;
-    gap: 0.5rem;
-    text-align: left;
-  }
-
-  .departure .code,
-  .arrival .code {
-    font-size: 0.9rem;
-  }
-
-  .departure .time,
-  .arrival .time {
-    font-size: 0.8rem;
-  }
-
-  .flight-old-meta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
   }
 }
 
@@ -814,22 +480,6 @@
 
 @media (max-width: 480px) {
   /* Navigation button styles handled by Navigation.css */
-
-  .luggage-addon-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .luggage-addon-card .luggage-checkbox {
-    order: -1;
-    align-self: flex-end;
-  }
-
-  .luggage-addon-card .luggage-price {
-    align-self: flex-end;
-    margin-top: -10px;
-  }
 }
 
 /* Responsive pack price layout */
@@ -844,46 +494,6 @@
   .pack-price-amount {
     font-size: 2.5rem;
   }
-}
-
-/* Ultra Simple Flight Card */
-
-.simple-flight {
-  width: 100%;
-}
-
-.flight-line {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.25rem;
-  flex-wrap: wrap;
-}
-
-.flight-code {
-  font-weight: 700;
-  color: var(--primary);
-  font-size: 0.9rem;
-  background: rgba(184, 149, 106, 0.1);
-  padding: 0.2rem 0.4rem;
-  border-radius: 3px;
-}
-
-.flight-route {
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.flight-times {
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  margin-left: auto;
-}
-
-.flight-date {
-  color: var(--text-secondary);
-  font-size: 0.8rem;
 }
 
 /* Single Line Hotel/Accommodation Format */
@@ -977,95 +587,7 @@
   }
 }
 
-/* Single Line Flight Format */
-.flight-single-line {
-  width: 100%;
-}
-
-.flight-route-line {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  font-size: 0.9rem;
-}
-
-.flight-cities {
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.flight-iata-times {
-  color: var(--text-secondary);
-  font-weight: 500;
-  font-size: 0.85rem;
-}
-
-.flight-segment {
-  color: var(--text-primary);
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.flight-arrow {
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-@media (max-width: 768px) {
-  .flight-route-line {
-    font-size: 0.85rem;
-    gap: 0.25rem;
-  }
-
-  .flight-cities {
-    font-size: 0.9rem;
-  }
-
-  .flight-iata-times {
-    font-size: 0.8rem;
-  }
-
-  .flight-segment {
-    font-size: 0.8rem;
-  }
-
-  .flight-arrow {
-    font-size: 0.9rem;
-  }
-}
-
 @media (max-width: 480px) {
-  .flight-route-line {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.125rem;
-  }
-
-  .flight-cities {
-    font-size: 0.85rem;
-    width: 100%;
-  }
-
-  .flight-iata-times {
-    font-size: 0.75rem;
-    width: 100%;
-    margin-left: 0.5rem;
-  }
-
-  .flight-arrow {
-    display: none;
-  }
-
-  .flight-segment:first-child::after {
-    content: " →";
-    color: var(--primary);
-    font-weight: 600;
-  }
-
   /* Hotel date responsive formatting on small screens */
   .accommodation-dates {
     flex-direction: column;
@@ -1118,62 +640,6 @@
     font-size: 0.7rem;
     margin-bottom: 0.15rem;
   }
-
-  .flight-cities {
-    font-size: 0.8rem;
-  }
-
-  .flight-iata-times {
-    font-size: 0.7rem;
-    margin-left: 0.25rem;
-  }
-
-  .flight-date {
-    font-size: 0.65rem;
-  }
-}
-
-/* Expanded Details */
-.simple-flight .flight-details {
-  margin-top: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  animation: expandDown 0.2s ease-out;
-}
-
-.service-item.included .simple-flight .flight-details {
-  border-top-color: rgba(34, 197, 94, 0.2);
-}
-
-.service-item.excluded .simple-flight .flight-details {
-  border-top-color: rgba(0, 0, 0, 0.1);
-}
-
-.airport-times {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.departure,
-.arrival {
-  text-align: center;
-}
-
-.departure .code,
-.arrival .code {
-  display: block;
-  font-weight: 700;
-  color: var(--primary);
-  font-size: 1.1rem;
-  margin-bottom: 0.25rem;
-}
-
-.departure .time,
-.arrival .time {
-  display: block;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
 }
 
 /* Service Icon */

@@ -14,9 +14,6 @@ export const PRICING_CONFIG = {
     Mendoza: 45, // Nov 27, 28
   },
 
-  // Note: Individual flight prices are not displayed to users
-  // Users only see the total package price from their RSVP data
-
   // Optional Activities (will be used later for add-ons)
   activities: {
     horsebackRiding: 0,
@@ -50,9 +47,6 @@ export const getprivateRoomUpgrade = (location, period = null) => {
 
   return typeof config === "number" ? config : config.arrival || 0;
 };
-
-// Note: Individual flight pricing removed - users only see total package price
-// Flight costs are bundled into the base package price from RSVP data
 
 /**
  * Format price for display

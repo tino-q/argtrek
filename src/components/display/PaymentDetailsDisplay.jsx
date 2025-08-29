@@ -372,7 +372,7 @@ const PaymentDetailsDisplay = ({
           </button>
           <p className="print-note">
             Generate and print your comprehensive trip registration summary with
-            all confirmed flights, hotels, and payment details.
+            all confirmed hotels, and payment details.
           </p>
         </div>
 

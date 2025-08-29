@@ -168,14 +168,8 @@ const RSVPDisplay = ({
   // Helper function to get generic hotel description
   const getGenericHotelDescription = (location) => `Hotel in ${location}`;
 
-  // Helper function to extract city names from route
-  const extractCityNames = (route) => {
-    const cities = route.split(" → ");
-    return { origin: cities[0].replace("→", ""), destination: cities[1] };
-  };
-
   // Define all services in chronological order using centralized data
-  const createChronologicalServices = (accommodations, flights, isIncluded) => {
+  const createChronologicalServices = (accommodations, isIncluded) => {
     const services = [];
 
     // Nov 22-23: Buenos Aires Arrival
@@ -192,24 +186,6 @@ const RSVPDisplay = ({
         nights: buenosAiresArrival.nights.map((night) => ({ date: night })),
         isIncluded,
         sortOrder: 1,
-      });
-    }
-
-    // Nov 24: Flight Buenos Aires → Bariloche
-    const flightToBRC = flights.find((flight) => flight.code === "JA3047");
-    if (flightToBRC) {
-      services.push({
-        type: "flight",
-        code: flightToBRC.code,
-        airline: flightToBRC.airline,
-        route: flightToBRC.route,
-        departure: flightToBRC.departure,
-        arrival: flightToBRC.arrival,
-        date: flightToBRC.date,
-        duration: flightToBRC.duration,
-        aircraft: flightToBRC.aircraft,
-        isIncluded,
-        sortOrder: 2,
       });
     }
 
@@ -230,24 +206,6 @@ const RSVPDisplay = ({
       });
     }
 
-    // Nov 27: Flight Bariloche → Mendoza
-    const flightToMDZ = flights.find((flight) => flight.code === "JA3725");
-    if (flightToMDZ) {
-      services.push({
-        type: "flight",
-        code: flightToMDZ.code,
-        airline: flightToMDZ.airline,
-        route: flightToMDZ.route,
-        departure: flightToMDZ.departure,
-        arrival: flightToMDZ.arrival,
-        date: flightToMDZ.date,
-        duration: flightToMDZ.duration,
-        aircraft: flightToMDZ.aircraft,
-        isIncluded,
-        sortOrder: 4,
-      });
-    }
-
     // Nov 27-28: Mendoza
     const mendoza = accommodations.find(
       (acc) => acc.location === "Mendoza" && !acc.period
@@ -262,24 +220,6 @@ const RSVPDisplay = ({
         nights: mendoza.nights.map((night) => ({ date: night })),
         isIncluded,
         sortOrder: 5,
-      });
-    }
-
-    // Nov 29: Flight Mendoza → Buenos Aires
-    const flightToAEP = flights.find((flight) => flight.code === "JA3073");
-    if (flightToAEP) {
-      services.push({
-        type: "flight",
-        code: flightToAEP.code,
-        airline: flightToAEP.airline,
-        route: flightToAEP.route,
-        departure: flightToAEP.departure,
-        arrival: flightToAEP.arrival,
-        date: flightToAEP.date,
-        duration: flightToAEP.duration,
-        aircraft: flightToAEP.aircraft,
-        isIncluded,
-        sortOrder: 6,
       });
     }
 
@@ -307,23 +247,11 @@ const RSVPDisplay = ({
   // Create chronologically ordered services
   const includedServices = createChronologicalServices(
     tripItinerary.accommodations,
-    tripItinerary.flights,
     true
   );
 
-  console.log({
-    accommodations: excludedServices.accommodations,
-    flights: excludedServices.flights,
-    createChronologicalServicesValue: createChronologicalServices(
-      excludedServices.accommodations,
-      excludedServices.flights,
-      false
-    ),
-  });
-
   const excludedProcessedServices = createChronologicalServices(
     excludedServices.accommodations,
-    excludedServices.flights,
     false
   );
 
@@ -361,36 +289,7 @@ const RSVPDisplay = ({
             </div>
           </>
         ) : (
-          <>
-            {/* Flight - Single Line Format */}
-            <div className="flight-single-line">
-              {(() => {
-                const cities = extractCityNames(service.route);
-                return (
-                  <div className="flight-route-line">
-                    <div>
-                      <span className="flight-segment">{cities.origin}</span>
-                    </div>
-
-                    <div className="flight-date ">
-                      <span>
-                        ({service.departure.airport}) {service.departure.time}
-                      </span>
-                      <span className="flight-arrow"> → </span>
-                      <span>
-                        {cities.destination} ({service.arrival.airport}){" "}
-                        {service.arrival.time}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })()}
-              <div className="flight-date">
-                {service.date} - {service.code}
-              </div>
-              <div className="flight-date">{service.airline}</div>
-            </div>
-          </>
+          <></>
         )}
       </div>
       <div className={`service-status ${isIncluded ? "included" : "excluded"}`}>
@@ -747,10 +646,10 @@ const RSVPDisplay = ({
       {/* Included Services */}
       <div className="services-section">
         <h3>
-          <i className="fas fa-star"></i> Accomodation & Flights
+          <i className="fas fa-star"></i> Accomodation
         </h3>
         <p className="services-description">
-          These flights and accommodations are confirmed for your trip:
+          These accommodations are confirmed for your trip:
         </p>
         <p className="services-description"></p>
 
@@ -791,7 +690,7 @@ const RSVPDisplay = ({
             <i className="fas fa-times-circle"></i> Services Not Included
           </h3>
           <p className="services-description">
-            These flights and accommodations are not included in your trip:
+            These accommodations are not included in your trip:
           </p>
 
           <div className="services-grid">
@@ -827,102 +726,6 @@ const RSVPDisplay = ({
                 Maddie on WhatsApp <i className="fab fa-whatsapp"></i>
               </a>
             </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Luggage Options */}
-      <div className="luggage-addon-section">
-        <h3>
-          <i className="fas fa-suitcase"></i> Luggage Options
-        </h3>
-
-        {/* Personal Item - Always included */}
-        <div className="luggage-addon-card included disabled">
-          <div className="luggage-checkbox">
-            <input
-              type="checkbox"
-              checked={true}
-              disabled={true}
-              style={{ pointerEvents: "none" }}
-            />
-          </div>
-          <div className="luggage-icon personal-item">
-            <i className={LUGGAGE.personalItem.icon}></i>
-          </div>
-          <div className="luggage-details">
-            <div className="luggage-title">{LUGGAGE.personalItem.name}</div>
-            <div className="luggage-description">
-              {LUGGAGE.personalItem.description}
-              {LUGGAGE.personalItem.maxWeight &&
-                ` (max ${LUGGAGE.personalItem.maxWeight})`}
-            </div>
-          </div>
-          <div className="luggage-price included">
-            <span className="price-amount">Included</span>
-          </div>
-        </div>
-
-        {/* Carry-on Luggage - Always included */}
-        <div className="luggage-addon-card included disabled">
-          <div className="luggage-checkbox">
-            <input
-              type="checkbox"
-              checked={true}
-              disabled={true}
-              style={{ pointerEvents: "none" }}
-            />
-          </div>
-          <div className="luggage-icon carry-on">
-            <i className={LUGGAGE.carryOn.icon}></i>
-          </div>
-          <div className="luggage-details">
-            <div className="luggage-title">{LUGGAGE.carryOn.name}</div>
-            <div className="luggage-description">
-              {LUGGAGE.carryOn.description} (max {LUGGAGE.carryOn.maxWeight})
-            </div>
-          </div>
-          <div className="luggage-price included">
-            <span className="price-amount">Included</span>
-          </div>
-        </div>
-
-        {/* Checked Luggage - Optional addon */}
-
-        <div
-          className={`luggage-addon-card discouraged ${isLuggageSelected ? "selected" : ""}`}
-          onClick={(e) => {
-            // Allow clicking the whole card to toggle, but not if clicking the checkbox directly
-            if (e.target.id !== "checked-luggage-checkbox") {
-              handleLuggageToggle();
-            }
-          }}
-        >
-          <div className="luggage-checkbox">
-            <input
-              type="checkbox"
-              id="checked-luggage-checkbox"
-              checked={isLuggageSelected}
-              onChange={handleLuggageToggle}
-            />
-          </div>
-          <div className="luggage-icon">
-            <i className={LUGGAGE.checked.icon}></i>
-          </div>
-          <div className="luggage-details">
-            <div className="luggage-title">{LUGGAGE.checked.name}</div>
-            <div className="luggage-description">
-              {LUGGAGE.checked.description} (max {LUGGAGE.checked.maxWeight})
-            </div>
-            {isLuggageSelected && LUGGAGE.checked.warningMessage && (
-              <div className="luggage-warning">
-                {LUGGAGE.checked.warningMessage}
-              </div>
-            )}
-          </div>
-          <div className="luggage-price">
-            <span className="price-amount on-demand">$ On demand</span>
-            <span className="price-currency"></span>
           </div>
         </div>
       </div>
