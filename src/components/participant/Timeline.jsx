@@ -450,7 +450,6 @@ const Timeline = ({ onNavigate }) => {
     "guidoh@stanford.edu",
     "tinqueija@gmail.com",
     "madibakla@gmail.com",
-    "ekin@stanford.edu",
   ];
 
   // TODO: remove this after construction
