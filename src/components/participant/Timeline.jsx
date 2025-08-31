@@ -309,11 +309,11 @@ const Timeline = ({ onNavigate }) => {
           );
           if (refresh === "1") {
             // clear local storage
-            localStorage.removeItem("timelineData");
+            localStorage.removeItem("timelineDataDev");
           }
           // get from local storage
 
-          const timelineDataStr = localStorage.getItem("timelineData");
+          const timelineDataStr = localStorage.getItem("timelineDataDev");
           let timelineData = timelineDataStr
             ? JSON.parse(timelineDataStr)
             : null;
@@ -325,7 +325,7 @@ const Timeline = ({ onNavigate }) => {
             if (success) {
               // write to local storage
               localStorage.setItem(
-                "timelineData",
+                "timelineDataDev",
                 JSON.stringify(timelineDataNew)
               );
               timelineData = timelineDataNew;
@@ -337,8 +337,51 @@ const Timeline = ({ onNavigate }) => {
             data: timelineData,
           };
         } else {
-          const response = await fetch(`${APPS_SCRIPT_URL}?endpoint=timeline`);
-          data = await response.json();
+          // Check for refresh parameter to clear cache
+          const refresh = new URLSearchParams(window.location.search).get(
+            "refresh"
+          );
+          if (refresh === "1") {
+            localStorage.removeItem("timelineData");
+            localStorage.removeItem("timelineDataTimestamp");
+          }
+
+          // Check if we have cached data and if it's still valid (1 hour)
+          const timelineDataStr = localStorage.getItem("timelineData");
+          const timestampStr = localStorage.getItem("timelineDataTimestamp");
+          const now = Date.now();
+          const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+
+          let timelineData = null;
+          if (timelineDataStr && timestampStr) {
+            const timestamp = parseInt(timestampStr);
+            if (now - timestamp < oneHour) {
+              // Cache is still valid
+              timelineData = JSON.parse(timelineDataStr);
+            }
+          }
+
+          if (!timelineData) {
+            // Fetch fresh data
+            const response = await fetch(
+              `${APPS_SCRIPT_URL}?endpoint=timeline`
+            );
+            const { success, data: timelineDataNew } = await response.json();
+            if (success) {
+              // Cache the data with timestamp
+              localStorage.setItem(
+                "timelineData",
+                JSON.stringify(timelineDataNew)
+              );
+              localStorage.setItem("timelineDataTimestamp", now.toString());
+              timelineData = timelineDataNew;
+            }
+          }
+
+          data = {
+            success: true,
+            data: timelineData,
+          };
         }
 
         if (data.success) {
@@ -407,15 +450,37 @@ const Timeline = ({ onNavigate }) => {
     "guidoh@stanford.edu",
     "tinqueija@gmail.com",
     "madibakla@gmail.com",
+    "ekin@stanford.edu",
   ];
 
   // TODO: remove this after construction
   if (!allowedEmails.includes(userEmail)) {
     return (
       <div className="container">
-        <div className="timeline-loading" style={{ height: '300px', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center' }}>
-          <h3 style={{ margin: 0, background: 'transparent', boxShadow: 'none', textShadow: 'none', border: 'none' }}>Under Construction</h3>
-          <p style={{ margin: 0 }}>Timeline is currently being updated. Please check back later.</p>
+        <div
+          className="timeline-loading"
+          style={{
+            height: "300px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-evenly",
+            alignItems: "center",
+          }}
+        >
+          <h3
+            style={{
+              margin: 0,
+              background: "transparent",
+              boxShadow: "none",
+              textShadow: "none",
+              border: "none",
+            }}
+          >
+            Under Construction
+          </h3>
+          <p style={{ margin: 0 }}>
+            Timeline is currently being updated. Please check back later.
+          </p>
           <button
             className="btn btn-secondary btn-sm"
             onClick={() => onNavigate && onNavigate("home")}
