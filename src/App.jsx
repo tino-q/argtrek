@@ -2,7 +2,7 @@
 // Enhanced with browser navigation integration using React Router
 // Supports both registration flow and participant management
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import { useNotificationContext } from "./hooks/useNotificationContext";
 import { injectAnimationStyles } from "./hooks/useAnimations";
@@ -11,6 +11,7 @@ import { useTripContext } from "./hooks/useTripContext";
 import TripProvider from "./context/TripContext.jsx";
 import NotificationProvider from "./context/NotificationContext.jsx";
 import { APPS_SCRIPT_URL, ACTION_TYPES } from "./utils/config";
+import useAuth from "./hooks/useAuth";
 
 // Import components
 import Header from "./components/layout/Header";
@@ -19,6 +20,7 @@ import Footer from "./components/layout/Footer";
 import FormFlow from "./components/flows/FormFlow";
 import Home from "./components/participant/Home";
 import Payments from "./components/participant/Payments";
+import Timeline from "./components/participant/Timeline";
 import EmailLogin from "./components/auth/EmailLogin";
 import NewEmailStep from "./components/form/NewEmailStep";
 import { STEPS } from "./utils/stepConfig";
@@ -30,6 +32,7 @@ function AppContent() {
   // React Router hooks
   const navigate = useNavigate();
   const location = useLocation();
+  const { clearAuth } = useAuth();
 
   // Trip context
   const {
@@ -120,6 +123,7 @@ function AppContent() {
   const handleLogout = () => {
     navigateToStep(STEPS.LOGIN);
     clearTripData();
+    clearAuth(); // Clear auth credentials
     showSuccess(
       "Logged out successfully. You can now login with different credentials."
     );
@@ -265,13 +269,7 @@ function AppContent() {
               "Coming soon - manage your profile and trip preferences here."
             )}
           />
-          <Route
-            path="/itinerary"
-            element={renderPlaceholderPage(
-              "Trip Itinerary",
-              "Coming soon - view your complete Argentina itinerary here."
-            )}
-          />
+          <Route path="/itinerary" element={<Timeline onNavigate={navigateToStep} />} />
 
           {/* Catch-all route */}
           <Route

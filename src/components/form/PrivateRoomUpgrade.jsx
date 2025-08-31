@@ -138,7 +138,10 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
             </div>
             <div className="room-option-details">
               <div className="room-description">
-                <p>Share a room with another solo traveler from the group</p>
+                <p>
+                  Share a room with another solo traveler from the group
+                  (Subject to availability)
+                </p>
 
                 {/* Roommate Preference Options - only shown when shared room is selected */}
                 {!hasPrivateRoomUpgrade && (

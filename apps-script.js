@@ -25,6 +25,8 @@ const NEW_EMAILS_SHEET_NAME = "NEW EMAILS"; // Sheet for new email requests
 const WELCOME_EMAILS_SHEET_NAME = "WELCOME EMAILS"; // Sheet for tracking welcome emails sent
 const WHATSAPP_EMAILS_SHEET_NAME = "WHATSAPP EMAILS"; // Sheet for tracking WhatsApp invite emails sent
 const PAYMENTLINKSDB_SHEET_NAME = "PAYMENTLINKSDB";
+const TIMELINE_SHEET_NAME = "TIMELINE"; // Sheet containing timeline data
+const CHOICES_SHEET_NAME = "CHOICES"; // Sheet for tracking user activity choices
 
 /**
  * Validates user credentials by checking for presence of email and password,
@@ -73,11 +75,21 @@ function validateCredentials(email, password) {
 }
 
 /**
- * Handle GET requests for RSVP lookup
+ * Handle GET requests for RSVP lookup and timeline data
  */
 // eslint-disable-next-line no-unused-vars
 function doGet(e) {
   try {
+    // Check if this is a timeline request
+    if (e.parameter.endpoint === "timeline") {
+      return getTimelineData();
+    }
+
+    // Check if this is a choices request
+    if (e.parameter.endpoint === "choices") {
+      return getUserChoices(e.parameter.email, e.parameter.password);
+    }
+
     const email = e.parameter.email;
     const password = e.parameter.password;
 
@@ -102,7 +114,7 @@ function doGet(e) {
       })
     ).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
-    console.error("Error processing RSVP lookup request:", error);
+    console.error("Error processing GET request:", error);
     return ContentService.createTextOutput(
       JSON.stringify({
         success: false,
@@ -168,6 +180,11 @@ function doPost(e) {
           })
         ).setMimeType(ContentService.MimeType.JSON);
       }
+    }
+
+    // Check if this is a choices update request
+    if (data.action === "update_choices") {
+      return updateUserChoices(data);
     }
 
     // Check if this is a REDSYS TPV callback
@@ -2271,4 +2288,292 @@ function generatePaymentLinksBatch() {
   }
 
   console.log("Batch payment link generation complete.");
+}
+
+/**
+ * Get timeline data from TIMELINE sheet
+ * Returns an array of objects where keys are headers and values are row data
+ */
+function getTimelineData() {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(TIMELINE_SHEET_NAME);
+
+    if (!sheet) {
+      throw new Error("TIMELINE sheet not found");
+    }
+
+    // Get all data from the sheet
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getDisplayValues();
+
+    if (values.length === 0) {
+      throw new Error("No data found in TIMELINE sheet");
+    }
+
+    // Get headers from first row
+    const headers = values[0];
+
+    // Convert data rows to objects
+    const timelineData = [];
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const rowObject = {};
+
+      // Map each column value to its corresponding header
+      for (let j = 0; j < headers.length; j++) {
+        rowObject[headers[j]] = row[j] || null;
+      }
+
+      timelineData.push(rowObject);
+    }
+
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: true,
+        data: timelineData,
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    console.error("Error getting timeline data:", error);
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: "Failed to retrieve timeline data",
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Get user choices from CHOICES sheet
+ */
+function getUserChoices(email, password) {
+  try {
+    // Validate credentials first
+    const validation = validateCredentials(email, password);
+    if (!validation.success) {
+      return validation.response;
+    }
+
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
+
+    if (!sheet) {
+      // If sheet doesn't exist, return empty choices
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: true,
+          data: {},
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Get all data from the sheet
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+
+    if (values.length < 2) {
+      // Only header row exists, return empty choices
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: true,
+          data: {},
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Get headers (first row)
+    const headers = values[0];
+
+    // Find the required columns
+    const emailColumnIndex = headers.indexOf("email");
+    const itemKeyColumnIndex = headers.indexOf("itemKey");
+    const choiceColumnIndex = headers.indexOf("choice");
+    const counterColumnIndex = headers.indexOf("counter");
+
+    if (
+      emailColumnIndex === -1 ||
+      itemKeyColumnIndex === -1 ||
+      choiceColumnIndex === -1 ||
+      counterColumnIndex === -1
+    ) {
+      throw new Error("Required columns not found in CHOICES sheet");
+    }
+
+    // Build choices object for this user, keeping only the latest choice for each itemKey
+    const userChoices = {};
+    const latestChoices = new Map(); // itemKey -> {choice, counter}
+
+    // Search for the user's choices in the data rows (skip header row)
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const rowEmail = row[emailColumnIndex];
+      const itemKey = row[itemKeyColumnIndex];
+      const choice = row[choiceColumnIndex];
+      const counter = parseInt(row[counterColumnIndex]) || 0;
+
+      if (
+        rowEmail &&
+        rowEmail.toString().toLowerCase().trim() === email.toLowerCase() &&
+        itemKey &&
+        choice
+      ) {
+        // Check if this is the latest choice for this itemKey
+        const existing = latestChoices.get(itemKey);
+        if (!existing || counter > existing.counter) {
+          latestChoices.set(itemKey, { choice, counter });
+        }
+      }
+    }
+
+    // Convert latest choices to the expected format
+    for (const [itemKey, { choice }] of latestChoices) {
+      userChoices[itemKey] = choice;
+    }
+
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: true,
+        data: userChoices,
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    console.error("Error getting user choices:", error);
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: "Failed to retrieve user choices",
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Update user choices in CHOICES sheet (event-sourced)
+ */
+function updateUserChoices(data) {
+  try {
+    // Validate required fields
+    if (!data.email || !data.password || !data.itemKey || !data.choice) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: "Email, password, itemKey, and choice are required",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // Validate credentials first
+    const validation = validateCredentials(data.email, data.password);
+    if (!validation.success) {
+      return validation.response;
+    }
+
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
+
+    // Create CHOICES sheet if it doesn't exist
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(CHOICES_SHEET_NAME);
+      console.log("Created CHOICES sheet");
+
+      // Add headers
+      const headers = ["timestamp", "email", "itemKey", "choice", "counter"];
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+
+      // Format header row
+      const headerRange = sheet.getRange(1, 1, 1, headers.length);
+      headerRange.setFontWeight("bold");
+      headerRange.setBackground("#f0f0f0");
+    }
+
+    // Get the next counter for this user and itemKey
+    const nextCounter = getNextCounterForItem(sheet, data.email, data.itemKey);
+
+    // Add new choice event (always insert, never update)
+    const timestamp = new Date().toISOString();
+    const newRow = [
+      timestamp,
+      data.email,
+      data.itemKey,
+      data.choice,
+      nextCounter,
+    ];
+    sheet.appendRow(newRow);
+
+    console.log(
+      `Added new choice event for ${data.email} - ${data.itemKey}: ${data.choice} (counter: ${nextCounter})`
+    );
+
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: true,
+        message: "Choice updated successfully",
+        counter: nextCounter,
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    console.error("Error updating user choices:", error);
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: "Failed to update user choices: " + error.message,
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Get the next counter value for a specific user and itemKey
+ */
+function getNextCounterForItem(sheet, email, itemKey) {
+  try {
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+
+    if (values.length < 2) {
+      // Only header row exists, start with counter 1
+      return 1;
+    }
+
+    const headers = values[0];
+    const emailColumnIndex = headers.indexOf("email");
+    const itemKeyColumnIndex = headers.indexOf("itemKey");
+    const counterColumnIndex = headers.indexOf("counter");
+
+    if (
+      emailColumnIndex === -1 ||
+      itemKeyColumnIndex === -1 ||
+      counterColumnIndex === -1
+    ) {
+      throw new Error("Required columns not found in CHOICES sheet");
+    }
+
+    let maxCounter = 0;
+
+    // Find the highest counter for this user and itemKey
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const rowEmail = row[emailColumnIndex];
+      const rowItemKey = row[itemKeyColumnIndex];
+      const counter = parseInt(row[counterColumnIndex]) || 0;
+
+      if (
+        rowEmail &&
+        rowEmail.toString().toLowerCase().trim() === email.toLowerCase() &&
+        rowItemKey &&
+        rowItemKey.toString().trim() === itemKey.toString().trim()
+      ) {
+        if (counter > maxCounter) {
+          maxCounter = counter;
+        }
+      }
+    }
+
+    return maxCounter + 1;
+  } catch (error) {
+    console.error("Error getting next counter:", error);
+    return 1; // Fallback to 1 if there's an error
+  }
 }

@@ -15,7 +15,7 @@ import jsPDF from "jspdf";
 
 import { BANK_DETAILS, CRYPTO_WALLETS, NETWORK_INFO } from "../../utils/config";
 
-export function buildPDfDoc(rsvpData, submissionResult, formData, pricing) {
+export function buildPDfDoc(rsvpData, voucherId, formData, pricing) {
   const tripItinerary = getTripItinerary(rsvpData);
   const travelerName = getTravelerName(rsvpData);
   const plusOneName = getPlusOneName(rsvpData);
@@ -105,10 +105,10 @@ export function buildPDfDoc(rsvpData, submissionResult, formData, pricing) {
   });
 
   // Order number badge
-  if (submissionResult?.rowNumber) {
+  if (voucherId) {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.text(`ORDER #${submissionResult.rowNumber}`, pageWidth / 2, 45, {
+    doc.text(`ORDER #${voucherId}`, pageWidth / 2, 45, {
       align: "center",
     });
   }

@@ -71,15 +71,6 @@ const IMAGE_COLLECTIONS = {
   },
 };
 
-// Log the image collections for debugging
-console.log("🖼️ Dynamic Image Loader Initialized");
-console.log("📸 Available Collections:", Object.keys(IMAGE_COLLECTIONS));
-Object.entries(IMAGE_COLLECTIONS).forEach(([activityId, collection]) => {
-  console.log(
-    `📷 ${activityId}: Main image (index -1) + ${collection.additional.length} additional images`
-  );
-});
-
 /**
  * Get all images for a specific activity
  * @param {string} activityId - The activity identifier (empanadas, horseback, rafting)
@@ -97,8 +88,6 @@ export const getActivityImages = (activityId) => {
     { index: -1, image: collection.main },
     ...collection.additional.sort((a, b) => a.index - b.index),
   ];
-
-  console.log(`🎯 Loading ${images.length} images for activity: ${activityId}`);
   return images;
 };
 
@@ -110,13 +99,6 @@ export const getActivityImages = (activityId) => {
 export const getMainActivityImage = (activityId) => {
   const collection = IMAGE_COLLECTIONS[activityId];
   const mainImage = collection?.main || null;
-
-  if (mainImage) {
-    console.log(`🌟 Main image loaded for ${activityId} (index: -1)`);
-  } else {
-    console.warn(`⚠️ No main image found for activity: ${activityId}`);
-  }
-
   return mainImage;
 };
 

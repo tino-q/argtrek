@@ -16,13 +16,20 @@ const Home = ({ onLogout, onNavigate }) => {
     );
   }
 
-  const email = getEmail(userRSVP);
-
   return (
     <div className="container">
       <div className="home-container">
         <div className="navigation-menu">
           <div className="nav-grid">
+            <button
+              className="nav-card"
+              onClick={() => onNavigate("itinerary")}
+            >
+              <i className="fas fa-map"></i>
+              <h3>Itinerary</h3>
+              <p>View your complete trip schedule</p>
+            </button>
+
             <button className="nav-card" onClick={() => onNavigate("payments")}>
               <i className="fas fa-credit-card"></i>
               <h3>Payments</h3>
@@ -33,15 +40,6 @@ const Home = ({ onLogout, onNavigate }) => {
               <i className="fas fa-user"></i>
               <h3>Profile</h3>
               <p>Manage your trip preferences</p>
-            </button>
-
-            <button
-              className="nav-card"
-              onClick={() => onNavigate("itinerary")}
-            >
-              <i className="fas fa-map"></i>
-              <h3>Itinerary</h3>
-              <p>View your complete trip schedule</p>
             </button>
           </div>
         </div>

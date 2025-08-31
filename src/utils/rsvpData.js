@@ -1,7 +1,7 @@
 // RSVP Data Utility
 // Centralized access to RSVP data with proper field mapping and validation
 
-import { FORM_FIELDS } from "./config";
+import { FORM_FIELDS } from "./config.js";
 
 /**
  * RSVP Field Name Constants
@@ -55,8 +55,6 @@ const formatFieldsToNights = (fields) => {
 
   const first = dates[0];
   const last = dates[dates.length - 1];
-
-  console.log({ first, last });
 
   return [`Check in ${first} Nov - Check out ${last + 1} Nov`];
 };

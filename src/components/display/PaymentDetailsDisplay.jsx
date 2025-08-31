@@ -2,7 +2,11 @@
 // Shows payment information after successful trip registration
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { getTravelerName, getEmail, getUSDToEURExchangeRate } from "../../utils/rsvpData";
+import {
+  getTravelerName,
+  getEmail,
+  getUSDToEURExchangeRate,
+} from "../../utils/rsvpData";
 import { FORM_FIELDS, EMAIL_CONFIG, APPS_SCRIPT_URL } from "../../utils/config";
 
 import { copyToClipboard } from "../../utils/clipboard";
@@ -33,7 +37,12 @@ const PaymentDetailsDisplay = ({
         return;
       }
 
-      const doc = buildPDfDoc(rsvpData, submissionResult, formData, pricing);
+      const doc = buildPDfDoc(
+        rsvpData,
+        submissionResult.rowNumber,
+        formData,
+        pricing
+      );
 
       // Generate PDF
       const generatedPdfBlob = doc.output("blob");

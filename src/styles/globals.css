@@ -60,6 +60,7 @@
 
   /* Warning - Orange */
   --warning-bg: #fff7ed; /* orange-50 */
+  --warning-primary: #ea580c; /* orange-600 */
   --warning-border: #fb923c; /* orange-400 */
   --warning-border-light: #fdba74; /* orange-300 - light orange border */
   --warning-icon: #ea580c; /* orange-600 */

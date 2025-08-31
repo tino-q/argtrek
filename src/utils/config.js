@@ -3,7 +3,7 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbziRQK-OafA9kTX7uno20h16MrgHipqKnpz1Y6Evyrzjk8pTFAUz_XpBLfGYSBRR6O3/exec";
+  "https://script.google.com/macros/s/AKfycbxK7LmSwVpyC5VdbnlWwlQI8uisG61HjzeFijj7UVMUOMLmYVsQwtUWI7E_vOmbohl7/exec";
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {
@@ -20,6 +20,7 @@ export const PRICES = {
   tango: 25,
   creditCardFeeRate: 0.0285,
   installmentRate: 0.35,
+  activityValleDeUco: 50,
 };
 
 // Luggage Configuration

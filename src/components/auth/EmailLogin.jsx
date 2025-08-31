@@ -5,14 +5,111 @@ import { APPS_SCRIPT_URL } from "../../utils/config";
 import { STEPS } from "../../utils/stepConfig";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
 
+const hardcodedProfile = {
+  rsvpData: {
+    Timestamp: "2025-06-29T02:36:54.163Z",
+    name: "Ekin Karamalak",
+    party: "Solo",
+    plus1: false,
+    option: "Option 2",
+    email: "ekin@stanford.edu",
+    comments: false,
+    email2: "ekin@stanford.edu",
+    "22Nov_BSAS": true,
+    "23Nov_Tour": true,
+    "23Nov_Dinner_Welcome": true,
+    "23Nov_BSAS": true,
+    "AEP-BRC": true,
+    "24Nov_BARI": true,
+    "25Nov_BARI": true,
+    "26Nov_BARI": true,
+    "BRC-MDZ": true,
+    "27Nov_MDZ": true,
+    "28Nov_MDZ": true,
+    "MDZ-AEP": true,
+    "29Nov_BSAS": true,
+    PACKPRICE: 2680,
+    PRIVATEROOM: 610,
+    VALIJA: 75,
+    USD_TO_EUR_EXCHANGE_RATE: 0.8486,
+  },
+  row: {
+    "formData.email": "ekin@stanford.edu",
+    "formData.firstName": "Ekin",
+    "formData.lastName": "Karamalak",
+    "formData.phoneNumber": 16502503899,
+    "formData.roommateName": "",
+    "formData.roommatePreference": "seeking",
+    "formData.dietaryMessage": "",
+    "formData.dietaryRestrictions": "none",
+    "formData.checkedLuggage": true,
+    "formData.privateRoomUpgrade": false,
+    "formData.cooking": false,
+    "formData.horseback": false,
+    "formData.rafting": false,
+    "formData.tango": false,
+    "formData.paymentSchedule": "installments",
+    "formData.paymentMethod": "credit",
+    "formData.cryptoCurrency": "USDT",
+    "formData.cryptoNetwork": "ETH",
+    "pricing.activitiesPrice": 0,
+    "pricing.basePrice": 2680,
+    "pricing.installmentAmount": 965,
+    "pricing.privateRoomUpgrade": 0,
+    "pricing.processingFee": 76,
+    "pricing.subtotal": 2680,
+    "pricing.total": 2756,
+    "rsvpData.22Nov_BSAS": true,
+    "rsvpData.23Nov_BSAS": true,
+    "rsvpData.23Nov_Dinner_Welcome": true,
+    "rsvpData.23Nov_Tour": true,
+    "rsvpData.24Nov_BARI": true,
+    "rsvpData.25Nov_BARI": true,
+    "rsvpData.26Nov_BARI": true,
+    "rsvpData.27Nov_MDZ": true,
+    "rsvpData.28Nov_MDZ": true,
+    "rsvpData.29Nov_BSAS": true,
+    "rsvpData.AEP-BRC": true,
+    "rsvpData.BRC-MDZ": true,
+    "rsvpData.MDZ-AEP": true,
+    "rsvpData.PACKPRICE": 2680,
+    "rsvpData.PRIVATEROOM": 610,
+    "rsvpData.Timestamp": "2025-06-29T02:36:54.163Z",
+    "rsvpData.comments": false,
+    "rsvpData.email": "ekin@stanford.edu",
+    "rsvpData.email2": "ekin@stanford.edu",
+    "rsvpData.name": "Ekin Karamalak",
+    "rsvpData.option": "Option 2",
+    "rsvpData.party": "Solo",
+    "rsvpData.plus1": false,
+    "pricing.totalEUR": 2339.0172,
+    "pricing.installmentAmountEUR": 819,
+    "paymentLink.url": "",
+    "": "",
+    "TPV LINK ISSUED": false,
+    PAYMENT_1: true,
+    PAYMENT_2: "",
+    ROOMMATE: "PENDING",
+    ID: 5,
+  },
+  rowNumber: 5,
+};
+
 const EmailLogin = ({
   onLoginSuccess,
   onLogout,
   onEmailNotFound,
   onExistingSubmission,
 }) => {
-  const { email, setEmail, password, setPassword, isLoading, setIsLoading } =
-    useAuth();
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    isLoading,
+    setIsLoading,
+    clearAuth,
+  } = useAuth();
   const { showSuccess, showError } = useNotificationContext();
   const hasLoggedOut = useRef(false);
   const location = useLocation();
@@ -36,6 +133,7 @@ const EmailLogin = ({
       localStorage.removeItem("formData");
       localStorage.removeItem("isFormSubmitted");
       localStorage.removeItem("submissionResult");
+      clearAuth(); // Clear auth credentials
     }
 
     // Update previous location
@@ -45,19 +143,27 @@ const EmailLogin = ({
     return () => {
       hasLoggedOut.current = false;
     };
-  }, [location.pathname, onLogout]);
+  }, [location.pathname, onLogout, clearAuth]);
 
   // Main authentication handler
   const handleEmailLogin = async (email, password) => {
     try {
-      const response = await fetch(
-        `${APPS_SCRIPT_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
-        {
-          method: "GET",
-        }
-      );
+      let result;
 
-      const result = await response.json();
+      if (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1"
+      ) {
+        result = { data: hardcodedProfile };
+      } else {
+        const response = await fetch(
+          `${APPS_SCRIPT_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
+          {
+            method: "GET",
+          }
+        );
+        result = await response.json();
+      }
 
       if (result.error) {
         if (
@@ -195,8 +301,8 @@ const EmailLogin = ({
       ) {
         // setEmail("dev@test.com");
         // setPassword("dev123");
-        // setEmail("madibakla@gmail.com");
-        // setPassword("dima");
+        setEmail("ekin@stanford.edu");
+        setPassword("rmpRTSJDcK");
       }
     }
   }, [isLoading]);

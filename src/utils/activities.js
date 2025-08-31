@@ -1,5 +1,5 @@
-import { FORM_FIELDS, PRICES } from "./config";
-import { getMainActivityImage } from "./imageLoader";
+import { FORM_FIELDS, PRICES } from "./config.js";
+import { getMainActivityImage } from "./imageLoader.js";
 
 export const ACTIVITY_LIST = [
   {
