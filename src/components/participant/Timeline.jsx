@@ -413,10 +413,15 @@ const Timeline = ({ onNavigate }) => {
   if (!allowedEmails.includes(userEmail)) {
     return (
       <div className="container">
-        <div className="timeline-loading">
-          <h3>Under Construction</h3>
-          <br />
-          <p>Timeline is currently being updated. Please check back later.</p>
+        <div className="timeline-loading" style={{ height: '300px', display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center' }}>
+          <h3 style={{ margin: 0, background: 'transparent', boxShadow: 'none', textShadow: 'none', border: 'none' }}>Under Construction</h3>
+          <p style={{ margin: 0 }}>Timeline is currently being updated. Please check back later.</p>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => onNavigate && onNavigate("home")}
+          >
+            Back to Home
+          </button>
         </div>
       </div>
     );

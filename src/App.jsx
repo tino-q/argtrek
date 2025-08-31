@@ -184,7 +184,7 @@ function AppContent() {
 
   // Render placeholder components for future pages
   const renderPlaceholderPage = (title, description) => (
-    <div className="placeholder-page">
+    <div className="placeholder-page nav-card">
       <h2>{title}</h2>
       <p>{description}</p>
       <button
