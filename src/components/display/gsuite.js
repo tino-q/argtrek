@@ -159,6 +159,8 @@ async function processAllDataRows() {
     console.log(
       `Merged PDF saved to ${path.resolve(outputDir, `merged-pdf-${row.ID}.pdf`)}`
     );
+
+    break;
   }
 
   await browser.close();

@@ -75,7 +75,7 @@ const pageTemplate = (content, voucherId) => `
     }
     
     .info-item {
-      margin-bottom: 10px;
+      margin-bottom: 1px;
     }
     
     .info-label {
@@ -291,13 +291,31 @@ function generateFirstPageHTML(
         <span>Total:</span>
         <span>$${pricing.total}</span>
       </div>
+      <div class="pricing-row" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e2e8f0;">
+        <span>Payment Method:</span>
+        <span>${formData.paymentMethod === "bank" ? "Bank Transfer" : formData.paymentMethod === "crypto" ? "Cryptocurrency" : "Credit Card"}</span>
+      </div>
     </div>
   </div>
   
   <div class="section">
-    <div class="section-title">Payment Method</div>
-    <div class="info-item">
-      <div class="info-value">${formData.paymentMethod === "bank" ? "Bank Transfer" : formData.paymentMethod === "crypto" ? "Cryptocurrency" : "Credit Card"}</div>
+    <div class="section-title" style="color: #dc2626;">⚠️ DOCUMENTATION</div>
+    <div class="info-item" style="color: #dc2626; font-size: 12px;">
+      <div class="info-value" style="margin-bottom: 8px;">Avoid relying on unofficial sources as ChatGPT. Check your passport's expiration date. Verify visa requirements directly with the Argentina consulate (or all corresponding consulates depending on your trip itinerary). Review vaccination rules based on your travel history.</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="section-title" style="color: #dc2626;">⚠️ INSURANCE REQUIREMENTS</div>
+    <div class="info-item" style="color: #dc2626; font-size: 12px;">
+      <div class="info-value">In accordance with a new Decree 366/2025, all foreign visitors must have valid health insurance for the entire duration of their stay in Argentina (with country-specific coverage). Proof may be requested at the border, by airlines, or by local authorities during your trip so keep your certificate in English or Spanish accessible throughout your trip.</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="section-title" style="color: #dc2626;">⚠️ INSURANCE RECOMMENDATION</div>
+    <div class="info-item" style="color: #dc2626; font-size: 12px;">
+      <div class="info-value">Beyond mandatory health insurance, I very strongly recommend personal travel insurance mainly to cover flight disruptions, schedule changes, lost luggage, or trip interruptions.</div>
     </div>
   </div>
   
