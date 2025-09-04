@@ -1,19 +1,12 @@
+import { useNavigate } from "react-router-dom";
 import { useTripContext } from "../../hooks/useTripContext";
-import { getEmail } from "../../utils/rsvpData";
 
 const Home = ({ onLogout, onNavigate }) => {
   const { userRSVP } = useTripContext();
+  const navigate = useNavigate();
 
   if (!userRSVP) {
-    return (
-      <div className="participant-home">
-        <h2>Welcome</h2>
-        <p>Please log in to access your trip details.</p>
-        <button className="btn btn-primary" onClick={() => onNavigate("login")}>
-          Login
-        </button>
-      </div>
-    );
+    navigate("/");
   }
 
   return (
