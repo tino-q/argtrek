@@ -42,7 +42,7 @@ const pageTemplate = (content, voucherId) => `
     .header h1 {
       font-size: 22px;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 3px;
     }
     
     .header .subtitle {
@@ -56,14 +56,14 @@ const pageTemplate = (content, voucherId) => `
     }
     
     .section {
-      margin-bottom: 20px;
+      margin-bottom: 5px;
     }
     
     .section-title {
       font-size: 16px;
       font-weight: 600;
       color: #1e3c72;
-      margin-bottom: 10px;
+      margin-bottom: 5px;
       border-bottom: 2px solid #e0e6ed;
       padding-bottom: 6px;
     }
@@ -327,40 +327,35 @@ function generateFirstPageHTML(
 function generateSecondPageHTML(voucherId) {
   const content = `<div class="content">
   <div class="section">
-    <div class="section-title">Terms and Conditions</div>
+    <div class="section-title">Terms and Conditions Highlights</div>
     <div class="terms-content">
-      <h4>TRAVELER INFORMATION</h4>
-      <p>• The name and surname above exactly match my travel document (passport/ID) for this trip</p>
-      <p>• I have double-checked all my traveler information above</p>
-      <p>• All information provided is accurate and complete</p>
-      
-      <h4>TERMS & CONDITIONS</h4>
-      <p>• Quotation is based on RSVP submissions. This proposal is subject to availability and may change until the group reservation is confirmed with a deposit. In case of delayed payments, prices may be adjusted due to currency fluctuations or updated supplier rates.</p>
-      <p>• Deposits are non-refundable. The remaining balance must be paid according to the specified deadlines.</p>
-      <p>• Prices do not include visa processing fees or travel insurance. Each traveler is responsible for obtaining the necessary visa and health insurance.</p>
-      <p>• All passengers must have valid travel documents in good condition. It is the traveler's responsibility to verify passport, visa, and health requirements. A passport valid for at least 6 months is recommended.</p>
-      <p>• The organizer acts solely as an intermediary and is not responsible for delays, changes, or cancellations due to weather, third parties, or force majeure.</p>
-      <p>• Participation in all activities implies voluntary acceptance of associated risks.</p>
-      
-      <h4>TRAVEL INSURANCE</h4>
-      <p>• I am responsible for obtaining my own travel insurance. The organizers are not liable for any lost, damaged, or stolen property at any time during the trip. Lost luggage must be claimed directly with the airline.</p>
-      
-      <h4>HEALTH INSURANCE</h4>
-      <p>• I have or will obtain by the time of the trip a valid health insurance policy that complies with the new Argentine requirement established by Decree 366/2025, covering all regular medical treatments and services during my stay in Argentina.</p>
-      <p>• In accordance with Decree 366/2025, all foreign visitors to Argentina must have valid health insurance that covers general medical care, outpatient treatment, and hospitalization, is valid throughout the entire stay in Argentina, clearly states that it covers the traveler while in Argentina (country-specific coverage), includes coverage for medical emergencies, and may be required to be presented at the border or upon request by local authorities.</p>
-      <p>• Note: Public healthcare services in Argentina will only be available to non-residents in cases of emergency. For all other situations, proof of valid health insurance will be required in order to receive care.</p>
-      
-      <h4>PAYMENT TERMS</h4>
-      <p>• All payments must be made in accordance with the specified payment schedule. Late payments may result in cancellation of the reservation.</p>
-      <p>• Payment methods accepted include bank transfer, credit card, and cryptocurrency as specified in the booking process.</p>
-      <p>• Processing fees are non-refundable and apply to all payment methods.</p>
-      
-      <h4>CANCELLATION POLICY</h4>
-      <p>• Cancellations must be made in writing and received by the organizers within the specified timeframe.</p>
-      <p>• Refund policies vary based on the timing of cancellation and may be subject to supplier penalties.</p>
-      <p>• No refunds will be provided for no-shows or early departures.</p>
-      </div>
-  </div>
+    <p>The complete General Conditions will remain published on the website and available to the TRAVELER so that they may reproduce and store them as confirmation of the service.</p>
+    <h4>TRAVELER DECLARES</h4>
+    <p>To have read, understood, and accepted the complete Terms and Conditions in their entirety. To understand that a personal travel insurance is strongly recommended to cover flight disruptions, schedule changes, cancellations, lost luggage, or trip interruptions.</p>
+    <p>To understand that in compliance with Decree 366/2025 of the Republic of Argentina, every foreign TRAVELER must have valid health insurance for the entire duration of their stay, with the policy issued in English or Spanish. The TRAVELER must carry and present the policy when required by border authorities, airlines, or local authorities.</p>
+    <p>To assume responsibility for complying with required health and vaccination obligations. The PROVIDER offers indicative information, but it is the TRAVELER’s responsibility to confirm requirements with relevant consulates and health authorities. Lack of documentation or failure to meet requirements shall not entitle the TRAVELER to any refund.</p>
+    <p>To be a person with sufficient legal capacity to contract and assume all obligations set forth herein. To be responsible for the veracity of the personal data provided to the PROVIDER. The TRAVELER is responsible for ensuring they hold valid documentation necessary for the trip (passports, visas, minor authorizations, residence permits, etc.), as well as complying with entry, transit, and exit requirements of the destination country.</p>
+  
+  <h4>COORDINATOR ROLE & INCLUDED SERVICES</h4>
+<p>The PROVIDER acts solely as a coordinator of services provided by third parties (accommodations, land transport companies, activity providers, etc.).</p>
+<p>The PROVIDER will not be responsible for booking errors attributable to the TRAVELER (including but not limited to errors in personal data provided for tickets or reservations) or for problems arising from unavoidable and extraordinary circumstances beyond its control (strikes, government decisions, war, natural disasters, epidemics, etc.).</p>
+<p>Not included in the package travel price: flights, insurance, visas, tourist taxes. International and/or domestic flights are not part of the package travel covered by this contract. The TRAVELER is solely responsible for handling any incidents related to such flights (delays, cancellations, schedule changes, or other contingencies). The PROVIDER assumes no responsibility with respect to air transportation.</p>
+<p>Provision of certain services (excursions, transfers, activities) may be subject to a minimum number of participants required by the supplier. If this minimum is not reached or due to issues attributable to the supplier, the PROVIDER may replace the affected service with another of equal or similar quality and value, without this constituting a substantial alteration of the contract.</p>
+
+
+<h4>CLAIMS</h4>
+<p>The Traveler must promptly notify the Provider of any lack of conformity or issue during the trip in order to allow the Provider to remedy the situation within a reasonable period. Failure to communicate such issues while in destination affects the Traveler’s right to subsequently claim compensation.</p>
+
+<h4>APPLICABLE LAW AND JURISDICTION</h4>
+<p>This contract shall be governed by Spanish law. Any dispute will first be submitted to an Alternative Dispute Resolution (ADR) or mediation body recognized in Spain or the EU.</p>
+<p>If unresolved, both parties expressly and exclusively submit to the Courts and Tribunals of Spain, waiving any other forum. This does not limit the Traveler’s mandatory consumer protection rights.</p>
+
+<h4>FULL TERMS & CONDITIONS IN WEB PAGE</h4>
+
+<p>These Reduced Terms and Conditions provide a summary of the key points of your contract. The complete Terms and Conditions, which form an integral part of this agreement, are available at any time through your personal login area on our website. By accepting these Reduced Terms and Conditions, the Traveler acknowledges having been informed of the existence of the full Terms and Conditions and agrees that they apply in their entirety to the contract.</p>
+
+  
+    </div>
 </div>`;
   return pageTemplate(content, voucherId);
 }
@@ -368,26 +363,8 @@ function generateSecondPageHTML(voucherId) {
 function generateThirdPageHTML(voucherId) {
   const content = `<div class="content">
   <div class="section">
-    <div class="section-title">Terms and Conditions</div>
-    <div class="terms-content">
-
-      <h4>ITINERARY CHANGES</h4>
-      <p>• The organizers reserve the right to modify the itinerary due to circumstances beyond their control, including but not limited to weather conditions, political unrest, or supplier changes.</p>
-      <p>• Participants will be notified of any significant changes as soon as possible.</p>
-      <p>• Alternative arrangements will be made when feasible, but no compensation will be provided for minor itinerary adjustments.</p>
-      
-      <h4>LIABILITY AND RESPONSIBILITY</h4>
-      <p>• Participants acknowledge that travel involves inherent risks and agree to participate at their own risk.</p>
-      <p>• The organizers are not liable for personal injury, property damage, or other losses that may occur during the trip.</p>
-      <p>• Participants are responsible for their own behavior and must comply with local laws and customs.</p>
-      
-      <h4>PHOTOGRAPHY AND MEDIA</h4>
-      <p>• By participating in this trip, participants consent to the use of their image in promotional materials unless otherwise specified in writing.</p>
-      <p>• Participants are encouraged to share their experiences but must respect the privacy of other participants.</p>
-      
-      <h4>FORCE MAJEURE</h4>
-      <p>• The organizers are not responsible for any failure to perform due to circumstances beyond their reasonable control, including but not limited to natural disasters, government actions, or other unforeseeable events.</p>
-      <p>• In such cases, the organizers will make reasonable efforts to provide alternative arrangements or refunds as appropriate.</p>
+    <div class="section-title">Terms and Conditions Highlights</div>
+    <div class="terms-content">  
     </div>
   </div>
 </div>`;
@@ -410,7 +387,7 @@ export async function generatePdfPuppeteer(
       )
     ),
     await toPdf(browser, generateSecondPageHTML(voucherId)),
-    await toPdf(browser, generateThirdPageHTML(voucherId)),
+    // await toPdf(browser, generateThirdPageHTML(voucherId)),
   ];
 }
 async function toPdf(browser, html) {

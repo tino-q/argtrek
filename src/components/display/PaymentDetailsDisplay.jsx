@@ -2,6 +2,7 @@
 // Shows payment information after successful trip registration
 
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getTravelerName,
   getEmail,
@@ -26,6 +27,7 @@ const PaymentDetailsDisplay = ({
   pricing,
   submissionResult,
 }) => {
+  const navigate = useNavigate();
   const travelerName = getTravelerName(rsvpData, formData);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -92,14 +94,7 @@ const PaymentDetailsDisplay = ({
       console.error("Error generating PDF:", error);
       setIsGenerating(false);
     }
-  }, [
-    rsvpData,
-    formData,
-    pricing,
-    submissionResult,
-    travelerName,
-    pricing.installmentAmountEUR,
-  ]);
+  }, [rsvpData, formData, pricing, submissionResult, travelerName]);
 
   // Generate PDF on component mount (only once)
   useEffect(() => {
@@ -132,6 +127,10 @@ const PaymentDetailsDisplay = ({
     if (pdfUrl) {
       window.open(pdfUrl, "_blank");
     }
+  };
+
+  const handleTermsClick = () => {
+    navigate("/terms");
   };
 
   return (
@@ -376,9 +375,22 @@ const PaymentDetailsDisplay = ({
         </div>
 
         <div className="print-section">
-          <button className="print-button" onClick={downloadPDF} type="button">
-            📄 Download voucher
-          </button>
+          <div className="action-buttons">
+            <button
+              className="print-button"
+              onClick={downloadPDF}
+              type="button"
+            >
+              📄 Download voucher
+            </button>
+            <button
+              className="btn btn-secondary terms-button"
+              onClick={handleTermsClick}
+              type="button"
+            >
+              📋 Terms & Conditions
+            </button>
+          </div>
           <p className="print-note">
             Generate and print your comprehensive trip registration summary with
             all confirmed flights, hotels, and payment details.

@@ -23,6 +23,7 @@ import Payments from "./components/participant/Payments";
 import Timeline from "./components/participant/Timeline";
 import EmailLogin from "./components/auth/EmailLogin";
 import NewEmailStep from "./components/form/NewEmailStep";
+import TermsAndConditions from "./components/display/TermsAndConditions";
 import { STEPS } from "./utils/stepConfig";
 
 // Define registration flow paths (after authentication)
@@ -269,7 +270,11 @@ function AppContent() {
               "Coming soon - manage your profile and trip preferences here."
             )}
           />
-          <Route path="/itinerary" element={<Timeline onNavigate={navigateToStep} />} />
+          <Route
+            path="/itinerary"
+            element={<Timeline onNavigate={navigateToStep} />}
+          />
+          <Route path="/terms" element={<TermsAndConditions />} />
 
           {/* Catch-all route */}
           <Route
