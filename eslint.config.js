@@ -30,6 +30,7 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.es2020,
+        __DEV__: "readonly", // Development mode flag
       },
       parserOptions: {
         ecmaVersion: "latest",
@@ -57,6 +58,7 @@ export default [
         //   ignoreRestSiblings: true,
         // },
       ],
+      "no-undef": "error", // Catch undefined variables including missing imports
       "no-console": "off",
       "no-debugger": "warn",
 

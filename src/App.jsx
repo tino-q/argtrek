@@ -3,7 +3,7 @@
 // Supports both registration flow and participant management
 
 import { useEffect } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
 import EmailLogin from "./components/auth/EmailLogin";
 import NotificationContainer from "./components/common/NotificationContainer";
@@ -25,13 +25,13 @@ import { useTripContext } from "./hooks/useTripContext";
 const REGISTRATION_FLOW_PATHS = ["/welcome", "/rsvp", "/addons", "/payment"];
 
 const Redirect = ({ path }) => {
-  const nagivate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    nagivate(path);
-  }, [nagivate, path]);
+    navigate(path);
+  }, [navigate, path]);
 
-  return <div> Redirecting to home... </div>;
+  return <div> Redirecting... </div>;
 };
 
 const RegisteredTravelerRoute = ({ children }) => {
