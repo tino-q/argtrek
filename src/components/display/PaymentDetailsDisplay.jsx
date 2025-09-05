@@ -3,18 +3,22 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getTravelerName, getUSDToEURExchangeRate } from "../../utils/rsvpData";
-import { FORM_FIELDS, EMAIL_CONFIG, APPS_SCRIPT_URL } from "../../utils/config";
 
 import { copyToClipboard } from "../../utils/clipboard";
+import {
+  FORM_FIELDS,
+  EMAIL_CONFIG,
+  APPS_SCRIPT_URL,
+  BANK_DETAILS,
+  CRYPTO_WALLETS,
+  NETWORK_INFO,
+} from "../../utils/config";
+import { getTravelerName, getUSDToEURExchangeRate } from "../../utils/rsvpData";
+import CreditCardWarning from "../common/CreditCardWarning";
+import ProofOfPaymentUpload from "../form/ProofOfPaymentUpload";
 import PricingSummary from "../layout/PricingSummary";
 
 import "../../styles/PaymentDetailsDisplay.css";
-
-import ProofOfPaymentUpload from "../form/ProofOfPaymentUpload";
-import CreditCardWarning from "../common/CreditCardWarning";
-
-import { BANK_DETAILS, CRYPTO_WALLETS, NETWORK_INFO } from "../../utils/config";
 
 const PaymentDetailsDisplay = ({
   rsvpData,
@@ -106,8 +110,8 @@ const PaymentDetailsDisplay = ({
               </div>
               <br />
               <h4>Bank Transfer Details</h4>
-              {BANK_DETAILS.map((detail, index) => (
-                <div key={index} className="detail-row">
+              {BANK_DETAILS.map((detail) => (
+                <div key={detail.label} className="detail-row">
                   <span className="label">{detail.label}:</span>
                   <div className="value-container">
                     <span
@@ -126,7 +130,7 @@ const PaymentDetailsDisplay = ({
                       onClick={(e) => handleCopyClick(detail.value, e)}
                       title="Copy to clipboard"
                     >
-                      <i className="fas fa-copy"></i>
+                      <i className="fas fa-copy" />
                     </button>
                   </div>
                 </div>
@@ -184,7 +188,7 @@ const PaymentDetailsDisplay = ({
                         }}
                         title="Copy wallet address"
                       >
-                        <i className="fas fa-copy"></i>
+                        <i className="fas fa-copy" />
                       </button>
                     </div>
                   </div>

@@ -1,4 +1,4 @@
-import puppeteer from "puppeteer";
+// import puppeteer from "puppeteer"; // unused
 import { PRICES } from "../../utils/config.js";
 import { getTripItinerary } from "../../utils/rsvpData.js";
 
@@ -360,6 +360,7 @@ function generateSecondPageHTML(voucherId) {
   return pageTemplate(content, voucherId);
 }
 
+/*
 function generateThirdPageHTML(voucherId) {
   const content = `<div class="content">
   <div class="section">
@@ -370,6 +371,7 @@ function generateThirdPageHTML(voucherId) {
 </div>`;
   return pageTemplate(content, voucherId);
 }
+*/
 
 export async function generatePdfPuppeteer(
   browser,

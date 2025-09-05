@@ -3,7 +3,7 @@ import React from "react";
 const CreditCardWarning = ({ paymentSchedule, exchangeRate }) => {
   return (
     <div className="payment-warning">
-      <i className="fas fa-exclamation-triangle"></i>
+      <i className="fas fa-exclamation-triangle" />
       <div>
         <h3>Important</h3>
         <ul>

@@ -1,9 +1,10 @@
-import { useTripContext } from "../../hooks/useTripContext";
 import { useEffect, useRef, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
 import useAuth from "../../hooks/useAuth";
-import { APPS_SCRIPT_URL } from "../../utils/config";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
+import { useTripContext } from "../../hooks/useTripContext";
+import { APPS_SCRIPT_URL } from "../../utils/config";
 import { STEPS } from "../../utils/stepConfig";
 
 const hardcodedProfile = {
@@ -143,7 +144,6 @@ const EmailLogin = () => {
       try {
         let result;
 
-        // eslint-disable-next-line no-undef
         if (__DEV__) {
           result = { data: hardcodedProfile };
         } else {
@@ -259,13 +259,12 @@ const EmailLogin = () => {
       }, 500);
 
       return () => clearTimeout(autoSubmit);
-    } else {
-      // eslint-disable-next-line no-undef
+    } 
       if (__DEV__) {
         setEmail("ekin@stanford.edu");
         setPassword("rmpRTSJDcK");
       }
-    }
+    
   }, [handleEmailLogin, isLoading, setEmail, setIsLoading, setPassword]);
 
   const handleSubmit = async (e) => {
@@ -289,7 +288,7 @@ const EmailLogin = () => {
           <form onSubmit={handleSubmit} className="email-login-form">
             <div className="form-group">
               <label htmlFor="loginEmail">
-                <i className="fas fa-envelope"></i>
+                <i className="fas fa-envelope" />
                 Email Address *
               </label>
               <input
@@ -306,7 +305,7 @@ const EmailLogin = () => {
 
             <div className="form-group">
               <label htmlFor="loginPassword">
-                <i className="fas fa-lock"></i>
+                <i className="fas fa-lock" />
                 Password *
               </label>
               <input
@@ -330,7 +329,7 @@ const EmailLogin = () => {
               >
                 {isLoading ? (
                   <>
-                    <i className="fas fa-spinner fa-spin"></i> Loading...
+                    <i className="fas fa-spinner fa-spin" /> Loading...
                   </>
                 ) : (
                   <>Login</>
@@ -352,7 +351,7 @@ function cleanupUrlParameters() {
     urlParams.delete("password");
     const newUrl =
       window.location.pathname +
-      (urlParams.toString() ? "?" + urlParams.toString() : "");
+      (urlParams.toString() ? `?${  urlParams.toString()}` : "");
     window.history.replaceState({}, "", newUrl);
   }
 }

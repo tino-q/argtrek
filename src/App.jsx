@@ -4,22 +4,21 @@
 
 import { useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import { useNotificationContext } from "./hooks/useNotificationContext";
-import { injectAnimationStyles } from "./hooks/useAnimations";
-import { useTripContext } from "./hooks/useTripContext";
-import TripProvider from "./context/TripContext.jsx";
-import NotificationProvider from "./context/NotificationContext.jsx";
 
-// Import components
-import Header from "./components/layout/Header";
+import EmailLogin from "./components/auth/EmailLogin";
 import NotificationContainer from "./components/common/NotificationContainer";
-import Footer from "./components/layout/Footer";
+import TermsAndConditions from "./components/display/TermsAndConditions";
 import FormFlow from "./components/flows/FormFlow";
+import Footer from "./components/layout/Footer";
+import Header from "./components/layout/Header";
 import Home from "./components/participant/Home";
 import Payments from "./components/participant/Payments";
 import Timeline from "./components/participant/Timeline";
-import EmailLogin from "./components/auth/EmailLogin";
-import TermsAndConditions from "./components/display/TermsAndConditions";
+import NotificationProvider from "./context/NotificationContext.jsx";
+import TripProvider from "./context/TripContext.jsx";
+import { injectAnimationStyles } from "./hooks/useAnimations";
+import { useNotificationContext } from "./hooks/useNotificationContext";
+import { useTripContext } from "./hooks/useTripContext";
 
 // Define registration flow paths (after authentication)
 const REGISTRATION_FLOW_PATHS = ["/welcome", "/rsvp", "/addons", "/payment"];
@@ -78,7 +77,7 @@ function AppContent() {
       <h2>{title}</h2>
       <p>{description}</p>
       <button className="btn btn-secondary" onClick={() => navigate("/home")}>
-        <i className="fas fa-arrow-left"></i>
+        <i className="fas fa-arrow-left" />
         Back to Home
       </button>
     </div>

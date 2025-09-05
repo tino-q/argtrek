@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+
 import { LUGGAGE, FORM_FIELDS } from "../../utils/config";
 import {
   getPersonalInfo,
@@ -6,6 +7,95 @@ import {
   getTripItinerary,
   getExcludedTripServices,
 } from "../../utils/rsvpData";
+
+// Helper function to get generic hotel description
+const getGenericHotelDescription = (location) => `Hotel in ${location}`;
+
+// Helper function to extract city names from route
+const extractCityNames = (route) => {
+  const cities = route.split(" → ");
+  return { origin: cities[0].replace("→", ""), destination: cities[1] };
+};
+
+// Reusable service card component
+const ServiceCard = ({ service, index, isIncluded }) => (
+  <div
+    key={isIncluded ? index : `excluded-${index}`}
+    className={`service-item ${isIncluded ? "included" : "excluded"}`}
+  >
+    <div className="service-icon">
+      <i
+        className={
+          service.type === "accommodation" ? "fas fa-bed" : "fas fa-plane"
+        }
+      />
+    </div>
+    <div className="service-details">
+      {service.type === "accommodation" ? (
+        <>
+          <div className="accommodation-single-line">
+            <div className="accommodation-info-line">
+              <span className="hotel-name-simple">
+                {getGenericHotelDescription(service.location)}
+              </span>
+            </div>
+            <div className="accommodation-breakfast">Breakfast included</div>
+            <div className="accommodation-dates">
+              {service.nights.length === 1
+                ? service.nights[0].date
+                : `${service.nights[0].date} - ${service.nights[service.nights.length - 1].date}`}
+            </div>
+            <div className="accommodation-dates">
+              * per person, double occupancy
+            </div>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Flight - Single Line Format */}
+          <div className="flight-single-line">
+            {(() => {
+              const cities = extractCityNames(service.route);
+              return (
+                <div className="flight-route-line">
+                  <div>
+                    <span className="flight-segment">{cities.origin}</span>
+                  </div>
+
+                  <div className="flight-date ">
+                    <span>
+                      ({service.departure.airport}) {service.departure.time}
+                    </span>
+                    <span className="flight-arrow"> → </span>
+                    <span>
+                      {cities.destination} ({service.arrival.airport}){" "}
+                      {service.arrival.time}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
+            <div className="flight-date">
+              {service.date} - {service.code}
+            </div>
+            <div className="flight-date">{service.airline}</div>
+          </div>
+        </>
+      )}
+    </div>
+    <div className={`service-status ${isIncluded ? "included" : "excluded"}`}>
+      <i className={`fas fa-${isIncluded ? "check" : "times"}`} />
+      <span>{isIncluded ? "Included" : "Not Included"}</span>
+    </div>
+  </div>
+);
+
+function getServiceKey(service, isIncluded = true) {
+  const prefix = isIncluded ? '' : 'excluded-';
+  return service.type === "flight"
+    ? `${prefix}${service.type}-${service.code}`
+    : `${prefix}${service.type}-${service.location}${service.period ? `-${service.period}` : ""}`;
+}
 
 const RSVPDisplay = ({
   rsvpData,
@@ -51,24 +141,24 @@ const RSVPDisplay = ({
   useEffect(() => {
     const errors = {};
 
-    if (!formData[FORM_FIELDS.FIRST_NAME]?.trim()) {
+    const firstName = formData[FORM_FIELDS.FIRST_NAME];
+    const lastName = formData[FORM_FIELDS.LAST_NAME];
+    const phoneNumber = formData[FORM_FIELDS.PHONE_NUMBER];
+
+    if (!firstName?.trim()) {
       errors[FORM_FIELDS.FIRST_NAME] = true;
     }
 
-    if (!formData[FORM_FIELDS.LAST_NAME]?.trim()) {
+    if (!lastName?.trim()) {
       errors[FORM_FIELDS.LAST_NAME] = true;
     }
 
-    if (!formData[FORM_FIELDS.PHONE_NUMBER]?.trim()) {
+    if (!phoneNumber?.trim()) {
       errors[FORM_FIELDS.PHONE_NUMBER] = true;
     }
 
     setValidationErrors(errors);
-  }, [
-    formData[FORM_FIELDS.FIRST_NAME],
-    formData[FORM_FIELDS.LAST_NAME],
-    formData[FORM_FIELDS.PHONE_NUMBER],
-  ]);
+  }, [formData]);
 
   // Focus on phone number input when component loads
   useEffect(() => {
@@ -165,14 +255,6 @@ const RSVPDisplay = ({
     updateFormData(FORM_FIELDS.CHECKED_LUGGAGE, !isLuggageSelected);
   };
 
-  // Helper function to get generic hotel description
-  const getGenericHotelDescription = (location) => `Hotel in ${location}`;
-
-  // Helper function to extract city names from route
-  const extractCityNames = (route) => {
-    const cities = route.split(" → ");
-    return { origin: cities[0].replace("→", ""), destination: cities[1] };
-  };
 
   // Define all services in chronological order using centralized data
   const createChronologicalServices = (accommodations, flights, isIncluded) => {
@@ -327,83 +409,11 @@ const RSVPDisplay = ({
     false
   );
 
-  // Reusable service card component
-  const ServiceCard = ({ service, index, isIncluded }) => (
-    <div
-      key={isIncluded ? index : `excluded-${index}`}
-      className={`service-item ${isIncluded ? "included" : "excluded"}`}
-    >
-      <div className="service-icon">
-        <i
-          className={
-            service.type === "accommodation" ? "fas fa-bed" : "fas fa-plane"
-          }
-        ></i>
-      </div>
-      <div className="service-details">
-        {service.type === "accommodation" ? (
-          <>
-            <div className="accommodation-single-line">
-              <div className="accommodation-info-line">
-                <span className="hotel-name-simple">
-                  {getGenericHotelDescription(service.location)}
-                </span>
-              </div>
-              <div className="accommodation-breakfast">Breakfast included</div>
-              <div className="accommodation-dates">
-                {service.nights.length === 1
-                  ? service.nights[0].date
-                  : `${service.nights[0].date} - ${service.nights[service.nights.length - 1].date}`}
-              </div>
-              <div className="accommodation-dates">
-                * per person, double occupancy
-              </div>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Flight - Single Line Format */}
-            <div className="flight-single-line">
-              {(() => {
-                const cities = extractCityNames(service.route);
-                return (
-                  <div className="flight-route-line">
-                    <div>
-                      <span className="flight-segment">{cities.origin}</span>
-                    </div>
-
-                    <div className="flight-date ">
-                      <span>
-                        ({service.departure.airport}) {service.departure.time}
-                      </span>
-                      <span className="flight-arrow"> → </span>
-                      <span>
-                        {cities.destination} ({service.arrival.airport}){" "}
-                        {service.arrival.time}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })()}
-              <div className="flight-date">
-                {service.date} - {service.code}
-              </div>
-              <div className="flight-date">{service.airline}</div>
-            </div>
-          </>
-        )}
-      </div>
-      <div className={`service-status ${isIncluded ? "included" : "excluded"}`}>
-        <i className={`fas fa-${isIncluded ? "check" : "times"}`}></i>
-        <span>{isIncluded ? "Included" : "Not Included"}</span>
-      </div>
-    </div>
-  );
 
   return (
     <section className="form-section">
       <h2>
-        <i className="fas fa-check-circle"></i> Trip Confirmed
+        <i className="fas fa-check-circle" /> Trip Confirmed
       </h2>
 
       {/* Personal Information */}
@@ -500,7 +510,7 @@ const RSVPDisplay = ({
               }
             />
             <label htmlFor="travel-document-check">
-              <span className="checkmark"></span>
+              <span className="checkmark" />
               <div className="confirmation-text">
                 <strong>
                   I confirm that I have read, understood, and agreed to the
@@ -520,7 +530,7 @@ const RSVPDisplay = ({
                     conditions
                     <i
                       className={`fas fa-chevron-${showConfirmationDetails ? "up" : "down"}`}
-                    ></i>
+                    />
                   </button>
 
                   {showConfirmationDetails && (
@@ -629,7 +639,7 @@ const RSVPDisplay = ({
                             health insurance requirements
                             <i
                               className={`fas fa-chevron-${showHealthInsuranceDetails ? "up" : "down"}`}
-                            ></i>
+                            />
                           </button>
 
                           {showHealthInsuranceDetails && (
@@ -694,7 +704,7 @@ const RSVPDisplay = ({
         <div className="pack-price-section">
           <div className="pack-price-card">
             <h3>
-              <i className="fas fa-tag"></i> Trip Package Price
+              <i className="fas fa-tag" /> Trip Package Price
             </h3>
 
             {/* Readonly Notice */}
@@ -702,7 +712,7 @@ const RSVPDisplay = ({
               <div className="notice-content">
                 <div>
                   <h4>
-                    <i className="fas fa-info-circle"></i> Kindly wait before
+                    <i className="fas fa-info-circle" /> Kindly wait before
                     processing the payment until we confirm the final package
                     pricing
                   </h4>
@@ -732,7 +742,7 @@ const RSVPDisplay = ({
         <div className="notice-content">
           <div>
             <h4>
-              <i className="fas fa-info-circle"></i> Included activities will be
+              <i className="fas fa-info-circle" /> Included activities will be
               listed in the agenda, coming soon.
             </h4>
             <p>
@@ -747,18 +757,18 @@ const RSVPDisplay = ({
       {/* Included Services */}
       <div className="services-section">
         <h3>
-          <i className="fas fa-star"></i> Accomodation & Flights
+          <i className="fas fa-star" /> Accomodation & Flights
         </h3>
         <p className="services-description">
           These flights and accommodations are confirmed for your trip:
         </p>
-        <p className="services-description"></p>
+        <p className="services-description" />
 
         <div className="services-grid">
           {includedServices.map((service, index) => {
             return (
               <ServiceCard
-                key={index}
+                key={getServiceKey(service)}
                 service={service}
                 index={index}
                 isIncluded={true}
@@ -777,9 +787,7 @@ const RSVPDisplay = ({
             onClick={() => setShowAllDetails(!showAllDetails)}
           >
             {showAllDetails ? "Hide" : "Show"} services not included
-            <i
-              className={`fas fa-chevron-${showAllDetails ? "up" : "down"}`}
-            ></i>
+            <i className={`fas fa-chevron-${showAllDetails ? "up" : "down"}`} />
           </button>
         </div>
       )}
@@ -788,7 +796,7 @@ const RSVPDisplay = ({
       {showAllDetails && excludedProcessedServices.length > 0 && (
         <div className="services-section">
           <h3>
-            <i className="fas fa-times-circle"></i> Services Not Included
+            <i className="fas fa-times-circle" /> Services Not Included
           </h3>
           <p className="services-description">
             These flights and accommodations are not included in your trip:
@@ -798,7 +806,7 @@ const RSVPDisplay = ({
             {excludedProcessedServices.map((service, index) => {
               return (
                 <ServiceCard
-                  key={`excluded-${index}`}
+                  key={getServiceKey(service, false)}
                   service={service}
                   index={index}
                   isIncluded={false}
@@ -814,7 +822,8 @@ const RSVPDisplay = ({
         <div className="notice-content">
           <div>
             <h4>
-              <i className="fas fa-info-circle"></i>Need to make changes?
+              <i className="fas fa-info-circle" />
+              Need to make changes?
             </h4>
             <p>
               This information is based on your confirmed RSVP. If you need to
@@ -824,7 +833,7 @@ const RSVPDisplay = ({
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Maddie on WhatsApp <i className="fab fa-whatsapp"></i>
+                Maddie on WhatsApp <i className="fab fa-whatsapp" />
               </a>
             </p>
           </div>
@@ -834,7 +843,7 @@ const RSVPDisplay = ({
       {/* Luggage Options */}
       <div className="luggage-addon-section">
         <h3>
-          <i className="fas fa-suitcase"></i> Luggage Options
+          <i className="fas fa-suitcase" /> Luggage Options
         </h3>
 
         {/* Personal Item - Always included */}
@@ -848,7 +857,7 @@ const RSVPDisplay = ({
             />
           </div>
           <div className="luggage-icon personal-item">
-            <i className={LUGGAGE.personalItem.icon}></i>
+            <i className={LUGGAGE.personalItem.icon} />
           </div>
           <div className="luggage-details">
             <div className="luggage-title">{LUGGAGE.personalItem.name}</div>
@@ -874,7 +883,7 @@ const RSVPDisplay = ({
             />
           </div>
           <div className="luggage-icon carry-on">
-            <i className={LUGGAGE.carryOn.icon}></i>
+            <i className={LUGGAGE.carryOn.icon} />
           </div>
           <div className="luggage-details">
             <div className="luggage-title">{LUGGAGE.carryOn.name}</div>
@@ -907,7 +916,7 @@ const RSVPDisplay = ({
             />
           </div>
           <div className="luggage-icon">
-            <i className={LUGGAGE.checked.icon}></i>
+            <i className={LUGGAGE.checked.icon} />
           </div>
           <div className="luggage-details">
             <div className="luggage-title">{LUGGAGE.checked.name}</div>
@@ -922,7 +931,7 @@ const RSVPDisplay = ({
           </div>
           <div className="luggage-price">
             <span className="price-amount on-demand">$ On demand</span>
-            <span className="price-currency"></span>
+            <span className="price-currency" />
           </div>
         </div>
       </div>
@@ -931,14 +940,14 @@ const RSVPDisplay = ({
       {!hideNavigation && (
         <div className="form-actions">
           <button type="button" className="btn-secondary" onClick={onLogout}>
-            <i className="fas fa-arrow-left"></i> Go Back
+            <i className="fas fa-arrow-left" /> Go Back
           </button>
           <button
             type="button"
             className="submit-btn"
             onClick={handleContinueClick}
           >
-            <i className="fas fa-arrow-right"></i> Continue to Add-ons
+            <i className="fas fa-arrow-right" /> Continue to Add-ons
           </button>
         </div>
       )}

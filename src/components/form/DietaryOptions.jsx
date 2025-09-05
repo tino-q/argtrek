@@ -1,4 +1,5 @@
 import React from "react";
+
 import { FORM_FIELDS } from "../../utils/config";
 import "../../styles/DietaryOptions.css";
 
@@ -40,7 +41,7 @@ const DietaryOptions = ({ formData, updateFormData }) => {
   return (
     <section className="form-section">
       <h2>
-        <i className="fas fa-utensils"></i> Dietary Preferences
+        <i className="fas fa-utensils" /> Dietary Preferences
       </h2>
 
       <div className="form-group">
@@ -64,7 +65,7 @@ const DietaryOptions = ({ formData, updateFormData }) => {
               <label htmlFor={`dietary-${option}`}>
                 <div className="option-content">
                   <div className="option-icon" style={{ color: info.color }}>
-                    <i className={info.icon}></i>
+                    <i className={info.icon} />
                   </div>
                   <h3>{info.name}</h3>
                   <p className="description">{info.description}</p>
@@ -77,7 +78,7 @@ const DietaryOptions = ({ formData, updateFormData }) => {
 
       <div className="form-group">
         <label htmlFor="dietary-message" className="section-label">
-          <i className="fas fa-info-circle"></i> Allergies or anything else we
+          <i className="fas fa-info-circle" /> Allergies or anything else we
           should know?
         </label>
         <textarea

@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import { useTripContext } from "../../hooks/useTripContext";
-import PaymentDetailsDisplay from "../display/PaymentDetailsDisplay";
-import PaymentSummary from "../common/PaymentSummary";
-import { usePricing } from "../../hooks/usePricing";
 import { useNavigate } from "react-router-dom";
+
+import { usePricing } from "../../hooks/usePricing";
+import { useTripContext } from "../../hooks/useTripContext";
+import PaymentSummary from "../common/PaymentSummary";
+import PaymentDetailsDisplay from "../display/PaymentDetailsDisplay";
 
 const Payments = () => {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ const Payments = () => {
             className="btn btn-secondary"
             onClick={() => navigate("/home")}
           >
-            <i className="fas fa-arrow-left"></i>
+            <i className="fas fa-arrow-left" />
             Back to Home
           </button>
         </div>

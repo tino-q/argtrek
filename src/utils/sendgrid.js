@@ -16,6 +16,7 @@
  * @param {string} textBody - Plain text content
  * @returns {boolean} - true if sent successfully, false otherwise
  */
+/*
 function sendViaSendGrid(to, from, subject, htmlBody, textBody) {
   var SENDGRID_API_KEY =
     PropertiesService.getScriptProperties().getProperty("SENDGRID_KEY");
@@ -44,6 +45,7 @@ function sendViaSendGrid(to, from, subject, htmlBody, textBody) {
   );
   return response.getResponseCode() === 202;
 }
+*/
 
 /**
  * Example usage:

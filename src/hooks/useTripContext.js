@@ -1,4 +1,5 @@
 import { useContext } from "react";
+
 import { TripContext } from "../context/tripContext";
 
 export const useTripContext = () => {

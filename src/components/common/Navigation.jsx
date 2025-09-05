@@ -21,7 +21,7 @@ const Navigation = ({
       <div className="form-actions">
         {showBack && (
           <button type="button" className="btn-secondary" onClick={onBack}>
-            <i className={backIcon}></i> {backText}
+            <i className={backIcon} /> {backText}
           </button>
         )}
 
@@ -34,7 +34,7 @@ const Navigation = ({
             onClick={onForward}
             disabled={forwardDisabled}
           >
-            <i className={forwardIcon}></i> {forwardText}
+            <i className={forwardIcon} /> {forwardText}
           </button>
         ) : null}
       </div>

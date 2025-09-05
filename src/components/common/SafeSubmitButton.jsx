@@ -27,7 +27,7 @@ const SafeSubmitButton = ({
   }, []);
 
   const handleClick = () => {
-    if (disabled || isLoading) return;
+    if (disabled || isLoading) {return;}
 
     if (!isConfirming) {
       // First click - start confirmation state
@@ -77,7 +77,7 @@ const SafeSubmitButton = ({
     if (isLoading) {
       return (
         <>
-          <i className="fas fa-spinner fa-spin"></i> Processing...
+          <i className="fas fa-spinner fa-spin" /> Processing...
         </>
       );
     }
@@ -85,7 +85,7 @@ const SafeSubmitButton = ({
     if (isConfirming) {
       return (
         <>
-          <i className="fas fa-exclamation-triangle"></i> {confirmText} (
+          <i className="fas fa-exclamation-triangle" /> {confirmText} (
           {countdown}s)
         </>
       );

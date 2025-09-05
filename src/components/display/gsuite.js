@@ -1,12 +1,14 @@
 /* eslint-env node */
-import { google } from "googleapis";
+import fs from "fs";
+import process from "node:process";
 import path from "path";
 import { fileURLToPath } from "url";
-import process from "node:process";
-import { generatePdfPuppeteer } from "./generatePdfPuppeteer.js";
-import fs from "fs";
+
+import { google } from "googleapis";
 import { PDFDocument } from "pdf-lib";
 import puppeteer from "puppeteer";
+
+import { generatePdfPuppeteer } from "./generatePdfPuppeteer.js";
 
 async function getProcessedArray(__dirname, spreadsheetId) {
   /// read from cache
@@ -64,13 +66,13 @@ async function getProcessedArray(__dirname, spreadsheetId) {
       }
 
       if (key.startsWith("formData.")) {
-        if (!processed.formData) processed.formData = {};
+        if (!processed.formData) {processed.formData = {};}
         processed.formData[key.replace("formData.", "")] = value;
       } else if (key.startsWith("pricing.")) {
-        if (!processed.pricing) processed.pricing = {};
+        if (!processed.pricing) {processed.pricing = {};}
         processed.pricing[key.replace("pricing.", "")] = value;
       } else if (key.startsWith("rsvpData.")) {
-        if (!processed.rsvpData) processed.rsvpData = {};
+        if (!processed.rsvpData) {processed.rsvpData = {};}
         processed.rsvpData[key.replace("rsvpData.", "")] = value;
       } else {
         // Keep other fields at top level

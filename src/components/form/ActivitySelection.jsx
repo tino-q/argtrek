@@ -1,9 +1,8 @@
 import { useState } from "react";
-import ImageCarousel from "../common/ImageCarousel";
-import { ACTIVITY_LIST } from "../../utils/activities";
 
-// Import dynamic image loader utility
+import { ACTIVITY_LIST } from "../../utils/activities";
 import { getActivityImageSources } from "../../utils/imageLoader";
+import ImageCarousel from "../common/ImageCarousel";
 
 const ActivitySelection = ({ formData, updateFormData }) => {
   const [carouselState, setCarouselState] = useState({
@@ -67,7 +66,7 @@ const ActivitySelection = ({ formData, updateFormData }) => {
     <div>
       <div className="section-header">
         <h1>
-          <i className="fas fa-plus-circle"></i> Experiences
+          <i className="fas fa-plus-circle" /> Experiences
         </h1>
       </div>
 
@@ -95,7 +94,7 @@ const ActivitySelection = ({ formData, updateFormData }) => {
                     <img src={activity.image} alt={activity.name} />
                     {hasCarousel(activity.id) && (
                       <div className="image-overlay-hint">
-                        <i className="fas fa-search-plus"></i>
+                        <i className="fas fa-search-plus" />
                         <span>View Gallery</span>
                       </div>
                     )}
@@ -111,14 +110,14 @@ const ActivitySelection = ({ formData, updateFormData }) => {
                         onChange={() => {}} // Handled by card click
                         style={{ pointerEvents: "none", marginRight: "12px" }}
                       />
-                      <i className={activity.icon}></i>
+                      <i className={activity.icon} />
                       <div style={{ display: "flex", flexDirection: "column" }}>
                         <h3>{activity.name}</h3>
                         {activity.subtitles &&
                           activity.subtitles.length > 0 && (
                             <div className="activity-subtitles">
                               {activity.subtitles.map((subtitle, i) => (
-                                <div key={i}>{subtitle}</div>
+                                <div key={subtitle || `subtitle-${i}`}>{subtitle}</div>
                               ))}
                             </div>
                           )}
@@ -132,7 +131,7 @@ const ActivitySelection = ({ formData, updateFormData }) => {
                       {activity.descriptionLines && (
                         <div className="description">
                           {activity.descriptionLines.map((line, index) => (
-                            <p key={index} className="description-line">
+                            <p key={line || `description-${index}`} className="description-line">
                               {line || "\u00A0"}
                             </p>
                           ))}

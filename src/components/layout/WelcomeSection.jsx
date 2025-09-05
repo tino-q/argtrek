@@ -1,13 +1,13 @@
 // Welcome Section Component
 // Migrated from original index.html welcome section
 
-import { CONTACTS } from "../../utils/config";
-import { getTravelerName } from "../../utils/rsvpData";
-import { useClipboard } from "../../utils/clipboard";
-import { useNotificationContext } from "../../hooks/useNotificationContext";
 import barilocheImage from "../../assets/bariloche.png";
 import buenosAiresImage from "../../assets/buenos-aires.png";
 import mendozaImage from "../../assets/mendoza.png";
+import { useNotificationContext } from "../../hooks/useNotificationContext";
+import { useClipboard } from "../../utils/clipboard";
+import { CONTACTS } from "../../utils/config";
+import { getTravelerName } from "../../utils/rsvpData";
 
 const WelcomeSection = ({ userRSVP }) => {
   const { copy } = useClipboard();
@@ -67,8 +67,8 @@ const WelcomeSection = ({ userRSVP }) => {
 
         {/* Destination Images */}
         <div className="destinations-stack">
-          {destinations.map((destination, index) => (
-            <div key={index} className="destination-card">
+          {destinations.map((destination) => (
+            <div key={destination.name} className="destination-card">
               <div className="destination-image">
                 <img src={destination.image} alt={destination.name} />
                 <div className="destination-overlay">
@@ -83,7 +83,7 @@ const WelcomeSection = ({ userRSVP }) => {
         {/* Itinerary Section */}
         <div className="content-section">
           <div className="section-icon">
-            <i className="fas fa-map-marked-alt"></i>
+            <i className="fas fa-map-marked-alt" />
           </div>
           <h3>Explore the Full Itinerary</h3>
           <p>
@@ -96,20 +96,20 @@ const WelcomeSection = ({ userRSVP }) => {
             rel="noopener noreferrer"
             className="action-button primary"
           >
-            View Presentation <i className="fas fa-external-link-alt"></i>
+            View Presentation <i className="fas fa-external-link-alt" />
           </a>
         </div>
 
         {/* Contact Section */}
         <div className="content-section">
           <div className="section-icon">
-            <i className="fas fa-headset"></i>
+            <i className="fas fa-headset" />
           </div>
           <h3>Need Assistance?</h3>
           <p>Our team is here to help with any questions</p>
           <div className="contacts-grid">
-            {CONTACTS.map((contact, index) => (
-              <div key={index} className="contact-card">
+            {CONTACTS.map((contact) => (
+              <div key={contact.name} className="contact-card">
                 <div className="contact-info">
                   <span className="contact-name">{contact.name}</span>
                   <button
@@ -118,7 +118,7 @@ const WelcomeSection = ({ userRSVP }) => {
                     title={`Copy ${contact.name}'s phone number`}
                   >
                     {contact.phone}
-                    <i className="fas fa-copy"></i>
+                    <i className="fas fa-copy" />
                   </button>
                 </div>
                 <a
@@ -128,7 +128,7 @@ const WelcomeSection = ({ userRSVP }) => {
                   className="whatsapp-btn"
                   title={`Message ${contact.name} on WhatsApp`}
                 >
-                  <i className="fab fa-whatsapp"></i>
+                  <i className="fab fa-whatsapp" />
                 </a>
               </div>
             ))}

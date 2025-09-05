@@ -16,14 +16,14 @@ const NotificationContainer = ({ notifications, onRemove }) => {
           className={`notification notification-${notification.type} ${notification.customClass || ""} show`}
         >
           <div className="notification-content">
-            <i className={getNotificationIcon(notification.type)}></i>
+            <i className={getNotificationIcon(notification.type)} />
             <span>{notification.message}</span>
             <button
               className="notification-close"
               onClick={() => onRemove && onRemove(notification.id)}
               aria-label="Close notification"
             >
-              <i className="fas fa-times"></i>
+              <i className="fas fa-times" />
             </button>
           </div>
         </div>

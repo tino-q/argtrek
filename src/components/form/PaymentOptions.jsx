@@ -1,4 +1,5 @@
 import React from "react";
+
 import { FORM_FIELDS } from "../../utils/config";
 import "../../styles/PaymentOptions.css";
 import { getUSDToEURExchangeRate } from "../../utils/rsvpData";
@@ -97,12 +98,12 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
   return (
     <section className="form-section">
       <h2>
-        <i className="fas fa-credit-card"></i> Payment Configuration
+        <i className="fas fa-credit-card" /> Payment Configuration
       </h2>
 
       {/* Payment Warning */}
       <div className="payment-warning">
-        <i className="fas fa-exclamation-triangle"></i>
+        <i className="fas fa-exclamation-triangle" />
         <div>
           <h3>Important</h3>
           <ul>
@@ -305,7 +306,7 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
                           className="option-icon"
                           style={{ color: info.color }}
                         >
-                          <i className={info.icon}></i>
+                          <i className={info.icon} />
                         </div>
                         <h3>{currency}</h3>
                         <p className="description">{info.name}</p>
@@ -341,7 +342,7 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
                           className="option-icon"
                           style={{ color: info.color }}
                         >
-                          <i className={info.icon}></i>
+                          <i className={info.icon} />
                         </div>
                         <h3>{info.name}</h3>
                         <p className="description">{info.symbol}</p>

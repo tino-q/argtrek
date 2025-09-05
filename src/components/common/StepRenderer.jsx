@@ -2,15 +2,16 @@
 // Renders the appropriate step component based on current step
 
 import { useNavigate } from "react-router-dom";
+
 import { useTripContext } from "../../hooks/useTripContext";
+import { getStepConfig } from "../../utils/stepConfig";
 import EmailLogin from "../auth/EmailLogin";
-import WelcomeSection from "../layout/WelcomeSection";
 import RSVPDisplay from "../display/RSVPDisplay";
 import AddonsStep from "../form/AddonsStep";
 import PaymentStep from "../form/PaymentStep";
+import WelcomeSection from "../layout/WelcomeSection";
 import Home from "../participant/Home";
 import Payments from "../participant/Payments";
-import { getStepConfig } from "../../utils/stepConfig";
 
 const StepRenderer = ({ currentStep, pricing, onRSVPContinue }) => {
   const { userRSVP, formData, updateFormData } = useTripContext();
@@ -30,7 +31,7 @@ const StepRenderer = ({ currentStep, pricing, onRSVPContinue }) => {
         return <WelcomeSection userRSVP={userRSVP} />;
 
       case "rsvp":
-        if (!userRSVP) return null;
+        if (!userRSVP) {return null;}
         return (
           <RSVPDisplay
             rsvpData={userRSVP}
@@ -75,7 +76,7 @@ const StepRenderer = ({ currentStep, pricing, onRSVPContinue }) => {
               className="btn btn-secondary"
               onClick={() => navigate("/home")}
             >
-              <i className="fas fa-arrow-left"></i>
+              <i className="fas fa-arrow-left" />
               Back to Home
             </button>
           </div>
@@ -90,7 +91,7 @@ const StepRenderer = ({ currentStep, pricing, onRSVPContinue }) => {
               className="btn btn-secondary"
               onClick={() => navigate("/home")}
             >
-              <i className="fas fa-arrow-left"></i>
+              <i className="fas fa-arrow-left" />
               Back to Home
             </button>
           </div>

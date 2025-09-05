@@ -6,19 +6,16 @@ import empanadasMain from "../assets/empanadas/empanadas-1.jpeg";
 import empanadas2 from "../assets/empanadas/empanadas-2.jpeg";
 import empanadas3 from "../assets/empanadas/empanadas-3.jpeg";
 import empanadas4 from "../assets/empanadas/empanadas-4.jpeg";
-
-// Import all horseback riding images
 import horseback2 from "../assets/horseback-riding/horseback-riding-mendoza-1.jpeg";
 import horseback3 from "../assets/horseback-riding/horseback-riding-mendoza-2.jpeg";
-
-// Import milonga images
 import milonga1 from "../assets/milonga/milonga-1.jpg";
 import milonga2 from "../assets/milonga/milonga-2.jpg";
 import milonga3 from "../assets/milonga/milonga-3.jpg";
 import milonga4 from "../assets/milonga/milonga-4.jpeg";
-
-// Import rafting images (keeping existing structure for now)
 import rafting1 from "../assets/rafting/rafting1.jpeg";
+import rafting10 from "../assets/rafting/rafting10.jpeg";
+import rafting11 from "../assets/rafting/rafting11.jpeg";
+import rafting12 from "../assets/rafting/rafting12.jpeg";
 import rafting2 from "../assets/rafting/rafting2.jpeg";
 import rafting3 from "../assets/rafting/rafting3.jpeg";
 import rafting4 from "../assets/rafting/rafting4.jpeg";
@@ -27,9 +24,6 @@ import rafting6 from "../assets/rafting/rafting6.jpeg";
 import rafting7 from "../assets/rafting/rafting7.jpeg";
 import rafting8 from "../assets/rafting/rafting8.jpeg";
 import rafting9 from "../assets/rafting/rafting9.jpeg";
-import rafting10 from "../assets/rafting/rafting10.jpeg";
-import rafting11 from "../assets/rafting/rafting11.jpeg";
-import rafting12 from "../assets/rafting/rafting12.jpeg";
 
 // Image collection configuration
 const IMAGE_COLLECTIONS = {

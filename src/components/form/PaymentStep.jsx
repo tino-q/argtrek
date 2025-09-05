@@ -1,8 +1,9 @@
 // Payment Step Component
 // Extracted from App.jsx for better component organization
 
-import PaymentOptions from "./PaymentOptions";
 import PricingSummary from "../layout/PricingSummary";
+
+import PaymentOptions from "./PaymentOptions";
 
 const PaymentStep = ({ formData, updateFormData, rsvpData, pricing }) => {
   return (
@@ -19,7 +20,7 @@ const PaymentStep = ({ formData, updateFormData, rsvpData, pricing }) => {
       <div className="change-request-notice">
         <div className="notice-content">
           <p>
-            <i className="fas fa-info-circle"></i>Once submitted all change
+            <i className="fas fa-info-circle" />Once submitted all change
             requests must be done through Maddie
           </p>
         </div>

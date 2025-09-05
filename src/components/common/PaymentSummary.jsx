@@ -218,7 +218,7 @@ const PaymentSummary = ({ formData, pricing, submissionResult }) => {
           {/* Credit Card Info */}
           {formData.paymentMethod === "credit" && (
             <div className="payment-summary__credit-info">
-              <i className="fas fa-info-circle payment-summary__credit-icon"></i>
+              <i className="fas fa-info-circle payment-summary__credit-icon" />
               <span className="payment-summary__credit-text">
                 Credit card payments are processed in EUR
               </span>

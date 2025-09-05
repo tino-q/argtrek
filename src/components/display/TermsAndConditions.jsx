@@ -267,7 +267,7 @@ const TermsAndConditions = () => {
             onClick={handleHomeClick}
             type="button"
           >
-            <i className="fas fa-home"></i>Home
+            <i className="fas fa-home" />Home
           </button>
         </div>
       </div>

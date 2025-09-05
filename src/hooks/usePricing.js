@@ -2,13 +2,14 @@
 // Shows pricing preview to user, but all actual calculations happen in backend
 
 import { useState, useEffect } from "react";
+
+import { getActivityByFormField } from "../utils/activities";
 import { FORM_FIELDS } from "../utils/config";
 import {
   getBasePrice,
   getPrivateRoomUpgradePrice,
   getUSDToEURExchangeRate,
 } from "../utils/rsvpData";
-import { getActivityByFormField } from "../utils/activities";
 
 export const usePricing = (rsvpData, formData) => {
   const [pricing, setPricing] = useState({

@@ -23,7 +23,7 @@ const PricingSummary = ({ pricing, formData }) => {
   return (
     <section className="price-summary">
       <h2>
-        <i className="fas fa-calculator"></i> Price Summary
+        <i className="fas fa-calculator" /> Price Summary
       </h2>
 
       <div className="summary-content">
@@ -47,8 +47,8 @@ const PricingSummary = ({ pricing, formData }) => {
         {/* Activities Section */}
         {hasActivities && (
           <div id="activitiesSection">
-            {pricing.activities.map((activity, index) => (
-              <div key={index} className="summary-row activity-row">
+            {pricing.activities.map((activity) => (
+              <div key={activity.name} className="summary-row activity-row">
                 <span>{activity.name}</span>
                 <span>
                   {activity.price === 0

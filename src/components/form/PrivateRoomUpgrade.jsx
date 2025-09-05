@@ -64,7 +64,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
   return (
     <section className="form-section">
       <h2>
-        <i className="fas fa-bed"></i> Room Accommodation
+        <i className="fas fa-bed" /> Room Accommodation
       </h2>
       <p className="section-description">
         Choose your preferred room arrangement
@@ -88,10 +88,10 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                   onChange={() => handleRoomSelection(true)}
                   className="room-radio"
                 />
-                <label htmlFor="privateRoom" className="radio-label"></label>
+                <label htmlFor="privateRoom" className="radio-label" />
               </div>
               <div className="option-info">
-                <i className="fas fa-crown"></i>
+                <i className="fas fa-crown" />
                 <h3>Private Room Upgrade</h3>
               </div>
             </div>
@@ -99,8 +99,8 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
               <div className="room-description">
                 <p>Get your own private room in:</p>
                 <ul>
-                  {accommodations.map((accommodation, index) => (
-                    <li key={index}>{accommodation}</li>
+                  {accommodations.map((accommodation) => (
+                    <li key={accommodation}>{accommodation}</li>
                   ))}
                 </ul>
               </div>
@@ -129,10 +129,10 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                   onChange={() => handleRoomSelection(false)}
                   className="room-radio"
                 />
-                <label htmlFor="sharedRoom" className="radio-label"></label>
+                <label htmlFor="sharedRoom" className="radio-label" />
               </div>
               <div className="option-info">
-                <i className="fas fa-users"></i>
+                <i className="fas fa-users" />
                 <h3>Shared Room</h3>
               </div>
             </div>
@@ -158,7 +158,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                           }
                           className="roommate-radio"
                         />
-                        <span className="radio-checkmark"></span>
+                        <span className="radio-checkmark" />
                         <span className="option-text">
                           I'm ok with random assignment
                         </span>
@@ -177,7 +177,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                           }
                           className="roommate-radio"
                         />
-                        <span className="radio-checkmark"></span>
+                        <span className="radio-checkmark" />
                         <span className="option-text">I'm sharing with</span>
                       </label>
                       {roommatePreference === "know" && (
@@ -204,14 +204,14 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                           }
                           className="roommate-radio"
                         />
-                        <span className="radio-checkmark"></span>
+                        <span className="radio-checkmark" />
                         <span className="option-text">
                           Add me to the "find a roommate list"
                         </span>
                       </label>
                       {roommatePreference === "seeking" && (
                         <span className="roommate-help-text">
-                          <i className="fas fa-info-circle"></i>Once everyone
+                          <i className="fas fa-info-circle" />Once everyone
                           completes their registration, we'll share the list
                           with others looking for roommates
                         </span>

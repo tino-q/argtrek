@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useTripContext } from "../../hooks/useTripContext";
-import { APPS_SCRIPT_URL, PRICES } from "../../utils/config.js";
-import AuthContext from "../../context/AuthContext.jsx";
-import "./Timeline.css";
 import { useNavigate } from "react-router-dom";
 
+import AuthContext from "../../context/AuthContext.jsx";
+import { useTripContext } from "../../hooks/useTripContext";
+import { APPS_SCRIPT_URL, PRICES } from "../../utils/config.js";
+
+import "./Timeline.css";
+
 const RecommendationsModal = ({ recommendations, onClose }) => {
-  if (!recommendations) return null;
+  if (!recommendations) {return null;}
 
   const items = recommendations
     .split(" // ")
@@ -25,7 +27,7 @@ const RecommendationsModal = ({ recommendations, onClose }) => {
         <div className="modal-body">
           <ul className="recommendations-list">
             {items.map((item, index) => (
-              <li key={index}>{item}</li>
+              <li key={item || `item-${index}`}>{item}</li>
             ))}
           </ul>
         </div>
@@ -47,7 +49,7 @@ const TimeRange = ({ start, end }) => {
 };
 
 const ChoicesGroup = ({ name, options, selectedValue, onChange, isSaving }) => {
-  if (!Array.isArray(options) || options.length === 0) return null;
+  if (!Array.isArray(options) || options.length === 0) {return null;}
   const normalized = options.map((opt) => String(opt).trim()).filter(Boolean);
   return (
     <div
@@ -59,8 +61,8 @@ const ChoicesGroup = ({ name, options, selectedValue, onChange, isSaving }) => {
       {isSaving ? (
         <span className="saving-text">Saving...</span>
       ) : (
-        normalized.map((choice, index) => (
-          <label key={index} className="choice-option">
+        normalized.map((choice) => (
+          <label key={choice} className="choice-option">
             <input
               type="radio"
               name={name}
@@ -84,10 +86,10 @@ const TimelineRow = ({
   recommendations,
   onRecommendationClick,
   choices,
-  itemKey,
-  selectedChoice,
+  // itemKey,
+  // selectedChoice,
   onChoiceChange,
-  isSaving,
+  // isSaving,
   formData,
   activityChoices,
   savingChoices,
@@ -95,13 +97,13 @@ const TimelineRow = ({
   const timeDisplay = start && end ? `${start} - ${end}` : start || end || "";
 
   const renderParameter = () => {
-    if (!parameter1) return null;
+    if (!parameter1) {return null;}
 
     const lines = parameter1
       .split("//")
       .map((line) => line.trim())
       .filter(Boolean);
-    if (lines.length === 0) return null;
+    if (lines.length === 0) {return null;}
 
     return (
       <div className="timeline-parameter">
@@ -109,7 +111,7 @@ const TimelineRow = ({
           <span className="parameter-text">{lines[0]}</span>
         </div>
         {lines.slice(1).map((line, index) => (
-          <div key={index} className="parameter-detail">
+          <div key={line || `detail-${index}`} className="parameter-detail">
             {line}
           </div>
         ))}
@@ -118,7 +120,7 @@ const TimelineRow = ({
   };
 
   const renderChoices = () => {
-    if (!choices || !choices.trim()) return null;
+    if (!choices || !choices.trim()) {return null;}
 
     const identifier = choices.trim();
 
@@ -144,7 +146,7 @@ const TimelineRow = ({
             <div className="registered-status">You're registered!</div>
           </div>
         );
-      } else {
+      } 
         const price = PRICES?.[choiceItemKey];
         return (
           <div className="timeline-choices">
@@ -160,7 +162,7 @@ const TimelineRow = ({
             </div>
           </div>
         );
-      }
+      
     }
 
     // Handle activity-valle-de-uco
@@ -300,7 +302,6 @@ const Timeline = () => {
       try {
         let data;
 
-        // eslint-disable-next-line no-undef
         if (__DEV__) {
           // get queryparamt refresh
           const refresh = new URLSearchParams(window.location.search).get(
@@ -411,7 +412,6 @@ const Timeline = () => {
       }
 
       try {
-        // eslint-disable-next-line no-undef
         if (__DEV__) {
           await new Promise((resolve) => setTimeout(resolve, 300));
           const userKey = `${userEmail}-${userPassword}`;
@@ -512,7 +512,7 @@ const Timeline = () => {
   };
 
   const getDaySuffix = (day) => {
-    if (day >= 11 && day <= 13) return "th";
+    if (day >= 11 && day <= 13) {return "th";}
     switch (day % 10) {
       case 1:
         return "st";
@@ -580,7 +580,7 @@ const Timeline = () => {
     return (
       <div className="container">
         <div className="timeline-loading">
-          <div className="loading-spinner"></div>
+          <div className="loading-spinner" />
           <p>Loading timeline...</p>
         </div>
       </div>
@@ -637,7 +637,7 @@ const Timeline = () => {
                 <div className="timeline-items">
                   {dayData.items.map((item, itemIndex) => (
                     <div
-                      key={`${dayKey}-${itemIndex}`}
+                      key={getItemKey(item, dayKey, itemIndex)}
                       className="timeline-item"
                     >
                       {renderItemByType(item, dayKey, itemIndex)}

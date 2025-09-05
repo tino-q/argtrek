@@ -324,7 +324,7 @@ export const validateFormDataStructure = (formData) => {
       if (expectedType.includes("|")) {
         const types = expectedType.split("|");
         const isValidType = types.some((type) => {
-          if (type === "array") return Array.isArray(value);
+          if (type === "array") {return Array.isArray(value);}
           return typeof value === type;
         });
 

@@ -3,17 +3,16 @@
 
 import { useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { usePricing } from "../../hooks/usePricing";
+
 import { useFormSubmission } from "../../hooks/useFormSubmission";
-import { useTripContext } from "../../hooks/useTripContext";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
+import { usePricing } from "../../hooks/usePricing";
+import { useTripContext } from "../../hooks/useTripContext";
 import { FORM_FIELDS } from "../../utils/config";
 import { getEmail } from "../../utils/rsvpData";
 import { STEPS } from "../../utils/stepConfig";
-
-// Import form-specific components
-import StepRenderer from "../common/StepRenderer";
 import StepNavigation from "../common/StepNavigation";
+import StepRenderer from "../common/StepRenderer";
 
 const FormFlow = () => {
   const { setSubmissionResult } = useTripContext();

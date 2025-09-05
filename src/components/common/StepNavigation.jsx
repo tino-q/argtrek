@@ -2,12 +2,15 @@
 // Uses step configuration to provide consistent navigation across all steps
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { useNotificationContext } from "../../hooks/useNotificationContext";
+import { FORM_FIELDS } from "../../utils/config";
+import { getStepConfig } from "../../utils/stepConfig";
+
 import Navigation from "./Navigation";
 import SafeSubmitButton from "./SafeSubmitButton";
-import { getStepConfig } from "../../utils/stepConfig";
-import { FORM_FIELDS } from "../../utils/config";
-import { useNotificationContext } from "../../hooks/useNotificationContext";
-import { useNavigate } from "react-router-dom";
+
 
 const StepNavigation = ({
   currentStep,
@@ -108,7 +111,7 @@ const StepNavigation = ({
             confirmText="You can only submit once, continue?"
             confirmDuration={3000}
           >
-            <i className="fas fa-check"></i> Submit Registration
+            <i className="fas fa-check" /> Submit Registration
           </SafeSubmitButton>
         }
       />
@@ -131,7 +134,7 @@ const StepNavigation = ({
             confirmText="Submit account request?"
             confirmDuration={3000}
           >
-            <i className="fas fa-paper-plane"></i> Request My Account
+            <i className="fas fa-paper-plane" /> Request My Account
           </SafeSubmitButton>
         }
       />

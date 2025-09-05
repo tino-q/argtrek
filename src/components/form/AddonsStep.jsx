@@ -1,10 +1,11 @@
 // Addons Step Component
 // Extracted from App.jsx for better component organization
 
-import ActivitySelection from "./ActivitySelection";
-import PrivateRoomUpgrade from "./PrivateRoomUpgrade";
-import DietaryOptions from "./DietaryOptions";
 import { isSoloTraveler } from "../../utils/rsvpData";
+
+import ActivitySelection from "./ActivitySelection";
+import DietaryOptions from "./DietaryOptions";
+import PrivateRoomUpgrade from "./PrivateRoomUpgrade";
 
 const AddonsStep = ({ formData, updateFormData, rsvpData }) => {
   // Check if user is a solo traveler using centralized utility

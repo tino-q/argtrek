@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { APPS_SCRIPT_URL } from "../utils/config";
 
 /**
@@ -72,9 +73,9 @@ export const useFormSubmission = () => {
             autoClose: true,
           },
         };
-      } else {
+      } 
         throw new Error(result.error || "Submission failed");
-      }
+      
     } catch (error) {
       console.error("Submission error:", error);
 

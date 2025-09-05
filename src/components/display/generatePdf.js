@@ -1,6 +1,10 @@
 // Payment Details Display Component
 // Shows payment information after successful trip registration
 
+import jsPDF from "jspdf";
+
+import { getActivityByFormField } from "../../utils/activities";
+import { FORM_FIELDS, EMAIL_CONFIG , BANK_DETAILS, CRYPTO_WALLETS, NETWORK_INFO } from "../../utils/config";
 import {
   getEmail,
   getBasePrice,
@@ -9,11 +13,6 @@ import {
   getTravelerName,
   getPlusOneName,
 } from "../../utils/rsvpData";
-import { FORM_FIELDS, EMAIL_CONFIG } from "../../utils/config";
-import { getActivityByFormField } from "../../utils/activities";
-import jsPDF from "jspdf";
-
-import { BANK_DETAILS, CRYPTO_WALLETS, NETWORK_INFO } from "../../utils/config";
 
 export function buildPDfDoc(rsvpData, voucherId, formData, pricing) {
   const tripItinerary = getTripItinerary(rsvpData);
@@ -82,7 +81,7 @@ export function buildPDfDoc(rsvpData, voucherId, formData, pricing) {
 
   const addKeyValue = (label, value, yPos = yPosition, indent = 0) => {
     setLabel();
-    doc.text(label + ":", margin + indent, yPos);
+    doc.text(`${label  }:`, margin + indent, yPos);
     setBody();
     doc.text(value, margin + indent + 57, yPos);
     return yPos + 6;
@@ -172,7 +171,7 @@ export function buildPDfDoc(rsvpData, voucherId, formData, pricing) {
       const maxLeftWidth = contentWidth * 0.6; // Use 60% of width for left side
       const flightHeaderLines = doc.splitTextToSize(flightHeader, maxLeftWidth);
 
-      let currentY = yPosition + 8;
+      const currentY = yPosition + 8;
       flightHeaderLines.forEach((line, lineIndex) => {
         doc.text(line, margin + 6, currentY + lineIndex * 5);
       });
@@ -239,7 +238,7 @@ export function buildPDfDoc(rsvpData, voucherId, formData, pricing) {
       const maxLeftWidth = contentWidth * 0.65; // Use 65% of width for left side
       const hotelNameLines = doc.splitTextToSize(hotel.hotelName, maxLeftWidth);
 
-      let currentY = yPosition + 8;
+      const currentY = yPosition + 8;
       hotelNameLines.forEach((line, lineIndex) => {
         doc.text(line, margin + 6, currentY + lineIndex * 5);
       });
@@ -447,7 +446,7 @@ export function buildPDfDoc(rsvpData, voucherId, formData, pricing) {
     const instructions = [
       "- Select 'OUR' option to cover ALL transfer fees in your bank",
       "- Include your full name in the transfer reference",
-      "- Send transfer receipt to " + EMAIL_CONFIG.MADDIE,
+      `- Send transfer receipt to ${  EMAIL_CONFIG.MADDIE}`,
       "- Recommended: Use Revolut for free transfers",
     ];
 

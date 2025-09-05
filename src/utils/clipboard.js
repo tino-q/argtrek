@@ -8,10 +8,10 @@ export const copyToClipboard = async (text) => {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);
       return { success: true, method: "modern" };
-    } else {
+    } 
       // Use fallback method for older browsers or non-secure contexts
       return await fallbackCopyMethod(text);
-    }
+    
   } catch (error) {
     console.error("Clipboard operation failed:", error);
     return { success: false, error: error.message };

@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+
 import { APPS_SCRIPT_URL } from "../../utils/config";
 
 const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
@@ -14,8 +15,8 @@ const ProofOfPaymentUpload = ({ name, surname, orderNumber, installments }) => {
   const handleFileChange = (e) => {
     setMessage("");
     setError("");
-    const f = e.target.files[0];
-    if (!f) return;
+    const [f] = e.target.files;
+    if (!f) {return;}
     if (!ALLOWED_TYPES.includes(f.type)) {
       setError("Only PDF, JPG, and PNG files are allowed.");
       return;
@@ -28,14 +29,14 @@ const ProofOfPaymentUpload = ({ name, surname, orderNumber, installments }) => {
   };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file) {return;}
     setUploading(true);
     setMessage("");
     setError("");
     try {
       const reader = new FileReader();
       reader.onload = async (event) => {
-        const base64 = event.target.result.split(",")[1];
+        const [, base64] = event.target.result.split(",");
         const timestamp = Date.now();
         const formData = new FormData();
         formData.append("action", "upload_proof_of_payment");

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { FORM_FIELDS } from "../utils/config";
-import { TripContext } from "./tripContext";
-import { useNavigate } from "react-router-dom";
+
 import { useNotificationContext } from "../hooks/useNotificationContext";
+import { FORM_FIELDS } from "../utils/config";
+
+import { TripContext } from "./tripContext";
 
 const TripProvider = ({ children }) => {
-  const navigate = useNavigate();
   const { showSuccess } = useNotificationContext();
 
   const getFromStorage = (key, defaultValue) => {

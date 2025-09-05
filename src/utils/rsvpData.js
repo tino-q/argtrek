@@ -53,7 +53,7 @@ const formatFieldsToNights = (fields) => {
     Number(field.split("_")[0].replace("Nov", ""))
   );
 
-  const first = dates[0];
+  const [first] = dates;
   const last = dates[dates.length - 1];
 
   return [`Check in ${first} Nov - Check out ${last + 1} Nov`];
@@ -63,7 +63,7 @@ const formatFieldsToNights = (fields) => {
  * Get traveler's primary name from RSVP data
  */
 export const getTravelerName = (rsvpData, formData) => {
-  if (!rsvpData) return "Name not found";
+  if (!rsvpData) {return "Name not found";}
 
   if (
     formData &&
@@ -81,7 +81,7 @@ export const getTravelerName = (rsvpData, formData) => {
  * Get plus one's name from RSVP data
  */
 export const getPlusOneName = (rsvpData) => {
-  if (!rsvpData) return null;
+  if (!rsvpData) {return null;}
 
   const plusOneName = rsvpData[RSVP_FIELDS.PLUS_ONE_NAME];
   return plusOneName && plusOneName.trim() ? plusOneName : null;
@@ -91,7 +91,7 @@ export const getPlusOneName = (rsvpData) => {
  * Get email address from RSVP data
  */
 export const getEmail = (rsvpData) => {
-  if (!rsvpData) return "Email not found";
+  if (!rsvpData) {return "Email not found";}
 
   const email = rsvpData[RSVP_FIELDS.EMAIL];
   return email || "Email not found";
@@ -101,7 +101,7 @@ export const getEmail = (rsvpData) => {
  * Get base trip price from RSVP data
  */
 export const getBasePrice = (rsvpData) => {
-  if (!rsvpData) return 0;
+  if (!rsvpData) {return 0;}
 
   const price = rsvpData[RSVP_FIELDS.PACK_PRICE];
   return parseFloat(price) || 0;
@@ -111,7 +111,7 @@ export const getBasePrice = (rsvpData) => {
  * Get private room upgrade price from RSVP data
  */
 export const getPrivateRoomUpgradePrice = (rsvpData) => {
-  if (!rsvpData) return 0;
+  if (!rsvpData) {return 0;}
 
   const price = rsvpData[RSVP_FIELDS.PRIVATE_ROOM_UPGRADE];
   return parseFloat(price) || 0;
@@ -121,7 +121,7 @@ export const getPrivateRoomUpgradePrice = (rsvpData) => {
  * Check if traveler is traveling solo
  */
 export const isSoloTraveler = (rsvpData) => {
-  if (!rsvpData) return false;
+  if (!rsvpData) {return false;}
 
   // Check if party size is 1 or if plus1 is empty/null
   const partySize = rsvpData[RSVP_FIELDS.PARTY_SIZE];
@@ -141,7 +141,7 @@ export const hasPlusOne = (rsvpData) => {
  * Get accommodation nights for a specific location
  */
 export const getAccommodationNights = (rsvpData, location) => {
-  if (!rsvpData) return [];
+  if (!rsvpData) {return [];}
 
   const nightMappings = {
     "buenos-aires-arrival": [RSVP_FIELDS.NOV_22, RSVP_FIELDS.NOV_23],
@@ -158,7 +158,7 @@ export const getAccommodationNights = (rsvpData, location) => {
  * Get all included accommodations with their nights
  */
 export const getIncludedAccommodations = (rsvpData) => {
-  if (!rsvpData) return [];
+  if (!rsvpData) {return [];}
 
   const accommodations = [];
 
@@ -341,7 +341,7 @@ export const getExcludedAccommodations = (rsvpData) => {
  * Get included flights
  */
 export const getIncludedFlights = (rsvpData) => {
-  if (!rsvpData) return [];
+  if (!rsvpData) {return [];}
 
   const flights = [];
 
@@ -421,7 +421,7 @@ export const getIncludedFlights = (rsvpData) => {
  * Get excluded flights
  */
 export const getExcludedFlights = (rsvpData) => {
-  if (!rsvpData) return [];
+  if (!rsvpData) {return [];}
 
   const flights = [];
 
@@ -514,7 +514,7 @@ export const splitTravelerName = (rsvpData, formData) => {
   }
 
   // First part is first name, rest is last name
-  const firstName = nameParts[0];
+  const [firstName] = nameParts;
   const lastName = nameParts.slice(1).join(" ");
 
   return { firstName, lastName };

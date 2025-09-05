@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 
 const ImageCarousel = ({ images, isOpen, onClose, initialIndex = 0 }) => {
@@ -34,7 +34,7 @@ const ImageCarousel = ({ images, isOpen, onClose, initialIndex = 0 }) => {
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (!isOpen) return;
+      if (!isOpen) {return;}
 
       if (e.key === "Escape") {
         onClose();
@@ -47,20 +47,18 @@ const ImageCarousel = ({ images, isOpen, onClose, initialIndex = 0 }) => {
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isOpen, currentIndex]);
-
-  const goToNext = () => {
+  }, [isOpen, goToNext, goToPrevious, onClose]);
+  const goToNext = useCallback(() => {
     setCurrentIndex((prevIndex) =>
       prevIndex === images.length - 1 ? 0 : prevIndex + 1
     );
-  };
+  }, [images.length]);
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? images.length - 1 : prevIndex - 1
     );
-  };
-
+  }, [images.length]);
   const goToSlide = (index) => {
     setCurrentIndex(index);
   };
@@ -76,7 +74,7 @@ const ImageCarousel = ({ images, isOpen, onClose, initialIndex = 0 }) => {
   };
 
   const handleTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
+    if (!touchStart || !touchEnd) {return;}
 
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
@@ -89,13 +87,13 @@ const ImageCarousel = ({ images, isOpen, onClose, initialIndex = 0 }) => {
     }
   };
 
-  if (!isOpen || images.length === 0) return null;
+  if (!isOpen || images.length === 0) {return null;}
 
   return createPortal(
     <div className="carousel-overlay" onClick={onClose}>
       <div className="carousel-container" onClick={(e) => e.stopPropagation()}>
         <button className="carousel-close" onClick={onClose}>
-          <i className="fas fa-times"></i>
+          <i className="fas fa-times" />
         </button>
 
         <div
@@ -105,7 +103,7 @@ const ImageCarousel = ({ images, isOpen, onClose, initialIndex = 0 }) => {
           onTouchEnd={handleTouchEnd}
         >
           <button className="carousel-nav carousel-prev" onClick={goToPrevious}>
-            <i className="fas fa-chevron-left"></i>
+            <i className="fas fa-chevron-left" />
           </button>
 
           <div className="carousel-image-container">
@@ -117,14 +115,14 @@ const ImageCarousel = ({ images, isOpen, onClose, initialIndex = 0 }) => {
           </div>
 
           <button className="carousel-nav carousel-next" onClick={goToNext}>
-            <i className="fas fa-chevron-right"></i>
+            <i className="fas fa-chevron-right" />
           </button>
         </div>
 
         <div className="carousel-indicators">
-          {images.map((_, index) => (
+          {images.map((image, index) => (
             <button
-              key={index}
+              key={image}
               className={`carousel-dot ${index === currentIndex ? "active" : ""}`}
               onClick={() => goToSlide(index)}
             />
