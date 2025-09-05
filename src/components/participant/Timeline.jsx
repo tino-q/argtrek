@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useContext,
+  useCallback,
+  useMemo,
+} from "react";
 import { useNavigate } from "react-router-dom";
 
 import AuthContext from "../../context/AuthContext.jsx";
@@ -6,6 +12,119 @@ import { useTripContext } from "../../hooks/useTripContext";
 import { APPS_SCRIPT_URL, PRICES } from "../../utils/config.js";
 
 import "./Timeline.css";
+
+const filterTimelineData = (timelineData, submissionResult) => {
+  const { row } = submissionResult;
+  const buenosAiresArrivalHotel =
+    row["rsvpData.22Nov_BSAS"] || row["rsvpData.23Nov_BSAS"];
+  const welcomeDinner = row["rsvpData.23Nov_Dinner_Welcome"];
+  const bsasTour = row["rsvpData.23Nov_Tour"];
+  const bariHotel =
+    row["rsvpData.24Nov_BARI"] ||
+    row["rsvpData.25Nov_BARI"] ||
+    row["rsvpData.26Nov_BARI"];
+  const mendozaHotel = row["rsvpData.27Nov_MDZ"] || row["rsvpData.28Nov_MDZ"];
+  const bsasDepartureHotel = row["rsvpData.29Nov_BSAS"];
+  const bsasToBrcFlight = row["rsvpData.AEP-BRC"];
+  const brcToMendozaFlight = row["rsvpData.BRC-MDZ"];
+  const mdzToBsasFlight = row["rsvpData.MDZ-AEP"];
+
+  return timelineData.filter((item) => {
+    const city = item.CITY; // "Buenos Aires", "Mendoza", "Bariloche";
+    const dayOfMonth = item["DAY OF MONTH"];
+    const category = item["CATEGORY"];
+    const parameter1 = item["PARAMETER_1"];
+    if ([22, 23, 24].includes(Number(dayOfMonth)) && city === "Buenos Aires") {
+      switch (category.toLowerCase().trim()) {
+        case "dinner":
+          return welcomeDinner;
+        case "flight":
+          return bsasToBrcFlight;
+        case "activity":
+          if (parameter1.toLowerCase().includes("city tour")) {
+            return bsasTour;
+          }
+          return buenosAiresArrivalHotel;
+        case "free time":
+        case "hotel check in":
+        case "breakfast":
+        case "lunch":
+        case "breakfast":
+        case "hotel checkout":
+        case "transportation":
+          return buenosAiresArrivalHotel;
+        default:
+          throw new Error(`Unknown category: ${category}`);
+      }
+    }
+
+    if (city === "Bariloche") {
+      switch (category.toLowerCase().trim()) {
+        case "flight":
+          return brcToMendozaFlight;
+        case "dinner":
+        case "activity":
+        case "drinks":
+        case "lunchdinner":
+        case "free time":
+        case "hotel check in":
+        case "breakfast":
+        case "lunch":
+        case "breakfast":
+        case "hotel checkout":
+        case "transportation":
+          return bariHotel;
+        default:
+          throw new Error(
+            `Unknown category3: ${category.toLowerCase().trim()}`
+          );
+      }
+    }
+
+    if (city === "Mendoza") {
+      switch (category.toLowerCase().trim()) {
+        case "flight":
+          return mdzToBsasFlight;
+        case "dinner":
+        case "activity":
+        case "free time":
+        case "hotel check in":
+        case "breakfast":
+        case "lunch":
+        case "drinks":
+        case "breakfast":
+        case "hotel checkout":
+        case "transportation":
+          return mendozaHotel;
+        default:
+          throw new Error(
+            `Unknown category2: ${category.toLowerCase().trim()}`
+          );
+      }
+    }
+
+    if (city === "Buenos Aires") {
+      switch (category.toLowerCase().trim()) {
+        case "dinner":
+        case "activity":
+        case "free time":
+        case "hotel check in":
+        case "breakfast":
+        case "lunch":
+        case "breakfast":
+        case "hotel checkout":
+        case "transportation":
+          return bsasDepartureHotel;
+        default:
+          throw new Error(
+            `Unknown category1: ${category.toLowerCase().trim()}`
+          );
+      }
+    }
+
+    throw new Error(`Problematic item: ${JSON.stringify(item)}`);
+  });
+};
 
 const RecommendationsModal = ({ recommendations, onClose }) => {
   const stopPropagation = useCallback((e) => e.stopPropagation(), []);
@@ -247,7 +366,13 @@ const Timeline = () => {
   const [activityChoices, setActivityChoices] = useState({});
   const [savingChoices, setSavingChoices] = useState(new Set());
   const { email: userEmail, password: userPassword } = useContext(AuthContext);
-  const { formData } = useTripContext();
+  const { formData, submissionResult } = useTripContext();
+
+  const personalTimelineData = useMemo(() => {
+    return timelineData && submissionResult
+      ? filterTimelineData(timelineData, submissionResult)
+      : null;
+  }, [timelineData, submissionResult]);
 
   const handleRecommendationClick = useCallback((recommendations) => {
     setSelectedRecommendation(recommendations);
@@ -576,10 +701,10 @@ const Timeline = () => {
     const isSaving = isChoiceSaving(itemKey);
 
     // Handle special parameter formatting for different item types
-    let parameter1 = item["PARAMETER _1"];
+    let parameter1 = item["PARAMETER_1"];
 
     if (item.CATEGORY === "FLIGHT") {
-      parameter1 = `${item["PARAMETER _1"]} (${item["PARAMETER_2"]} → ${item["PARAMETER_3"]})`;
+      parameter1 = `${item["PARAMETER_1"]} (${item["PARAMETER_2"]} → ${item["PARAMETER_3"]})`;
     } else if (item.CATEGORY === "BUS" || item.CATEGORY === "TRANSPORTATION") {
       parameter1 =
         parameter1 ||
@@ -626,7 +751,7 @@ const Timeline = () => {
     );
   }
 
-  if (!timelineData || timelineData.length === 0) {
+  if (!personalTimelineData || personalTimelineData.length === 0) {
     return (
       <div className="timeline-empty">
         <h3>No timeline data</h3>
@@ -635,7 +760,7 @@ const Timeline = () => {
     );
   }
 
-  const groupedData = groupByDay(timelineData);
+  const groupedData = groupByDay(personalTimelineData);
 
   return (
     <div className="container">

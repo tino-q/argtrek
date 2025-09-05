@@ -134,6 +134,8 @@ const TripProvider = ({ children }) => {
     getDefaultFormData,
   };
 
+  console.log("ss", submissionResult);
+
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;
 };
 
