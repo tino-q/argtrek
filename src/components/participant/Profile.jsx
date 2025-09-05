@@ -58,7 +58,9 @@ const Profile = () => {
         <div className="profile-field">
           <label>Accommodation</label>
           <div className="profile-value">
-            {!formData[FORM_FIELDS.PRIVATE_ROOM_UPGRADE]
+            {formData[FORM_FIELDS.PRIVATE_ROOM_UPGRADE]
+              .toString()
+              .toLowerCase() === "true"
               ? "Private Room Upgrade"
               : `Roommate: ${submissionResult.row.ROOMMATE}`}
           </div>
