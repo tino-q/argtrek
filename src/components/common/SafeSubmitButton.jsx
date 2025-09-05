@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 const SafeSubmitButton = ({
   onSubmit,
@@ -26,8 +26,10 @@ const SafeSubmitButton = ({
     };
   }, []);
 
-  const handleClick = () => {
-    if (disabled || isLoading) {return;}
+  const handleClick = useCallback(() => {
+    if (disabled || isLoading) {
+      return;
+    }
 
     if (!isConfirming) {
       // First click - start confirmation state
@@ -71,7 +73,7 @@ const SafeSubmitButton = ({
         onSubmit();
       }
     }
-  };
+  }, [disabled, isLoading, isConfirming, confirmDuration, onSubmit]);
 
   const getButtonContent = () => {
     if (isLoading) {

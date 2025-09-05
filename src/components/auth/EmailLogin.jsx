@@ -97,6 +97,18 @@ const hardcodedProfile = {
   rowNumber: 5,
 };
 
+function cleanupUrlParameters() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("email") && urlParams.get("password")) {
+    urlParams.delete("email");
+    urlParams.delete("password");
+    const newUrl =
+      window.location.pathname +
+      (urlParams.toString() ? `?${urlParams.toString()}` : "");
+    window.history.replaceState({}, "", newUrl);
+  }
+}
+
 const EmailLogin = () => {
   const {
     email,
@@ -259,27 +271,39 @@ const EmailLogin = () => {
       }, 500);
 
       return () => clearTimeout(autoSubmit);
-    } 
-      if (__DEV__) {
-        setEmail("ekin@stanford.edu");
-        setPassword("rmpRTSJDcK");
-      }
-    
-  }, [handleEmailLogin, isLoading, setEmail, setIsLoading, setPassword]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!email.trim() || !password.trim()) {
-      return;
     }
 
-    setIsLoading(true);
+    if (__DEV__) {
+      setEmail("tinqueija@gmail.com");
+      setPassword("dima");
+    }
+  }, [handleEmailLogin, isLoading, setEmail, setIsLoading, setPassword]);
 
-    await handleEmailLogin(email.trim(), password.trim());
+  const handleEmailChange = useCallback(
+    (e) => setEmail(e.target.value),
+    [setEmail]
+  );
+  const handlePasswordChange = useCallback(
+    (e) => setPassword(e.target.value),
+    [setPassword]
+  );
 
-    setIsLoading(false);
-  };
+  const handleSubmit = useCallback(
+    async (e) => {
+      e.preventDefault();
+
+      if (!email.trim() || !password.trim()) {
+        return;
+      }
+
+      setIsLoading(true);
+
+      await handleEmailLogin(email.trim(), password.trim());
+
+      setIsLoading(false);
+    },
+    [email, password, handleEmailLogin, setIsLoading]
+  );
 
   return (
     <div className="container">
@@ -296,7 +320,7 @@ const EmailLogin = () => {
                 id="loginEmail"
                 name="loginEmail"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 placeholder="Enter your registration email"
                 required
                 disabled={isLoading}
@@ -313,7 +337,7 @@ const EmailLogin = () => {
                 id="loginPassword"
                 name="loginPassword"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 placeholder="Enter your password"
                 required
                 disabled={isLoading}
@@ -344,14 +368,3 @@ const EmailLogin = () => {
 };
 
 export default EmailLogin;
-function cleanupUrlParameters() {
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get("email") && urlParams.get("password")) {
-    urlParams.delete("email");
-    urlParams.delete("password");
-    const newUrl =
-      window.location.pathname +
-      (urlParams.toString() ? `?${  urlParams.toString()}` : "");
-    window.history.replaceState({}, "", newUrl);
-  }
-}

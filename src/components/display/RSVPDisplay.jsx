@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { LUGGAGE, FORM_FIELDS } from "../../utils/config";
 import {
@@ -91,7 +91,7 @@ const ServiceCard = ({ service, index, isIncluded }) => (
 );
 
 function getServiceKey(service, isIncluded = true) {
-  const prefix = isIncluded ? '' : 'excluded-';
+  const prefix = isIncluded ? "" : "excluded-";
   return service.type === "flight"
     ? `${prefix}${service.type}-${service.code}`
     : `${prefix}${service.type}-${service.location}${service.period ? `-${service.period}` : ""}`;
@@ -111,6 +111,92 @@ const RSVPDisplay = ({
   const [showConfirmationDetails, setShowConfirmationDetails] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const [hasInitialized, setHasInitialized] = useState(false);
+
+  // Validation function
+  const validateRequiredFields = useCallback(() => {
+    const errors = {};
+
+    if (!formData[FORM_FIELDS.FIRST_NAME]?.trim()) {
+      errors[FORM_FIELDS.FIRST_NAME] = true;
+    }
+
+    if (!formData[FORM_FIELDS.LAST_NAME]?.trim()) {
+      errors[FORM_FIELDS.LAST_NAME] = true;
+    }
+
+    if (!formData[FORM_FIELDS.PHONE_NUMBER]?.trim()) {
+      errors[FORM_FIELDS.PHONE_NUMBER] = true;
+    }
+
+    setValidationErrors(errors);
+
+    // Check if confirmation is checked
+    const hasFieldErrors = Object.keys(errors).length > 0;
+    const hasConfirmationError = !formData.travelDocumentConfirmed;
+
+    // If confirmation checkbox is not checked, scroll to it
+    if (hasConfirmationError) {
+      const confirmationElement = document.getElementById(
+        "travel-document-confirmation"
+      );
+      if (confirmationElement) {
+        confirmationElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }
+
+    return hasFieldErrors === false && hasConfirmationError === false;
+  }, [formData]);
+
+  // Create callback functions
+  const handleContinueClick = useCallback(() => {
+    if (validateRequiredFields()) {
+      onContinue();
+    }
+  }, [onContinue, validateRequiredFields]);
+
+  const toggleShowAllDetails = useCallback(() => {
+    setShowAllDetails(!showAllDetails);
+  }, [showAllDetails]);
+
+  const toggleConfirmationDetails = useCallback(() => {
+    setShowConfirmationDetails(!showConfirmationDetails);
+  }, [showConfirmationDetails]);
+
+  const toggleHealthInsuranceDetails = useCallback(() => {
+    setShowHealthInsuranceDetails(!showHealthInsuranceDetails);
+  }, [showHealthInsuranceDetails]);
+
+  // Create handlers for form inputs
+  const handleFirstNameChange = useCallback((e) => {
+    handleInputChange(FORM_FIELDS.FIRST_NAME, e.target.value);
+  }, [handleInputChange]);
+
+  const handleFirstNameBlur = useCallback((e) => {
+    handleInputBlur(FORM_FIELDS.FIRST_NAME, e.target.value);
+  }, [handleInputBlur]);
+
+  const handleLastNameChange = useCallback((e) => {
+    handleInputChange(FORM_FIELDS.LAST_NAME, e.target.value);
+  }, [handleInputChange]);
+
+  const handleLastNameBlur = useCallback((e) => {
+    handleInputBlur(FORM_FIELDS.LAST_NAME, e.target.value);
+  }, [handleInputBlur]);
+
+  const handlePhoneChange = useCallback((e) => {
+    handleInputChange(FORM_FIELDS.PHONE_NUMBER, e.target.value);
+  }, [handleInputChange]);
+
+  const handlePhoneBlur = useCallback((e) => {
+    handleInputBlur(FORM_FIELDS.PHONE_NUMBER, e.target.value);
+  }, [handleInputBlur]);
+
+  const handleTravelDocumentChange = useCallback((e) => {
+    updateFormData("travelDocumentConfirmed", e.target.checked);
+  }, [updateFormData]);
 
   // Extract data using centralized utilities
   const personalInfo = getPersonalInfo(rsvpData, formData);
@@ -168,58 +254,10 @@ const RSVPDisplay = ({
     }
   }, []); // Empty dependency array means this runs once when component mounts
 
-  // Validation function
-  const validateRequiredFields = () => {
-    const errors = {};
 
-    if (!formData[FORM_FIELDS.FIRST_NAME]?.trim()) {
-      errors[FORM_FIELDS.FIRST_NAME] = true;
-    }
-
-    if (!formData[FORM_FIELDS.LAST_NAME]?.trim()) {
-      errors[FORM_FIELDS.LAST_NAME] = true;
-    }
-
-    if (!formData[FORM_FIELDS.PHONE_NUMBER]?.trim()) {
-      errors[FORM_FIELDS.PHONE_NUMBER] = true;
-    }
-
-    setValidationErrors(errors);
-
-    // Check if confirmation is checked
-    const hasFieldErrors = Object.keys(errors).length > 0;
-    const hasConfirmationError = !formData.travelDocumentConfirmed;
-
-    // If confirmation checkbox is not checked, scroll to it
-    if (hasConfirmationError) {
-      const confirmationElement = document.getElementById(
-        "travel-document-confirmation"
-      );
-      if (confirmationElement) {
-        confirmationElement.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-        // Add a visual flash effect
-        confirmationElement.classList.add("highlight-error");
-        setTimeout(() => {
-          confirmationElement.classList.remove("highlight-error");
-        }, 2000);
-      }
-    }
-
-    return hasFieldErrors === false && hasConfirmationError === false;
-  };
-
-  // Handle continue with validation
-  const handleContinueClick = () => {
-    if (validateRequiredFields()) {
-      onContinue();
-    }
-  };
 
   // Handle input change and real-time validation
-  const handleInputChange = (field, value) => {
+  const handleInputChange = useCallback((field, value) => {
     updateFormData(field, value);
 
     // Real-time validation - show error if field is empty
@@ -236,25 +274,33 @@ const RSVPDisplay = ({
         return newErrors;
       });
     }
-  };
+  }, [updateFormData]);
 
   // Handle input blur for validation
-  const handleInputBlur = (field, value) => {
+  const handleInputBlur = useCallback((field, value) => {
     if (!value?.trim()) {
       setValidationErrors((prev) => ({
         ...prev,
         [field]: true,
       }));
     }
-  };
+  }, []);
 
   // Handle checked luggage selection
   const isLuggageSelected = Boolean(formData[FORM_FIELDS.CHECKED_LUGGAGE]);
 
-  const handleLuggageToggle = () => {
+  const handleLuggageToggle = useCallback(() => {
     updateFormData(FORM_FIELDS.CHECKED_LUGGAGE, !isLuggageSelected);
-  };
+  }, [updateFormData, isLuggageSelected]);
 
+  const handleLuggageCardClick = useCallback(
+    (e) => {
+      if (e.target.id !== "checked-luggage-checkbox") {
+        handleLuggageToggle();
+      }
+    },
+    [handleLuggageToggle]
+  );
 
   // Define all services in chronological order using centralized data
   const createChronologicalServices = (accommodations, flights, isIncluded) => {
@@ -409,7 +455,6 @@ const RSVPDisplay = ({
     false
   );
 
-
   return (
     <section className="form-section">
       <h2>
@@ -434,12 +479,8 @@ const RSVPDisplay = ({
               id="first-name-input"
               type="text"
               value={formData[FORM_FIELDS.FIRST_NAME] || ""}
-              onChange={(e) =>
-                handleInputChange(FORM_FIELDS.FIRST_NAME, e.target.value)
-              }
-              onBlur={(e) =>
-                handleInputBlur(FORM_FIELDS.FIRST_NAME, e.target.value)
-              }
+              onChange={handleFirstNameChange}
+              onBlur={handleFirstNameBlur}
               placeholder="Enter your first name"
               className={`editable-input ${validationErrors[FORM_FIELDS.FIRST_NAME] ? "error" : ""}`}
               required
@@ -453,12 +494,8 @@ const RSVPDisplay = ({
               id="last-name-input"
               type="text"
               value={formData[FORM_FIELDS.LAST_NAME] || ""}
-              onChange={(e) =>
-                handleInputChange(FORM_FIELDS.LAST_NAME, e.target.value)
-              }
-              onBlur={(e) =>
-                handleInputBlur(FORM_FIELDS.LAST_NAME, e.target.value)
-              }
+              onChange={handleLastNameChange}
+              onBlur={handleLastNameBlur}
               placeholder="Enter your last name"
               className={`editable-input ${validationErrors[FORM_FIELDS.LAST_NAME] ? "error" : ""}`}
               required
@@ -472,12 +509,8 @@ const RSVPDisplay = ({
               id="phone-number-input"
               type="text"
               value={formData[FORM_FIELDS.PHONE_NUMBER] || ""}
-              onChange={(e) =>
-                handleInputChange(FORM_FIELDS.PHONE_NUMBER, e.target.value)
-              }
-              onBlur={(e) =>
-                handleInputBlur(FORM_FIELDS.PHONE_NUMBER, e.target.value)
-              }
+              onChange={handlePhoneChange}
+              onBlur={handlePhoneBlur}
               placeholder="Include country code"
               className={`editable-input ${validationErrors[FORM_FIELDS.PHONE_NUMBER] ? "error" : ""}`}
               required
@@ -505,9 +538,7 @@ const RSVPDisplay = ({
               type="checkbox"
               id="travel-document-check"
               checked={formData.travelDocumentConfirmed}
-              onChange={(e) =>
-                updateFormData("travelDocumentConfirmed", e.target.checked)
-              }
+              onChange={handleTravelDocumentChange}
             />
             <label htmlFor="travel-document-check">
               <span className="checkmark" />
@@ -522,9 +553,7 @@ const RSVPDisplay = ({
                   <button
                     type="button"
                     className="btn-link details-toggle"
-                    onClick={() =>
-                      setShowConfirmationDetails(!showConfirmationDetails)
-                    }
+                    onClick={toggleConfirmationDetails}
                   >
                     {showConfirmationDetails ? "Hide" : "Show"} terms and
                     conditions
@@ -629,11 +658,7 @@ const RSVPDisplay = ({
                           <button
                             type="button"
                             className="btn-link details-toggle"
-                            onClick={() =>
-                              setShowHealthInsuranceDetails(
-                                !showHealthInsuranceDetails
-                              )
-                            }
+                            onClick={toggleHealthInsuranceDetails}
                           >
                             {showHealthInsuranceDetails ? "Hide" : "Show"}{" "}
                             health insurance requirements
@@ -784,7 +809,7 @@ const RSVPDisplay = ({
           <button
             type="button"
             className="btn-link"
-            onClick={() => setShowAllDetails(!showAllDetails)}
+            onClick={toggleShowAllDetails}
           >
             {showAllDetails ? "Hide" : "Show"} services not included
             <i className={`fas fa-chevron-${showAllDetails ? "up" : "down"}`} />
@@ -900,12 +925,7 @@ const RSVPDisplay = ({
 
         <div
           className={`luggage-addon-card discouraged ${isLuggageSelected ? "selected" : ""}`}
-          onClick={(e) => {
-            // Allow clicking the whole card to toggle, but not if clicking the checkbox directly
-            if (e.target.id !== "checked-luggage-checkbox") {
-              handleLuggageToggle();
-            }
-          }}
+          onClick={handleLuggageCardClick}
         >
           <div className="luggage-checkbox">
             <input

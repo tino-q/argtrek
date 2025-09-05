@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
@@ -10,33 +11,45 @@ const Home = () => {
   const { clearTripData } = useTripContext();
   const { showSuccess } = useNotificationContext();
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     navigate("/login");
     clearTripData();
     clearAuth(); // Clear auth credentials
     showSuccess(
       "Logged out successfully. You can now login with different credentials."
     );
-  };
+  }, [navigate, clearTripData, clearAuth, showSuccess]);
+
+  const navigateToItinerary = useCallback(() => {
+    navigate("/itinerary");
+  }, [navigate]);
+
+  const navigateToPayments = useCallback(() => {
+    navigate("/payments");
+  }, [navigate]);
+
+  const navigateToProfile = useCallback(() => {
+    navigate("/profile");
+  }, [navigate]);
 
   return (
     <div className="container">
       <div className="home-container">
         <div className="navigation-menu">
           <div className="nav-grid">
-            <button className="nav-card" onClick={() => navigate("/itinerary")}>
+            <button className="nav-card" onClick={navigateToItinerary}>
               <i className="fas fa-map" />
               <h3>Itinerary</h3>
               <p>View your complete trip schedule</p>
             </button>
 
-            <button className="nav-card" onClick={() => navigate("/payments")}>
+            <button className="nav-card" onClick={navigateToPayments}>
               <i className="fas fa-credit-card" />
               <h3>Payments</h3>
               <p>View payment status and details</p>
             </button>
 
-            <button className="nav-card" onClick={() => navigate("/profile")}>
+            <button className="nav-card" onClick={navigateToProfile}>
               <i className="fas fa-user" />
               <h3>Profile</h3>
               <p>Manage your trip preferences</p>

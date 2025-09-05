@@ -3,6 +3,7 @@ import importPlugin from "eslint-plugin-import";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
+import reactPerf from "eslint-plugin-react-perf";
 import reactRefresh from "eslint-plugin-react-refresh";
 import globals from "globals";
 
@@ -18,6 +19,7 @@ export default [
     plugins: {
       react,
       "react-hooks": reactHooks,
+      "react-perf": reactPerf,
       "react-refresh": reactRefresh,
       "jsx-a11y": jsxA11y,
       import: importPlugin,
@@ -49,11 +51,11 @@ export default [
       // Relaxed JavaScript rules
       "no-unused-vars": [
         "error",
-        {
-          varsIgnorePattern: "^[A-Z_]",
-          argsIgnorePattern: "^_",
-          ignoreRestSiblings: true,
-        },
+        // {
+        //   varsIgnorePattern: "^[A-Z_]",
+        //   argsIgnorePattern: "^_",
+        //   ignoreRestSiblings: true,
+        // },
       ],
       "no-console": "off",
       "no-debugger": "warn",
@@ -133,6 +135,11 @@ export default [
       complexity: "off", // ["warn", 15],
       "max-lines-per-function": "off", // ['warn', 100],
       "max-params": ["warn", 5],
+
+      // React Performance - High Impact (warnings)
+      "react-perf/jsx-no-new-object-as-prop": "off",
+      "react-perf/jsx-no-new-array-as-prop": "off",
+      "react-perf/jsx-no-new-function-as-prop": "error",
     },
   },
 ];

@@ -1,14 +1,13 @@
 // Payment Details Display Component
 // Shows payment information after successful trip registration
 
-import React from "react";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { copyToClipboard } from "../../utils/clipboard";
 import {
   FORM_FIELDS,
   EMAIL_CONFIG,
-  APPS_SCRIPT_URL,
   BANK_DETAILS,
   CRYPTO_WALLETS,
   NETWORK_INFO,
@@ -29,7 +28,7 @@ const PaymentDetailsDisplay = ({
   const navigate = useNavigate();
   const travelerName = getTravelerName(rsvpData, formData);
 
-  const handleCopyClick = async (value, event) => {
+  const handleCopyClick = useCallback(async (value, event) => {
     const button = event.currentTarget;
     const success = await copyToClipboard(value);
 
@@ -40,15 +39,31 @@ const PaymentDetailsDisplay = ({
         button.classList.remove("copied");
       }, 2000);
     }
-  };
+  }, []);
 
-  const downloadPDF = () => {
+  const downloadPDF = useCallback(() => {
     console.log("Download PDF button clicked - PDF generation removed");
-  };
+  }, []);
 
-  const handleTermsClick = () => {
+  const handleTermsClick = useCallback(() => {
     navigate("/terms");
-  };
+  }, [navigate]);
+
+  const handleBankDetailsClick = useCallback(
+    (detail) => (e) => handleCopyClick(detail.value, e),
+    [handleCopyClick]
+  );
+
+  const handleCryptoWalletClick = useCallback(
+    (e) => {
+      const networkKey =
+        formData[FORM_FIELDS.CRYPTO_NETWORK] === "ARB"
+          ? "ETH"
+          : formData[FORM_FIELDS.CRYPTO_NETWORK];
+      handleCopyClick(CRYPTO_WALLETS[networkKey], e);
+    },
+    [formData, handleCopyClick]
+  );
 
   return (
     <div className="container">
@@ -127,7 +142,7 @@ const PaymentDetailsDisplay = ({
                     <button
                       type="button"
                       className="copy-btn"
-                      onClick={(e) => handleCopyClick(detail.value, e)}
+                      onClick={handleBankDetailsClick(detail)}
                       title="Copy to clipboard"
                     >
                       <i className="fas fa-copy" />
@@ -179,13 +194,7 @@ const PaymentDetailsDisplay = ({
                       <button
                         type="button"
                         className="copy-btn"
-                        onClick={(e) => {
-                          const networkKey =
-                            formData[FORM_FIELDS.CRYPTO_NETWORK] === "ARB"
-                              ? "ETH"
-                              : formData[FORM_FIELDS.CRYPTO_NETWORK];
-                          handleCopyClick(CRYPTO_WALLETS[networkKey], e);
-                        }}
+                        onClick={handleCryptoWalletClick}
                         title="Copy wallet address"
                       >
                         <i className="fas fa-copy" />

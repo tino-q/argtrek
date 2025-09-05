@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 
 import { APPS_SCRIPT_URL } from "../../utils/config";
 
@@ -12,11 +12,13 @@ const ProofOfPaymentUpload = ({ name, surname, orderNumber, installments }) => {
   const [error, setError] = useState("");
   const fileInputRef = useRef();
 
-  const handleFileChange = (e) => {
+  const handleFileChange = useCallback((e) => {
     setMessage("");
     setError("");
     const [f] = e.target.files;
-    if (!f) {return;}
+    if (!f) {
+      return;
+    }
     if (!ALLOWED_TYPES.includes(f.type)) {
       setError("Only PDF, JPG, and PNG files are allowed.");
       return;
@@ -26,10 +28,12 @@ const ProofOfPaymentUpload = ({ name, surname, orderNumber, installments }) => {
       return;
     }
     setFile(f);
-  };
+  }, []);
 
-  const handleUpload = async () => {
-    if (!file) {return;}
+  const handleUpload = useCallback(async () => {
+    if (!file) {
+      return;
+    }
     setUploading(true);
     setMessage("");
     setError("");
@@ -68,7 +72,7 @@ const ProofOfPaymentUpload = ({ name, surname, orderNumber, installments }) => {
       setError("Upload failed.");
       setUploading(false);
     }
-  };
+  }, [file, name, surname, orderNumber, installments]);
 
   return (
     <div className="proof-upload">

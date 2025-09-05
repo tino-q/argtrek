@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useCallback } from "react";
 import "../../styles/PaymentSummary.css";
 
 const PaymentSummary = ({ formData, pricing, submissionResult }) => {
@@ -34,9 +34,9 @@ const PaymentSummary = ({ formData, pricing, submissionResult }) => {
       : "Installments";
   };
 
-  const toggleExpanded = () => {
+  const toggleExpanded = useCallback(() => {
     setIsExpanded(!isExpanded);
-  };
+  }, [isExpanded]);
 
   return (
     <div className="payment-summary">

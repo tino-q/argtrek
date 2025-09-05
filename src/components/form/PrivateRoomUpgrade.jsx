@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+
 import { FORM_FIELDS } from "../../utils/config";
 import {
   getPrivateRoomUpgradePrice,
@@ -34,32 +36,66 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
     formData[FORM_FIELDS.ROOMMATE_PREFERENCE] || "random";
   const roommateName = formData[FORM_FIELDS.ROOMMATE_NAME] || "";
 
-  const handleRoomSelection = (isPrivateRoom) => {
-    updateFormData(FORM_FIELDS.PRIVATE_ROOM_UPGRADE, isPrivateRoom);
+  const handleRoomSelection = useCallback(
+    (isPrivateRoom) => {
+      updateFormData(FORM_FIELDS.PRIVATE_ROOM_UPGRADE, isPrivateRoom);
 
-    // Clear roommate preference and name if switching to private room
-    if (isPrivateRoom) {
-      updateFormData(FORM_FIELDS.ROOMMATE_PREFERENCE, "");
-      updateFormData(FORM_FIELDS.ROOMMATE_NAME, "");
-    } else {
-      // Set default preference to random if switching to shared room
-      if (!formData[FORM_FIELDS.ROOMMATE_PREFERENCE]) {
-        updateFormData(FORM_FIELDS.ROOMMATE_PREFERENCE, "random");
+      // Clear roommate preference and name if switching to private room
+      if (isPrivateRoom) {
+        updateFormData(FORM_FIELDS.ROOMMATE_PREFERENCE, "");
+        updateFormData(FORM_FIELDS.ROOMMATE_NAME, "");
+      } else {
+        // Set default preference to random if switching to shared room
+        if (!formData[FORM_FIELDS.ROOMMATE_PREFERENCE]) {
+          updateFormData(FORM_FIELDS.ROOMMATE_PREFERENCE, "random");
+        }
       }
-    }
-  };
+    },
+    [updateFormData, formData]
+  );
 
-  const handleRoommatePreferenceChange = (preference) => {
-    updateFormData(FORM_FIELDS.ROOMMATE_PREFERENCE, preference);
-    // Clear roommate name if not selecting "know" option
-    if (preference !== "know") {
-      updateFormData(FORM_FIELDS.ROOMMATE_NAME, "");
-    }
-  };
+  const handleRoommatePreferenceChange = useCallback(
+    (preference) => {
+      updateFormData(FORM_FIELDS.ROOMMATE_PREFERENCE, preference);
+      // Clear roommate name if not selecting "know" option
+      if (preference !== "know") {
+        updateFormData(FORM_FIELDS.ROOMMATE_NAME, "");
+      }
+    },
+    [updateFormData]
+  );
 
-  const handleRoommateNameChange = (e) => {
-    updateFormData(FORM_FIELDS.ROOMMATE_NAME, e.target.value);
-  };
+  const handleRoommateNameChange = useCallback(
+    (e) => {
+      updateFormData(FORM_FIELDS.ROOMMATE_NAME, e.target.value);
+    },
+    [updateFormData]
+  );
+
+  // Memoized handlers for JSX
+  const handlePrivateRoom = useCallback(
+    () => handleRoomSelection(true),
+    [handleRoomSelection]
+  );
+  const handleSharedRoom = useCallback(
+    () => handleRoomSelection(false),
+    [handleRoomSelection]
+  );
+  const handleStopPropagation = useCallback((e) => e.stopPropagation(), []);
+
+  // Roommate preference handlers
+  const handleRandomPreference = useCallback(
+    () => handleRoommatePreferenceChange("random"),
+    [handleRoommatePreferenceChange]
+  );
+  const handleKnowPreference = useCallback(
+    () => handleRoommatePreferenceChange("know"),
+    [handleRoommatePreferenceChange]
+  );
+  const handleSeekingPreference = useCallback(
+    () => handleRoommatePreferenceChange("seeking"),
+    [handleRoommatePreferenceChange]
+  );
 
   return (
     <section className="form-section">
@@ -74,7 +110,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
         {/* Private Room Upgrade Option */}
         <div
           className={`room-option-card ${hasPrivateRoomUpgrade ? "room-selected" : ""}`}
-          onClick={() => handleRoomSelection(true)}
+          onClick={handlePrivateRoom}
           style={{ cursor: "pointer" }}
         >
           <div className="room-option-content">
@@ -85,7 +121,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                   id="privateRoom"
                   name="roomType"
                   checked={hasPrivateRoomUpgrade}
-                  onChange={() => handleRoomSelection(true)}
+                  onChange={handlePrivateRoom}
                   className="room-radio"
                 />
                 <label htmlFor="privateRoom" className="radio-label" />
@@ -115,7 +151,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
         {/* Shared Room Option (Default) */}
         <div
           className={`room-option-card ${!hasPrivateRoomUpgrade ? "room-selected" : ""}`}
-          onClick={() => handleRoomSelection(false)}
+          onClick={handleSharedRoom}
           style={{ cursor: "pointer" }}
         >
           <div className="room-option-content">
@@ -126,7 +162,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                   id="sharedRoom"
                   name="roomType"
                   checked={!hasPrivateRoomUpgrade}
-                  onChange={() => handleRoomSelection(false)}
+                  onChange={handleSharedRoom}
                   className="room-radio"
                 />
                 <label htmlFor="sharedRoom" className="radio-label" />
@@ -153,9 +189,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                           name="roommatePreference"
                           value="random"
                           checked={roommatePreference === "random"}
-                          onChange={() =>
-                            handleRoommatePreferenceChange("random")
-                          }
+                          onChange={handleRandomPreference}
                           className="roommate-radio"
                         />
                         <span className="radio-checkmark" />
@@ -172,9 +206,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                           name="roommatePreference"
                           value="know"
                           checked={roommatePreference === "know"}
-                          onChange={() =>
-                            handleRoommatePreferenceChange("know")
-                          }
+                          onChange={handleKnowPreference}
                           className="roommate-radio"
                         />
                         <span className="radio-checkmark" />
@@ -187,7 +219,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                           value={roommateName}
                           onChange={handleRoommateNameChange}
                           className="roommate-name-input"
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={handleStopPropagation}
                         />
                       )}
                     </div>
@@ -199,9 +231,7 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                           name="roommatePreference"
                           value="seeking"
                           checked={roommatePreference === "seeking"}
-                          onChange={() =>
-                            handleRoommatePreferenceChange("seeking")
-                          }
+                          onChange={handleSeekingPreference}
                           className="roommate-radio"
                         />
                         <span className="radio-checkmark" />
@@ -211,9 +241,9 @@ const PrivateRoomUpgrade = ({ formData, updateFormData, rsvpData }) => {
                       </label>
                       {roommatePreference === "seeking" && (
                         <span className="roommate-help-text">
-                          <i className="fas fa-info-circle" />Once everyone
-                          completes their registration, we'll share the list
-                          with others looking for roommates
+                          <i className="fas fa-info-circle" />
+                          Once everyone completes their registration, we'll
+                          share the list with others looking for roommates
                         </span>
                       )}
                     </div>

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { usePricing } from "../../hooks/usePricing";
@@ -10,6 +10,8 @@ const Payments = () => {
   const navigate = useNavigate();
   const { userRSVP, formData, submissionResult } = useTripContext();
   const pricing = usePricing(userRSVP, formData);
+
+  const handleBackToHome = useCallback(() => navigate("/home"), [navigate]);
 
   useEffect(() => {
     if (!userRSVP) {
@@ -46,7 +48,7 @@ const Payments = () => {
         <div className="payment-actions">
           <button
             className="btn btn-secondary"
-            onClick={() => navigate("/home")}
+            onClick={handleBackToHome}
           >
             <i className="fas fa-arrow-left" />
             Back to Home

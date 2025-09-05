@@ -1,6 +1,7 @@
 // Generic Step Renderer Component
 // Renders the appropriate step component based on current step
 
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useTripContext } from "../../hooks/useTripContext";
@@ -18,6 +19,8 @@ const StepRenderer = ({ currentStep, pricing, onRSVPContinue }) => {
   const navigate = useNavigate();
   const stepConfig = getStepConfig(currentStep);
 
+  const handleHomeNavigation = useCallback(() => navigate("/home"), [navigate]);
+
   if (!stepConfig) {
     return null;
   }
@@ -31,7 +34,9 @@ const StepRenderer = ({ currentStep, pricing, onRSVPContinue }) => {
         return <WelcomeSection userRSVP={userRSVP} />;
 
       case "rsvp":
-        if (!userRSVP) {return null;}
+        if (!userRSVP) {
+          return null;
+        }
         return (
           <RSVPDisplay
             rsvpData={userRSVP}
@@ -74,7 +79,7 @@ const StepRenderer = ({ currentStep, pricing, onRSVPContinue }) => {
             <p>Coming soon - manage your profile and trip preferences here.</p>
             <button
               className="btn btn-secondary"
-              onClick={() => navigate("/home")}
+              onClick={handleHomeNavigation}
             >
               <i className="fas fa-arrow-left" />
               Back to Home
@@ -89,7 +94,7 @@ const StepRenderer = ({ currentStep, pricing, onRSVPContinue }) => {
             <p>Coming soon - view your complete Argentina itinerary here.</p>
             <button
               className="btn btn-secondary"
-              onClick={() => navigate("/home")}
+              onClick={handleHomeNavigation}
             >
               <i className="fas fa-arrow-left" />
               Back to Home

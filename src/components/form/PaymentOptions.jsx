@@ -1,22 +1,9 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 import { FORM_FIELDS } from "../../utils/config";
 import "../../styles/PaymentOptions.css";
 import { getUSDToEURExchangeRate } from "../../utils/rsvpData";
 import CreditCardWarning from "../common/CreditCardWarning";
-
-const BANK_DETAILS = [
-  { label: "Bank Name", value: "Revolut" },
-  { label: "Account Holder", value: "SONSOLES RKT SL" },
-  { label: "IBAN", value: "ES51 1583 0001 1093 9530 1696" },
-  { label: "BIC/SWIFT", value: "CHASGB2L" },
-  { label: "Currency", value: "USD" },
-  {
-    label: "Holder address",
-    value: "CALLE BERNARDO LOPEZ GARCIA, 18 - BJ, 03013, ALICANTE",
-  },
-  { label: "Country", value: "Spain" },
-];
 
 const NETWORK_INFO = {
   ETH: {
@@ -56,6 +43,45 @@ const CURRENCY_INFO = {
 
 const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
   const isCrypto = formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto";
+
+  // Handler functions
+  const handlePaymentScheduleChange = useCallback(
+    (e) => {
+      updateFormData(FORM_FIELDS.PAYMENT_SCHEDULE, e.target.value);
+    },
+    [updateFormData]
+  );
+
+  const handlePaymentMethodChange = useCallback(
+    (e) => {
+      updateFormData(FORM_FIELDS.PAYMENT_METHOD, e.target.value);
+    },
+    [updateFormData]
+  );
+
+  // Style objects - move outside component to prevent recreation
+  const priceStyle = { whiteSpace: "nowrap" };
+  const linkStyle = {
+    color: "var(--primary)",
+    textDecoration: "underline",
+    marginLeft: "4px",
+  };
+
+  const handleCryptoCurrencyChange = useCallback(
+    (e) => {
+      updateFormData(FORM_FIELDS.CRYPTO_CURRENCY, e.target.value);
+    },
+    [updateFormData]
+  );
+
+  const handleCryptoNetworkChange = useCallback(
+    (e) => {
+      updateFormData(FORM_FIELDS.CRYPTO_NETWORK, e.target.value);
+    },
+    [updateFormData]
+  );
+
+  const getCryptoIconStyle = useCallback((color) => ({ color }), []);
 
   // Set default payment schedule to "full" (Single Payment) if not set
   React.useEffect(() => {
@@ -136,9 +162,7 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
               name="paymentSchedule"
               value="full"
               checked={formData[FORM_FIELDS.PAYMENT_SCHEDULE] === "full"}
-              onChange={(e) =>
-                updateFormData(FORM_FIELDS.PAYMENT_SCHEDULE, e.target.value)
-              }
+              onChange={handlePaymentScheduleChange}
               required
             />
             <label htmlFor="fullPayment">
@@ -158,9 +182,7 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
               checked={
                 formData[FORM_FIELDS.PAYMENT_SCHEDULE] === "installments"
               }
-              onChange={(e) =>
-                updateFormData(FORM_FIELDS.PAYMENT_SCHEDULE, e.target.value)
-              }
+              onChange={handlePaymentScheduleChange}
               required
             />
             <label htmlFor="installments">
@@ -186,25 +208,19 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
               name="paymentMethod"
               value="bank"
               checked={formData[FORM_FIELDS.PAYMENT_METHOD] === "bank"}
-              onChange={(e) =>
-                updateFormData(FORM_FIELDS.PAYMENT_METHOD, e.target.value)
-              }
+              onChange={handlePaymentMethodChange}
               required
             />
             <label htmlFor="bankTransfer">
               <div className="option-content">
                 <h3>Bank Transfer</h3>
-                <p className="price" style={{ whiteSpace: "nowrap" }}>
+                <p className="price" style={priceStyle}>
                   0% via Revolut,
                   <a
                     href="https://revolut.com/referral/?referral-code=mbaklayan!JUN2-25-VR-ES-AE&geo-redirect"
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                      color: "var(--primary)",
-                      textDecoration: "underline",
-                      marginLeft: "4px",
-                    }}
+                    style={linkStyle}
                   >
                     sign up!
                   </a>
@@ -225,9 +241,7 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
               name="paymentMethod"
               value="credit"
               checked={formData[FORM_FIELDS.PAYMENT_METHOD] === "credit"}
-              onChange={(e) =>
-                updateFormData(FORM_FIELDS.PAYMENT_METHOD, e.target.value)
-              }
+              onChange={handlePaymentMethodChange}
               required
             />
             <label htmlFor="creditCard">
@@ -249,9 +263,7 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
               name="paymentMethod"
               value="crypto"
               checked={formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto"}
-              onChange={(e) =>
-                updateFormData(FORM_FIELDS.PAYMENT_METHOD, e.target.value)
-              }
+              onChange={handlePaymentMethodChange}
               required
             />
             <label htmlFor="crypto">
@@ -292,19 +304,14 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
                       checked={
                         formData[FORM_FIELDS.CRYPTO_CURRENCY] === currency
                       }
-                      onChange={(e) =>
-                        updateFormData(
-                          FORM_FIELDS.CRYPTO_CURRENCY,
-                          e.target.value
-                        )
-                      }
+                      onChange={handleCryptoCurrencyChange}
                       required
                     />
                     <label htmlFor={`crypto-${currency}`}>
                       <div className="option-content">
                         <div
                           className="option-icon"
-                          style={{ color: info.color }}
+                          style={getCryptoIconStyle(info.color)}
                         >
                           <i className={info.icon} />
                         </div>
@@ -328,19 +335,14 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
                       name="cryptoNetwork"
                       value={network}
                       checked={formData[FORM_FIELDS.CRYPTO_NETWORK] === network}
-                      onChange={(e) =>
-                        updateFormData(
-                          FORM_FIELDS.CRYPTO_NETWORK,
-                          e.target.value
-                        )
-                      }
+                      onChange={handleCryptoNetworkChange}
                       required
                     />
                     <label htmlFor={`network-${network}`}>
                       <div className="option-content">
                         <div
                           className="option-icon"
-                          style={{ color: info.color }}
+                          style={getCryptoIconStyle(info.color)}
                         >
                           <i className={info.icon} />
                         </div>

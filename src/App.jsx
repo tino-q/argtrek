@@ -2,7 +2,7 @@
 // Enhanced with browser navigation integration using React Router
 // Supports both registration flow and participant management
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 import EmailLogin from "./components/auth/EmailLogin";
@@ -62,6 +62,10 @@ function AppContent() {
   const location = useLocation();
   const { notifications, removeNotification } = useNotificationContext();
 
+  const navigateToHome = useCallback(() => {
+    navigate("/home");
+  }, [navigate]);
+
   useEffect(() => {
     injectAnimationStyles();
   }, []);
@@ -76,7 +80,7 @@ function AppContent() {
     <div className="placeholder-page nav-card">
       <h2>{title}</h2>
       <p>{description}</p>
-      <button className="btn btn-secondary" onClick={() => navigate("/home")}>
+      <button className="btn btn-secondary" onClick={navigateToHome}>
         <i className="fas fa-arrow-left" />
         Back to Home
       </button>

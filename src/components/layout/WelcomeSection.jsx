@@ -114,7 +114,7 @@ const WelcomeSection = ({ userRSVP }) => {
                   <span className="contact-name">{contact.name}</span>
                   <button
                     className="contact-phone"
-                    onClick={() => handlePhoneCopy(contact.phone, contact.name)}
+                    onClick={handlePhoneCopy}
                     title={`Copy ${contact.name}'s phone number`}
                   >
                     {contact.phone}

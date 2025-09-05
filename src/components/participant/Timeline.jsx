@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AuthContext from "../../context/AuthContext.jsx";
@@ -8,6 +8,8 @@ import { APPS_SCRIPT_URL, PRICES } from "../../utils/config.js";
 import "./Timeline.css";
 
 const RecommendationsModal = ({ recommendations, onClose }) => {
+  const stopPropagation = useCallback((e) => e.stopPropagation(), []);
+
   if (!recommendations) {return null;}
 
   const items = recommendations
@@ -17,7 +19,7 @@ const RecommendationsModal = ({ recommendations, onClose }) => {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content" onClick={stopPropagation}>
         <div className="modal-header">
           <h3>Recommendations</h3>
           <button className="modal-close" onClick={onClose}>
@@ -37,20 +39,15 @@ const RecommendationsModal = ({ recommendations, onClose }) => {
 };
 
 // Generic, reusable helpers
-const TimeRange = ({ start, end }) => {
-  const hasStart = !!start;
-  const hasEnd = !!end;
-  return (
-    <div className="timeline-item-time">
-      {hasStart ? start : ""}
-      {hasStart && hasEnd ? ` - ${end}` : ""}
-    </div>
-  );
-};
 
 const ChoicesGroup = ({ name, options, selectedValue, onChange, isSaving }) => {
+  const handleRadioChange = useCallback((e) => {
+    onChange(name, e.target.value);
+  }, [name, onChange]);
+
   if (!Array.isArray(options) || options.length === 0) {return null;}
   const normalized = options.map((opt) => String(opt).trim()).filter(Boolean);
+  
   return (
     <div
       className="activity-choices"
@@ -68,7 +65,7 @@ const ChoicesGroup = ({ name, options, selectedValue, onChange, isSaving }) => {
               name={name}
               value={choice}
               checked={selectedValue === choice}
-              onChange={(e) => onChange(name, e.target.value)}
+              onChange={handleRadioChange}
               disabled={isSaving}
             />
             <span className="choice-label">{choice}</span>
@@ -95,6 +92,11 @@ const TimelineRow = ({
   savingChoices,
 }) => {
   const timeDisplay = start && end ? `${start} - ${end}` : start || end || "";
+  
+  const createJoinHandler = useCallback((choiceItemKey) => {
+    return () => onChoiceChange(choiceItemKey, "yes");
+  }, [onChoiceChange]);
+
 
   const renderParameter = () => {
     if (!parameter1) {return null;}
@@ -154,7 +156,7 @@ const TimelineRow = ({
               {price && <div className="activity-price">${price}</div>}
               <button
                 className="join-button"
-                onClick={() => onChoiceChange(choiceItemKey, "yes")}
+                onClick={createJoinHandler(choiceItemKey)}
                 disabled={choiceIsSaving}
               >
                 {choiceIsSaving ? "Joining..." : "I want to join"}
@@ -233,13 +235,38 @@ const Timeline = () => {
   const { email: userEmail, password: userPassword } = useContext(AuthContext);
   const { formData } = useTripContext();
 
-  const handleRecommendationClick = (recommendations) => {
+  const handleRecommendationClick = useCallback((recommendations) => {
     setSelectedRecommendation(recommendations);
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setSelectedRecommendation(null);
-  };
+  }, []);
+
+  const navigateToHome = useCallback(() => {
+    navigate("/home");
+  }, [navigate]);
+
+  const reloadPage = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  const toggleDay = useCallback((dayKey) => {
+    setCollapsedDays((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(dayKey)) {
+        newSet.delete(dayKey);
+      } else {
+        newSet.add(dayKey);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const createToggleHandler = useCallback((dayKey) => {
+    return () => toggleDay(dayKey);
+  }, [toggleDay]);
+
 
   const handleChoiceSelection = async (itemKey, choice) => {
     if (!userEmail || !userPassword) {
@@ -483,7 +510,7 @@ const Timeline = () => {
           </p>
           <button
             className="btn btn-secondary btn-sm"
-            onClick={() => navigate("/home")}
+            onClick={navigateToHome}
           >
             Back to Home
           </button>
@@ -525,17 +552,6 @@ const Timeline = () => {
     }
   };
 
-  const toggleDay = (dayKey) => {
-    setCollapsedDays((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(dayKey)) {
-        newSet.delete(dayKey); // Expand the day
-      } else {
-        newSet.add(dayKey); // Collapse the day
-      }
-      return newSet;
-    });
-  };
 
   const isDayCollapsed = (dayKey) => {
     return collapsedDays.has(dayKey);
@@ -592,7 +608,7 @@ const Timeline = () => {
       <div className="timeline-error">
         <h3>Error</h3>
         <p>{error}</p>
-        <button onClick={() => window.location.reload()}>Try Again</button>
+        <button onClick={reloadPage}>Try Again</button>
       </div>
     );
   }
@@ -616,7 +632,7 @@ const Timeline = () => {
             <h1>Trip Timeline</h1>
             <button
               className="btn btn-secondary"
-              onClick={() => navigate("/home")}
+              onClick={navigateToHome}
             >
               Back to Home
             </button>
@@ -626,7 +642,7 @@ const Timeline = () => {
         <div className="timeline-content">
           {Object.entries(groupedData).map(([dayKey, dayData]) => (
             <div key={dayKey} className="timeline-day">
-              <div className="day-header" onClick={() => toggleDay(dayKey)}>
+              <div className="day-header" onClick={createToggleHandler(dayKey)}>
                 <div className="collapse-indicator">
                   {isDayCollapsed(dayKey) ? "▼" : "▲"}
                 </div>

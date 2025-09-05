@@ -1,7 +1,7 @@
 // FormFlow Component
 // Handles the registration form flow for new participants
 
-import { useRef } from "react";
+import { useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useFormSubmission } from "../../hooks/useFormSubmission";
@@ -41,7 +41,7 @@ const FormFlow = () => {
   const currentStep = getCurrentStepFromPath();
 
   // Handle RSVP continue - proceed to next step
-  const handleRSVPContinue = () => {
+  const handleRSVPContinue = useCallback(() => {
     // Validate required fields before continuing
     const errors = {};
 
@@ -110,10 +110,10 @@ const FormFlow = () => {
     }
 
     navigate(`/${STEPS.ADDONS}`);
-  };
+  }, [formData, showError, navigate]);
 
   // Handle form submission
-  const handleSubmitForm = async () => {
+  const handleSubmitForm = useCallback(async () => {
     try {
       if (!formData[FORM_FIELDS.PAYMENT_SCHEDULE]) {
         showError("Please select a payment schedule.");
@@ -152,7 +152,7 @@ const FormFlow = () => {
       console.error("Form submission error:", error);
       showError("An unexpected error occurred. Please try again.");
     }
-  };
+  }, [formData, showError, submitForm, userRSVP, pricing, setSubmissionResult, navigate, showSuccess]);
 
   // Handle logout
 

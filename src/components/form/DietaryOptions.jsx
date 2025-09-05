@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 
 import { FORM_FIELDS } from "../../utils/config";
 import "../../styles/DietaryOptions.css";
@@ -38,6 +38,14 @@ const DietaryOptions = ({ formData, updateFormData }) => {
     }
   }, [formData, updateFormData]);
 
+  const handleDietaryRestrictionChange = useCallback((e) => {
+    updateFormData(FORM_FIELDS.DIETARY_RESTRICTIONS, e.target.value);
+  }, [updateFormData]);
+
+  const handleDietaryMessageChange = useCallback((e) => {
+    updateFormData(FORM_FIELDS.DIETARY_MESSAGE, e.target.value);
+  }, [updateFormData]);
+
   return (
     <section className="form-section">
       <h2>
@@ -54,12 +62,7 @@ const DietaryOptions = ({ formData, updateFormData }) => {
                 name="dietaryRestrictions"
                 value={option}
                 checked={formData[FORM_FIELDS.DIETARY_RESTRICTIONS] === option}
-                onChange={(e) =>
-                  updateFormData(
-                    FORM_FIELDS.DIETARY_RESTRICTIONS,
-                    e.target.value
-                  )
-                }
+                onChange={handleDietaryRestrictionChange}
                 required
               />
               <label htmlFor={`dietary-${option}`}>
@@ -85,9 +88,7 @@ const DietaryOptions = ({ formData, updateFormData }) => {
           id="dietary-message"
           name="dietaryMessage"
           value={formData[FORM_FIELDS.DIETARY_MESSAGE] || ""}
-          onChange={(e) =>
-            updateFormData(FORM_FIELDS.DIETARY_MESSAGE, e.target.value)
-          }
+          onChange={handleDietaryMessageChange}
           placeholder="Please let us know about any allergies, food intolerances, or special dietary needs..."
           rows="4"
           className="dietary-message-input"

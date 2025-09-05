@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 import { ACTIVITY_LIST } from "../../utils/activities";
 import { getActivityImageSources } from "../../utils/imageLoader";
@@ -10,11 +10,14 @@ const ActivitySelection = ({ formData, updateFormData }) => {
     activityId: null,
   });
 
-  const handleActivityToggle = (activity, isSelected) => {
-    updateFormData(activity.formField, isSelected);
-  };
+  const handleActivityToggle = useCallback(
+    (activity, isSelected) => {
+      updateFormData(activity.formField, isSelected);
+    },
+    [updateFormData]
+  );
 
-  const handleImageClick = (e, activity) => {
+  const handleImageClick = useCallback((e, activity) => {
     e.stopPropagation(); // Prevent card selection
     if (
       activity.id === "horseback" ||
@@ -27,14 +30,27 @@ const ActivitySelection = ({ formData, updateFormData }) => {
         activityId: activity.id,
       });
     }
-  };
+  }, []);
 
-  const handleCloseCarousel = () => {
+  // Factory functions for creating handlers inside map
+  const createActivityToggleHandler = useCallback((activity, isSelected) => {
+    return () => handleActivityToggle(activity, !isSelected);
+  }, [handleActivityToggle]);
+
+  const createImageClickHandler = useCallback((activity) => {
+    return (e) => handleImageClick(e, activity);
+  }, [handleImageClick]);
+
+  const createEmptyHandler = useCallback(() => {
+    return () => {}; // Handled by card click
+  }, []);
+
+  const handleCloseCarousel = useCallback(() => {
     setCarouselState({
       isOpen: false,
       activityId: null,
     });
-  };
+  }, []);
 
   // Get images array based on activity
   const getCarouselImages = () => {
@@ -53,14 +69,14 @@ const ActivitySelection = ({ formData, updateFormData }) => {
   };
 
   // Check if activity has carousel
-  const hasCarousel = (activityId) => {
+  const hasCarousel = useCallback((activityId) => {
     return (
       activityId === "horseback" ||
       activityId === "rafting" ||
       activityId === "cooking" ||
       activityId === "tango"
     );
-  };
+  }, []);
 
   return (
     <div>
@@ -80,12 +96,12 @@ const ActivitySelection = ({ formData, updateFormData }) => {
                 <div
                   key={activity.id}
                   className={`activity-card ${isSelected ? "activity-selected" : ""}`}
-                  onClick={() => handleActivityToggle(activity, !isSelected)}
+                  onClick={createActivityToggleHandler(activity, isSelected)}
                   style={{ cursor: "pointer" }}
                 >
                   <div
                     className="activity-image"
-                    onClick={(e) => handleImageClick(e, activity)}
+                    onClick={createImageClickHandler(activity)}
                     style={{
                       cursor: hasCarousel(activity.id) ? "zoom-in" : "pointer",
                       position: "relative",
@@ -107,7 +123,7 @@ const ActivitySelection = ({ formData, updateFormData }) => {
                         id={activity.id}
                         name="activities"
                         checked={isSelected}
-                        onChange={() => {}} // Handled by card click
+                        onChange={createEmptyHandler()}
                         style={{ pointerEvents: "none", marginRight: "12px" }}
                       />
                       <i className={activity.icon} />
@@ -117,7 +133,9 @@ const ActivitySelection = ({ formData, updateFormData }) => {
                           activity.subtitles.length > 0 && (
                             <div className="activity-subtitles">
                               {activity.subtitles.map((subtitle, i) => (
-                                <div key={subtitle || `subtitle-${i}`}>{subtitle}</div>
+                                <div key={subtitle || `subtitle-${i}`}>
+                                  {subtitle}
+                                </div>
                               ))}
                             </div>
                           )}
@@ -131,7 +149,10 @@ const ActivitySelection = ({ formData, updateFormData }) => {
                       {activity.descriptionLines && (
                         <div className="description">
                           {activity.descriptionLines.map((line, index) => (
-                            <p key={line || `description-${index}`} className="description-line">
+                            <p
+                              key={line || `description-${index}`}
+                              className="description-line"
+                            >
                               {line || "\u00A0"}
                             </p>
                           ))}

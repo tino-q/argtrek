@@ -1,7 +1,7 @@
 // Generic Step Navigation Component
 // Uses step configuration to provide consistent navigation across all steps
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useNotificationContext } from "../../hooks/useNotificationContext";
@@ -25,17 +25,13 @@ const StepNavigation = ({
   const { showError } = useNotificationContext();
   const stepConfig = getStepConfig(currentStep);
 
-  if (!stepConfig?.showNavigation) {
-    return null;
-  }
-
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if (stepConfig.backStep) {
       navigate(stepConfig.backStep);
     }
-  };
+  }, [stepConfig.backStep, navigate]);
 
-  const handleForward = async () => {
+  const handleForward = useCallback(async () => {
     // Special handling for RSVP step to use custom validation
     if (currentStep === "rsvp" && onRSVPContinue) {
       onRSVPContinue();
@@ -45,9 +41,9 @@ const StepNavigation = ({
     if (stepConfig.forwardStep) {
       navigate(`/${stepConfig.forwardStep}`);
     }
-  };
+  }, [currentStep, onRSVPContinue, stepConfig.forwardStep, navigate]);
 
-  const handleNewEmailSubmit = async () => {
+  const handleNewEmailSubmit = useCallback(async () => {
     if (currentStep === "new-email" && onNewEmailRequest) {
       // Get email and name from URL params and form data
       const urlParams = new URLSearchParams(window.location.search);
@@ -70,9 +66,9 @@ const StepNavigation = ({
         setIsNewEmailLoading(false);
       }
     }
-  };
+  }, [currentStep, onNewEmailRequest, formData, showError]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     // Validate required fields for payment step
     if (currentStep === "payment") {
       if (!formData || !formData[FORM_FIELDS.PAYMENT_SCHEDULE]) {
@@ -89,7 +85,11 @@ const StepNavigation = ({
     if (onSubmit) {
       await onSubmit();
     }
-  };
+  }, [currentStep, formData, showError, onSubmit]);
+
+  if (!stepConfig?.showNavigation) {
+    return null;
+  }
 
   // Handle custom forward component (like submit button)
   if (stepConfig.customForward === "SubmitButton") {
