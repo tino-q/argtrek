@@ -1,5 +1,3 @@
-import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import "../../styles/TermsAndConditions.css";
 
 const termsAndConditionsHtml = () => {
@@ -247,12 +245,6 @@ const termsAndConditionsHtml = () => {
 };
 
 const TermsAndConditions = () => {
-  const navigate = useNavigate();
-
-  const handleHomeClick = useCallback(() => {
-    navigate("/home"); // Go to home page
-  }, [navigate]);
-
   return (
     <div className="container">
       <div className="terms-and-conditions-section">

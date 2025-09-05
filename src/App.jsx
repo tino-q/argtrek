@@ -2,8 +2,8 @@
 // Enhanced with browser navigation integration using React Router
 // Supports both registration flow and participant management
 
-import { useEffect, useCallback } from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 import EmailLogin from "./components/auth/EmailLogin";
 import NotificationContainer from "./components/common/NotificationContainer";
@@ -13,6 +13,7 @@ import Footer from "./components/layout/Footer";
 import Header from "./components/layout/Header";
 import Home from "./components/participant/Home";
 import Payments from "./components/participant/Payments";
+import Profile from "./components/participant/Profile";
 import Timeline from "./components/participant/Timeline";
 import NotificationProvider from "./context/NotificationContext.jsx";
 import TripProvider from "./context/TripContext.jsx";
@@ -58,13 +59,8 @@ const RsvpTravelerRoute = ({ children }) => {
 };
 
 function AppContent() {
-  const navigate = useNavigate();
   const location = useLocation();
   const { notifications, removeNotification } = useNotificationContext();
-
-  const navigateToHome = useCallback(() => {
-    navigate("/home");
-  }, [navigate]);
 
   useEffect(() => {
     injectAnimationStyles();
@@ -74,18 +70,6 @@ function AppContent() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [location.pathname]);
-
-  // Render placeholder components for future pages
-  const renderPlaceholderPage = (title, description) => (
-    <div className="placeholder-page nav-card">
-      <h2>{title}</h2>
-      <p>{description}</p>
-      <button className="btn btn-secondary" onClick={navigateToHome}>
-        <i className="fas fa-arrow-left" />
-        Back to Home
-      </button>
-    </div>
-  );
 
   return (
     <div>
@@ -129,10 +113,7 @@ function AppContent() {
             path="/profile"
             element={
               <RegisteredTravelerRoute>
-                {renderPlaceholderPage(
-                  "Profile & Trip Details",
-                  "Coming soon - manage your profile and trip preferences here."
-                )}
+                <Profile />
               </RegisteredTravelerRoute>
             }
           />

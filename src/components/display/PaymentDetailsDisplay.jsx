@@ -48,7 +48,9 @@ const PaymentDetailsDisplay = ({
   }, []);
 
   const downloadPDF = useCallback(async () => {
-    if (isDownloading) return;
+    if (isDownloading) {
+      return;
+    }
     
     try {
       setIsDownloading(true);
