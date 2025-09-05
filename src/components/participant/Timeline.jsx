@@ -10,7 +10,9 @@ import "./Timeline.css";
 const RecommendationsModal = ({ recommendations, onClose }) => {
   const stopPropagation = useCallback((e) => e.stopPropagation(), []);
 
-  if (!recommendations) {return null;}
+  if (!recommendations) {
+    return null;
+  }
 
   const items = recommendations
     .split(" // ")
@@ -41,13 +43,18 @@ const RecommendationsModal = ({ recommendations, onClose }) => {
 // Generic, reusable helpers
 
 const ChoicesGroup = ({ name, options, selectedValue, onChange, isSaving }) => {
-  const handleRadioChange = useCallback((e) => {
-    onChange(name, e.target.value);
-  }, [name, onChange]);
+  const handleRadioChange = useCallback(
+    (e) => {
+      onChange(name, e.target.value);
+    },
+    [name, onChange]
+  );
 
-  if (!Array.isArray(options) || options.length === 0) {return null;}
+  if (!Array.isArray(options) || options.length === 0) {
+    return null;
+  }
   const normalized = options.map((opt) => String(opt).trim()).filter(Boolean);
-  
+
   return (
     <div
       className="activity-choices"
@@ -92,20 +99,26 @@ const TimelineRow = ({
   savingChoices,
 }) => {
   const timeDisplay = start && end ? `${start} - ${end}` : start || end || "";
-  
-  const createJoinHandler = useCallback((choiceItemKey) => {
-    return () => onChoiceChange(choiceItemKey, "yes");
-  }, [onChoiceChange]);
 
+  const createJoinHandler = useCallback(
+    (choiceItemKey) => {
+      return () => onChoiceChange(choiceItemKey, "yes");
+    },
+    [onChoiceChange]
+  );
 
   const renderParameter = () => {
-    if (!parameter1) {return null;}
+    if (!parameter1) {
+      return null;
+    }
 
     const lines = parameter1
       .split("//")
       .map((line) => line.trim())
       .filter(Boolean);
-    if (lines.length === 0) {return null;}
+    if (lines.length === 0) {
+      return null;
+    }
 
     return (
       <div className="timeline-parameter">
@@ -122,7 +135,9 @@ const TimelineRow = ({
   };
 
   const renderChoices = () => {
-    if (!choices || !choices.trim()) {return null;}
+    if (!choices || !choices.trim()) {
+      return null;
+    }
 
     const identifier = choices.trim();
 
@@ -148,23 +163,22 @@ const TimelineRow = ({
             <div className="registered-status">You're registered!</div>
           </div>
         );
-      } 
-        const price = PRICES?.[choiceItemKey];
-        return (
-          <div className="timeline-choices">
-            <div className="price-button-row">
-              {price && <div className="activity-price">${price}</div>}
-              <button
-                className="join-button"
-                onClick={createJoinHandler(choiceItemKey)}
-                disabled={choiceIsSaving}
-              >
-                {choiceIsSaving ? "Joining..." : "I want to join"}
-              </button>
-            </div>
+      }
+      const price = PRICES?.[choiceItemKey];
+      return (
+        <div className="timeline-choices">
+          <div className="price-button-row">
+            {price && <div className="activity-price">${price}</div>}
+            <button
+              className="join-button"
+              onClick={createJoinHandler(choiceItemKey)}
+              disabled={choiceIsSaving}
+            >
+              {choiceIsSaving ? "Joining..." : "I want to join"}
+            </button>
           </div>
-        );
-      
+        </div>
+      );
     }
 
     // Handle activity-valle-de-uco
@@ -263,10 +277,12 @@ const Timeline = () => {
     });
   }, []);
 
-  const createToggleHandler = useCallback((dayKey) => {
-    return () => toggleDay(dayKey);
-  }, [toggleDay]);
-
+  const createToggleHandler = useCallback(
+    (dayKey) => {
+      return () => toggleDay(dayKey);
+    },
+    [toggleDay]
+  );
 
   const handleChoiceSelection = async (itemKey, choice) => {
     if (!userEmail || !userPassword) {
@@ -477,7 +493,6 @@ const Timeline = () => {
     "guidoh@stanford.edu",
     "tinqueija@gmail.com",
     "madibakla@gmail.com",
-    "ekin@stanford.edu",
   ];
 
   // TODO: remove this after construction
@@ -508,10 +523,7 @@ const Timeline = () => {
           <p style={{ margin: 0 }}>
             Timeline is currently being updated. Please check back later.
           </p>
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={navigateToHome}
-          >
+          <button className="btn btn-secondary btn-sm" onClick={navigateToHome}>
             Back to Home
           </button>
         </div>
@@ -539,7 +551,9 @@ const Timeline = () => {
   };
 
   const getDaySuffix = (day) => {
-    if (day >= 11 && day <= 13) {return "th";}
+    if (day >= 11 && day <= 13) {
+      return "th";
+    }
     switch (day % 10) {
       case 1:
         return "st";
@@ -551,7 +565,6 @@ const Timeline = () => {
         return "th";
     }
   };
-
 
   const isDayCollapsed = (dayKey) => {
     return collapsedDays.has(dayKey);
@@ -630,10 +643,7 @@ const Timeline = () => {
         <div className="timeline-header">
           <div className="timeline-header-nav">
             <h1>Trip Timeline</h1>
-            <button
-              className="btn btn-secondary"
-              onClick={navigateToHome}
-            >
+            <button className="btn btn-secondary" onClick={navigateToHome}>
               Back to Home
             </button>
           </div>
