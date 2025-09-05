@@ -234,20 +234,6 @@
   color: var(--success-dark);
 }
 
-/* Footer */
-.terms-footer {
-  background: var(--bg-light);
-  padding: 2rem 1.5rem;
-  text-align: center;
-  border-top: 1px solid var(--border-light);
-}
-
-.terms-footer .btn {
-  min-width: 200px;
-  font-size: 1.1rem;
-  padding: 1rem 2rem;
-}
-
 /* Mobile Responsive Design */
 @media (max-width: 768px) {
   .terms-header {
@@ -303,16 +289,6 @@
   .policy-item {
     padding: 0.75rem;
   }
-
-  .terms-footer {
-    padding: 1.5rem 1rem;
-  }
-
-  .terms-footer .btn {
-    min-width: 150px;
-    font-size: 1rem;
-    padding: 0.875rem 1.5rem;
-  }
 }
 
 @media (max-width: 480px) {
@@ -361,16 +337,6 @@
   .policy-item {
     padding: 0.5rem;
   }
-
-  .terms-footer {
-    padding: 1rem;
-  }
-
-  .terms-footer .btn {
-    min-width: 120px;
-    font-size: 0.95rem;
-    padding: 0.75rem 1.25rem;
-  }
 }
 
 /* Print Styles */
@@ -385,8 +351,7 @@
     color: #333 !important;
   }
 
-  .back-button,
-  .terms-footer {
+  .back-button {
     display: none;
   }
 

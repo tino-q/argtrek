@@ -303,14 +303,14 @@ const PaymentDetailsDisplay = ({
         <div className="print-section">
           <div className="action-buttons">
             <button
-              className="print-button"
+              className="payment-download-btn"
               onClick={downloadPDF}
               type="button"
             >
               📄 Download voucher
             </button>
             <button
-              className="btn btn-secondary terms-button"
+              className="payment-terms-btn"
               onClick={handleTermsClick}
               type="button"
             >

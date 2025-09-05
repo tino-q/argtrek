@@ -259,6 +259,40 @@ function generateFirstPageHTML(
   ${hotelSection}
   
   <div class="section">
+    <div class="section-title">Group Activities (full confirmed agenda COMING SOON)</div>
+    <div class="activities">
+      <div class="activity">
+        <div class="activity-name">Buenos Aires</div>
+        <div class="activity-price">Day outing</div>
+        <div class="activity-price">Welcome Dinner</div>
+      </div>
+      <div class="activity">
+        <div class="activity-name">Bariloche</div>
+        <div class="activity-price">Welcome & Closing Dinner</div>
+        <div class="activity-price">Day outing days 2 & 3</div>
+      </div>
+      <div class="activity">
+        <div class="activity-name">Mendoza</div>
+        <div class="activity-price">Day Outing</div>
+        <div class="activity-price">Welcome & Closing Dinner</div>
+      </div>
+
+      ${
+        accommodations.find(
+          (accomodation) => accomodation.period === "departure"
+        )
+          ? `
+      <div class="activity">
+        <div class="activity-name">Buenos Aires</div>
+        <div class="activity-price">Closing Dinner</div>
+      </div>
+        `
+          : ""
+      } 
+    </div>
+  </div>
+  
+  <div class="section">
     <div class="section-title">Optional Activities</div>
     <div class="activities">
       ${!formData.rafting && !formData.tango && !formData.cooking ? `<div class="activity"><div class="activity-name">No optional activities selected</div><div class="activity-price"></div></div>` : ""}
@@ -329,7 +363,6 @@ function generateSecondPageHTML(voucherId) {
   <div class="section">
     <div class="section-title">Terms and Conditions Highlights</div>
     <div class="terms-content">
-    <p>The complete General Conditions will remain published on the website and available to the TRAVELER so that they may reproduce and store them as confirmation of the service.</p>
     <h4>TRAVELER DECLARES</h4>
     <p>To have read, understood, and accepted the complete Terms and Conditions in their entirety. To understand that a personal travel insurance is strongly recommended to cover flight disruptions, schedule changes, cancellations, lost luggage, or trip interruptions.</p>
     <p>To understand that in compliance with Decree 366/2025 of the Republic of Argentina, every foreign TRAVELER must have valid health insurance for the entire duration of their stay, with the policy issued in English or Spanish. The TRAVELER must carry and present the policy when required by border authorities, airlines, or local authorities.</p>
@@ -353,6 +386,7 @@ function generateSecondPageHTML(voucherId) {
 <h4>FULL TERMS & CONDITIONS IN WEB PAGE</h4>
 
 <p>These Reduced Terms and Conditions provide a summary of the key points of your contract. The complete Terms and Conditions, which form an integral part of this agreement, are available at any time through your personal login area on our website. By accepting these Reduced Terms and Conditions, the Traveler acknowledges having been informed of the existence of the full Terms and Conditions and agrees that they apply in their entirety to the contract.</p>
+    <p>You can find the complete terms and conditions <a href="https://argtrip.sonsolesstays.com/terms" target="_blank">here</a>.</p>
 
   
     </div>

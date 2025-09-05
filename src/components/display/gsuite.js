@@ -66,13 +66,19 @@ async function getProcessedArray(__dirname, spreadsheetId) {
       }
 
       if (key.startsWith("formData.")) {
-        if (!processed.formData) {processed.formData = {};}
+        if (!processed.formData) {
+          processed.formData = {};
+        }
         processed.formData[key.replace("formData.", "")] = value;
       } else if (key.startsWith("pricing.")) {
-        if (!processed.pricing) {processed.pricing = {};}
+        if (!processed.pricing) {
+          processed.pricing = {};
+        }
         processed.pricing[key.replace("pricing.", "")] = value;
       } else if (key.startsWith("rsvpData.")) {
-        if (!processed.rsvpData) {processed.rsvpData = {};}
+        if (!processed.rsvpData) {
+          processed.rsvpData = {};
+        }
         processed.rsvpData[key.replace("rsvpData.", "")] = value;
       } else {
         // Keep other fields at top level
@@ -138,6 +144,10 @@ async function processAllDataRows() {
   });
 
   for (const row of processedArray) {
+    if (row.ID.toString() !== "5") {
+      // continue;
+    }
+
     const pdfs = await generatePdfPuppeteer(browser, row).then((pdfs) =>
       pdfs.map((pdf, i) => [
         pdf,
@@ -161,8 +171,6 @@ async function processAllDataRows() {
     console.log(
       `Merged PDF saved to ${path.resolve(outputDir, `merged-pdf-${row.ID}.pdf`)}`
     );
-
-    break;
   }
 
   await browser.close();

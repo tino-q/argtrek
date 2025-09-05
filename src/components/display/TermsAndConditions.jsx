@@ -261,17 +261,6 @@ const TermsAndConditions = () => {
         </div>
 
         <div className="terms-content">{termsAndConditionsHtml()}</div>
-
-        <div className="terms-footer">
-          <button
-            className="btn btn-primary"
-            onClick={handleHomeClick}
-            type="button"
-          >
-            <i className="fas fa-home" />
-            Home
-          </button>
-        </div>
       </div>
     </div>
   );
