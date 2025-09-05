@@ -2,16 +2,19 @@ import { useEffect } from "react";
 import { useTripContext } from "../../hooks/useTripContext";
 import PaymentDetailsDisplay from "../display/PaymentDetailsDisplay";
 import PaymentSummary from "../common/PaymentSummary";
+import { usePricing } from "../../hooks/usePricing";
+import { useNavigate } from "react-router-dom";
 
-const Payments = ({ pricing, onNavigate }) => {
-  const { userRSVP, formData, isFormSubmitted, submissionResult } =
-    useTripContext();
+const Payments = () => {
+  const navigate = useNavigate();
+  const { userRSVP, formData, submissionResult } = useTripContext();
+  const pricing = usePricing(userRSVP, formData);
 
   useEffect(() => {
     if (!userRSVP) {
-      onNavigate("login");
+      navigate("/login");
     }
-  }, [userRSVP, onNavigate]);
+  }, [userRSVP, navigate]);
 
   if (!userRSVP) {
     return (
@@ -23,7 +26,7 @@ const Payments = ({ pricing, onNavigate }) => {
   }
 
   // If form is submitted, show payment details
-  if (isFormSubmitted && submissionResult) {
+  if (submissionResult) {
     return (
       <div className="container">
         <PaymentSummary
@@ -42,7 +45,7 @@ const Payments = ({ pricing, onNavigate }) => {
         <div className="payment-actions">
           <button
             className="btn btn-secondary"
-            onClick={() => onNavigate("home")}
+            onClick={() => navigate("/home")}
           >
             <i className="fas fa-arrow-left"></i>
             Back to Home
@@ -102,7 +105,7 @@ const Payments = ({ pricing, onNavigate }) => {
   //       <div className="payment-actions">
   //         <button
   //           className="btn btn-secondary"
-  //           onClick={() => onNavigate("home")}
+  //           onClick={() => navigate("/home")}
   //         >
   //           <i className="fas fa-arrow-left"></i>
   //           Back to Home

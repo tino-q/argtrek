@@ -22,16 +22,6 @@ export const STEP_CONFIG = {
     showNavigation: false,
     component: "EmailLogin",
   },
-  [STEPS.NEW_EMAIL]: {
-    id: "new-email",
-    showNavigation: true,
-    showBack: true,
-    showForward: false,
-    backText: "Back to Login",
-    backStep: STEPS.LOGIN,
-    component: "NewEmailStep",
-    customForward: "SafeSubmitButton",
-  },
   [STEPS.WELCOME]: {
     id: "welcome",
     showNavigation: true,

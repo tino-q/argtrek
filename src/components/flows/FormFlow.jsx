@@ -15,17 +15,16 @@ import { STEPS } from "../../utils/stepConfig";
 import StepRenderer from "../common/StepRenderer";
 import StepNavigation from "../common/StepNavigation";
 
-const FormFlow = ({
-  onLoginSuccess,
-  onExistingSubmission,
-  onFormSubmitted,
-}) => {
+const FormFlow = () => {
+  const { setSubmissionResult } = useTripContext();
   const navigate = useNavigate();
   const location = useLocation();
   const formRef = useRef(null);
 
   // Trip context
-  const { userRSVP, formData, resetFormData } = useTripContext();
+  const { userRSVP, formData } = useTripContext();
+
+  console.log("🚀 FORM DATA:", formData);
 
   // Notification context
   const { showSuccess, showError } = useNotificationContext();
@@ -41,11 +40,6 @@ const FormFlow = ({
   };
 
   const currentStep = getCurrentStepFromPath();
-
-  // Generic navigation handler
-  const navigateToStep = (step) => {
-    navigate(`/${step}`);
-  };
 
   // Handle RSVP continue - proceed to next step
   const handleRSVPContinue = () => {
@@ -116,7 +110,7 @@ const FormFlow = ({
       return;
     }
 
-    navigateToStep(STEPS.ADDONS);
+    navigate(`/${STEPS.ADDONS}`);
   };
 
   // Handle form submission
@@ -146,15 +140,12 @@ const FormFlow = ({
       const result = await submitForm(submissionData, userRSVP, pricing);
 
       if (result.success) {
-        onFormSubmitted(result.data);
-        navigateToStep(STEPS.PAYMENTS);
-        showSuccess(
-          "Registration confirmed! Check your payment details below.",
-          {
-            duration: 3000,
-            autoClose: true,
-          }
-        );
+        setSubmissionResult(result.data);
+        navigate(`/${STEPS.PAYMENTS}`);
+        showSuccess("Registration confirmed!", {
+          duration: 3000,
+          autoClose: true,
+        });
       } else {
         showError(result.message, result.options);
       }
@@ -165,22 +156,11 @@ const FormFlow = ({
   };
 
   // Handle logout
-  const handleLogout = () => {
-    navigateToStep(STEPS.LOGIN);
-    resetFormData();
-    showSuccess(
-      "Logged out successfully. You can now login with different credentials."
-    );
-  };
 
   // Common step props
   const commonStepProps = {
     pricing,
-    onLogout: handleLogout,
     onRSVPContinue: handleRSVPContinue,
-    onNavigate: navigateToStep,
-    onLoginSuccess, // New registration login success
-    onExistingSubmission, // Existing user found during login
   };
 
   return (
@@ -189,7 +169,6 @@ const FormFlow = ({
 
       <StepNavigation
         currentStep={currentStep}
-        onNavigate={navigateToStep}
         onSubmit={handleSubmitForm}
         isSubmitting={isSubmitting}
         formData={formData}

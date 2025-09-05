@@ -1,19 +1,14 @@
 // Payment Details Display Component
 // Shows payment information after successful trip registration
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getTravelerName,
-  getEmail,
-  getUSDToEURExchangeRate,
-} from "../../utils/rsvpData";
+import { getTravelerName, getUSDToEURExchangeRate } from "../../utils/rsvpData";
 import { FORM_FIELDS, EMAIL_CONFIG, APPS_SCRIPT_URL } from "../../utils/config";
 
 import { copyToClipboard } from "../../utils/clipboard";
 import PricingSummary from "../layout/PricingSummary";
 
-import { buildPDfDoc } from "./generatePdf";
 import "../../styles/PaymentDetailsDisplay.css";
 
 import ProofOfPaymentUpload from "../form/ProofOfPaymentUpload";
@@ -29,86 +24,6 @@ const PaymentDetailsDisplay = ({
 }) => {
   const navigate = useNavigate();
   const travelerName = getTravelerName(rsvpData, formData);
-  const [pdfUrl, setPdfUrl] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const hasGeneratedRef = useRef(false);
-
-  const generateAndUploadPDF = useCallback(() => {
-    try {
-      if (!pricing.installmentAmountEUR) {
-        return;
-      }
-
-      const doc = buildPDfDoc(
-        rsvpData,
-        submissionResult.rowNumber,
-        formData,
-        pricing
-      );
-
-      // Generate PDF
-      const generatedPdfBlob = doc.output("blob");
-
-      // Store PDF URL in state for later download
-      const generatedPdfUrl = URL.createObjectURL(generatedPdfBlob);
-      setPdfUrl(generatedPdfUrl);
-      setIsGenerating(false);
-
-      // Upload to Google Drive in background (fire and forget)
-      const cleanTravelerName = travelerName.replace(/[^a-zA-Z0-9]/g, "_");
-      const orderNumber = submissionResult?.rowNumber || "DRAFT";
-      const filename = `Order_${orderNumber}_${cleanTravelerName}.pdf`;
-
-      // Convert PDF blob to base64 and upload in background
-      const reader = new FileReader();
-      reader.onload = async function () {
-        const base64Data = reader.result.split(",")[1]; // Remove data:application/pdf;base64, prefix
-
-        try {
-          const formData = new FormData();
-          formData.append("action", "upload_pdf");
-          formData.append("pdfData", base64Data);
-          formData.append("filename", filename);
-          formData.append("clientEmail", getEmail(rsvpData));
-          formData.append("travelerName", travelerName);
-
-          const response = await fetch(APPS_SCRIPT_URL, {
-            method: "POST",
-            body: formData,
-          });
-
-          const result = await response.json();
-
-          if (result.success) {
-            console.log("PDF uploaded successfully:", result);
-          } else {
-            console.error("PDF upload failed:", result.error);
-          }
-        } catch (error) {
-          console.error("Error uploading PDF:", error);
-        }
-      };
-
-      reader.readAsDataURL(generatedPdfBlob);
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      setIsGenerating(false);
-    }
-  }, [rsvpData, formData, pricing, submissionResult, travelerName]);
-
-  // Generate PDF on component mount (only once)
-  useEffect(() => {
-    if (
-      !hasGeneratedRef.current &&
-      !isGenerating &&
-      !pdfUrl &&
-      submissionResult?.rowNumber
-    ) {
-      hasGeneratedRef.current = true;
-      setIsGenerating(true);
-      generateAndUploadPDF();
-    }
-  }, [submissionResult?.rowNumber, isGenerating, pdfUrl, generateAndUploadPDF]);
 
   const handleCopyClick = async (value, event) => {
     const button = event.currentTarget;
@@ -124,9 +39,7 @@ const PaymentDetailsDisplay = ({
   };
 
   const downloadPDF = () => {
-    if (pdfUrl) {
-      window.open(pdfUrl, "_blank");
-    }
+    console.log("Download PDF button clicked - PDF generation removed");
   };
 
   const handleTermsClick = () => {

@@ -7,16 +7,17 @@ import SafeSubmitButton from "./SafeSubmitButton";
 import { getStepConfig } from "../../utils/stepConfig";
 import { FORM_FIELDS } from "../../utils/config";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
+import { useNavigate } from "react-router-dom";
 
 const StepNavigation = ({
   currentStep,
-  onNavigate,
   onSubmit,
   isSubmitting,
   formData,
   onNewEmailRequest,
   onRSVPContinue,
 }) => {
+  const navigate = useNavigate();
   const [isNewEmailLoading, setIsNewEmailLoading] = useState(false);
   const { showError } = useNotificationContext();
   const stepConfig = getStepConfig(currentStep);
@@ -27,7 +28,7 @@ const StepNavigation = ({
 
   const handleBack = () => {
     if (stepConfig.backStep) {
-      onNavigate(stepConfig.backStep);
+      navigate(stepConfig.backStep);
     }
   };
 
@@ -39,7 +40,7 @@ const StepNavigation = ({
     }
 
     if (stepConfig.forwardStep) {
-      onNavigate(stepConfig.forwardStep);
+      navigate(`/${stepConfig.forwardStep}`);
     }
   };
 

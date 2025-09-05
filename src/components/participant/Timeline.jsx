@@ -3,6 +3,7 @@ import { useTripContext } from "../../hooks/useTripContext";
 import { APPS_SCRIPT_URL, PRICES } from "../../utils/config.js";
 import AuthContext from "../../context/AuthContext.jsx";
 import "./Timeline.css";
+import { useNavigate } from "react-router-dom";
 
 const RecommendationsModal = ({ recommendations, onClose }) => {
   if (!recommendations) return null;
@@ -218,7 +219,8 @@ const TimelineRow = ({
   );
 };
 
-const Timeline = ({ onNavigate }) => {
+const Timeline = () => {
+  const navigate = useNavigate();
   const [timelineData, setTimelineData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -228,10 +230,6 @@ const Timeline = ({ onNavigate }) => {
   const [savingChoices, setSavingChoices] = useState(new Set());
   const { email: userEmail, password: userPassword } = useContext(AuthContext);
   const { formData } = useTripContext();
-
-  const isLocalHost =
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1";
 
   const handleRecommendationClick = (recommendations) => {
     setSelectedRecommendation(recommendations);
@@ -302,7 +300,8 @@ const Timeline = ({ onNavigate }) => {
       try {
         let data;
 
-        if (isLocalHost) {
+        // eslint-disable-next-line no-undef
+        if (__DEV__) {
           // get queryparamt refresh
           const refresh = new URLSearchParams(window.location.search).get(
             "refresh"
@@ -412,7 +411,8 @@ const Timeline = ({ onNavigate }) => {
       }
 
       try {
-        if (isLocalHost) {
+        // eslint-disable-next-line no-undef
+        if (__DEV__) {
           await new Promise((resolve) => setTimeout(resolve, 300));
           const userKey = `${userEmail}-${userPassword}`;
           const userChoices = mockChoicesStore.current.get(userKey) || {};
@@ -439,7 +439,7 @@ const Timeline = ({ onNavigate }) => {
 
     fetchTimelineData();
     fetchUserChoices();
-  }, [userEmail, userPassword, isLocalHost]);
+  }, [userEmail, userPassword]);
 
   const allowedEmails = [
     "nnavas@stanford.edu",
@@ -450,6 +450,7 @@ const Timeline = ({ onNavigate }) => {
     "guidoh@stanford.edu",
     "tinqueija@gmail.com",
     "madibakla@gmail.com",
+    "ekin@stanford.edu",
   ];
 
   // TODO: remove this after construction
@@ -482,7 +483,7 @@ const Timeline = ({ onNavigate }) => {
           </p>
           <button
             className="btn btn-secondary btn-sm"
-            onClick={() => onNavigate && onNavigate("home")}
+            onClick={() => navigate("/home")}
           >
             Back to Home
           </button>
@@ -614,8 +615,8 @@ const Timeline = ({ onNavigate }) => {
           <div className="timeline-header-nav">
             <h1>Trip Timeline</h1>
             <button
-              className="btn btn-secondary back-button"
-              onClick={() => onNavigate && onNavigate("home")}
+              className="btn btn-secondary"
+              onClick={() => navigate("/home")}
             >
               Back to Home
             </button>

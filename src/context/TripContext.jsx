@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import { FORM_FIELDS } from "../utils/config";
 import { TripContext } from "./tripContext";
+import { useNavigate } from "react-router-dom";
+import { useNotificationContext } from "../hooks/useNotificationContext";
 
 const TripProvider = ({ children }) => {
-  // Helper functions for localStorage
+  const navigate = useNavigate();
+  const { showSuccess } = useNotificationContext();
+
   const getFromStorage = (key, defaultValue) => {
     try {
       const stored = localStorage.getItem(key);
@@ -54,9 +58,7 @@ const TripProvider = ({ children }) => {
   const [formData, setFormData] = useState(() =>
     getFromStorage("formData", getDefaultFormData())
   );
-  const [isFormSubmitted, setIsFormSubmitted] = useState(() =>
-    getFromStorage("isFormSubmitted", false)
-  );
+
   const [submissionResult, setSubmissionResult] = useState(() =>
     getFromStorage("submissionResult", null)
   );
@@ -69,10 +71,6 @@ const TripProvider = ({ children }) => {
   useEffect(() => {
     setToStorage("formData", formData);
   }, [formData]);
-
-  useEffect(() => {
-    setToStorage("isFormSubmitted", isFormSubmitted);
-  }, [isFormSubmitted]);
 
   useEffect(() => {
     setToStorage("submissionResult", submissionResult);
@@ -95,27 +93,38 @@ const TripProvider = ({ children }) => {
   const clearTripData = () => {
     setUserRSVP(null);
     setFormData(getDefaultFormData());
-    setIsFormSubmitted(false);
     setSubmissionResult(null);
 
     // Clear localStorage
     localStorage.removeItem("userRSVP");
     localStorage.removeItem("formData");
-    localStorage.removeItem("isFormSubmitted");
     localStorage.removeItem("submissionResult");
   };
 
+  const handleLogout = () => {
+    resetFormData();
+    setSubmissionResult(null);
+    setFormData(getDefaultFormData());
+    setUserRSVP(null);
+    localStorage.removeItem("userRSVP");
+    localStorage.removeItem("formData");
+    localStorage.removeItem("submissionResult");
+    showSuccess(
+      "Logged out successfully. You can now login with different credentials."
+    );
+  };
+
   const value = {
+    handleLogout,
+
     // State
     userRSVP,
     formData,
-    isFormSubmitted,
     submissionResult,
 
     // Setters
     setUserRSVP,
     setFormData,
-    setIsFormSubmitted,
     setSubmissionResult,
 
     // Helper functions

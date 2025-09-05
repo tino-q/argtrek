@@ -1,28 +1,20 @@
 // Generic Step Renderer Component
 // Renders the appropriate step component based on current step
 
+import { useNavigate } from "react-router-dom";
 import { useTripContext } from "../../hooks/useTripContext";
 import EmailLogin from "../auth/EmailLogin";
 import WelcomeSection from "../layout/WelcomeSection";
 import RSVPDisplay from "../display/RSVPDisplay";
 import AddonsStep from "../form/AddonsStep";
 import PaymentStep from "../form/PaymentStep";
-import NewEmailStep from "../form/NewEmailStep";
 import Home from "../participant/Home";
 import Payments from "../participant/Payments";
 import { getStepConfig } from "../../utils/stepConfig";
 
-const StepRenderer = ({
-  currentStep,
-  pricing,
-  onLoginSuccess,
-  onExistingSubmission,
-  onLogout,
-  onRSVPContinue,
-  onEmailNotFound,
-  onNavigate,
-}) => {
+const StepRenderer = ({ currentStep, pricing, onRSVPContinue }) => {
   const { userRSVP, formData, updateFormData } = useTripContext();
+  const navigate = useNavigate();
   const stepConfig = getStepConfig(currentStep);
 
   if (!stepConfig) {
@@ -32,17 +24,7 @@ const StepRenderer = ({
   const renderStepContent = () => {
     switch (currentStep) {
       case "login":
-        return (
-          <EmailLogin
-            onLoginSuccess={onLoginSuccess}
-            onExistingSubmission={onExistingSubmission}
-            onLogout={onLogout}
-            onEmailNotFound={onEmailNotFound}
-          />
-        );
-
-      case "new-email":
-        return <NewEmailStep updateFormData={updateFormData} />;
+        return <EmailLogin />;
 
       case "welcome":
         return <WelcomeSection userRSVP={userRSVP} />;
@@ -53,7 +35,6 @@ const StepRenderer = ({
           <RSVPDisplay
             rsvpData={userRSVP}
             onContinue={onRSVPContinue}
-            onLogout={onLogout}
             formData={formData}
             updateFormData={updateFormData}
             hideNavigation={true}
@@ -80,10 +61,10 @@ const StepRenderer = ({
         );
 
       case "home":
-        return <Home onLogout={onLogout} onNavigate={onNavigate} />;
+        return <Home />;
 
       case "payments":
-        return <Payments pricing={pricing} onNavigate={onNavigate} />;
+        return <Payments pricing={pricing} />;
 
       case "profile":
         return (
@@ -92,7 +73,7 @@ const StepRenderer = ({
             <p>Coming soon - manage your profile and trip preferences here.</p>
             <button
               className="btn btn-secondary"
-              onClick={() => onNavigate("home")}
+              onClick={() => navigate("/home")}
             >
               <i className="fas fa-arrow-left"></i>
               Back to Home
@@ -107,7 +88,7 @@ const StepRenderer = ({
             <p>Coming soon - view your complete Argentina itinerary here.</p>
             <button
               className="btn btn-secondary"
-              onClick={() => onNavigate("home")}
+              onClick={() => navigate("/home")}
             >
               <i className="fas fa-arrow-left"></i>
               Back to Home

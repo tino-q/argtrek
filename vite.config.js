@@ -8,4 +8,8 @@ export default defineConfig({
     host: true, // This allows access from any IP on your network
     port: 5173,
   },
+  define: {
+    // Define environment variables that will be available at build time
+    __DEV__: JSON.stringify(false),
+  },
 });
