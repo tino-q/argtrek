@@ -9,7 +9,7 @@
 /* global ContentService, SpreadsheetApp, Utilities, DriveApp, UrlFetchApp */
 
 const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbziRQK-OafA9kTX7uno20h16MrgHipqKnpz1Y6Evyrzjk8pTFAUz_XpBLfGYSBRR6O3/exec";
+  "https://script.google.com/macros/s/AKfycbwIhmt_w7pGravPSBa6f2T_x27Pg17XV_dUzaBN5uwAaeuxnSaZQUi7A4J4rq1eIEs/exec";
 const MG_KEY = "<REDACTED>";
 const REDSYS_USER = "<REDACTED>";
 const REDSYS_PASS = "<REDACTED>"; // Note: \u0021 is '!'
@@ -88,6 +88,11 @@ function doGet(e) {
     // Check if this is a choices request
     if (e.parameter.endpoint === "choices") {
       return getUserChoices(e.parameter.email, e.parameter.password);
+    }
+
+    // Check if this is a voucher download request
+    if (e.parameter.endpoint === "download_voucher") {
+      return downloadVoucher(e.parameter.email, e.parameter.password);
     }
 
     const email = e.parameter.email;
@@ -2575,5 +2580,67 @@ function getNextCounterForItem(sheet, email, itemKey) {
   } catch (error) {
     console.error("Error getting next counter:", error);
     return 1; // Fallback to 1 if there's an error
+  }
+}
+
+/**
+ * Download voucher PDF for a user based on their row ID
+ */
+function downloadVoucher(email, password) {
+  try {
+    // Validate credentials first
+    const validation = validateCredentials(email, password);
+    if (!validation.success) {
+      return validation.response;
+    }
+
+    // Get existing submission to find row number
+    const existingSubmission = getExistingSubmission(email.trim());
+    if (!existingSubmission || !existingSubmission.rowNumber) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: "No registration found for this user",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const rowId = existingSubmission.rowNumber;
+    const fileName = `pdf-${rowId}.pdf`;
+    const driveFolder = DriveApp.getFolderById(
+      "1QuSXGvECgYCM2HeVwGDzEJkcRkACda4X"
+    );
+
+    // Find the PDF file
+    const files = driveFolder.getFilesByName(fileName);
+    if (!files.hasNext()) {
+      return ContentService.createTextOutput(
+        JSON.stringify({
+          success: false,
+          error: "Voucher PDF not found",
+        })
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const file = files.next();
+    const blob = file.getBlob();
+
+    // Return the PDF as base64 for download
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: true,
+        fileName: fileName,
+        fileData: Utilities.base64Encode(blob.getBytes()),
+        mimeType: "application/pdf",
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    console.error("Error downloading voucher:", error);
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: "Failed to download voucher: " + error.message,
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
   }
 }

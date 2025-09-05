@@ -1,9 +1,11 @@
 // Payment Details Display Component
 // Shows payment information after successful trip registration
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import useAuth from "../../hooks/useAuth";
+import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { copyToClipboard } from "../../utils/clipboard";
 import {
   FORM_FIELDS,
@@ -11,6 +13,7 @@ import {
   BANK_DETAILS,
   CRYPTO_WALLETS,
   NETWORK_INFO,
+  APPS_SCRIPT_URL,
 } from "../../utils/config";
 import { getTravelerName, getUSDToEURExchangeRate } from "../../utils/rsvpData";
 import CreditCardWarning from "../common/CreditCardWarning";
@@ -25,8 +28,11 @@ const PaymentDetailsDisplay = ({
   pricing,
   submissionResult,
 }) => {
+  const { email, password } = useAuth();
+  const { showError } = useNotificationContext();
   const navigate = useNavigate();
   const travelerName = getTravelerName(rsvpData, formData);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleCopyClick = useCallback(async (value, event) => {
     const button = event.currentTarget;
@@ -41,9 +47,99 @@ const PaymentDetailsDisplay = ({
     }
   }, []);
 
-  const downloadPDF = useCallback(() => {
-    console.log("Download PDF button clicked - PDF generation removed");
-  }, []);
+  const downloadPDF = useCallback(async () => {
+    if (isDownloading) return;
+    
+    try {
+      setIsDownloading(true);
+      
+      if (!email || !password) {
+        console.error("Missing email or password for voucher download");
+        showError("Missing authentication credentials");
+        return;
+      }
+
+      // Generate cache key based on user email
+      const cacheKey = `voucher_${email.toLowerCase()}`;
+      
+      // Try to get cached file first
+      let cachedFileData = null;
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          cachedFileData = JSON.parse(cached);
+          console.log("Using cached voucher file");
+        }
+      } catch (cacheError) {
+        console.warn("Failed to read cached voucher:", cacheError);
+        // Clear invalid cache entry
+        localStorage.removeItem(cacheKey);
+      }
+
+      let result = cachedFileData;
+
+      // If no cache, fetch from server
+      if (!result) {
+        const response = await fetch(
+          `${APPS_SCRIPT_URL}?endpoint=download_voucher&email=${encodeURIComponent(
+            email
+          )}&password=${encodeURIComponent(password)}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        result = await response.json();
+
+        if (!result.success) {
+          console.error("Voucher download failed:", result.error);
+          showError(result.error);
+          return;
+        }
+
+        // Cache the successful result
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({
+            success: result.success,
+            fileName: result.fileName,
+            fileData: result.fileData,
+            mimeType: result.mimeType,
+            cachedAt: Date.now()
+          }));
+          console.log("Voucher cached successfully");
+        } catch (cacheError) {
+          console.warn("Failed to cache voucher:", cacheError);
+          // Continue with download even if caching fails
+        }
+      }
+
+      // Convert base64 to blob and trigger download
+      const binaryString = atob(result.fileData);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      const blob = new Blob([bytes], { type: result.mimeType });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = result.fileName;
+      document.body.appendChild(a);
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Error downloading voucher:", error);
+      showError("Failed to download voucher. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [email, password, showError, isDownloading]);
 
   const handleTermsClick = useCallback(() => {
     navigate("/terms");
@@ -306,8 +402,16 @@ const PaymentDetailsDisplay = ({
               className="payment-download-btn"
               onClick={downloadPDF}
               type="button"
+              disabled={isDownloading}
             >
-              📄 Download voucher
+              {isDownloading ? (
+                <>
+                  <i className="fas fa-spinner fa-spin" style={{ marginRight: '8px' }} />
+                  Downloading...
+                </>
+              ) : (
+                '📄 Download voucher'
+              )}
             </button>
             <button
               className="payment-terms-btn"
@@ -317,10 +421,6 @@ const PaymentDetailsDisplay = ({
               📋 Terms & Conditions
             </button>
           </div>
-          <p className="print-note">
-            Generate and print your comprehensive trip registration summary with
-            all confirmed flights, hotels, and payment details.
-          </p>
         </div>
 
         {/* Bank Transfer Proof of Payment Upload */}
