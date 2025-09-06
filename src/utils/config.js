@@ -3,7 +3,7 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwIhmt_w7pGravPSBa6f2T_x27Pg17XV_dUzaBN5uwAaeuxnSaZQUi7A4J4rq1eIEs/exec";
+  "https://script.google.com/macros/s/AKfycbwRGzNdNGe4F7BSHnyqVV9Ee3N6QUrUPu-NovwzT8Bc8PONYGcKGbEiY34AqZJhbhW0/exec";
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {
@@ -22,6 +22,17 @@ export const PRICES = {
   installmentRate: 0.35,
   activityValleDeUco: 50,
 };
+
+export const ADMIN_EMAILS = [
+  "nnavas@stanford.edu",
+  "jeronimo.llacay@gmail.com",
+  "talves@stanford.edu",
+  "ftosi@stanford.edu",
+  "verdaromjulieta@gmail.com",
+  "guidoh@stanford.edu",
+  "tinqueija@gmail.com",
+  "madibakla@gmail.com",
+];
 
 // Luggage Configuration
 export const LUGGAGE = {

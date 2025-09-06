@@ -138,7 +138,6 @@ const EmailLogin = () => {
     if (!hasLoggedOut.current && isNavigatingToLogin) {
       hasLoggedOut.current = true;
       handleLogout();
-      clearAuth(); // Clear auth credentials
     }
 
     // Update previous location

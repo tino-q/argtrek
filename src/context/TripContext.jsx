@@ -65,7 +65,9 @@ const TripProvider = ({ children }) => {
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    setToStorage("userRSVP", userRSVP);
+    if (userRSVP) {
+      setToStorage("userRSVP", userRSVP);
+    }
   }, [userRSVP]);
 
   useEffect(() => {
@@ -73,7 +75,9 @@ const TripProvider = ({ children }) => {
   }, [formData]);
 
   useEffect(() => {
-    setToStorage("submissionResult", submissionResult);
+    if (submissionResult) {
+      setToStorage("submissionResult", submissionResult);
+    }
   }, [submissionResult]);
 
   // Form data management

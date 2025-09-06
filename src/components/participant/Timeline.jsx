@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 import AuthContext from "../../context/AuthContext.jsx";
 import { useTripContext } from "../../hooks/useTripContext";
-import { APPS_SCRIPT_URL, PRICES } from "../../utils/config.js";
+import { APPS_SCRIPT_URL, PRICES, ADMIN_EMAILS } from "../../utils/config.js";
 
 import "./Timeline.css";
 
@@ -216,6 +216,7 @@ const TimelineRow = ({
   formData,
   activityChoices,
   savingChoices,
+  isIncluded = true,
 }) => {
   const timeDisplay = start && end ? `${start} - ${end}` : start || end || "";
 
@@ -341,7 +342,7 @@ const TimelineRow = ({
     <div className="timeline-row-wrapper">
       {hasChoices && <div className="optional-activity-label">Paid Add-On</div>}
       <div
-        className={`timeline-item-row-mobile ${hasRecommendations ? "clickable" : ""} ${hasChoices ? "has-choices" : ""}`}
+        className={`timeline-item-row-mobile ${hasRecommendations ? "clickable" : ""} ${hasChoices ? "has-choices" : ""} ${!isIncluded ? "not-included" : ""}`}
         onClick={handleClick}
       >
         <div className="timeline-mobile-content">
@@ -365,14 +366,34 @@ const Timeline = () => {
   const [selectedRecommendation, setSelectedRecommendation] = useState(null);
   const [activityChoices, setActivityChoices] = useState({});
   const [savingChoices, setSavingChoices] = useState(new Set());
+  const [showAllItems, setShowAllItems] = useState(false);
   const { email: userEmail, password: userPassword } = useContext(AuthContext);
   const { formData, submissionResult } = useTripContext();
 
+  const isAdmin = ADMIN_EMAILS.includes(userEmail);
+
   const personalTimelineData = useMemo(() => {
-    return timelineData && submissionResult
+    if (!timelineData) {
+      return null;
+    }
+
+    if (showAllItems && isAdmin) {
+      // Return all items with inclusion status for styling
+      return timelineData.map((item) => {
+        const isIncluded = submissionResult
+          ? filterTimelineData([item], submissionResult).length > 0
+          : false;
+        return {
+          ...item,
+          isIncluded,
+        };
+      });
+    }
+
+    return submissionResult
       ? filterTimelineData(timelineData, submissionResult)
       : null;
-  }, [timelineData, submissionResult]);
+  }, [timelineData, submissionResult, showAllItems, isAdmin]);
 
   const handleRecommendationClick = useCallback((recommendations) => {
     setSelectedRecommendation(recommendations);
@@ -408,6 +429,10 @@ const Timeline = () => {
     },
     [toggleDay]
   );
+
+  const handleShowAllItemsChange = useCallback((e) => {
+    setShowAllItems(e.target.checked);
+  }, []);
 
   const handleChoiceSelection = async (itemKey, choice) => {
     if (!userEmail || !userPassword) {
@@ -468,95 +493,50 @@ const Timeline = () => {
   useEffect(() => {
     const fetchTimelineData = async () => {
       try {
-        let data;
-
-        if (__DEV__) {
-          // get queryparamt refresh
-          const refresh = new URLSearchParams(window.location.search).get(
-            "refresh"
-          );
-          if (refresh === "1") {
-            // clear local storage
-            localStorage.removeItem("timelineDataDev");
-          }
-          // get from local storage
-
-          const timelineDataStr = localStorage.getItem("timelineDataDev");
-          let timelineData = timelineDataStr
-            ? JSON.parse(timelineDataStr)
-            : null;
-          if (!timelineData) {
-            const response = await fetch(
-              `${APPS_SCRIPT_URL}?endpoint=timeline`
-            );
-            const { success, data: timelineDataNew } = await response.json();
-            if (success) {
-              // write to local storage
-              localStorage.setItem(
-                "timelineDataDev",
-                JSON.stringify(timelineDataNew)
-              );
-              timelineData = timelineDataNew;
-            }
-          }
-
-          data = {
-            success: true,
-            data: timelineData,
-          };
-        } else {
-          // Check for refresh parameter to clear cache
-          const refresh = new URLSearchParams(window.location.search).get(
-            "refresh"
-          );
-          if (refresh === "1") {
-            localStorage.removeItem("timelineData");
-            localStorage.removeItem("timelineDataTimestamp");
-          }
-
-          // Check if we have cached data and if it's still valid (1 hour)
-          const timelineDataStr = localStorage.getItem("timelineData");
-          const timestampStr = localStorage.getItem("timelineDataTimestamp");
-          const now = Date.now();
-          const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
-
-          let timelineData = null;
-          if (timelineDataStr && timestampStr) {
-            const timestamp = parseInt(timestampStr);
-            if (now - timestamp < oneHour) {
-              // Cache is still valid
-              timelineData = JSON.parse(timelineDataStr);
-            }
-          }
-
-          if (!timelineData) {
-            // Fetch fresh data
-            const response = await fetch(
-              `${APPS_SCRIPT_URL}?endpoint=timeline`
-            );
-            const { success, data: timelineDataNew } = await response.json();
-            if (success) {
-              // Cache the data with timestamp
-              localStorage.setItem(
-                "timelineData",
-                JSON.stringify(timelineDataNew)
-              );
-              localStorage.setItem("timelineDataTimestamp", now.toString());
-              timelineData = timelineDataNew;
-            }
-          }
-
-          data = {
-            success: true,
-            data: timelineData,
-          };
+        // Check for refresh parameter to clear cache
+        const refresh = new URLSearchParams(window.location.search).get(
+          "refresh"
+        );
+        if (refresh === "1") {
+          localStorage.removeItem("timelineData");
+          localStorage.removeItem("timelineDataTimestamp");
         }
 
-        if (data.success) {
-          setTimelineData(data.data);
+        // Check if we have cached data and if it's still valid (1 hour)
+        const timelineDataStr = localStorage.getItem("timelineData");
+        const timestampStr = localStorage.getItem("timelineDataTimestamp");
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+
+        let timelineData = null;
+        if (timelineDataStr && timestampStr) {
+          const timestamp = parseInt(timestampStr);
+          if (now - timestamp < oneHour) {
+            // Cache is still valid
+            timelineData = JSON.parse(timelineDataStr);
+          }
+        }
+
+        if (!timelineData) {
+          // Fetch fresh data
+          const response = await fetch(`${APPS_SCRIPT_URL}?endpoint=timeline`);
+          const { success, data: timelineDataNew } = await response.json();
+          if (success) {
+            // Cache the data with timestamp
+            localStorage.setItem(
+              "timelineData",
+              JSON.stringify(timelineDataNew)
+            );
+            localStorage.setItem("timelineDataTimestamp", now.toString());
+            timelineData = timelineDataNew;
+          }
+        }
+
+        if (timelineData) {
+          setTimelineData(timelineData);
           // Initialize all days as collapsed
           const dayKeys = new Set();
-          data.data.forEach((item) => {
+          timelineData.forEach((item) => {
             const dayKey = item["DAY OF MONTH"];
             if (dayKey !== "22") {
               dayKeys.add(dayKey);
@@ -564,7 +544,7 @@ const Timeline = () => {
           });
           setCollapsedDays(dayKeys);
         } else {
-          setError(data.error || "Failed to load timeline data");
+          setError("Failed to load timeline data");
         }
       } catch (err) {
         setError("Error fetching timeline data");
@@ -609,19 +589,8 @@ const Timeline = () => {
     fetchUserChoices();
   }, [userEmail, userPassword]);
 
-  const allowedEmails = [
-    "nnavas@stanford.edu",
-    "jeronimo.llacay@gmail.com",
-    "talves@stanford.edu",
-    "ftosi@stanford.edu",
-    "verdaromjulieta@gmail.com",
-    "guidoh@stanford.edu",
-    "tinqueija@gmail.com",
-    "madibakla@gmail.com",
-  ];
-
   // TODO: remove this after construction
-  if (!allowedEmails.includes(userEmail)) {
+  if (!ADMIN_EMAILS.includes(userEmail)) {
     return (
       <div className="container">
         <div
@@ -726,6 +695,7 @@ const Timeline = () => {
         formData={formData}
         activityChoices={activityChoices}
         savingChoices={savingChoices}
+        isIncluded={item.isIncluded}
       />
     );
   };
@@ -768,6 +738,18 @@ const Timeline = () => {
         <div className="timeline-header">
           <div className="timeline-header-nav">
             <h1>Trip Timeline</h1>
+            {isAdmin && (
+              <div className="admin-controls">
+                <label className="admin-toggle">
+                  <input
+                    type="checkbox"
+                    checked={showAllItems}
+                    onChange={handleShowAllItemsChange}
+                  />
+                  Show All Items
+                </label>
+              </div>
+            )}
             <button className="btn btn-secondary" onClick={navigateToHome}>
               Back to Home
             </button>

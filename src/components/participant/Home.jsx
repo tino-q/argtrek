@@ -15,6 +15,11 @@ const Home = () => {
     navigate("/login");
     clearTripData();
     clearAuth(); // Clear auth credentials
+    localStorage.removeItem("timelineData");
+    localStorage.removeItem("userRSVP");
+    localStorage.removeItem("formData");
+    localStorage.removeItem("submissionResult");
+    localStorage.removeItem("timelineDataTimestamp");
     showSuccess(
       "Logged out successfully. You can now login with different credentials."
     );

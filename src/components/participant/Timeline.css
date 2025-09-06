@@ -23,6 +23,28 @@
   gap: 1rem;
 }
 
+.admin-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.admin-toggle input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+
 .timeline-header h1 {
   font-size: 2rem;
   font-weight: 600;
@@ -284,6 +306,21 @@
 .timeline-item-row-mobile.has-choices:hover {
   box-shadow: 0 4px 16px rgba(0, 123, 255, 0.15);
   border-color: var(--primary, #007bff);
+}
+
+.timeline-item-row-mobile.not-included {
+  opacity: 0.4;
+  background: rgba(108, 117, 125, 0.1);
+  border-radius: 6px;
+  position: relative;
+}
+
+.timeline-item-row-mobile.not-included .timeline-time {
+  color: var(--text-secondary, #6c757d);
+}
+
+.timeline-item-row-mobile.not-included .parameter-text {
+  color: var(--text-secondary, #6c757d);
 }
 
 .parameter-main {

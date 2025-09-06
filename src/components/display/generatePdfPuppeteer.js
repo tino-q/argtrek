@@ -1,6 +1,4 @@
-// import puppeteer from "puppeteer"; // unused
 import { PRICES } from "../../utils/config.js";
-import { getTripItinerary } from "../../utils/rsvpData.js";
 
 const pageTemplate = (content, voucherId) => `
 <!DOCTYPE html>
@@ -206,32 +204,60 @@ function generateFirstPageHTML(
   voucherId,
   roommateName
 ) {
-  // Extract hotel information from rsvpData
-  const tripItinerary = getTripItinerary(rsvpData);
-  const accommodations = tripItinerary?.accommodations || [];
+  const buenosAiresArrivalHotel =
+    rsvpData["22Nov_BSAS"] || rsvpData["23Nov_BSAS"];
+
+  console.log({ buenosAiresArrivalHotel });
+  const bariHotel =
+    rsvpData["24Nov_BARI"] || rsvpData["25Nov_BARI"] || rsvpData["26Nov_BARI"];
+  const mendozaHotel = rsvpData["27Nov_MDZ"] || rsvpData["28Nov_MDZ"];
+  const bsasDepartureHotel = rsvpData["29Nov_BSAS"];
+  const welcomeDinner = rsvpData["23Nov_Dinner_Welcome"];
 
   // Generate hotel HTML if accommodations exist
-  const hotelSection =
-    accommodations.length > 0
-      ? `
+  const hotelSection = `
   <div class="section">
     <div class="section-title">Accommodations</div>
     <div class="activities">
-      ${accommodations
+      ${[
+        {
+          hotelName: "Hotel in Buenos Aires",
+          nights: ["Check in 22 Nov - Check out 24 Nov"],
+          enable: buenosAiresArrivalHotel,
+        },
+        {
+          hotelName: "Hotel in Bariloche",
+          nights: ["Check in 24 Nov - Check out 27 Nov"],
+          enable: bariHotel,
+        },
+        {
+          hotelName: "Hotel in Mendoza",
+          nights: ["Check in 27 Nov - Check out 29 Nov"],
+          enable: mendozaHotel,
+        },
+        {
+          hotelName: "Hotel in Buenos Aires",
+          nights: ["Check in 29 Nov - Check out 30 Nov"],
+          enable: bsasDepartureHotel,
+        },
+      ]
         .map(
           (hotel) => `
-        <div class="activity">
+        ${
+          hotel.enable
+            ? `<div class="activity">
           <div class="activity-name">${hotel.hotelName}</div>
           <div class="activity-price">${hotel.nights[0].split(" - ")[0]}</div>
           <div class="activity-price">${hotel.nights[0].split(" - ")[1]}</div>
-        </div>
+        </div>`
+            : ""
+        }
       `
         )
         .join("")}
     </div>
   </div>
-  `
-      : "";
+  `;
 
   const content = `<div class="content">
   <div class="section">
@@ -261,26 +287,36 @@ function generateFirstPageHTML(
   <div class="section">
     <div class="section-title">Group Activities (full confirmed agenda COMING SOON)</div>
     <div class="activities">
-      <div class="activity">
+      ${
+        welcomeDinner
+          ? `<div class="activity">
         <div class="activity-name">Buenos Aires</div>
         <div class="activity-price">Day outing</div>
         <div class="activity-price">Welcome Dinner</div>
-      </div>
-      <div class="activity">
-        <div class="activity-name">Bariloche</div>
-        <div class="activity-price">Welcome & Closing Dinner</div>
-        <div class="activity-price">Day outing days 2 & 3</div>
-      </div>
-      <div class="activity">
+      </div>`
+          : ""
+      }
+      ${
+        bariHotel
+          ? `<div class="activity">
+            <div class="activity-name">Bariloche</div>
+            <div class="activity-price">Welcome & Closing Dinner</div>
+            <div class="activity-price">Day outing days 2 & 3</div>
+          </div>`
+          : ""
+      }
+      ${
+        mendozaHotel
+          ? `<div class="activity">
         <div class="activity-name">Mendoza</div>
         <div class="activity-price">Day Outing</div>
         <div class="activity-price">Welcome & Closing Dinner</div>
-      </div>
+      </div>`
+          : ""
+      }
 
       ${
-        accommodations.find(
-          (accomodation) => accomodation.period === "departure"
-        )
+        bsasDepartureHotel
           ? `
       <div class="activity">
         <div class="activity-name">Buenos Aires</div>

@@ -9,7 +9,7 @@
 /* global ContentService, SpreadsheetApp, Utilities, DriveApp, UrlFetchApp */
 
 const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwIhmt_w7pGravPSBa6f2T_x27Pg17XV_dUzaBN5uwAaeuxnSaZQUi7A4J4rq1eIEs/exec";
+  "https://script.google.com/macros/s/AKfycbwRGzNdNGe4F7BSHnyqVV9Ee3N6QUrUPu-NovwzT8Bc8PONYGcKGbEiY34AqZJhbhW0/exec";
 const MG_KEY = "<REDACTED>";
 const REDSYS_USER = "<REDACTED>";
 const REDSYS_PASS = "<REDACTED>"; // Note: \u0021 is '!'
@@ -21,9 +21,7 @@ const USE_GMAIL = false; // Set to false to use Mailgun
 const TRIP_REGISTRATIONS_SHEET_NAME = "Trip Registrations";
 const RSVP_SHEET_NAME = "RSVP"; // Sheet containing RSVP data
 const TPV_PAYMENTS_SHEET_NAME = "TPV PAYMENTS"; // Sheet for REDSYS TPV payment callbacks
-const NEW_EMAILS_SHEET_NAME = "NEW EMAILS"; // Sheet for new email requests
-const WELCOME_EMAILS_SHEET_NAME = "WELCOME EMAILS"; // Sheet for tracking welcome emails sent
-const WHATSAPP_EMAILS_SHEET_NAME = "WHATSAPP EMAILS"; // Sheet for tracking WhatsApp invite emails sent
+const AUTO_EMAILS_SHEET_NAME = "AUTO_EMAILS"; // Unified sheet for tracking all automated emails with type column
 const PAYMENTLINKSDB_SHEET_NAME = "PAYMENTLINKSDB";
 const TIMELINE_SHEET_NAME = "TIMELINE"; // Sheet containing timeline data
 const CHOICES_SHEET_NAME = "CHOICES"; // Sheet for tracking user activity choices
@@ -195,16 +193,6 @@ function doPost(e) {
     // Check if this is a REDSYS TPV callback
     if (data.Ds_MerchantParameters) {
       return handleRedsysCallback(data);
-    }
-
-    // Check if this is a new email request
-    if (data.action === "new_email") {
-      return handleNewEmailRequest(data);
-    }
-
-    // Check if this is a PDF upload request
-    if (data.action === "upload_pdf") {
-      return handlePdfUpload(e);
     }
 
     // Continue with existing form submission logic
@@ -770,192 +758,10 @@ function saveToSheet(data) {
 }
 
 /**
- * Handle new email request submissions
- */
-function handleNewEmailRequest(data) {
-  try {
-    console.log("Processing new email request:", data);
-
-    // Validate required fields
-    if (!data.email || !data.name) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: "Email and name are required",
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // Check if email already exists in RSVP data
-    if (_getRsvpDataForEmail(data.email)) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error:
-            "This email is already registered. Please try logging in instead.",
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // Check if email already requested in NEW EMAILS sheet
-    const alreadyRequested = checkEmailInNewEmails(data.email);
-    if (alreadyRequested) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: "Account creation already requested for this email",
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // Save to NEW EMAILS sheet
-    const result = saveToNewEmailsSheet(data);
-
-    if (result.success) {
-      // Send notification email to admin
-      try {
-        sendNewAccountNotificationEmail(data.email, data.name);
-      } catch (notificationError) {
-        console.error("Failed to send notification email:", notificationError);
-        // Don't fail the request if notification email fails
-      }
-
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: true,
-          message: "Account creation request submitted successfully",
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    } else {
-      throw new Error(result.error || "Failed to save new email request");
-    }
-  } catch (error) {
-    console.error("Error processing new email request:", error);
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: "Internal server error: " + error.message,
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * Check if email already requested in NEW EMAILS sheet
- */
-function checkEmailInNewEmails(email) {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = spreadsheet.getSheetByName(NEW_EMAILS_SHEET_NAME);
-
-    if (!sheet) {
-      return false;
-    }
-
-    const dataRange = sheet.getDataRange();
-    const values = dataRange.getValues();
-
-    if (values.length < 2) {
-      return false;
-    }
-
-    const headers = values[0];
-    const emailColumnIndex = headers.indexOf("email");
-
-    if (emailColumnIndex === -1) {
-      return false;
-    }
-
-    // Search for the email in the data rows
-    for (let i = 1; i < values.length; i++) {
-      const row = values[i];
-      const rowEmail = row[emailColumnIndex];
-
-      if (
-        rowEmail &&
-        rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
-      ) {
-        return true;
-      }
-    }
-
-    return false;
-  } catch (error) {
-    console.error("Error checking email in NEW EMAILS:", error);
-    return false;
-  }
-}
-
-/**
- * Save new email request to NEW EMAILS sheet
- */
-function saveToNewEmailsSheet(data) {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = spreadsheet.getSheetByName(NEW_EMAILS_SHEET_NAME);
-
-    // Create NEW EMAILS sheet if it doesn't exist
-    if (!sheet) {
-      sheet = spreadsheet.insertSheet(NEW_EMAILS_SHEET_NAME);
-      // Add headers
-      const headers = ["timestamp", "email", "name", "status"];
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    }
-
-    // Prepare data row
-    const timestamp = new Date().toISOString();
-    const rowData = [timestamp, data.email, data.name, "pending"];
-
-    // Append the new row
-    sheet.appendRow(rowData);
-
-    // Get the row number of the newly added row
-    const lastRow = sheet.getLastRow();
-
-    console.log("New email request saved successfully to row:", lastRow);
-
-    return {
-      success: true,
-      rowNumber: lastRow,
-    };
-  } catch (error) {
-    console.error("Error saving to NEW EMAILS sheet:", error);
-    return {
-      success: false,
-      error: "Failed to save new email request",
-    };
-  }
-}
-
-/**
  * Helper to load all emails that have already received a welcome email
  */
 function getAllWelcomeEmailsSent() {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = spreadsheet.getSheetByName(WELCOME_EMAILS_SHEET_NAME);
-    if (!sheet) {
-      return new Set();
-    }
-    const dataRange = sheet.getDataRange();
-    const values = dataRange.getValues();
-    if (values.length === 0) {
-      return new Set();
-    }
-    // No headers - email is in column 2 (index 1)
-    const emailSet = new Set();
-    for (let i = 0; i < values.length; i++) {
-      const row = values[i];
-      const rowEmail = row[1]; // Column 2 (email)
-      if (rowEmail) {
-        emailSet.add(rowEmail.toString().toLowerCase().trim());
-      }
-    }
-    return emailSet;
-  } catch (error) {
-    console.error("Error loading all welcome emails sent:", error);
-    return new Set();
-  }
+  return getAllSentEmails(AUTO_EMAILS_SHEET_NAME, "welcome");
 }
 
 /**
@@ -1087,11 +893,11 @@ function sendPasswordEmailsToAllRSVPs() {
 function recordWelcomeEmailSent(email, name, status, htmlBody) {
   try {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = spreadsheet.getSheetByName(WELCOME_EMAILS_SHEET_NAME);
+    let sheet = spreadsheet.getSheetByName(AUTO_EMAILS_SHEET_NAME);
 
     // Create WELCOME EMAILS sheet if it doesn't exist
     if (!sheet) {
-      sheet = spreadsheet.insertSheet(WELCOME_EMAILS_SHEET_NAME);
+      sheet = spreadsheet.insertSheet(AUTO_EMAILS_SHEET_NAME);
       console.log("Created WELCOME EMAILS sheet");
       // Add headers including htmlBody
       const headers = ["timestamp", "email", "name", "status", "htmlBody"];
@@ -1236,9 +1042,17 @@ function sendPasswordEmail(email, password, name) {
       emailSent = false;
     }
 
-    // Record the email sending attempt, always save the HTML
+    // Record the email sending attempt (for direct calls, batch calls handled in sendBatchEmails)
     const status = emailSent ? "sent" : "failed";
-    recordWelcomeEmailSent(email, name, status, htmlBody);
+    const resultMessage = emailSent ? "" : errorMessage || "Unknown error";
+    recordEmailSent(
+      AUTO_EMAILS_SHEET_NAME,
+      email,
+      name,
+      status,
+      "welcome",
+      resultMessage
+    );
 
     return {
       success: emailSent,
@@ -1250,218 +1064,20 @@ function sendPasswordEmail(email, password, name) {
   } catch (error) {
     console.error(`Error sending email to ${email}:`, error);
 
-    // Record the failed attempt, save HTML if possible
-    recordWelcomeEmailSent(email, name, "failed", "");
+    // Record the failed attempt (for direct calls, batch calls handled in sendBatchEmails)
+    recordEmailSent(
+      AUTO_EMAILS_SHEET_NAME,
+      email,
+      name,
+      "failed",
+      "welcome",
+      error.message
+    );
 
     return {
       success: false,
       error: error.message,
     };
-  }
-}
-
-/**
- * Handle PDF upload requests
- */
-function handlePdfUpload(e) {
-  try {
-    const data = e.parameter;
-
-    // YOU MUST PASTE YOUR DRIVE FOLDER ID HERE
-    const DRIVE_FOLDER_ID = "12Tlr-aeKBSSJuzf8GxepYbePC5vY_HCh";
-
-    if (!data.pdfData) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: "PDF data is required",
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    if (!data.filename) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: "Filename is required",
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    if (!data.clientEmail) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: "Client email is required",
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // Decode the base64 PDF data
-    const pdfBlob = Utilities.base64Decode(data.pdfData);
-    const blob = Utilities.newBlob(pdfBlob, "application/pdf", data.filename);
-
-    // Check if file already exists in Google Drive
-    const folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-    const existingFiles = folder.getFilesByName(data.filename);
-
-    // If file exists, do nothing
-    if (existingFiles.hasNext()) {
-      const existingFile = existingFiles.next();
-      console.log(
-        `File already exists: ${data.filename} (ID: ${existingFile.getId()})`
-      );
-
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: true,
-          message: "File already exists, no action taken",
-          fileId: existingFile.getId(),
-          filename: data.filename,
-          driveUrl: existingFile.getUrl(),
-          emailSent: false,
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // File doesn't exist, create new file
-    const file = folder.createFile(blob);
-
-    console.log(`PDF uploaded successfully: ${data.filename}`);
-    console.log(`File ID: ${file.getId()}`);
-
-    // Send email with PDF attachment (only for new files)
-    try {
-      sendPdfEmail(data.clientEmail, data.filename, blob, data.travelerName);
-      console.log(`Email sent to ${data.clientEmail} with PDF attachment`);
-    } catch (emailError) {
-      console.error(`Failed to send email to ${data.clientEmail}:`, emailError);
-      // Don't fail the upload if email fails
-    }
-
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: true,
-        message: "PDF uploaded successfully",
-        fileId: file.getId(),
-        filename: data.filename,
-        driveUrl: file.getUrl(),
-        emailSent: true,
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    console.error("Error uploading PDF:", error);
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: "Failed to upload PDF: " + error.message,
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * Send notification email to admin when someone requests a new account
- */
-function sendNewAccountNotificationEmail(email, name) {
-  try {
-    const subject = "New Account Request - Argentina Trip";
-    const adminEmail = "sonsolesstays+argtrip@gmail.com";
-
-    const htmlBody = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2c3e50;">🆕 New Account Request</h2>
-        
-        <p>Someone has requested a new account for the Argentina Trip registration system.</p>
-        
-        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #495057;">Request Details:</h3>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
-        </div>
-        
-        <p>To process this request, you'll need to:</p>
-        <ul>
-          <li>✅ Add their details to the RSVP sheet</li>
-          <li>🔐 Generate a password for them</li>
-          <li>📧 Send them a welcome email with their credentials</li>
-        </ul>
-        
-        <p>The request has been automatically logged in the "NEW EMAILS" sheet for your reference.</p>
-        
-        <p style="margin-top: 30px; color: #6c757d; font-style: italic;">
-          This is an automated notification from the Argentina Trip registration system.
-        </p>
-      </div>
-    `;
-
-    // Send notification email to admin
-    sendEmail(adminEmail, subject, htmlBody);
-
-    console.log(`New account notification email sent to ${adminEmail}`);
-    return true;
-  } catch (error) {
-    console.error(`Error sending new account notification email:`, error);
-    // Don't fail the request if notification email fails
-    return false;
-  }
-}
-
-/**
- * Send email with PDF attachment to client
- */
-function sendPdfEmail(clientEmail, filename, pdfBlob, travelerName) {
-  try {
-    const subject = "Your Argentina Trip Registration Voucher";
-    const travelerDisplayName = travelerName || "Traveler";
-
-    const htmlBody = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #2c3e50;">¡Hola ${travelerDisplayName}!</h2>
-        
-        <p>Your Argentina Trip registration voucher is ready! 🇦🇷✈️</p>
-        
-        <p>Please find attached your comprehensive trip registration summary (<strong>${filename}</strong>) containing:</p>
-        <ul>
-          <li>✅ Your confirmed flight details</li>
-          <li>🏨 Hotel accommodations</li>
-          <li>💰 Pricing breakdown</li>
-          <li>💳 Payment information</li>
-          <li>📋 Terms and conditions</li>
-        </ul>
-        
-        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #495057;">Important:</h3>
-          <p>Please save this voucher for your records. You may need it for travel documentation.</p>
-        </div>
-        
-        <p>If you have any questions about your registration or need to make changes, please contact Maddie:</p>
-        <ul>
-          <li>📧 Email: sonsolesstays+argtrip@gmail.com</li>
-          <li>📱 WhatsApp: <a href="https://wa.me/5491169729783">+54 911 6972 9783</a></li>
-          <li>↩️ Or simply reply to this email</li>
-        </ul>
-        
-        <p style="margin-top: 30px;">¡Nos vemos en Argentina!</p>
-        <p style="color: #6c757d; font-style: italic;">Sonsoles Stays</p>
-        
-        <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
-        <p style="font-size: 12px; color: #6c757d;">
-          This is an automated email. Please do not reply to this message.
-        </p>
-      </div>
-    `;
-
-    const bcc = "sonsolesstays+argtrip@gmail.com";
-    // Send email with PDF attachment
-    sendEmail(clientEmail, subject, htmlBody, [pdfBlob], bcc);
-
-    console.log(`PDF email sent successfully to ${clientEmail}`);
-    return true;
-  } catch (error) {
-    console.error(`Error sending PDF email to ${clientEmail}:`, error);
-    throw error;
   }
 }
 
@@ -1878,91 +1494,18 @@ function createPaymentLink(order, authToken) {
  */
 // eslint-disable-next-line no-unused-vars
 function sendWhatsAppInviteEmails() {
-  try {
-    console.log("Starting to send WhatsApp invite emails...");
+  const whatsappLink = "https://chat.whatsapp.com/IYh0cLoxU4V12Njmp8CcnE";
 
-    const whatsappLink = "https://chat.whatsapp.com/IYh0cLoxU4V12Njmp8CcnE"; // You'll fill this in later
+  // Wrapper function that passes the WhatsApp link to the individual sender
+  const whatsappEmailSender = (email, name) => {
+    return sendWhatsAppInviteEmail(email, name, whatsappLink);
+  };
 
-    // Get all emails from Trip Registrations sheet
-    const emails = getAllRegisteredEmails();
-
-    if (emails.length === 0) {
-      console.log("No registered emails found");
-      return {
-        success: false,
-        message: "No registered emails found in Trip Registrations sheet",
-      };
-    }
-
-    let emailsSent = 0;
-    let emailsSkipped = 0;
-    let errors = 0;
-
-    // Load all sent WhatsApp emails into memory
-    const sentWhatsAppEmails = getAllWhatsAppEmailsSent();
-
-    // Process each email
-    for (const emailData of emails) {
-      const email = emailData.email;
-      const name = emailData.name;
-
-      try {
-        // Check if WhatsApp invite email was already sent
-        const alreadySent = sentWhatsAppEmails.has(
-          email.toString().toLowerCase().trim()
-        );
-
-        if (alreadySent) {
-          emailsSkipped++;
-          console.log(`⏭️  WhatsApp invite already sent to: ${email}`);
-          continue;
-        }
-
-        const result = sendWhatsAppInviteEmail(
-          email.toString().trim(),
-          name.toString().trim(),
-          whatsappLink
-        );
-
-        if (result.success) {
-          emailsSent++;
-          console.log(`✓ WhatsApp invite sent to: ${email}`);
-        } else {
-          errors++;
-          console.error(
-            `✗ Failed to send WhatsApp invite to: ${email} - ${result.error}`
-          );
-        }
-
-        // Add a small delay to avoid hitting Gmail sending limits
-        Utilities.sleep(3000); // 1 second delay
-      } catch (emailError) {
-        errors++;
-        console.error(
-          `✗ Error sending WhatsApp invite to ${email}:`,
-          emailError
-        );
-      }
-    }
-
-    // Final summary
-    console.log(`\n=== WHATSAPP INVITE EMAIL SUMMARY ===`);
-    console.log(`Total emails sent: ${emailsSent}`);
-    console.log(`Total emails skipped (already sent): ${emailsSkipped}`);
-    console.log(`Total errors: ${errors}`);
-    console.log(`Total processed: ${emailsSent + emailsSkipped + errors}`);
-
-    return {
-      success: true,
-      emailsSent: emailsSent,
-      emailsSkipped: emailsSkipped,
-      errors: errors,
-      message: `Completed: ${emailsSent} emails sent, ${emailsSkipped} skipped, ${errors} errors`,
-    };
-  } catch (error) {
-    console.error("Error in sendWhatsAppInviteEmails:", error);
-    throw error;
-  }
+  return sendBatchEmails(
+    "WhatsApp invite",
+    whatsappEmailSender,
+    3000 // 3 second delay
+  );
 }
 
 /**
@@ -2030,48 +1573,6 @@ function getAllRegisteredEmails() {
 }
 
 /**
- * Helper to load all emails that have already received a WhatsApp invite email
- */
-function getAllWhatsAppEmailsSent() {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = spreadsheet.getSheetByName(WHATSAPP_EMAILS_SHEET_NAME);
-    if (!sheet) {
-      return new Set();
-    }
-    const dataRange = sheet.getDataRange();
-    const values = dataRange.getValues();
-    if (values.length === 0) {
-      return new Set();
-    }
-
-    // Get headers to find email column index
-    const headers = values[0];
-    const emailColumnIndex = headers.indexOf("email");
-    const statusColumnIndex = headers.indexOf("status");
-
-    if (emailColumnIndex === -1) {
-      return new Set();
-    }
-
-    const emailSet = new Set();
-    for (let i = 1; i < values.length; i++) {
-      // Skip header row
-      const row = values[i];
-      const rowEmail = row[emailColumnIndex];
-      const rowStatus = row[statusColumnIndex];
-      if (rowEmail && rowStatus === "sent") {
-        emailSet.add(rowEmail.toString().toLowerCase().trim());
-      }
-    }
-    return emailSet;
-  } catch (error) {
-    console.error("Error loading all WhatsApp emails sent:", error);
-    return new Set();
-  }
-}
-
-/**
  * Send WhatsApp group invite email to a specific user
  */
 function sendWhatsAppInviteEmail(email, name, whatsappLink) {
@@ -2126,9 +1627,7 @@ function sendWhatsAppInviteEmail(email, name, whatsappLink) {
       emailSent = false;
     }
 
-    // Record the email sending attempt
-    const status = emailSent ? "sent" : "failed";
-    recordWhatsAppEmailSent(email, name, status);
+    // Email recording is now handled generically in sendBatchEmails
 
     return {
       success: emailSent,
@@ -2140,60 +1639,11 @@ function sendWhatsAppInviteEmail(email, name, whatsappLink) {
   } catch (error) {
     console.error(`Error sending WhatsApp invite email to ${email}:`, error);
 
-    // Record the failed attempt
-    recordWhatsAppEmailSent(email, name, "failed");
+    // Email recording is now handled generically in sendBatchEmails
 
     return {
       success: false,
       error: error.message,
-    };
-  }
-}
-
-/**
- * Record WhatsApp invite email sending in WHATSAPP EMAILS sheet
- */
-function recordWhatsAppEmailSent(email, name, status) {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = spreadsheet.getSheetByName(WHATSAPP_EMAILS_SHEET_NAME);
-
-    // Create WHATSAPP EMAILS sheet if it doesn't exist
-    if (!sheet) {
-      sheet = spreadsheet.insertSheet(WHATSAPP_EMAILS_SHEET_NAME);
-      console.log("Created WHATSAPP EMAILS sheet");
-      // Add headers
-      const headers = ["timestamp", "email", "name", "status"];
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-
-      // Format header row
-      const headerRange = sheet.getRange(1, 1, 1, headers.length);
-      headerRange.setFontWeight("bold");
-      headerRange.setBackground("#f0f0f0");
-    }
-
-    // Prepare data row
-    const timestamp = new Date().toISOString();
-
-    // Append the new row
-    sheet.appendRow([timestamp, email, name, status]);
-
-    // Get the row number of the newly added row
-    const lastRow = sheet.getLastRow();
-
-    console.log(
-      `WhatsApp email record saved to row ${lastRow}: ${email} - ${status}`
-    );
-
-    return {
-      success: true,
-      rowNumber: lastRow,
-    };
-  } catch (error) {
-    console.error("Error recording WhatsApp email:", error);
-    return {
-      success: false,
-      error: "Failed to record WhatsApp email",
     };
   }
 }
@@ -2329,6 +1779,8 @@ function getTimelineData() {
       for (let j = 0; j < headers.length; j++) {
         rowObject[headers[j]] = row[j] || null;
       }
+
+      rowObject.id = i;
 
       timelineData.push(rowObject);
     }
@@ -2584,6 +2036,447 @@ function getNextCounterForItem(sheet, email, itemKey) {
 }
 
 /**
+ * Generic batch email sender that can be used for any type of email campaign
+ * @param {string} emailType - Description of email type for logging (e.g., "WhatsApp invite", "Terms & Conditions")
+ * @param {function} emailSenderFunction - Function that sends individual emails
+ * @param {number} delayMs - Delay between emails in milliseconds (default: 2000)
+ */
+function sendBatchEmails(
+  emailType,
+  emailSenderFunction,
+  delayMs = 2000,
+  sendToEmails
+) {
+  try {
+    console.log(`Starting to send ${emailType} emails...`);
+
+    // Get all emails from Trip Registrations sheet
+    const emails = getAllRegisteredEmails();
+
+    if (emails.length === 0) {
+      console.log("No registered emails found");
+      return {
+        success: false,
+        message: "No registered emails found in Trip Registrations sheet",
+      };
+    }
+
+    let emailsSent = 0;
+    let emailsSkipped = 0;
+    let errors = 0;
+
+    // Load all sent emails into memory - determine email type from emailType parameter
+    let emailTypeFilter = null;
+    if (emailType.toLowerCase().includes("whatsapp")) {
+      emailTypeFilter = "whatsapp";
+    } else if (emailType.toLowerCase().includes("term")) {
+      emailTypeFilter = "terms";
+    } else if (emailType.toLowerCase().includes("welcome")) {
+      emailTypeFilter = "welcome";
+    }
+
+    const sentEmails = getAllSentEmails(
+      AUTO_EMAILS_SHEET_NAME,
+      emailTypeFilter
+    );
+
+    // Process each email
+    for (const emailData of emails) {
+      const email = emailData.email;
+      const name = emailData.name;
+
+      try {
+        // Check if email was already sent
+        const alreadySent = sentEmails.has(
+          email.toString().toLowerCase().trim()
+        );
+
+        if (alreadySent) {
+          emailsSkipped++;
+          console.log(`⏭️  ${emailType} email already sent to: ${email}`);
+          continue;
+        }
+
+        if (sendToEmails && !sendToEmails.includes(email)) {
+          console.log(`- ${emailType} email skipped: ${email}`);
+          continue;
+        }
+
+        // Call the specific email sender function
+        const result = emailSenderFunction(
+          email.toString().trim(),
+          name.toString().trim()
+        );
+
+        // Record the email attempt in the unified sheet
+        const status = result.success ? "sent" : "failed";
+        const resultMessage = result.success
+          ? ""
+          : result.error || "Unknown error";
+        recordEmailSent(
+          AUTO_EMAILS_SHEET_NAME,
+          email,
+          name,
+          status,
+          emailTypeFilter,
+          resultMessage
+        );
+
+        if (result.success) {
+          emailsSent++;
+          console.log(`✓ ${emailType} email sent to: ${email}`);
+        } else {
+          errors++;
+          console.error(
+            `✗ Failed to send ${emailType} email to: ${email} - ${result.error}`
+          );
+        }
+
+        // Add delay to avoid hitting Gmail sending limits
+        if (delayMs > 0) {
+          Utilities.sleep(delayMs);
+        }
+      } catch (emailError) {
+        errors++;
+        console.error(
+          `✗ Error sending ${emailType} email to ${email}:`,
+          emailError
+        );
+        // Record the exception as a failed attempt
+        recordEmailSent(
+          AUTO_EMAILS_SHEET_NAME,
+          email,
+          name,
+          "failed",
+          emailTypeFilter,
+          emailError.message
+        );
+      }
+    }
+
+    // Final summary
+    console.log(`\n=== ${emailType.toUpperCase()} EMAIL SUMMARY ===`);
+    console.log(`Total emails sent: ${emailsSent}`);
+    console.log(`Total emails skipped (already sent): ${emailsSkipped}`);
+    console.log(`Total errors: ${errors}`);
+    console.log(`Total processed: ${emailsSent + emailsSkipped + errors}`);
+
+    return {
+      success: true,
+      emailsSent: emailsSent,
+      emailsSkipped: emailsSkipped,
+      errors: errors,
+      message: `Completed: ${emailsSent} emails sent, ${emailsSkipped} skipped, ${errors} errors`,
+    };
+  } catch (error) {
+    console.error(`Error in sendBatchEmails for ${emailType}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Generic function to load all emails that have already received a specific type of email
+ * @param {string} sheetName - Name of the tracking sheet
+ * @param {string} emailType - Type of email to filter by (whatsapp, welcome, terms)
+ */
+function getAllSentEmails(sheetName, emailType = null) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(sheetName);
+    if (!sheet) {
+      return new Set();
+    }
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    if (values.length === 0) {
+      return new Set();
+    }
+
+    // Get headers to find column indices
+    const headers = values[0];
+    const emailColumnIndex = headers.indexOf("email");
+    const statusColumnIndex = headers.indexOf("status");
+    const typeColumnIndex = headers.indexOf("type");
+
+    if (emailColumnIndex === -1) {
+      return new Set();
+    }
+
+    const emailSet = new Set();
+    for (let i = 1; i < values.length; i++) {
+      // Skip header row
+      const row = values[i];
+      const rowEmail = row[emailColumnIndex];
+      const rowStatus = row[statusColumnIndex];
+      const rowType = row[typeColumnIndex];
+
+      if (
+        rowEmail &&
+        rowStatus === "sent" &&
+        (!emailType || rowType === emailType)
+      ) {
+        emailSet.add(rowEmail.toString().toLowerCase().trim());
+      }
+    }
+    console.log(
+      `Loaded ${emailSet.size} sent emails from ${sheetName} for type: ${emailType || "all"}`
+    );
+    return emailSet;
+  } catch (error) {
+    console.error(`Error loading all sent emails from ${sheetName}:`, error);
+    return new Set();
+  }
+}
+
+/**
+ * Generic function to record email sending in tracking sheet
+ * @param {string} sheetName - Name of the tracking sheet
+ * @param {string} email - Email address
+ * @param {string} name - Recipient name
+ * @param {string} status - Status: "sent" or "failed"
+ * @param {string} type - Email type: "whatsapp", "welcome", "terms"
+ * @param {string} result - Error message if failed, success message if sent
+ */
+function recordEmailSent(
+  sheetName,
+  email,
+  name,
+  status,
+  type = "unknown",
+  result = ""
+) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = spreadsheet.getSheetByName(sheetName);
+
+    // Create tracking sheet if it doesn't exist
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(sheetName);
+      console.log(`Created ${sheetName} sheet`);
+      // Add headers
+      const headers = [
+        "timestamp",
+        "email",
+        "name",
+        "status",
+        "type",
+        "result",
+      ];
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+
+      // Format header row
+      const headerRange = sheet.getRange(1, 1, 1, headers.length);
+      headerRange.setFontWeight("bold");
+      headerRange.setBackground("#f0f0f0");
+    }
+
+    // Prepare data row
+    const timestamp = new Date().toISOString();
+
+    // Append the new row
+    sheet.appendRow([timestamp, email, name, status, type, result]);
+
+    // Get the row number of the newly added row
+    const lastRow = sheet.getLastRow();
+
+    console.log(
+      `Email record saved to ${sheetName} row ${lastRow}: ${email} - ${status}`
+    );
+
+    return {
+      success: true,
+      rowNumber: lastRow,
+    };
+  } catch (error) {
+    console.error(`Error recording email in ${sheetName}:`, error);
+    return {
+      success: false,
+      error: `Failed to record email in ${sheetName}`,
+    };
+  }
+}
+
+/**
+ * Send Terms & Conditions emails to all registered participants
+ * This function reads all emails from the Trip Registrations sheet and sends T&C emails
+ * Uses TC EMAILS sheet to track sent emails and prevent duplicates
+ */
+// eslint-disable-next-line no-unused-vars
+function sendTermsAndConditionsEmails() {
+  return sendBatchEmails(
+    "Terms & Conditions",
+    sendTermsAndConditionsEmail,
+    2000, // 2 second delay
+    ["tinqueija@gmail.com"] // optional override of emails to send to for testing
+  );
+}
+
+/**
+ * Helper function to get voucher file from Google Drive
+ * @param {string} email - User email
+ * @returns {Object} - {success: boolean, file?: GoogleFile, error?: string, rowId?: number}
+ */
+function getVoucherFile(email) {
+  try {
+    const existingSubmission = getExistingSubmission(email.trim());
+
+    if (!existingSubmission || !existingSubmission.rowNumber) {
+      return {
+        success: false,
+        error: `No registration found for ${email}`,
+      };
+    }
+
+    const rowId = existingSubmission.rowNumber;
+    const fileName = `arg-trek-voucher-${rowId}.pdf`;
+    const driveFolder = DriveApp.getFolderById(
+      "1QuSXGvECgYCM2HeVwGDzEJkcRkACda4X"
+    );
+
+    const files = driveFolder.getFilesByName(fileName);
+    if (!files.hasNext()) {
+      return {
+        success: false,
+        error: `Voucher PDF not found (${fileName})`,
+      };
+    }
+
+    const file = files.next();
+    return {
+      success: true,
+      file: file,
+      rowId: rowId,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: `Error accessing voucher: ${error.message}`,
+    };
+  }
+}
+
+/**
+ * Send terms and conditions email with voucher attachment
+ */
+function sendTermsAndConditionsEmail(email, name) {
+  try {
+    const subject = "Terms and Conditions - Argentina Trip";
+
+    // Get RSVP data to retrieve password for magic link
+    const rsvpData = _getRsvpDataForEmail(email);
+    const password = rsvpData ? rsvpData.PASSWORD : null;
+
+    // Get voucher attachment - required for T&C emails
+    const voucherResult = getVoucherFile(email);
+    if (!voucherResult.success) {
+      throw new Error(
+        `${voucherResult.error} - cannot send T&C without voucher`
+      );
+    }
+
+    const blob = voucherResult.file.getBlob();
+    const voucherAttachment = blob.setName(
+      `Argentina_Trip_Voucher_${voucherResult.rowId}.pdf`
+    );
+
+    const textBody = `Hi ${name},
+
+Please find below the terms and conditions for your Argentina trip registration.
+
+TERMS AND CONDITIONS
+
+1. Payment Terms
+- All payments must be completed according to the agreed schedule
+- Late payments may result in cancellation of your booking
+
+2. Cancellation Policy
+- Cancellations more than 60 days before departure: 50% refund
+- Cancellations 30-60 days before departure: 25% refund
+- Cancellations less than 30 days before departure: No refund
+
+3. Travel Insurance
+- Travel insurance is strongly recommended
+- All participants travel at their own risk
+
+4. Health and Safety
+- Participants must disclose any medical conditions
+- All activities are at participant's own risk
+
+5. Changes to Itinerary
+- We reserve the right to modify the itinerary due to weather or unforeseen circumstances
+- No compensation will be provided for minor itinerary changes
+
+Your trip voucher is attached to this email.
+
+Please save this voucher for your records and bring it with you on the trip.
+
+If you have any questions about these terms or your registration, please contact Maddie:
+- WhatsApp: +54 911 6972 9783
+- Email: sonsolesstays+argtrip@gmail.com
+
+${
+  password
+    ? `
+ACCESS YOUR TRIP REGISTRATION:
+If you need to access your trip registration portal, you can <a href="https://argtrip.sonsolesstays.com/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}">click here</a>.
+`
+    : ""
+}
+Best regards,
+Sonsoles Stays Argentina Trip Team
+
+---
+This email was generated automatically. Please do not reply to this message.`;
+
+    let emailSent = false;
+    let errorMessage = null;
+
+    try {
+      const bcc = "sonsolesstays+argtrip@gmail.com";
+      const attachments = voucherAttachment ? [voucherAttachment] : [];
+
+      // Convert text body to HTML by replacing line breaks
+      const htmlBody = textBody.replace(/\n/g, "<br>");
+
+      // Send email using unified helper function
+      sendEmail(email, subject, htmlBody, attachments, bcc);
+
+      console.log("Terms and conditions email sent successfully to", email);
+      emailSent = true;
+    } catch (emailError) {
+      console.error(
+        `Error sending terms and conditions email to ${email}:`,
+        emailError
+      );
+      errorMessage = emailError.message;
+      emailSent = false;
+    }
+
+    // Email recording is now handled generically in sendBatchEmails
+
+    return {
+      success: emailSent,
+      message: emailSent
+        ? `Terms and conditions email sent successfully to ${email}`
+        : `Failed to send terms and conditions email to ${email}: ${errorMessage}`,
+      error: emailSent ? null : errorMessage,
+    };
+  } catch (error) {
+    console.error(
+      `Error sending terms and conditions email to ${email}:`,
+      error
+    );
+
+    // Email recording is now handled generically in sendBatchEmails
+
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+}
+
+/**
  * Download voucher PDF for a user based on their row ID
  */
 function downloadVoucher(email, password) {
@@ -2594,36 +2487,19 @@ function downloadVoucher(email, password) {
       return validation.response;
     }
 
-    // Get existing submission to find row number
-    const existingSubmission = getExistingSubmission(email.trim());
-    if (!existingSubmission || !existingSubmission.rowNumber) {
+    // Get voucher file
+    const voucherResult = getVoucherFile(email);
+    if (!voucherResult.success) {
       return ContentService.createTextOutput(
         JSON.stringify({
           success: false,
-          error: "No registration found for this user",
+          error: voucherResult.error,
         })
       ).setMimeType(ContentService.MimeType.JSON);
     }
 
-    const rowId = existingSubmission.rowNumber;
-    const fileName = `pdf-${rowId}.pdf`;
-    const driveFolder = DriveApp.getFolderById(
-      "1QuSXGvECgYCM2HeVwGDzEJkcRkACda4X"
-    );
-
-    // Find the PDF file
-    const files = driveFolder.getFilesByName(fileName);
-    if (!files.hasNext()) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: "Voucher PDF not found",
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    const file = files.next();
-    const blob = file.getBlob();
+    const blob = voucherResult.file.getBlob();
+    const fileName = `arg-trek-voucher-${voucherResult.rowId}.pdf`;
 
     // Return the PDF as base64 for download
     return ContentService.createTextOutput(
