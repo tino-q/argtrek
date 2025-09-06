@@ -9,7 +9,7 @@
 /* global ContentService, SpreadsheetApp, Utilities, DriveApp, UrlFetchApp */
 
 const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwRGzNdNGe4F7BSHnyqVV9Ee3N6QUrUPu-NovwzT8Bc8PONYGcKGbEiY34AqZJhbhW0/exec";
+  "https://script.google.com/macros/s/AKfycbyap_putx80V4jM_umrCd57Js_aVlCZUzQQpDtVwluLaRrt9EbCgWuWiJFfRQXq0WBa/exec";
 const MG_KEY = "<REDACTED>";
 const REDSYS_USER = "<REDACTED>";
 const REDSYS_PASS = "<REDACTED>"; // Note: \u0021 is '!'
@@ -2328,7 +2328,7 @@ function getVoucherFile(email) {
     }
 
     const rowId = existingSubmission.rowNumber;
-    const fileName = `arg-trek-voucher-${rowId}.pdf`;
+    const fileName = `arg-trip-voucher-${rowId}.pdf`;
     const driveFolder = DriveApp.getFolderById(
       "1QuSXGvECgYCM2HeVwGDzEJkcRkACda4X"
     );
@@ -2499,7 +2499,7 @@ function downloadVoucher(email, password) {
     }
 
     const blob = voucherResult.file.getBlob();
-    const fileName = `arg-trek-voucher-${voucherResult.rowId}.pdf`;
+    const fileName = `arg-trip-voucher-${voucherResult.rowId}.pdf`;
 
     // Return the PDF as base64 for download
     return ContentService.createTextOutput(

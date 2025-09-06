@@ -162,7 +162,7 @@ async function processAllDataRows() {
 
     await mergePDFs(
       pdfs.map(([, pdfPath]) => pdfPath),
-      path.resolve(outputDir, `arg-trek-voucher-${row.ID}.pdf`)
+      path.resolve(outputDir, `arg-trip-voucher-${row.ID}.pdf`)
     );
 
     for (const [, pdfPath] of pdfs) {
