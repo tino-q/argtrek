@@ -2307,7 +2307,16 @@ function sendTermsAndConditionsEmails() {
     "Terms & Conditions",
     sendTermsAndConditionsEmail,
     2000, // 2 second delay
-    ["tinqueija@gmail.com"] // optional override of emails to send to for testing
+    [
+      "nnavas@stanford.edu",
+      "jeronimo.llacay@gmail.com",
+      "talves@stanford.edu",
+      "ftosi@stanford.edu",
+      "verdaromjulieta@gmail.com",
+      "guidoh@stanford.edu",
+      "tinqueija@gmail.com",
+      "madibakla@gmail.com",
+    ] // optional override of emails to send to for testing
   );
 }
 
@@ -2366,6 +2375,10 @@ function sendTermsAndConditionsEmail(email, name) {
     const rsvpData = _getRsvpDataForEmail(email);
     const password = rsvpData ? rsvpData.PASSWORD : null;
 
+    if (!password) {
+      throw new Error("No password found for email");
+    }
+
     // Get voucher attachment - required for T&C emails
     const voucherResult = getVoucherFile(email);
     if (!voucherResult.success) {
@@ -2379,61 +2392,48 @@ function sendTermsAndConditionsEmail(email, name) {
       `Argentina_Trip_Voucher_${voucherResult.rowId}.pdf`
     );
 
-    const textBody = `Hi ${name},
+    const textBody = `Hola ${name}, hope you are having a great day!
 
-Please find below the terms and conditions for your Argentina trip registration.
+I want to share flight reservations updates, a new trip voucher and highlight some important trip details!
 
-TERMS AND CONDITIONS
+I'd appreciate it if you could reply with a quick “Received” so I know you've got this email. 
 
-1. Payment Terms
-- All payments must be completed according to the agreed schedule
-- Late payments may result in cancellation of your booking
+ABOUT ME & MY ROLE
+I'm Maddie, Nati's friend since high school. I’m based in Alicante, Spain, where I manage vacation rentals. I’m super thrilled to be coordinating this trip! I used to do this when I lived in Argentina. Together with my partner Martin, we created the trip registration app. It’s homemade, but we hope it makes the trip's communication smoother for everyone!
 
-2. Cancellation Policy
-- Cancellations more than 60 days before departure: 50% refund
-- Cancellations 30-60 days before departure: 25% refund
-- Cancellations less than 30 days before departure: No refund
+Important: I am acting as a group coordinator, not as a travel agency. My role is to centralize logistics, secure group rates, and book activities and hotels on behalf of each passenger. All services are provided directly by third-party companies, not by me personally.
 
-3. Travel Insurance
-- Travel insurance is strongly recommended
-- All participants travel at their own risk
+In the unlikely event of a trip disruption such as a flight delay, any extra costs for new flights or hotel nights are the traveler's responsiblity — I’ll still be there to guide and support.
 
-4. Health and Safety
-- Participants must disclose any medical conditions
-- All activities are at participant's own risk
+FLIGHTS
+We’ve updated how flight reservations are handled: Argentine participants will now book and manage these reservations. Schedules, operations, and payments remain the same; nothing to worry about. The difference is that I’m not the one managing those bookings directly so this will not be included in the voucher. Flight details will still be shared in the app. If you prefer to book your flights independently, you can let me know and I’ll deduct the corresponding amount from your next payment.
 
-5. Changes to Itinerary
-- We reserve the right to modify the itinerary due to weather or unforeseen circumstances
-- No compensation will be provided for minor itinerary changes
+You can find your new trip voucher attached to this email.
 
-Your trip voucher is attached to this email.
+DOCUMENTATION & INSURANCE REQUIREMENTS 
+Each traveler is responsible for checking their passport validity, visa requirements, health/insurance obligations, and vaccination rules based on their travel itinerary/history.
 
-Please save this voucher for your records and bring it with you on the trip.
+Friendly reminder: All foreign visitors must have valid health insurance covering the entire stay in Argentina (with country-specific coverage). In addition, I strongly recommend purchasing personal travel insurance to cover flight disruptions, schedule changes, lost luggage, or trip interruptions.
 
-If you have any questions about these terms or your registration, please contact Maddie:
-- WhatsApp: +54 911 6972 9783
-- Email: sonsolesstays+argtrip@gmail.com
+Thank you so much for trusting me with this adventure — I truly can’t wait to share this experience together!
 
-${
-  password
-    ? `
-ACCESS YOUR TRIP REGISTRATION:
-If you need to access your trip registration portal, you can <a href="https://argtrip.sonsolesstays.com/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}">click here</a>.
-`
-    : ""
-}
-Best regards,
-Sonsoles Stays Argentina Trip Team
+Dont hesitate to reach out to me at <a href="https://wa.me/5491169729783">+54 911 6972 9783</a>
 
----
-This email was generated automatically. Please do not reply to this message.`;
+To login to the app, please <a href="https://argtrip.sonsolesstays.com/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}">click here</a>.
+
+Warm regards,
+Maddie
+`;
 
     let emailSent = false;
     let errorMessage = null;
 
     try {
       const bcc = "sonsolesstays+argtrip@gmail.com";
-      const attachments = voucherAttachment ? [voucherAttachment] : [];
+      if (!voucherAttachment) {
+        throw new Error("No voucher attachment found");
+      }
+      const attachments = [voucherAttachment];
 
       // Convert text body to HTML by replacing line breaks
       const htmlBody = textBody.replace(/\n/g, "<br>");
