@@ -34,6 +34,27 @@ const Redirect = ({ path }) => {
   return <div> Redirecting... </div>;
 };
 
+// Backward compatibility for legacy magic links at root
+const RootRedirect = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const email = params.get("email");
+    const password = params.get("password");
+
+    if (email && password) {
+      const target = `/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+      navigate(target, { replace: true });
+    } else {
+      navigate("/home", { replace: true });
+    }
+  }, [location.search, navigate]);
+
+  return <div> Redirecting... </div>;
+};
+
 const RegisteredTravelerRoute = ({ children }) => {
   const { submissionResult } = useTripContext();
 
@@ -77,6 +98,8 @@ function AppContent() {
 
       <div className="main-content">
         <Routes>
+          {/* Root route: preserve legacy magic links */}
+          <Route path="/" element={<RootRedirect />} />
           {/* Registration flow routes */}
           {REGISTRATION_FLOW_PATHS.map((path) => (
             <Route
