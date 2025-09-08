@@ -300,8 +300,8 @@ function generateFirstPageHTML(
         bariHotel
           ? `<div class="activity">
             <div class="activity-name">Bariloche</div>
+            <div class="activity-price">Day outing</div>
             <div class="activity-price">Welcome & Closing Dinner</div>
-            <div class="activity-price">Day outing days 2 & 3</div>
           </div>`
           : ""
       }
@@ -309,7 +309,7 @@ function generateFirstPageHTML(
         mendozaHotel
           ? `<div class="activity">
         <div class="activity-name">Mendoza</div>
-        <div class="activity-price">Day Outing</div>
+        <div class="activity-price">Day outing</div>
         <div class="activity-price">Welcome & Closing Dinner</div>
       </div>`
           : ""
@@ -341,6 +341,14 @@ function generateFirstPageHTML(
   <div class="section">
     <div class="section-title">Pricing Summary</div>
     <div class="pricing-summary">
+      ${
+        formData.checkedLuggage
+          ? `<div class="pricing-row">
+              <span>Checked Luggage:</span>
+              <span>Pending</span>
+            </div>`
+          : ""
+      }
       <div class="pricing-row">
         <span>Base Price:</span>
         <span>$${pricing.basePrice}</span>
