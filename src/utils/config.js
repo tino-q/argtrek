@@ -32,6 +32,7 @@ export const ADMIN_EMAILS = [
   "guidoh@stanford.edu",
   "tinqueija@gmail.com",
   "madibakla@gmail.com",
+  "carocuestamarrero@gmail.com",
 ];
 
 // Luggage Configuration

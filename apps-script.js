@@ -1551,7 +1551,6 @@ function getAllRegisteredEmails() {
       const email = row[emailColumnIndex];
       const firstName = row[firstNameColumnIndex] || "";
       const lastName = row[lastNameColumnIndex] || "";
-      const fullName = `${firstName} ${lastName}`.trim() || "Traveler";
 
       // Skip rows without email
       if (!email) {
@@ -1560,7 +1559,8 @@ function getAllRegisteredEmails() {
 
       emails.push({
         email: email.toString().trim(),
-        name: fullName,
+        firstName: firstName.toString().trim(),
+        lastName: lastName.toString().trim(),
       });
     }
 
@@ -2045,7 +2045,7 @@ function sendBatchEmails(
   emailType,
   emailSenderFunction,
   delayMs = 2000,
-  sendToEmails
+  { sendToEmails, excludeEmails } = {}
 ) {
   try {
     console.log(`Starting to send ${emailType} emails...`);
@@ -2083,7 +2083,7 @@ function sendBatchEmails(
     // Process each email
     for (const emailData of emails) {
       const email = emailData.email;
-      const name = emailData.name;
+      const name = emailData.firstName;
 
       try {
         // Check if email was already sent
@@ -2097,8 +2097,27 @@ function sendBatchEmails(
           continue;
         }
 
-        if (sendToEmails && !sendToEmails.includes(email)) {
-          console.log(`- ${emailType} email skipped: ${email}`);
+        if (
+          excludeEmails &&
+          excludeEmails
+            .map((e) => e.toLowerCase().trim())
+            .includes(email.toLowerCase().trim())
+        ) {
+          console.log(
+            `This email is excluded from ${emailType} emails: ${email}`
+          );
+          continue;
+        }
+
+        if (
+          sendToEmails &&
+          !sendToEmails
+            .map((e) => e.toLowerCase().trim())
+            .includes(email.toLowerCase().trim())
+        ) {
+          console.log(
+            `This email is not in the sendToEmails list for ${emailType} emails: ${email}`
+          );
           continue;
         }
 
@@ -2307,16 +2326,22 @@ function sendTermsAndConditionsEmails() {
     "Terms & Conditions",
     sendTermsAndConditionsEmail,
     2000, // 2 second delay
-    [
-      "nnavas@stanford.edu",
-      "jeronimo.llacay@gmail.com",
-      "talves@stanford.edu",
-      "ftosi@stanford.edu",
-      "verdaromjulieta@gmail.com",
-      "guidoh@stanford.edu",
-      "tinqueija@gmail.com",
-      "madibakla@gmail.com",
-    ] // optional override of emails to send to for testing
+    {
+      sendToEmails: [
+        "dzhang6@stanford.edu",
+        "Bzakaria@stanford.edu",
+        "lmees@stanford.edu",
+        "Tkim1993@stanford.edu",
+        "lukasa@stanford.edu",
+        "zteiger@stanford.edu",
+      ],
+      excludeEmails: [
+        "Annie.se.park@gmail.com",
+        "Leonms@stanford.edu",
+        "Bradley.James.Rollins@gmail.com",
+        "lmassaro@stanford.edu",
+      ], // optional override of emails to send to for testing
+    }
   );
 }
 
@@ -2398,28 +2423,26 @@ I want to share flight reservations updates, a new trip voucher and highlight so
 
 I'd appreciate it if you could reply with a quick “Received” so I know you've got this email. 
 
-ABOUT ME & MY ROLE
+<strong>ABOUT ME & MY ROLE</strong>
 I'm Maddie, Nati's friend since high school. I’m based in Alicante, Spain, where I manage vacation rentals. I’m super thrilled to be coordinating this trip! I used to do this when I lived in Argentina. Together with my partner Martin, we created the trip registration app. It’s homemade, but we hope it makes the trip's communication smoother for everyone!
 
-Important: I am acting as a group coordinator, not as a travel agency. My role is to centralize logistics, secure group rates, and book activities and hotels on behalf of each passenger. All services are provided directly by third-party companies, not by me personally.
+<strong>Important: I am acting as a group coordinator, not as a travel agency.</strong> My role is to centralize logistics, secure group rates, and book activities and hotels on behalf of each passenger. All services are provided directly by third-party companies, not by me personally.
 
-In the unlikely event of a trip disruption such as a flight delay, any extra costs for new flights or hotel nights are the traveler's responsiblity — I’ll still be there to guide and support.
+<u>In the unlikely event of a trip disruption such as a flight delay, any extra costs for new flights or hotel nights are the traveler's responsiblity</u> — I’ll still be there to guide and support.
 
-FLIGHTS
+<strong>FLIGHTS</strong>
 We’ve updated how flight reservations are handled: Argentine participants will now book and manage these reservations. Schedules, operations, and payments remain the same; nothing to worry about. The difference is that I’m not the one managing those bookings directly so this will not be included in the voucher. Flight details will still be shared in the app. If you prefer to book your flights independently, you can let me know and I’ll deduct the corresponding amount from your next payment.
 
 You can find your new trip voucher attached to this email.
 
-DOCUMENTATION & INSURANCE REQUIREMENTS 
+<strong>DOCUMENTATION & INSURANCE REQUIREMENTS</strong>
 Each traveler is responsible for checking their passport validity, visa requirements, health/insurance obligations, and vaccination rules based on their travel itinerary/history.
 
-Friendly reminder: All foreign visitors must have valid health insurance covering the entire stay in Argentina (with country-specific coverage). In addition, I strongly recommend purchasing personal travel insurance to cover flight disruptions, schedule changes, lost luggage, or trip interruptions.
+Friendly reminder: <strong>All foreign visitors must have valid health insurance</strong> covering the entire stay in Argentina (with country-specific coverage). In addition, <strong>I strongly recommend purchasing personal travel insurance</strong> to cover flight disruptions, schedule changes, lost luggage, or trip interruptions.
 
-Thank you so much for trusting me with this adventure — I truly can’t wait to share this experience together!
+Thank you so much for trusting me with this adventure! Don't hesitate to reach out to me at <a href="https://wa.me/5491169729783">+54 911 6972 9783</a>.
 
-Dont hesitate to reach out to me at <a href="https://wa.me/5491169729783">+54 911 6972 9783</a>
-
-To login to the app, please <a href="https://argtrip.sonsolesstays.com/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}">click here</a>.
+To login to the app, please <a href="https://argtrip.sonsolesstays.com/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}">click here</a>; full trip agenda coming soon!
 
 Warm regards,
 Maddie
