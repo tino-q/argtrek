@@ -11,6 +11,8 @@ import AuthContext from "../../context/AuthContext.jsx";
 import { useTripContext } from "../../hooks/useTripContext";
 import { APPS_SCRIPT_URL, PRICES, ADMIN_EMAILS } from "../../utils/config.js";
 
+import PassportGate from "./PassportGate.jsx";
+
 import "./Timeline.css";
 
 const filterTimelineData = (timelineData, submissionResult) => {
@@ -49,7 +51,6 @@ const filterTimelineData = (timelineData, submissionResult) => {
         case "hotel check in":
         case "breakfast":
         case "lunch":
-        case "breakfast":
         case "hotel checkout":
         case "transportation":
           return buenosAiresArrivalHotel;
@@ -70,7 +71,6 @@ const filterTimelineData = (timelineData, submissionResult) => {
         case "hotel check in":
         case "breakfast":
         case "lunch":
-        case "breakfast":
         case "hotel checkout":
         case "transportation":
           return bariHotel;
@@ -92,7 +92,6 @@ const filterTimelineData = (timelineData, submissionResult) => {
         case "breakfast":
         case "lunch":
         case "drinks":
-        case "breakfast":
         case "hotel checkout":
         case "transportation":
           return mendozaHotel;
@@ -111,7 +110,6 @@ const filterTimelineData = (timelineData, submissionResult) => {
         case "hotel check in":
         case "breakfast":
         case "lunch":
-        case "breakfast":
         case "hotel checkout":
         case "transportation":
           return bsasDepartureHotel;
@@ -370,6 +368,9 @@ const Timeline = () => {
   const { email: userEmail, password: userPassword } = useContext(AuthContext);
   const { formData, submissionResult } = useTripContext();
 
+  // Passport presence from context (set at login or via PassportGate)
+  const hasPassport = Boolean(submissionResult?.passport);
+
   const isAdmin = ADMIN_EMAILS.includes(userEmail);
 
   const personalTimelineData = useMemo(() => {
@@ -490,7 +491,15 @@ const Timeline = () => {
   // Mock in-memory store for localhost
   const mockChoicesStore = React.useRef(new Map());
 
+  // Stable handler for PassportGate success
+  const onPassportSuccess = useCallback(() => {
+    setLoading(true);
+  }, []);
+
   useEffect(() => {
+    if (!hasPassport) {
+      return;
+    }
     const fetchTimelineData = async () => {
       try {
         // Check for refresh parameter to clear cache
@@ -587,7 +596,7 @@ const Timeline = () => {
 
     fetchTimelineData();
     fetchUserChoices();
-  }, [userEmail, userPassword]);
+  }, [hasPassport, userEmail, userPassword]);
 
   // TODO: remove this after construction
   if (!ADMIN_EMAILS.includes(userEmail)) {
@@ -699,6 +708,12 @@ const Timeline = () => {
       />
     );
   };
+
+  console.log("hasPassport", { hasPassport });
+  // If passport missing, show gate form
+  if (!hasPassport) {
+    return <PassportGate onSuccess={onPassportSuccess} />;
+  }
 
   if (loading) {
     return (

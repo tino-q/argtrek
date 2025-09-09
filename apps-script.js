@@ -9,7 +9,7 @@
 /* global ContentService, SpreadsheetApp, Utilities, DriveApp, UrlFetchApp */
 
 const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbyap_putx80V4jM_umrCd57Js_aVlCZUzQQpDtVwluLaRrt9EbCgWuWiJFfRQXq0WBa/exec";
+  "https://script.google.com/macros/s/AKfycbw17mYdTguvxgKaErXTW2d3ZmJutgfW4H2i6Tz5xRpFmtMa2ZMifOoN3bobZBLEs_Ij/exec";
 const MG_KEY = "<REDACTED>";
 const REDSYS_USER = "<REDACTED>";
 const REDSYS_PASS = "<REDACTED>"; // Note: \u0021 is '!'
@@ -25,6 +25,7 @@ const AUTO_EMAILS_SHEET_NAME = "AUTO_EMAILS"; // Unified sheet for tracking all 
 const PAYMENTLINKSDB_SHEET_NAME = "PAYMENTLINKSDB";
 const TIMELINE_SHEET_NAME = "TIMELINE"; // Sheet containing timeline data
 const CHOICES_SHEET_NAME = "CHOICES"; // Sheet for tracking user activity choices
+const PASSPORTS_SHEET_NAME = "PASSPORTS"; // Sheet for tracking traveler passport details
 
 /**
  * Validates user credentials by checking for presence of email and password,
@@ -104,10 +105,14 @@ function doGet(e) {
     // Check if there's an existing submission for this email
     const existingSubmission = getExistingSubmission(email.trim());
 
+    // Look up passport details for this traveler
+    const passportDetails = getPassportDetails(email.trim());
+
     const responseData = {
       rsvpData: validation.rsvpData,
       row: existingSubmission?.row || null,
       rowNumber: existingSubmission?.rowNumber || null,
+      passport: passportDetails || null,
     };
 
     return ContentService.createTextOutput(
@@ -183,6 +188,42 @@ function doPost(e) {
           })
         ).setMimeType(ContentService.MimeType.JSON);
       }
+    }
+
+    // === Passport submission handler ===
+    if (data.action === "submit_passport") {
+      // Required: email, password, passportNumber, expiryDate, birthDate
+      const email = (data.email || "").trim();
+      const password = (data.password || "").trim();
+      const validation = validateCredentials(email, password);
+      if (!validation.success) {
+        return validation.response;
+      }
+
+      const required = ["passportNumber", "expiryDate", "birthDate"];
+      for (const key of required) {
+        if (!data[key]) {
+          return ContentService.createTextOutput(
+            JSON.stringify({
+              success: false,
+              error: `Missing required field: ${key}`,
+            })
+          ).setMimeType(ContentService.MimeType.JSON);
+        }
+      }
+
+      const result = savePassportSubmission({
+        email,
+        passportName: (data.passportName || "").toString().trim(),
+        passportNumber: String(data.passportNumber).trim(),
+        expiryDate: String(data.expiryDate).trim(),
+        birthDate: String(data.birthDate).trim(),
+        aAdvantage: (data.aAdvantage || "").toString().trim(),
+      });
+
+      return ContentService.createTextOutput(
+        JSON.stringify(result)
+      ).setMimeType(ContentService.MimeType.JSON);
     }
 
     // Check if this is a choices update request
@@ -533,6 +574,156 @@ function getExistingSubmission(email) {
   } catch (error) {
     console.error("Error getting existing submission:", error);
     return null;
+  }
+}
+
+/**
+ * Ensure PASSPORTS sheet exists with correct headers. Return the sheet.
+ */
+function ensurePassportsSheet() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = spreadsheet.getSheetByName(PASSPORTS_SHEET_NAME);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(PASSPORTS_SHEET_NAME);
+  }
+
+  // Headers we expect
+  const headers = [
+    "timestamp",
+    "email",
+    "passportName",
+    "passportNumber",
+    "expiryDate",
+    "birthDate",
+    "aAdvantage",
+  ];
+
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    const headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setFontWeight("bold");
+    headerRange.setBackground("#f0f0f0");
+  } else {
+    // If it exists, ensure required headers are present (by name)
+    const existing = sheet
+      .getRange(1, 1, 1, sheet.getLastColumn())
+      .getValues()[0];
+    const existingSet = new Set(existing);
+
+    let appended = false;
+    headers.forEach((h) => {
+      if (!existingSet.has(h)) {
+        // Append new header at the end
+        const nextCol = sheet.getLastColumn() + 1;
+        sheet.getRange(1, nextCol).setValue(h);
+        appended = true;
+      }
+    });
+    if (appended) {
+      const headerRange = sheet.getRange(1, 1, 1, sheet.getLastColumn());
+      headerRange.setFontWeight("bold");
+      headerRange.setBackground("#f0f0f0");
+    }
+  }
+
+  return sheet;
+}
+
+/**
+ * Get passport details for a given email (or null if not found)
+ */
+function getPassportDetails(email) {
+  try {
+    const sheet = ensurePassportsSheet();
+    if (sheet.getLastRow() < 2) return null;
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+    const emailIdx = headers.indexOf("email");
+    if (emailIdx === -1) return null;
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const rowEmail = row[emailIdx];
+      if (
+        rowEmail &&
+        rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
+      ) {
+        // Build object
+        const obj = {};
+        headers.forEach((h, j) => (obj[h] = row[j]));
+        return obj;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting passport details:", error);
+    return null;
+  }
+}
+
+/**
+ * Save passport submission. Users can only submit once.
+ */
+function savePassportSubmission({
+  email,
+  passportName,
+  passportNumber,
+  expiryDate,
+  birthDate,
+  aAdvantage,
+}) {
+  try {
+    const sheet = ensurePassportsSheet();
+
+    // Check duplicates
+    const existing = getPassportDetails(email);
+    if (existing) {
+      return {
+        success: false,
+        error: "Passport information already submitted for this email.",
+      };
+    }
+
+    const timestamp = new Date().toISOString();
+    // Build an object and map to existing header order to avoid column mismatch
+    const rowObject = {
+      timestamp: timestamp,
+      email: email,
+      passportName: passportName || "",
+      passportNumber: passportNumber,
+      expiryDate: expiryDate,
+      birthDate: birthDate,
+      aAdvantage: aAdvantage || "",
+    };
+
+    const headers = sheet
+      .getRange(1, 1, 1, sheet.getLastColumn())
+      .getValues()[0];
+    const row = headers.map((h) =>
+      rowObject[h] !== undefined ? rowObject[h] : ""
+    );
+
+    sheet.appendRow(row);
+    const passport = {
+      timestamp: timestamp,
+      email: email,
+      passportName: passportName || "",
+      passportNumber: passportNumber,
+      expiryDate: expiryDate,
+      birthDate: birthDate,
+      aAdvantage: aAdvantage || "",
+    };
+    return {
+      success: true,
+      message: "Passport details saved successfully.",
+      passport: passport,
+    };
+  } catch (error) {
+    console.error("Error saving passport submission:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to save passport details.",
+    };
   }
 }
 
