@@ -113,6 +113,9 @@ const TripProvider = ({ children }) => {
     localStorage.removeItem("userRSVP");
     localStorage.removeItem("formData");
     localStorage.removeItem("submissionResult");
+    localStorage.removeItem("raftingCount");
+    localStorage.removeItem("raftingCountTimestamp");
+    localStorage.removeItem("userChoices");
     showSuccess(
       "Logged out successfully. You can now login with different credentials."
     );

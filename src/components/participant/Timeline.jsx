@@ -7,6 +7,7 @@ import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
 import { APPS_SCRIPT_URL, ADMIN_EMAILS } from "../../utils/config.js";
 
+import LuggageGate from "./LuggageGate.jsx";
 import PassportGate from "./PassportGate.jsx";
 
 import "./Timeline.css";
@@ -565,6 +566,7 @@ const Timeline = () => {
 
   // Passport presence from context (set at login or via PassportGate)
   const hasPassport = Boolean(submissionResult?.passport);
+  const hasLuggageSelection = Boolean(submissionResult?.luggageSelection);
 
   const isAdmin = ADMIN_EMAILS.includes(userEmail);
 
@@ -702,10 +704,16 @@ const Timeline = () => {
         } else {
           console.log("Choice saved successfully:", itemKey, choice);
           // Only update state after successful save
-          setActivityChoices((prev) => ({
-            ...prev,
+          const updatedChoices = {
+            ...activityChoices,
             [itemKey]: choice,
-          }));
+          };
+          setActivityChoices(updatedChoices);
+          
+          // Update the cache with the new choice
+          const cacheKey = `userChoices_${userEmail}`;
+          localStorage.setItem(cacheKey, JSON.stringify(updatedChoices));
+          
           if (itemKey === "rafting" && choice === "yes") {
             setRaftingCount((prev) =>
               typeof prev === "number" ? prev + 1 : prev
@@ -723,7 +731,7 @@ const Timeline = () => {
         });
       }
     },
-    [userEmail, userPassword]
+    [userEmail, userPassword, activityChoices]
   );
 
   const confirmChoice = useCallback(async () => {
@@ -834,6 +842,27 @@ const Timeline = () => {
       }
 
       try {
+        // Create a cache key based on user email
+        const cacheKey = `userChoices_${userEmail}`;
+        
+        // Check for cached choices data
+        const cachedChoicesStr = localStorage.getItem(cacheKey);
+        
+        let cachedChoices = null;
+        if (cachedChoicesStr) {
+          try {
+            cachedChoices = JSON.parse(cachedChoicesStr);
+          } catch {
+            console.warn("Failed to parse cached choices, will refetch");
+          }
+        }
+
+        if (cachedChoices) {
+          setActivityChoices(cachedChoices);
+          console.log("User choices loaded from cache:", cachedChoices);
+          return;
+        }
+
         if (!__DEV__) {
           const response = await fetch(
             `${APPS_SCRIPT_URL}?endpoint=choices&email=${encodeURIComponent(userEmail)}&password=${encodeURIComponent(userPassword)}`
@@ -844,8 +873,13 @@ const Timeline = () => {
             throw data;
           }
 
-          setActivityChoices(data.data || {});
-          console.log("User choices loaded:", data.data);
+          const choices = data.data || {};
+          setActivityChoices(choices);
+          
+          // Cache the choices data
+          localStorage.setItem(cacheKey, JSON.stringify(choices));
+          
+          console.log("User choices loaded:", choices);
         }
       } catch (err) {
         console.error("Error fetching user choices:", err);
@@ -859,12 +893,38 @@ const Timeline = () => {
       }
 
       try {
+        // Check for cached rafting count data (5 minutes cache)
+        const raftingCountStr = localStorage.getItem("raftingCount");
+        const raftingCountTimestampStr = localStorage.getItem("raftingCountTimestamp");
+        const now = Date.now();
+        const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+        let cachedRaftingCount = null;
+        if (raftingCountStr && raftingCountTimestampStr) {
+          const timestamp = parseInt(raftingCountTimestampStr);
+          if (now - timestamp < fiveMinutes) {
+            // Cache is still valid
+            cachedRaftingCount = parseInt(raftingCountStr);
+          }
+        }
+
+        if (cachedRaftingCount !== null) {
+          setRaftingCount(cachedRaftingCount);
+          return;
+        }
+
+        // Fetch fresh data if no valid cache
         const response = await fetch(
           `${APPS_SCRIPT_URL}?endpoint=rafting_count`
         );
         const data = await response.json();
         if (data.success) {
-          setRaftingCount(typeof data.count === "number" ? data.count : 0);
+          const count = typeof data.count === "number" ? data.count : 0;
+          setRaftingCount(count);
+          
+          // Cache the rafting count with timestamp
+          localStorage.setItem("raftingCount", count.toString());
+          localStorage.setItem("raftingCountTimestamp", now.toString());
         } else {
           setRaftingCount(0);
           showError("Failed to load rafting count");
@@ -996,6 +1056,9 @@ const Timeline = () => {
 
   if (!hasPassport) {
     return <PassportGate onSuccess={onPassportSuccess} />;
+  }
+  if (!hasLuggageSelection) {
+    return <LuggageGate />;
   }
 
   if (loading) {

@@ -26,6 +26,7 @@ const PAYMENTLINKSDB_SHEET_NAME = "PAYMENTLINKSDB";
 const TIMELINE_SHEET_NAME = "TIMELINE"; // Sheet containing timeline data
 const CHOICES_SHEET_NAME = "CHOICES"; // Sheet for tracking user activity choices
 const PASSPORTS_SHEET_NAME = "PASSPORTS"; // Sheet for tracking traveler passport details
+const LUGGAGE_SHEET_NAME = "Luggage"; // Sheet for tracking checked luggage selections per flight
 
 /**
  * Validates user credentials by checking for presence of email and password,
@@ -113,11 +114,16 @@ function doGet(e) {
     // Look up passport details for this traveler
     const passportDetails = getPassportDetails(email.trim());
 
+    // Look up luggage selections for this traveler
+    const luggageDetails = getLuggageDetails(email.trim());
+
     const responseData = {
       rsvpData: validation.rsvpData,
       row: existingSubmission?.row || null,
       rowNumber: existingSubmission?.rowNumber || null,
       passport: passportDetails || null,
+      // Luggage state for skipping LuggageGate if already answered
+      luggageSelection: luggageDetails || null,
     };
 
     return ContentService.createTextOutput(
@@ -304,6 +310,26 @@ function doPost(e) {
           })
         ).setMimeType(ContentService.MimeType.JSON);
       }
+    }
+
+    // === Luggage submission handler ===
+    if (data.action === "submit_luggage") {
+      // Required: email, password, chosen (JSON object mapping flight codes to boolean)
+      const email = (data.email || "").trim();
+      const password = (data.password || "").trim();
+      const validation = validateCredentials(email, password);
+      if (!validation.success) {
+        return validation.response;
+      }
+
+      const result = saveLuggageSubmission({
+        email,
+        luggageSelection: JSON.parse(data.luggageSelection),
+      });
+
+      return ContentService.createTextOutput(
+        JSON.stringify(result)
+      ).setMimeType(ContentService.MimeType.JSON);
     }
 
     // === Passport submission handler ===
@@ -839,6 +865,149 @@ function savePassportSubmission({
     return {
       success: false,
       error: error.message || "Failed to save passport details.",
+    };
+  }
+}
+
+/**
+ * Ensure Luggage sheet exists with correct headers. Return the sheet.
+ */
+function ensureLuggageSheet() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = spreadsheet.getSheetByName(LUGGAGE_SHEET_NAME);
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(LUGGAGE_SHEET_NAME);
+  }
+
+  // Expected headers: email as PK, then one column per internal flight
+  const headers = ["timestamp", "email", "AEP-BRC", "BRC-MDZ", "MDZ-AEP"];
+
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+    const headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setFontWeight("bold");
+    headerRange.setBackground("#f0f0f0");
+  } else {
+    // Ensure required headers are present
+    const existing = sheet
+      .getRange(1, 1, 1, sheet.getLastColumn())
+      .getValues()[0];
+    const existingSet = new Set(existing);
+    let appended = false;
+    headers.forEach((h) => {
+      if (!existingSet.has(h)) {
+        const nextCol = sheet.getLastColumn() + 1;
+        sheet.getRange(1, nextCol).setValue(h);
+        appended = true;
+      }
+    });
+    if (appended) {
+      const headerRange = sheet.getRange(1, 1, 1, sheet.getLastColumn());
+      headerRange.setFontWeight("bold");
+      headerRange.setBackground("#f0f0f0");
+    }
+  }
+
+  return sheet;
+}
+
+/**
+ * Get luggage selections for a given email (or null if not found)
+ */
+function getLuggageDetails(email) {
+  try {
+    const sheet = ensureLuggageSheet();
+    if (sheet.getLastRow() < 2) return null;
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+    const emailIdx = headers.indexOf("email");
+    if (emailIdx === -1) return null;
+
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const rowEmail = row[emailIdx];
+      if (
+        rowEmail &&
+        rowEmail.toString().toLowerCase().trim() === email.trim().toLowerCase()
+      ) {
+        const obj = {};
+        headers.forEach((h, j) => (obj[h] = row[j]));
+        obj["AEP-BRC"] = obj["AEP-BRC"] === "1" ? true : false;
+        obj["BRC-MDZ"] = obj["BRC-MDZ"] === "1" ? true : false;
+        obj["MDZ-AEP"] = obj["MDZ-AEP"] === "1" ? true : false;
+        return obj;
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting luggage details:", error);
+    return null;
+  }
+}
+
+/**
+ * Save luggage submission. Overwrites existing row for the email if present.
+ */
+function saveLuggageSubmission({ email, luggageSelection }) {
+  try {
+    const sheet = ensureLuggageSheet();
+    const headers = sheet
+      .getRange(1, 1, 1, sheet.getLastColumn())
+      .getValues()[0];
+
+    const timestamp = new Date().toISOString();
+    const rowObject = {
+      timestamp,
+      email,
+      "AEP-BRC": Boolean(luggageSelection?.["AEP-BRC"]) ? "1" : "0",
+      "BRC-MDZ": Boolean(luggageSelection?.["BRC-MDZ"]) ? "1" : "0",
+      "MDZ-AEP": Boolean(luggageSelection?.["MDZ-AEP"]) ? "1" : "0",
+    };
+
+    // Find existing row for email
+    const emailIdx = headers.indexOf("email");
+    let targetRow = -1;
+    if (emailIdx !== -1) {
+      const lastRow = sheet.getLastRow();
+      if (lastRow >= 2) {
+        const values = sheet
+          .getRange(2, 1, lastRow - 1, sheet.getLastColumn())
+          .getValues();
+        for (let i = 0; i < values.length; i++) {
+          const row = values[i];
+          const rowEmail = row[emailIdx];
+          if (
+            rowEmail &&
+            rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
+          ) {
+            targetRow = i + 2; // convert to sheet row number
+            break;
+          }
+        }
+      }
+    }
+
+    const row = headers.map((h) =>
+      rowObject[h] !== undefined ? rowObject[h] : ""
+    );
+
+    if (targetRow === -1) {
+      sheet.appendRow(row);
+    } else {
+      sheet.getRange(targetRow, 1, 1, headers.length).setValues([row]);
+    }
+
+    return {
+      success: true,
+      message: "Luggage selections saved successfully.",
+      luggage: rowObject,
+    };
+  } catch (error) {
+    console.error("Error saving luggage submission:", error);
+    return {
+      success: false,
+      error: error.message || "Failed to save luggage selections.",
     };
   }
 }
