@@ -3,7 +3,7 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbw17mYdTguvxgKaErXTW2d3ZmJutgfW4H2i6Tz5xRpFmtMa2ZMifOoN3bobZBLEs_Ij/exec";
+  "https://script.google.com/macros/s/AKfycbw1-S_IkhW1Oeht0M4tuNBHZrnxetOmyzDMExUVIUlYZKXuY5PHKrw7G4ocv7SmIvzj/exec";
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {
@@ -20,7 +20,6 @@ export const PRICES = {
   tango: 25,
   creditCardFeeRate: 0.0285,
   installmentRate: 0.35,
-  activityValleDeUco: 50,
 };
 
 export const ADMIN_EMAILS = [

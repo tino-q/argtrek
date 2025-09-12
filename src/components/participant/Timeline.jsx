@@ -1,15 +1,11 @@
-import React, {
-  useEffect,
-  useState,
-  useContext,
-  useCallback,
-  useMemo,
-} from "react";
+/* eslint-disable react-perf/jsx-no-new-function-as-prop */
+import { useEffect, useState, useContext, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 import AuthContext from "../../context/AuthContext.jsx";
+import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
-import { APPS_SCRIPT_URL, PRICES, ADMIN_EMAILS } from "../../utils/config.js";
+import { APPS_SCRIPT_URL, ADMIN_EMAILS } from "../../utils/config.js";
 
 import PassportGate from "./PassportGate.jsx";
 
@@ -72,6 +68,7 @@ const filterTimelineData = (timelineData, submissionResult) => {
         case "breakfast":
         case "lunch":
         case "hotel checkout":
+        case "tea":
         case "transportation":
           return bariHotel;
         default:
@@ -94,6 +91,7 @@ const filterTimelineData = (timelineData, submissionResult) => {
         case "drinks":
         case "hotel checkout":
         case "transportation":
+        case "tea":
           return mendozaHotel;
         default:
           throw new Error(
@@ -112,6 +110,7 @@ const filterTimelineData = (timelineData, submissionResult) => {
         case "lunch":
         case "hotel checkout":
         case "transportation":
+        case "tea":
           return bsasDepartureHotel;
         default:
           throw new Error(
@@ -157,20 +156,67 @@ const RecommendationsModal = ({ recommendations, onClose }) => {
   );
 };
 
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  isLoading,
+}) => {
+  const stopPropagation = useCallback((e) => e.stopPropagation(), []);
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <div className="modal-overlay" onClick={isLoading ? undefined : onClose}>
+      <div className="modal-content" onClick={stopPropagation}>
+        <div className="modal-header">
+          <h3>{title}</h3>
+          {!isLoading && (
+            <button className="modal-close" onClick={onClose}>
+              ×
+            </button>
+          )}
+        </div>
+        <div className="modal-body">
+          <p>{message}</p>
+          {isLoading ? (
+            <div className="modal-loading">
+              <div className="loading-spinner" />
+              <p>Saving your choice...</p>
+            </div>
+          ) : (
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={onClose}>
+                Cancel
+              </button>
+              <button className="btn btn-primary" onClick={onConfirm}>
+                Confirm
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Generic, reusable helpers
 
-const ChoicesGroup = ({ name, options, selectedValue, onChange, isSaving }) => {
-  const handleRadioChange = useCallback(
-    (e) => {
-      onChange(name, e.target.value);
-    },
-    [name, onChange]
-  );
-
+const ChoicesGroup = ({ name, options, onClickChoice, isSaving }) => {
   if (!Array.isArray(options) || options.length === 0) {
     return null;
   }
-  const normalized = options.map((opt) => String(opt).trim()).filter(Boolean);
+  // Accept strings or objects { label, value }
+  const normalized = options
+    .map((opt) => ({
+      label: String(opt.label).trim(),
+      value: String(opt.value).trim(),
+    }))
+    .filter((opt) => opt.label && opt.value);
 
   return (
     <div
@@ -183,173 +229,312 @@ const ChoicesGroup = ({ name, options, selectedValue, onChange, isSaving }) => {
         <span className="saving-text">Saving...</span>
       ) : (
         normalized.map((choice) => (
-          <label key={choice} className="choice-option">
-            <input
-              type="radio"
-              name={name}
-              value={choice}
-              checked={selectedValue === choice}
-              onChange={handleRadioChange}
-              disabled={isSaving}
-            />
-            <span className="choice-label">{choice}</span>
-          </label>
+          <button
+            className="choice-option"
+            key={choice.value}
+            onClick={() => onClickChoice(name, choice.value)}
+            disabled={isSaving}
+          >
+            {choice.label}
+          </button>
         ))
       )}
     </div>
   );
 };
 
+const renderSimpleTimelineItem = (...parts) => {
+  const [part1, ...rest] = parts;
+  return (
+    <div className="timeline-parameter">
+      <div className="parameter-main">
+        <span className="parameter-text">{part1}</span>
+      </div>
+      {rest.map((line, index) =>
+        typeof line === "string" ? (
+          <div key={line || `detail-${index}`} className="parameter-detail">
+            {line}
+          </div>
+        ) : (
+          // eslint-disable-next-line react/no-array-index-key
+          <div key={index} className="parameter-detail">
+            {line}
+          </div>
+        )
+      )}
+    </div>
+  );
+};
+
 const TimelineRow = ({
+  pricing,
   start,
   end,
   parameter1,
   recommendations,
   onRecommendationClick,
-  choices,
-  // itemKey,
-  // selectedChoice,
-  onChoiceChange,
-  // isSaving,
-  formData,
+  choicesIdentifier,
+  showConfirmationModal,
   activityChoices,
   savingChoices,
+  raftingCount,
+  raftingMinRequired,
   isIncluded = true,
 }) => {
+  if (!parameter1) {
+    return null;
+  }
+
+  const parameter1parts = parameter1
+    .split("//")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
   const timeDisplay = start && end ? `${start} - ${end}` : start || end || "";
 
-  const createJoinHandler = useCallback(
-    (choiceItemKey) => {
-      return () => onChoiceChange(choiceItemKey, "yes");
-    },
-    [onChoiceChange]
-  );
-
-  const renderParameter = () => {
-    if (!parameter1) {
+  const renderChoiceTimelineItem = () => {
+    if (!choicesIdentifier) {
       return null;
     }
 
-    const lines = parameter1
-      .split("//")
-      .map((line) => line.trim())
-      .filter(Boolean);
-    if (lines.length === 0) {
-      return null;
+    const choiceSelectedValue = activityChoices?.[choicesIdentifier];
+    const choiceIsSaving = savingChoices?.has(choicesIdentifier);
+
+    switch (choicesIdentifier) {
+      case "cuartito":
+        return elCuartitoPicker();
+      case "tango":
+        return tangoPicker();
+      case "rafting":
+        return raftingPicker();
+      case "activity-valle-de-uco":
+        return valleDeUcoPicker();
+      default:
+        throw new Error(`Unknown identifier: ${choicesIdentifier}`);
     }
 
-    return (
-      <div className="timeline-parameter">
-        <div className="parameter-main">
-          <span className="parameter-text">{lines[0]}</span>
-        </div>
-        {lines.slice(1).map((line, index) => (
-          <div key={line || `detail-${index}`} className="parameter-detail">
-            {line}
-          </div>
-        ))}
-      </div>
-    );
-  };
+    function elCuartitoPicker() {
+      const joinedCuartito = choiceSelectedValue === "cuartito";
 
-  const renderChoices = () => {
-    if (!choices || !choices.trim()) {
-      return null;
-    }
-
-    const identifier = choices.trim();
-
-    // Only handle specific identifiers
-    if (!["tango", "rafting", "activity-valle-de-uco"].includes(identifier)) {
-      return null;
-    }
-
-    // Handle join-type activities (tango, rafting)
-    if (["tango", "rafting"].includes(identifier.trim())) {
-      // Use identifier as itemKey for choices
-      const choiceItemKey = identifier.trim();
-      const choiceSelectedValue = activityChoices?.[choiceItemKey];
-      const choiceIsSaving = savingChoices?.has(choiceItemKey);
-
-      // Check if user already registered in formData or has made a choice
-      const hasRegistered = formData?.[choiceItemKey];
-      const hasChosen = choiceSelectedValue === "yes";
-
-      if (hasRegistered || hasChosen) {
+      if (joinedCuartito) {
         return (
-          <div className="timeline-choices">
-            <div className="registered-status">You're registered!</div>
+          <div>
+            {renderSimpleTimelineItem(
+              ...parameter1parts,
+              <div style={{ marginTop: "0.5rem" }}>
+                <div className="activity-price">${pricing}</div>
+              </div>
+            )}
           </div>
         );
       }
-      const price = PRICES?.[choiceItemKey];
+
+      return (
+        <>
+          {!joinedCuartito && (
+            <div className={`has-choices light`}>
+              {renderSimpleTimelineItem(
+                "Lunch on my own",
+                "I will join the group after lunch for the city tour",
+                <div>
+                  @ 14:30 @{" "}
+                  <a
+                    href="https://maps.app.goo.gl/54cPdbaqNACTU7ua6"
+                    target="_blank"
+                  >
+                    maps
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div
+            className={`has-choices ${joinedCuartito ? "selected-choice" : ""}`}
+          >
+            {<div className="optional-activity-label">Paid Add-On</div>}
+            {renderSimpleTimelineItem(...parameter1parts)}
+
+            <div className="timeline-choices">
+              <div className="choice-row">
+                {joinedCuartito && (
+                  <div className="activity-price">You're registered!</div>
+                )}
+                {!joinedCuartito && (
+                  <ChoicesGroup
+                    name={choicesIdentifier}
+                    options={[{ label: "I want to join", value: "cuartito" }]}
+                    onClickChoice={showConfirmationModal}
+                    isSaving={choiceIsSaving}
+                  />
+                )}
+
+                {pricing && <div className="activity-price">${pricing}</div>}
+              </div>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    function tangoPicker() {
+      const joinedTango = choiceSelectedValue === "tango";
+      if (joinedTango) {
+        return (
+          <div>
+            {renderSimpleTimelineItem(
+              ...parameter1parts,
+              <div style={{ marginTop: "0.5rem" }}>
+                <div className="activity-price">${pricing}</div>
+              </div>
+            )}
+          </div>
+        );
+      }
       return (
         <div className="timeline-choices">
-          <div className="price-button-row">
-            {price && <div className="activity-price">${price}</div>}
-            <button
-              className="join-button"
-              onClick={createJoinHandler(choiceItemKey)}
-              disabled={choiceIsSaving}
-            >
-              {choiceIsSaving ? "Joining..." : "I want to join"}
-            </button>
+          <div className="has-choices">
+            {<div className="optional-activity-label">Paid Add-On</div>}
+
+            {renderSimpleTimelineItem(...parameter1parts)}
+
+            <div className="timeline-choices">
+              <div className="choice-row">
+                {joinedTango && (
+                  <div className="activity-price">You're registered!</div>
+                )}
+                {!joinedTango && (
+                  <ChoicesGroup
+                    name={choicesIdentifier}
+                    options={[{ label: "I want to join", value: "tango" }]}
+                    onClickChoice={showConfirmationModal}
+                    isSaving={choiceIsSaving}
+                  />
+                )}
+
+                {pricing && <div className="activity-price">${pricing}</div>}
+              </div>
+            </div>
           </div>
         </div>
       );
     }
 
-    // Handle activity-valle-de-uco
-    if (identifier === "activity-valle-de-uco") {
-      // Use identifier as itemKey for choices
-      const choiceItemKey = "activity-valle-de-uco";
-      const choiceSelectedValue = activityChoices?.[choiceItemKey];
-      const choiceIsSaving = savingChoices?.has(choiceItemKey);
-      const choiceOptions = ["Horseback Riding", "Hiking"];
-      const price = PRICES?.activityValleDeUco;
-
+    function raftingPicker() {
+      const totalNeeded =
+        typeof raftingMinRequired === "number" && raftingMinRequired > 0
+          ? raftingMinRequired
+          : 40;
+      const currentCount = typeof raftingCount === "number" ? raftingCount : 0;
+      const pct = Math.max(
+        0,
+        Math.min(100, Math.round((currentCount / totalNeeded) * 100))
+      );
+      const joinedRafting = choiceSelectedValue === "rafting";
       return (
         <div className="timeline-choices">
-          <div className="valle-choice-row">
-            {price && <div className="activity-price">${price}</div>}
+          <div className="has-choices">
+            {renderSimpleTimelineItem(...parameter1parts)}
+
+            <div className="timeline-progress">
+              <div className="progress-header">
+                {currentCount}/{totalNeeded} registered
+              </div>
+              <div className="progress-bar-container">
+                <div className="progress-bar">
+                  <div className="progress-fill" style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+              <div className="progress-note">
+                We need at least {totalNeeded} participants to run this
+                activity.
+              </div>
+            </div>
+
+            {/* {joinedRafting ? (
+              <div className="activity-price">You're registered!</div>
+            ) : (
+              <div className="price-button-row">
+                {pricing && <div className="activity-price">${pricing}</div>}
+                <button
+                  className="join-button"
+                  onClick={() =>
+                    showConfirmationModal(choicesIdentifier, "rafting")
+                  }
+                  disabled={choiceIsSaving}
+                >
+                  {choiceIsSaving ? "Joining..." : "I want to join"}
+                </button>
+              </div>
+            )} */}
+
+            <div className="choice-row">
+              {!joinedRafting && (
+                <ChoicesGroup
+                  name={choicesIdentifier}
+                  options={[{ label: "I want to join", value: "rafting" }]}
+                  onClickChoice={showConfirmationModal}
+                  isSaving={choiceIsSaving}
+                />
+              )}
+
+              {pricing && <div className="activity-price">${pricing}</div>}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function valleDeUcoPicker() {
+      return (
+        <div className="timeline-choices">
+          <div className="choice-row">
+            {pricing && <div className="activity-price">${pricing}</div>}
             <ChoicesGroup
-              name={choiceItemKey}
-              options={choiceOptions}
-              selectedValue={choiceSelectedValue}
-              onChange={onChoiceChange}
+              name={choicesIdentifier}
+              options={[
+                { label: "Horseback Riding", value: "horseback" },
+                { label: "Hiking", value: "hiking" },
+              ]}
+              onClickChoice={showConfirmationModal}
               isSaving={choiceIsSaving}
             />
           </div>
         </div>
       );
     }
-
-    return null;
   };
 
   const hasRecommendations = recommendations && recommendations.trim();
   const hasChoices =
-    choices &&
-    choices.trim() &&
-    ["tango", "rafting", "activity-valle-de-uco"].includes(choices.trim());
+    choicesIdentifier &&
+    choicesIdentifier.trim() &&
+    ["tango", "rafting", "activity-valle-de-uco", "cuartito"].includes(
+      choicesIdentifier.trim()
+    );
   const handleClick = hasRecommendations
     ? () => onRecommendationClick(recommendations)
     : undefined;
 
   return (
     <div className="timeline-row-wrapper">
-      {hasChoices && <div className="optional-activity-label">Paid Add-On</div>}
       <div
-        className={`timeline-item-row-mobile ${hasRecommendations ? "clickable" : ""} ${hasChoices ? "has-choices" : ""} ${!isIncluded ? "not-included" : ""}`}
+        className={`timeline-item-row-mobile ${hasRecommendations ? "clickable" : ""}  ${!isIncluded ? "not-included" : ""}`}
         onClick={handleClick}
       >
         <div className="timeline-mobile-content">
           <div className="timeline-time">{timeDisplay}</div>
         </div>
-        <div className="timeline-right-column">
-          {renderParameter()}
-          {renderChoices()}
-        </div>
+
+        {!hasChoices ? (
+          <div className={`timeline-right-column`}>
+            {renderSimpleTimelineItem(...parameter1parts)}
+          </div>
+        ) : (
+          <div className={`timeline-right-column`}>
+            {renderChoiceTimelineItem()}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -365,8 +550,18 @@ const Timeline = () => {
   const [activityChoices, setActivityChoices] = useState({});
   const [savingChoices, setSavingChoices] = useState(new Set());
   const [showAllItems, setShowAllItems] = useState(false);
+  const [raftingCount, setRaftingCount] = useState(null);
+  const [confirmationModal, setConfirmationModal] = useState({
+    isOpen: false,
+    itemKey: null,
+    choice: null,
+    title: "",
+    message: "",
+    isLoading: false,
+  });
   const { email: userEmail, password: userPassword } = useContext(AuthContext);
   const { formData, submissionResult } = useTripContext();
+  const { showError } = useNotificationContext();
 
   // Passport presence from context (set at login or via PassportGate)
   const hasPassport = Boolean(submissionResult?.passport);
@@ -435,50 +630,118 @@ const Timeline = () => {
     setShowAllItems(e.target.checked);
   }, []);
 
-  const handleChoiceSelection = async (itemKey, choice) => {
-    if (!userEmail || !userPassword) {
-      console.error("Cannot save choice: User credentials not available");
-      return;
-    }
+  const showConfirmationModal = useCallback((itemKey, choice) => {
+    setConfirmationModal({
+      isOpen: true,
+      itemKey,
+      choice,
+      title: "Are you sure?",
+      message:
+        "This action cannot be undone and will have to be amended via Maddie.",
+    });
+  }, []);
 
-    setSavingChoices((prev) => new Set(prev).add(itemKey));
+  const closeConfirmationModal = useCallback(() => {
+    setConfirmationModal({
+      isOpen: false,
+      itemKey: null,
+      choice: null,
+      title: "",
+      message: "",
+      isLoading: false,
+    });
+  }, []);
 
-    try {
-      const formData = new FormData();
-      formData.append("action", "update_choices");
-      formData.append("email", userEmail);
-      formData.append("password", userPassword);
-      formData.append("itemKey", itemKey);
-      formData.append("choice", choice);
+  const handleChoiceSelection = useCallback(
+    async (itemKey, choice) => {
+      if (!userEmail || !userPassword) {
+        console.error("Cannot save choice: User credentials not available");
+        return;
+      }
 
-      const response = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-      if (!data.success) {
-        console.error("Failed to save choice:", data.error);
-        // Don't update state on failure
-      } else {
-        console.log("Choice saved successfully:", itemKey, choice);
-        // Only update state after successful save
+      if (__DEV__) {
+        console.log("Saving choice:", itemKey, choice);
+        setSavingChoices((prev) => new Set(prev).add(itemKey));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         setActivityChoices((prev) => ({
           ...prev,
           [itemKey]: choice,
         }));
+        setSavingChoices((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(itemKey);
+          return newSet;
+        });
+        if (itemKey === "rafting" && choice === "rafting") {
+          setRaftingCount((prev) =>
+            typeof prev === "number" ? prev + 1 : prev
+          );
+        }
+        return;
       }
-    } catch (err) {
-      console.error("Error saving choice:", err);
-      // Don't update state on error
-    } finally {
-      setSavingChoices((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(itemKey);
-        return newSet;
-      });
+
+      setSavingChoices((prev) => new Set(prev).add(itemKey));
+
+      try {
+        const formData = new FormData();
+        formData.append("action", "update_choices");
+        formData.append("email", userEmail);
+        formData.append("password", userPassword);
+        formData.append("itemKey", itemKey);
+        formData.append("choice", choice);
+
+        const response = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (!data.success) {
+          console.error("Failed to save choice:", data.error);
+          // Don't update state on failure
+        } else {
+          console.log("Choice saved successfully:", itemKey, choice);
+          // Only update state after successful save
+          setActivityChoices((prev) => ({
+            ...prev,
+            [itemKey]: choice,
+          }));
+          if (itemKey === "rafting" && choice === "yes") {
+            setRaftingCount((prev) =>
+              typeof prev === "number" ? prev + 1 : prev
+            );
+          }
+        }
+      } catch (err) {
+        console.error("Error saving choice:", err);
+        // Don't update state on error
+      } finally {
+        setSavingChoices((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(itemKey);
+          return newSet;
+        });
+      }
+    },
+    [userEmail, userPassword]
+  );
+
+  const confirmChoice = useCallback(async () => {
+    const { itemKey, choice } = confirmationModal;
+
+    // Set loading state
+    setConfirmationModal((prev) => ({ ...prev, isLoading: true }));
+
+    try {
+      await handleChoiceSelection(itemKey, choice);
+      // Close modal after successful save
+      closeConfirmationModal();
+    } catch (error) {
+      // Reset loading state on error, keep modal open
+      setConfirmationModal((prev) => ({ ...prev, isLoading: false }));
+      console.error("Error confirming choice:", error);
     }
-  };
+  }, [confirmationModal, closeConfirmationModal, handleChoiceSelection]);
 
   const isChoiceSaving = (itemKey) => {
     return savingChoices.has(itemKey);
@@ -488,10 +751,6 @@ const Timeline = () => {
     return `${dayKey}-${itemIndex}-${item.CATEGORY}`;
   };
 
-  // Mock in-memory store for localhost
-  const mockChoicesStore = React.useRef(new Map());
-
-  // Stable handler for PassportGate success
   const onPassportSuccess = useCallback(() => {
     setLoading(true);
   }, []);
@@ -528,16 +787,22 @@ const Timeline = () => {
 
         if (!timelineData) {
           // Fetch fresh data
+
+          // if (!__DEV__) {
           const response = await fetch(`${APPS_SCRIPT_URL}?endpoint=timeline`);
           const { success, data: timelineDataNew } = await response.json();
-          if (success) {
+          const s = success;
+          const d = timelineDataNew;
+          // } else {
+          //   s = true;
+          //   d = HARDCODED_TIMELINE_DATA.data;
+          // }
+
+          if (s) {
             // Cache the data with timestamp
-            localStorage.setItem(
-              "timelineData",
-              JSON.stringify(timelineDataNew)
-            );
+            localStorage.setItem("timelineData", JSON.stringify(d));
             localStorage.setItem("timelineDataTimestamp", now.toString());
-            timelineData = timelineDataNew;
+            timelineData = d;
           }
         }
 
@@ -569,34 +834,51 @@ const Timeline = () => {
       }
 
       try {
-        if (__DEV__) {
-          await new Promise((resolve) => setTimeout(resolve, 300));
-          const userKey = `${userEmail}-${userPassword}`;
-          const userChoices = mockChoicesStore.current.get(userKey) || {};
-          setActivityChoices(userChoices);
-        } else {
+        if (!__DEV__) {
           const response = await fetch(
             `${APPS_SCRIPT_URL}?endpoint=choices&email=${encodeURIComponent(userEmail)}&password=${encodeURIComponent(userPassword)}`
           );
           const data = await response.json();
 
-          if (data.success) {
-            setActivityChoices(data.data || {});
-            console.log("User choices loaded:", data.data);
-          } else {
-            console.error("Failed to load user choices:", data.error);
-            setActivityChoices({});
+          if (!data.success) {
+            throw data;
           }
+
+          setActivityChoices(data.data || {});
+          console.log("User choices loaded:", data.data);
         }
       } catch (err) {
         console.error("Error fetching user choices:", err);
-        setActivityChoices({});
+      }
+    };
+
+    const fetchRaftingCount = async () => {
+      if (__DEV__) {
+        setRaftingCount(10);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${APPS_SCRIPT_URL}?endpoint=rafting_count`
+        );
+        const data = await response.json();
+        if (data.success) {
+          setRaftingCount(typeof data.count === "number" ? data.count : 0);
+        } else {
+          setRaftingCount(0);
+          showError("Failed to load rafting count");
+        }
+      } catch (err) {
+        console.error("Error fetching rafting count:", err);
+        setRaftingCount(0);
       }
     };
 
     fetchTimelineData();
     fetchUserChoices();
-  }, [hasPassport, userEmail, userPassword]);
+    fetchRaftingCount();
+  }, [hasPassport, userEmail, userPassword, showError]);
 
   // TODO: remove this after construction
   if (!ADMIN_EMAILS.includes(userEmail)) {
@@ -670,6 +952,7 @@ const Timeline = () => {
   };
 
   const isDayCollapsed = (dayKey) => {
+    return false;
     return collapsedDays.has(dayKey);
   };
 
@@ -696,21 +979,21 @@ const Timeline = () => {
         parameter1={parameter1}
         recommendations={item.RECOMMENDATIONS}
         onRecommendationClick={handleRecommendationClick}
-        choices={item.CHOICES}
+        choicesIdentifier={item.CHOICES?.trim().toLowerCase()}
         itemKey={itemKey}
         selectedChoice={selectedChoice}
-        onChoiceChange={handleChoiceSelection}
+        showConfirmationModal={showConfirmationModal}
         isSaving={isSaving}
         formData={formData}
         activityChoices={activityChoices}
         savingChoices={savingChoices}
+        pricing={item["PRICING"]}
+        raftingCount={raftingCount}
         isIncluded={item.isIncluded}
       />
     );
   };
 
-  console.log("hasPassport", { hasPassport });
-  // If passport missing, show gate form
   if (!hasPassport) {
     return <PassportGate onSuccess={onPassportSuccess} />;
   }
@@ -802,6 +1085,14 @@ const Timeline = () => {
             onClose={closeModal}
           />
         )}
+        <ConfirmationModal
+          isOpen={confirmationModal.isOpen}
+          title={confirmationModal.title}
+          message={confirmationModal.message}
+          isLoading={confirmationModal.isLoading}
+          onClose={closeConfirmationModal}
+          onConfirm={confirmChoice}
+        />
       </div>
     </div>
   );

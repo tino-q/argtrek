@@ -155,7 +155,7 @@ const EmailLogin = () => {
       try {
         let result;
 
-        if (__DEV__) {
+        if (false && __DEV__) {
           result = { data: hardcodedProfile };
         } else {
           const response = await fetch(

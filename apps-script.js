@@ -89,6 +89,11 @@ function doGet(e) {
       return getUserChoices(e.parameter.email, e.parameter.password);
     }
 
+    // Check if this is a rafting registrations count request
+    if (e.parameter.endpoint === "rafting_count") {
+      return getRaftingRegistrationsCount();
+    }
+
     // Check if this is a voucher download request
     if (e.parameter.endpoint === "download_voucher") {
       return downloadVoucher(e.parameter.email, e.parameter.password);
@@ -127,6 +132,117 @@ function doGet(e) {
       JSON.stringify({
         success: false,
         error: "Internal server error. Please contact Maddie for assistance.",
+      })
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * Get rafting registrations count across Trip Registrations and CHOICES sheets.
+ * Logic:
+ * - Build latest choice per email for itemKey 'rafting' from CHOICES (event-sourced using highest counter)
+ * - Load Trip Registrations and read formData.rafting column
+ * - Final inclusion per email:
+ *   - If latest CHOICES for rafting exists: include if 'yes', exclude if 'no'
+ *   - Else fall back to formData.rafting truthiness
+ */
+function getRaftingRegistrationsCount() {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+
+    // --- Load CHOICES latest per email for rafting ---
+    const choicesSheet = spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
+    const latestChoiceByEmail = {};
+    if (choicesSheet && choicesSheet.getLastRow() >= 2) {
+      const values = choicesSheet.getDataRange().getValues();
+      const headers = values[0];
+      const emailIdx = headers.indexOf("email");
+      const itemKeyIdx = headers.indexOf("itemKey");
+      const choiceIdx = headers.indexOf("choice");
+      const counterIdx = headers.indexOf("counter");
+
+      if (
+        emailIdx !== -1 &&
+        itemKeyIdx !== -1 &&
+        choiceIdx !== -1 &&
+        counterIdx !== -1
+      ) {
+        // Track highest counter per email for rafting
+        const maxCounterByEmail = {};
+        for (let i = 1; i < values.length; i++) {
+          const row = values[i];
+          const email = (row[emailIdx] || "").toString().toLowerCase().trim();
+          const itemKey = (row[itemKeyIdx] || "").toString().trim();
+          if (!email || itemKey !== "rafting") continue;
+          const choiceVal = (row[choiceIdx] || "")
+            .toString()
+            .toLowerCase()
+            .trim();
+          const counterVal = parseInt(row[counterIdx]) || 0;
+          if (
+            maxCounterByEmail[email] === undefined ||
+            counterVal > maxCounterByEmail[email]
+          ) {
+            maxCounterByEmail[email] = counterVal;
+            latestChoiceByEmail[email] = choiceVal; // 'yes' or 'no'
+          }
+        }
+      }
+    }
+
+    // --- Load Trip Registrations formData.rafting ---
+    const regsSheet = spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
+    const formRaftingByEmail = {};
+    if (regsSheet && regsSheet.getLastRow() >= 2) {
+      const values = regsSheet.getDataRange().getValues();
+      const headers = values[0];
+      const emailIdx = headers.indexOf("rsvpData.email");
+      const raftingIdx = headers.indexOf("formData.rafting");
+      if (emailIdx !== -1 && raftingIdx !== -1) {
+        for (let i = 1; i < values.length; i++) {
+          const row = values[i];
+          const email = (row[emailIdx] || "").toString().toLowerCase().trim();
+          if (!email) continue;
+          const raftingVal = row[raftingIdx];
+          // Normalize truthy values: true boolean, 'true', 'yes', '1', 'x'
+          let isTrue = false;
+          if (typeof raftingVal === "boolean") {
+            isTrue = raftingVal;
+          } else if (typeof raftingVal === "string") {
+            const v = raftingVal.toLowerCase().trim();
+            isTrue = v === "true" || v === "yes" || v === "1" || v === "x";
+          } else if (typeof raftingVal === "number") {
+            isTrue = raftingVal === 1;
+          }
+          formRaftingByEmail[email] = Boolean(isTrue);
+        }
+      }
+    }
+
+    // --- Combine with precedence to CHOICES ---
+    const emailSet = new Set([
+      ...Object.keys(formRaftingByEmail),
+      ...Object.keys(latestChoiceByEmail),
+    ]);
+
+    let count = 0;
+    for (const email of emailSet) {
+      if (latestChoiceByEmail[email] !== undefined) {
+        if (latestChoiceByEmail[email] === "yes") count++;
+      } else if (formRaftingByEmail[email]) {
+        count++;
+      }
+    }
+
+    return ContentService.createTextOutput(
+      JSON.stringify({ success: true, count: count })
+    ).setMimeType(ContentService.MimeType.JSON);
+  } catch (error) {
+    console.error("Error getting rafting registrations count:", error);
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: "Failed to retrieve rafting registrations count",
       })
     ).setMimeType(ContentService.MimeType.JSON);
   }
