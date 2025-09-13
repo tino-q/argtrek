@@ -134,7 +134,7 @@ body {
 .container {
   /* width: 100%; */
   /* max-width: 1200px; */
-  margin-top: 20px;
+  margin-top: 1rem;
 }
 
 /* App root div - Responsive with proper margins and max-width */

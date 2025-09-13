@@ -426,8 +426,6 @@
   border-radius: 12px;
   border: 2px solid var(--border-light);
   box-shadow: 0 4px 16px var(--shadow-dark);
-  padding: 2rem;
-  margin-bottom: 2rem;
 }
 
 .payment-summary-header {

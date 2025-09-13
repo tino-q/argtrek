@@ -5,7 +5,7 @@ import { useTripContext } from "../../hooks/useTripContext";
 import { APPS_SCRIPT_URL } from "../../utils/config.js";
 import "./PassportGate.css";
 
-const PassportGate = ({ onSuccess }) => {
+const PassportGate = () => {
   const { email, password } = useContext(AuthContext);
   const { setSubmissionResult, submissionResult } = useTripContext();
 
@@ -87,7 +87,6 @@ const PassportGate = ({ onSuccess }) => {
         }
 
         setSuccessMsg("Passport details saved. Loading timeline...");
-        onSuccess?.();
       } catch (err) {
         console.error("Error submitting passport:", err);
         setError("Unexpected error. Please try again.");
@@ -106,7 +105,6 @@ const PassportGate = ({ onSuccess }) => {
       ackHealthInsurance,
       ackTravelInsurance,
       ackTerms,
-      onSuccess,
       setSubmissionResult,
     ]
   );

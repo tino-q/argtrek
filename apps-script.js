@@ -9,7 +9,7 @@
 /* global ContentService, SpreadsheetApp, Utilities, DriveApp, UrlFetchApp */
 
 const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbw17mYdTguvxgKaErXTW2d3ZmJutgfW4H2i6Tz5xRpFmtMa2ZMifOoN3bobZBLEs_Ij/exec";
+  "https://script.google.com/macros/s/AKfycby0wzW5_vwQw7oeddcMZzZ5RYeebIbm3b_5Rr1_Q7EyqmDDGtbS41jfwqkX_0M4LPoK/exec";
 const MG_KEY = "<REDACTED>";
 const REDSYS_USER = "<REDACTED>";
 const REDSYS_PASS = "<REDACTED>"; // Note: \u0021 is '!'
@@ -2316,12 +2316,14 @@ function getUserChoices(email) {
     const itemKeyColumnIndex = headers.indexOf("itemKey");
     const choiceColumnIndex = headers.indexOf("choice");
     const counterColumnIndex = headers.indexOf("counter");
+    const optionColumnIndex = headers.indexOf("option");
 
     if (
       emailColumnIndex === -1 ||
       itemKeyColumnIndex === -1 ||
       choiceColumnIndex === -1 ||
-      counterColumnIndex === -1
+      counterColumnIndex === -1 ||
+      optionColumnIndex === -1
     ) {
       throw new Error("Required columns not found in CHOICES sheet");
     }
@@ -2337,17 +2339,19 @@ function getUserChoices(email) {
       const itemKey = row[itemKeyColumnIndex];
       const choice = row[choiceColumnIndex];
       const counter = parseInt(row[counterColumnIndex]) || 0;
+      const option = row[optionColumnIndex];
 
       if (
         rowEmail &&
         rowEmail.toString().toLowerCase().trim() === email.toLowerCase() &&
         itemKey &&
-        choice
+        choice &&
+        option
       ) {
         // Check if this is the latest choice for this itemKey
-        const existing = latestChoices.get(itemKey);
+        const existing = latestChoices.get(`${itemKey}-${option}`);
         if (!existing || counter > existing.counter) {
-          latestChoices.set(itemKey, { choice, counter });
+          latestChoices.set(`${itemKey}-${option}`, { choice, counter });
         }
       }
     }
@@ -2357,12 +2361,7 @@ function getUserChoices(email) {
       userChoices[itemKey] = choice;
     }
 
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: true,
-        data: userChoices,
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
+    return userChoices;
   } catch (error) {
     console.error("Error getting user choices:", error);
     return ContentService.createTextOutput(
@@ -2380,7 +2379,13 @@ function getUserChoices(email) {
 function updateUserChoices(data) {
   try {
     // Validate required fields
-    if (!data.email || !data.password || !data.itemKey || !data.choice) {
+    if (
+      !data.email ||
+      !data.password ||
+      !data.itemKey ||
+      !data.option ||
+      !data.choice
+    ) {
       return ContentService.createTextOutput(
         JSON.stringify({
           success: false,
@@ -2422,13 +2427,14 @@ function updateUserChoices(data) {
       timestamp,
       data.email,
       data.itemKey,
+      data.option,
       data.choice,
       nextCounter,
     ];
     sheet.appendRow(newRow);
 
     console.log(
-      `Added new choice event for ${data.email} - ${data.itemKey}: ${data.choice} (counter: ${nextCounter})`
+      `Added new choice event for ${data.email} - ${data.itemKey}: ${data.option} - ${data.choice} (counter: ${nextCounter})`
     );
 
     return ContentService.createTextOutput(

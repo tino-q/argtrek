@@ -156,6 +156,10 @@
   gap: 0.375rem;
 }
 
+.optional-activity-label.grey {
+  color: var(--text-secondary);
+}
+
 .optional-activity-label {
   font-size: 0.75rem;
   font-weight: 500;
@@ -233,13 +237,19 @@
   margin-top: 0.5rem;
 }
 
+.activity-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
 .activity-price {
   color: var(--success-primary, #28a745);
   padding: 0.25rem 0.5rem;
   font-size: 0.8rem;
   background: var(--success-bg, rgba(40, 167, 69, 0.1));
   border-radius: 4px;
-  display: inline-block;
 }
 
 .choice-prompt {
@@ -279,10 +289,6 @@
 
 .timeline-item-row-mobile.clickable:hover {
   background-color: var(--bg-light);
-}
-
-.has-choices.selected-choice {
-  border: 3px solid var(--primary-light, #90caf9);
 }
 
 .has-choices.light {
@@ -492,6 +498,11 @@
 .meal-pricing.own-expense {
   background: var(--warning-bg);
   color: var(--warning-primary);
+}
+
+.activity-choices {
+  display: flex;
+  gap: 0.25rem;
 }
 
 .activity-content {

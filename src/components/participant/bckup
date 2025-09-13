@@ -13,6 +13,91 @@ import PassportGate from "./PassportGate.jsx";
 
 import "./Timeline.css";
 
+const getItemKey = (item, dayKey, itemIndex) => {
+  return `${dayKey}-${itemIndex}-${item.CATEGORY}`;
+};
+
+const SimpleTimelineItem = ({ parts, pin }) => {
+  const [part1, ...rest] = parts;
+  return (
+    <div className="timeline-parameter">
+      <div className="parameter-main">
+        <span className="parameter-text">{part1}</span>
+      </div>
+      {rest.map((line, index) => {
+        if (typeof line === "string") {
+          if (line.trim().toLowerCase().includes("see location on map")) {
+            return (
+              <div key={line || `detail-${index}`} className="parameter-detail">
+                <a href={pin} target="_blank">
+                  {line}
+                </a>
+              </div>
+            );
+          }
+
+          return (
+            <div key={line || `detail-${index}`} className="parameter-detail">
+              {line}
+            </div>
+          );
+        }
+
+        return (
+          // eslint-disable-next-line react/no-array-index-key
+          <div key={index} className="parameter-detail">
+            {line}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const useRaftingCount = () => {
+  const { showError } = useNotificationContext();
+  const [raftingCount, setRaftingCount] = useState(null);
+
+  useEffect(() => {
+    const fetchRaftingCount = async () => {
+      if (__DEV__) {
+        setRaftingCount(10);
+        return;
+      }
+
+      try {
+        const count = await fetchWithCache(
+          "raftingCount",
+          async () => {
+            const response = await fetch(
+              `${APPS_SCRIPT_URL}?endpoint=rafting_count`
+            );
+            const data = await response.json();
+            if (data.success) {
+              return typeof data.count === "number" ? data.count : 0;
+            }
+            throw new Error("Failed to load rafting count");
+          },
+          CACHE_DURATIONS.FIVE_MINUTES
+        );
+
+        setRaftingCount(count);
+      } catch (err) {
+        console.error("Error fetching rafting count:", err);
+        setRaftingCount(0);
+        showError("Failed to load rafting count");
+      }
+    };
+    fetchRaftingCount();
+  }, [showError]);
+
+  const onJoinRafting = useCallback(() => {
+    setRaftingCount((prev) => (typeof prev === "number" ? prev + 1 : prev));
+  }, []);
+
+  return { raftingCount, onJoinRafting };
+};
+
 const filterTimelineData = (timelineData, submissionResult) => {
   const { row } = submissionResult;
   const buenosAiresArrivalHotel =
@@ -232,6 +317,238 @@ const ChoicesGroup = ({ name, options, onClickChoice, isSaving }) => {
   );
 };
 
+const TangoPicker = ({
+  choicesIdentifier,
+  choiceSelectedValue,
+  parameter1parts,
+  showConfirmationModal,
+  choiceIsSaving,
+  pricing,
+  pin,
+}) => {
+  const joinedTango = choiceSelectedValue === "tango";
+  if (joinedTango) {
+    return (
+      <div>
+        <SimpleTimelineItem
+          parts={[
+            ...parameter1parts,
+            <div key="pricing" style={{ marginTop: "0.5rem" }}>
+              <div className="activity-price">${pricing}</div>
+            </div>,
+          ]}
+          pin={pin}
+        />
+      </div>
+    );
+  }
+  return (
+    <div className="timeline-choices">
+      <div className="has-choices">
+        {<div className="optional-activity-label">Paid Add-On</div>}
+
+        <SimpleTimelineItem parts={parameter1parts} pin={pin} />
+
+        <div className="timeline-choices">
+          <div className="choice-row">
+            {joinedTango && (
+              <div className="activity-price">You're registered!</div>
+            )}
+            {!joinedTango && (
+              <ChoicesGroup
+                name={choicesIdentifier}
+                options={[{ label: "I want to join", value: "tango" }]}
+                onClickChoice={showConfirmationModal}
+                isSaving={choiceIsSaving}
+              />
+            )}
+
+            {pricing && <div className="activity-price">${pricing}</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const RaftingPicker = ({
+  choicesIdentifier,
+  choiceSelectedValue,
+  parameter1parts,
+  showConfirmationModal,
+  choiceIsSaving,
+  pricing,
+  pin,
+}) => {
+  const totalNeeded = 40;
+  const { raftingCount } = useRaftingCount();
+  const currentCount = typeof raftingCount === "number" ? raftingCount : 0;
+  const pct = Math.max(
+    0,
+    Math.min(100, Math.round((currentCount / totalNeeded) * 100))
+  );
+  const joinedRafting = choiceSelectedValue === "rafting";
+
+  function raftingSelection() {
+    return (
+      <div className="has-choices">
+        <SimpleTimelineItem parts={parameter1parts} pin={pin} />
+
+        <div className="timeline-progress">
+          <div className="progress-header">
+            {currentCount}/{totalNeeded} registered
+          </div>
+          <div className="progress-bar-container">
+            <div className="progress-bar">
+              <div className="progress-fill" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+          <div className="progress-note">
+            We need at least {totalNeeded} participants to run this activity.
+          </div>
+        </div>
+
+        <div className="choice-row">
+          {!joinedRafting && (
+            <ChoicesGroup
+              name={choicesIdentifier}
+              options={[{ label: "I want to join", value: "rafting" }]}
+              onClickChoice={showConfirmationModal}
+              isSaving={choiceIsSaving}
+            />
+          )}
+
+          {pricing && <div className="activity-price">${pricing}</div>}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="timeline-choices">
+      {!joinedRafting && (
+        <div className={`has-choices light`}>
+          <SimpleTimelineItem
+            parts={[
+              "Free time",
+              "I will join the group after lunch for the city tour",
+              <div key="maps">
+                @ 14:30 @{" "}
+                <a
+                  href="https://maps.app.goo.gl/54cPdbaqNACTU7ua6"
+                  target="_blank"
+                >
+                  maps
+                </a>
+              </div>,
+            ]}
+            pin={pin}
+          />
+        </div>
+      )}
+      {raftingSelection()}
+    </div>
+  );
+};
+
+const ValleDeUcoPicker = ({
+  choicesIdentifier,
+  showConfirmationModal,
+  choiceIsSaving,
+  pricing,
+}) => {
+  return (
+    <div className="timeline-choices">
+      <div className="choice-row">
+        {pricing && <div className="activity-price">${pricing}</div>}
+        <ChoicesGroup
+          name={choicesIdentifier}
+          options={[
+            { label: "Horseback Riding", value: "horseback" },
+            { label: "Hiking", value: "hiking" },
+          ]}
+          onClickChoice={showConfirmationModal}
+          isSaving={choiceIsSaving}
+        />
+      </div>
+    </div>
+  );
+};
+
+const ElCuartitoPicker = ({
+  choicesIdentifier,
+  choiceSelectedValue,
+  parameter1parts,
+  showConfirmationModal,
+  choiceIsSaving,
+  pricing,
+  pin,
+}) => {
+  const joinedCuartito = choiceSelectedValue === "cuartito";
+
+  if (joinedCuartito) {
+    return (
+      <SimpleTimelineItem
+        parts={[
+          ...parameter1parts,
+          <div key="pricing" style={{ marginTop: "0.5rem" }}>
+            <div className="activity-price">${pricing}</div>
+          </div>,
+        ]}
+        pin={pin}
+      />
+    );
+  }
+
+  return (
+    <>
+      {!joinedCuartito && (
+        <div className={`has-choices light`}>
+          <SimpleTimelineItem
+            parts={[
+              "Lunch on my own",
+              "I will join the group after lunch for the city tour",
+              <div key="maps">
+                @ 14:30 @{" "}
+                <a
+                  href="https://maps.app.goo.gl/54cPdbaqNACTU7ua6"
+                  target="_blank"
+                >
+                  maps
+                </a>
+              </div>,
+            ]}
+            pin={pin}
+          />
+        </div>
+      )}
+
+      <div className={`has-choices ${joinedCuartito ? "selected-choice" : ""}`}>
+        {<div className="optional-activity-label">Paid Add-On</div>}
+        <SimpleTimelineItem parts={parameter1parts} pin={pin} />
+
+        <div className="timeline-choices">
+          <div className="choice-row">
+            {joinedCuartito && (
+              <div className="activity-price">You're registered!</div>
+            )}
+            {!joinedCuartito && (
+              <ChoicesGroup
+                name={choicesIdentifier}
+                options={[{ label: "I want to join", value: "cuartito" }]}
+                onClickChoice={showConfirmationModal}
+                isSaving={choiceIsSaving}
+              />
+            )}
+
+            {pricing && <div className="activity-price">${pricing}</div>}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
 const TimelineRow = ({
   pin,
   pricing,
@@ -244,7 +561,6 @@ const TimelineRow = ({
   showConfirmationModal,
   userChoices,
   savingChoices,
-  raftingCount,
   isIncluded = true,
 }) => {
   if (!parameter1) {
@@ -268,244 +584,54 @@ const TimelineRow = ({
 
     switch (choicesIdentifier) {
       case "cuartito":
-        return elCuartitoPicker();
+        return (
+          <ElCuartitoPicker
+            choicesIdentifier={choicesIdentifier}
+            choiceSelectedValue={choiceSelectedValue}
+            parameter1parts={parameter1parts}
+            showConfirmationModal={showConfirmationModal}
+            choiceIsSaving={choiceIsSaving}
+            pricing={pricing}
+            pin={pin}
+          />
+        );
       case "tango":
-        return tangoPicker();
+        return (
+          <TangoPicker
+            choicesIdentifier={choicesIdentifier}
+            choiceSelectedValue={choiceSelectedValue}
+            parameter1parts={parameter1parts}
+            showConfirmationModal={showConfirmationModal}
+            choiceIsSaving={choiceIsSaving}
+            pricing={pricing}
+            pin={pin}
+          />
+        );
       case "rafting":
-        return raftingPicker();
+        return (
+          <RaftingPicker
+            choicesIdentifier={choicesIdentifier}
+            choiceSelectedValue={choiceSelectedValue}
+            parameter1parts={parameter1parts}
+            showConfirmationModal={showConfirmationModal}
+            choiceIsSaving={choiceIsSaving}
+            pricing={pricing}
+            pin={pin}
+          />
+        );
       case "activity-valle-de-uco":
-        return valleDeUcoPicker();
+        return (
+          <ValleDeUcoPicker
+            choicesIdentifier={choicesIdentifier}
+            showConfirmationModal={showConfirmationModal}
+            choiceIsSaving={choiceIsSaving}
+            pricing={pricing}
+            pin={pin}
+          />
+        );
       default:
         throw new Error(`Unknown identifier: ${choicesIdentifier}`);
     }
-
-    function elCuartitoPicker() {
-      const joinedCuartito = choiceSelectedValue === "cuartito";
-
-      if (joinedCuartito) {
-        return (
-          <div>
-            {renderSimpleTimelineItem(
-              ...parameter1parts,
-              <div style={{ marginTop: "0.5rem" }}>
-                <div className="activity-price">${pricing}</div>
-              </div>
-            )}
-          </div>
-        );
-      }
-
-      return (
-        <>
-          {!joinedCuartito && (
-            <div className={`has-choices light`}>
-              {renderSimpleTimelineItem(
-                "Lunch on my own",
-                "I will join the group after lunch for the city tour",
-                <div>
-                  @ 14:30 @{" "}
-                  <a
-                    href="https://maps.app.goo.gl/54cPdbaqNACTU7ua6"
-                    target="_blank"
-                  >
-                    maps
-                  </a>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div
-            className={`has-choices ${joinedCuartito ? "selected-choice" : ""}`}
-          >
-            {<div className="optional-activity-label">Paid Add-On</div>}
-            {renderSimpleTimelineItem(...parameter1parts)}
-
-            <div className="timeline-choices">
-              <div className="choice-row">
-                {joinedCuartito && (
-                  <div className="activity-price">You're registered!</div>
-                )}
-                {!joinedCuartito && (
-                  <ChoicesGroup
-                    name={choicesIdentifier}
-                    options={[{ label: "I want to join", value: "cuartito" }]}
-                    onClickChoice={showConfirmationModal}
-                    isSaving={choiceIsSaving}
-                  />
-                )}
-
-                {pricing && <div className="activity-price">${pricing}</div>}
-              </div>
-            </div>
-          </div>
-        </>
-      );
-    }
-
-    function tangoPicker() {
-      const joinedTango = choiceSelectedValue === "tango";
-      if (joinedTango) {
-        return (
-          <div>
-            {renderSimpleTimelineItem(
-              ...parameter1parts,
-              <div style={{ marginTop: "0.5rem" }}>
-                <div className="activity-price">${pricing}</div>
-              </div>
-            )}
-          </div>
-        );
-      }
-      return (
-        <div className="timeline-choices">
-          <div className="has-choices">
-            {<div className="optional-activity-label">Paid Add-On</div>}
-
-            {renderSimpleTimelineItem(...parameter1parts)}
-
-            <div className="timeline-choices">
-              <div className="choice-row">
-                {joinedTango && (
-                  <div className="activity-price">You're registered!</div>
-                )}
-                {!joinedTango && (
-                  <ChoicesGroup
-                    name={choicesIdentifier}
-                    options={[{ label: "I want to join", value: "tango" }]}
-                    onClickChoice={showConfirmationModal}
-                    isSaving={choiceIsSaving}
-                  />
-                )}
-
-                {pricing && <div className="activity-price">${pricing}</div>}
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    function raftingPicker() {
-      const totalNeeded = 40;
-      const currentCount = typeof raftingCount === "number" ? raftingCount : 0;
-      const pct = Math.max(
-        0,
-        Math.min(100, Math.round((currentCount / totalNeeded) * 100))
-      );
-      const joinedRafting = choiceSelectedValue === "rafting";
-      return (
-        <div className="timeline-choices">
-          <div className="has-choices">
-            {renderSimpleTimelineItem(...parameter1parts)}
-
-            <div className="timeline-progress">
-              <div className="progress-header">
-                {currentCount}/{totalNeeded} registered
-              </div>
-              <div className="progress-bar-container">
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${pct}%` }} />
-                </div>
-              </div>
-              <div className="progress-note">
-                We need at least {totalNeeded} participants to run this
-                activity.
-              </div>
-            </div>
-
-            {/* {joinedRafting ? (
-              <div className="activity-price">You're registered!</div>
-            ) : (
-              <div className="price-button-row">
-                {pricing && <div className="activity-price">${pricing}</div>}
-                <button
-                  className="join-button"
-                  onClick={() =>
-                    showConfirmationModal(choicesIdentifier, "rafting")
-                  }
-                  disabled={choiceIsSaving}
-                >
-                  {choiceIsSaving ? "Joining..." : "I want to join"}
-                </button>
-              </div>
-            )} */}
-
-            <div className="choice-row">
-              {!joinedRafting && (
-                <ChoicesGroup
-                  name={choicesIdentifier}
-                  options={[{ label: "I want to join", value: "rafting" }]}
-                  onClickChoice={showConfirmationModal}
-                  isSaving={choiceIsSaving}
-                />
-              )}
-
-              {pricing && <div className="activity-price">${pricing}</div>}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    function valleDeUcoPicker() {
-      return (
-        <div className="timeline-choices">
-          <div className="choice-row">
-            {pricing && <div className="activity-price">${pricing}</div>}
-            <ChoicesGroup
-              name={choicesIdentifier}
-              options={[
-                { label: "Horseback Riding", value: "horseback" },
-                { label: "Hiking", value: "hiking" },
-              ]}
-              onClickChoice={showConfirmationModal}
-              isSaving={choiceIsSaving}
-            />
-          </div>
-        </div>
-      );
-    }
-  };
-
-  const renderSimpleTimelineItem = (...parts) => {
-    const [part1, ...rest] = parts;
-    return (
-      <div className="timeline-parameter">
-        <div className="parameter-main">
-          <span className="parameter-text">{part1}</span>
-        </div>
-        {rest.map((line, index) => {
-          if (typeof line === "string") {
-            if (line.trim().toLowerCase().includes("see location on map")) {
-              return (
-                <div
-                  key={line || `detail-${index}`}
-                  className="parameter-detail"
-                >
-                  <a href={pin} target="_blank">
-                    {line}
-                  </a>
-                </div>
-              );
-            }
-
-            return (
-              <div key={line || `detail-${index}`} className="parameter-detail">
-                {line}
-              </div>
-            );
-          }
-
-          return (
-            // eslint-disable-next-line react/no-array-index-key
-            <div key={index} className="parameter-detail">
-              {line}
-            </div>
-          );
-        })}
-      </div>
-    );
   };
 
   const hasRecommendations = recommendations && recommendations.trim();
@@ -531,7 +657,7 @@ const TimelineRow = ({
 
         {!hasChoices ? (
           <div className={`timeline-right-column`}>
-            {renderSimpleTimelineItem(...parameter1parts)}
+            <SimpleTimelineItem parts={parameter1parts} pin={pin} />
           </div>
         ) : (
           <div className={`timeline-right-column`}>
@@ -543,6 +669,86 @@ const TimelineRow = ({
   );
 };
 
+const GenericItem = ({
+  item,
+  handleRecommendationClick,
+  showConfirmationModal,
+  submissionResult,
+  savingChoices,
+}) => {
+  // Handle special parameter formatting for different item types
+  let parameter1 = item["PARAMETER_1"];
+
+  if (item.CATEGORY === "FLIGHT") {
+    parameter1 = `${item["PARAMETER_1"]} (${item["PARAMETER_2"]} → ${item["PARAMETER_3"]})`;
+  } else if (item.CATEGORY === "BUS" || item.CATEGORY === "TRANSPORTATION") {
+    parameter1 =
+      parameter1 ||
+      (item.CATEGORY === "BUS" ? "Bus Transfer" : "Transportation");
+  }
+
+  return (
+    <TimelineRow
+      start={item["START HS"]}
+      end={item["END HS"]}
+      parameter1={parameter1}
+      recommendations={item.RECOMMENDATIONS}
+      onRecommendationClick={handleRecommendationClick}
+      choicesIdentifier={item.CHOICES?.trim().toLowerCase()}
+      showConfirmationModal={showConfirmationModal}
+      userChoices={submissionResult.userChoices}
+      savingChoices={savingChoices}
+      pricing={item["PRICING"]}
+      isIncluded={item.isIncluded}
+      pin={item.PIN}
+    />
+  );
+};
+
+const DayItem = ({
+  dayData,
+  dayKey,
+  handleRecommendationClick,
+  showConfirmationModal,
+  submissionResult,
+  savingChoices,
+}) => (
+  <div className="timeline-items">
+    {dayData.items
+      .reduce(
+        (acc, curr) => {
+          const choices = curr.CHOICES?.trim().toLowerCase();
+          if (choices) {
+            if (!acc[choices]) {
+              acc[choices] = [];
+            }
+            acc[choices].push(curr);
+          } else {
+            acc["no-choice"].push(curr);
+          }
+          return acc;
+        },
+        {
+          ["no-choice"]: [],
+        }
+      )
+      .map((item, itemIndex) => (
+        <div
+          key={getItemKey(item, dayKey, itemIndex)}
+          className="timeline-item"
+        >
+          <GenericItem
+            item={item}
+            handleRecommendationClick={handleRecommendationClick}
+            showConfirmationModal={showConfirmationModal}
+            submissionResult={submissionResult}
+            savingChoices={savingChoices}
+          />
+        </div>
+      ))}
+  </div>
+);
+
 const Timeline = () => {
   const navigate = useNavigate();
   const [timelineData, setTimelineData] = useState(null);
@@ -552,7 +758,6 @@ const Timeline = () => {
   const [selectedRecommendation, setSelectedRecommendation] = useState(null);
   const [savingChoices, setSavingChoices] = useState(new Set());
   const [showAllItems, setShowAllItems] = useState(false);
-  const [raftingCount, setRaftingCount] = useState(null);
   const [confirmationModal, setConfirmationModal] = useState({
     isOpen: false,
     itemKey: null,
@@ -564,6 +769,8 @@ const Timeline = () => {
   const { email: userEmail, password: userPassword } = useContext(AuthContext);
   const { submissionResult, setSubmissionResult } = useTripContext();
   const { showError } = useNotificationContext();
+
+  const { onJoinRafting } = useRaftingCount();
 
   // Passport presence from context (set at login or via PassportGate)
   const hasPassport = Boolean(submissionResult?.passport);
@@ -680,9 +887,7 @@ const Timeline = () => {
           return newSet;
         });
         if (itemKey === "rafting" && choice === "rafting") {
-          setRaftingCount((prev) =>
-            typeof prev === "number" ? prev + 1 : prev
-          );
+          onJoinRafting();
         }
         return;
       }
@@ -719,9 +924,7 @@ const Timeline = () => {
           }));
 
           if (itemKey === "rafting" && choice === "yes") {
-            setRaftingCount((prev) =>
-              typeof prev === "number" ? prev + 1 : prev
-            );
+            onJoinRafting();
           }
         }
       } catch (err) {
@@ -735,7 +938,13 @@ const Timeline = () => {
         });
       }
     },
-    [userEmail, userPassword, submissionResult.userChoices, setSubmissionResult]
+    [
+      userEmail,
+      userPassword,
+      submissionResult.userChoices,
+      setSubmissionResult,
+      onJoinRafting,
+    ]
   );
 
   const confirmChoice = useCallback(async () => {
@@ -754,10 +963,6 @@ const Timeline = () => {
       console.error("Error confirming choice:", error);
     }
   }, [confirmationModal, closeConfirmationModal, handleChoiceSelection]);
-
-  const getItemKey = (item, dayKey, itemIndex) => {
-    return `${dayKey}-${itemIndex}-${item.CATEGORY}`;
-  };
 
   const onPassportSuccess = useCallback(() => {
     setLoading(true);
@@ -807,38 +1012,7 @@ const Timeline = () => {
       }
     };
 
-    const fetchRaftingCount = async () => {
-      if (__DEV__) {
-        setRaftingCount(10);
-        return;
-      }
-
-      try {
-        const count = await fetchWithCache(
-          "raftingCount",
-          async () => {
-            const response = await fetch(
-              `${APPS_SCRIPT_URL}?endpoint=rafting_count`
-            );
-            const data = await response.json();
-            if (data.success) {
-              return typeof data.count === "number" ? data.count : 0;
-            }
-            throw new Error("Failed to load rafting count");
-          },
-          CACHE_DURATIONS.FIVE_MINUTES
-        );
-
-        setRaftingCount(count);
-      } catch (err) {
-        console.error("Error fetching rafting count:", err);
-        setRaftingCount(0);
-        showError("Failed to load rafting count");
-      }
-    };
-
     fetchTimelineData();
-    fetchRaftingCount();
   }, [hasPassport, userEmail, userPassword, showError]);
 
   // TODO: remove this after construction
@@ -913,38 +1087,8 @@ const Timeline = () => {
   };
 
   const isDayCollapsed = (dayKey) => {
+    return false;
     return collapsedDays.has(dayKey);
-  };
-
-  const renderItemByType = (item) => {
-    // Handle special parameter formatting for different item types
-    let parameter1 = item["PARAMETER_1"];
-
-    if (item.CATEGORY === "FLIGHT") {
-      parameter1 = `${item["PARAMETER_1"]} (${item["PARAMETER_2"]} → ${item["PARAMETER_3"]})`;
-    } else if (item.CATEGORY === "BUS" || item.CATEGORY === "TRANSPORTATION") {
-      parameter1 =
-        parameter1 ||
-        (item.CATEGORY === "BUS" ? "Bus Transfer" : "Transportation");
-    }
-
-    return (
-      <TimelineRow
-        start={item["START HS"]}
-        end={item["END HS"]}
-        parameter1={parameter1}
-        recommendations={item.RECOMMENDATIONS}
-        onRecommendationClick={handleRecommendationClick}
-        choicesIdentifier={item.CHOICES?.trim().toLowerCase()}
-        showConfirmationModal={showConfirmationModal}
-        userChoices={submissionResult.userChoices}
-        savingChoices={savingChoices}
-        pricing={item["PRICING"]}
-        raftingCount={raftingCount}
-        isIncluded={item.isIncluded}
-        pin={item.PIN}
-      />
-    );
   };
 
   if (!hasPassport) {
@@ -1021,16 +1165,14 @@ const Timeline = () => {
               </div>
 
               {!isDayCollapsed(dayKey) && (
-                <div className="timeline-items">
-                  {dayData.items.map((item, itemIndex) => (
-                    <div
-                      key={getItemKey(item, dayKey, itemIndex)}
-                      className="timeline-item"
-                    >
-                      {renderItemByType(item)}
-                    </div>
-                  ))}
-                </div>
+                <DayItem
+                  dayData={dayData}
+                  dayKey={dayKey}
+                  handleRecommendationClick={handleRecommendationClick}
+                  showConfirmationModal={showConfirmationModal}
+                  submissionResult={submissionResult}
+                  savingChoices={savingChoices}
+                />
               )}
             </div>
           ))}
