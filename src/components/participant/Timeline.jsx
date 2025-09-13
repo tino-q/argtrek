@@ -241,30 +241,8 @@ const ChoicesGroup = ({ name, options, onClickChoice, isSaving }) => {
   );
 };
 
-const renderSimpleTimelineItem = (...parts) => {
-  const [part1, ...rest] = parts;
-  return (
-    <div className="timeline-parameter">
-      <div className="parameter-main">
-        <span className="parameter-text">{part1}</span>
-      </div>
-      {rest.map((line, index) =>
-        typeof line === "string" ? (
-          <div key={line || `detail-${index}`} className="parameter-detail">
-            {line}
-          </div>
-        ) : (
-          // eslint-disable-next-line react/no-array-index-key
-          <div key={index} className="parameter-detail">
-            {line}
-          </div>
-        )
-      )}
-    </div>
-  );
-};
-
 const TimelineRow = ({
+  pin,
   pricing,
   start,
   end,
@@ -501,6 +479,46 @@ const TimelineRow = ({
         </div>
       );
     }
+  };
+
+  const renderSimpleTimelineItem = (...parts) => {
+    const [part1, ...rest] = parts;
+    return (
+      <div className="timeline-parameter">
+        <div className="parameter-main">
+          <span className="parameter-text">{part1}</span>
+        </div>
+        {rest.map((line, index) => {
+          if (typeof line === "string") {
+            if (line.trim().toLowerCase().includes("see location on map")) {
+              return (
+                <div
+                  key={line || `detail-${index}`}
+                  className="parameter-detail"
+                >
+                  <a href={pin} target="_blank">
+                    {line}
+                  </a>
+                </div>
+              );
+            }
+
+            return (
+              <div key={line || `detail-${index}`} className="parameter-detail">
+                {line}
+              </div>
+            );
+          }
+
+          return (
+            // eslint-disable-next-line react/no-array-index-key
+            <div key={index} className="parameter-detail">
+              {line}
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   const hasRecommendations = recommendations && recommendations.trim();
@@ -972,6 +990,7 @@ const Timeline = () => {
         pricing={item["PRICING"]}
         raftingCount={raftingCount}
         isIncluded={item.isIncluded}
+        pin={item.PIN}
       />
     );
   };
