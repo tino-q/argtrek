@@ -136,25 +136,17 @@ const RecommendationsModal = ({ recommendations, onClose }) => {
     return null;
   }
 
-  const items = recommendations
-    .split(" // ")
-    .map((item) => item.trim())
-    .filter(Boolean);
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={stopPropagation}>
         <div className="modal-header">
-          <h3>Recommendations</h3>
           <button className="modal-close" onClick={onClose}>
             ×
           </button>
         </div>
         <div className="modal-body">
           <ul className="recommendations-list">
-            {items.map((item, index) => (
-              <li key={item || `item-${index}`}>{item}</li>
-            ))}
+            <div dangerouslySetInnerHTML={{ __html: recommendations }} />
           </ul>
         </div>
       </div>
