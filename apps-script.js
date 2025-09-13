@@ -9,7 +9,7 @@
 /* global ContentService, SpreadsheetApp, Utilities, DriveApp, UrlFetchApp */
 
 const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycby0wzW5_vwQw7oeddcMZzZ5RYeebIbm3b_5Rr1_Q7EyqmDDGtbS41jfwqkX_0M4LPoK/exec";
+  "https://script.google.com/macros/s/AKfycbw2qgRZBxEAhDQ-eSkxcXHEi-s1gLrHdypwPTg8jbedScR_Y7h_zC82nxm4FWaCMPhn/exec";
 const MG_KEY = "<REDACTED>";
 const REDSYS_USER = "<REDACTED>";
 const REDSYS_PASS = "<REDACTED>"; // Note: \u0021 is '!'
@@ -2337,9 +2337,9 @@ function getUserChoices(email) {
       const row = values[i];
       const rowEmail = row[emailColumnIndex];
       const itemKey = row[itemKeyColumnIndex];
+      const option = row[optionColumnIndex];
       const choice = row[choiceColumnIndex];
       const counter = parseInt(row[counterColumnIndex]) || 0;
-      const option = row[optionColumnIndex];
 
       if (
         rowEmail &&
@@ -2419,7 +2419,12 @@ function updateUserChoices(data) {
     }
 
     // Get the next counter for this user and itemKey
-    const nextCounter = getNextCounterForItem(sheet, data.email, data.itemKey);
+    const nextCounter = getNextCounterForItem(
+      sheet,
+      data.email,
+      data.itemKey,
+      data.option
+    );
 
     // Add new choice event (always insert, never update)
     const timestamp = new Date().toISOString();
@@ -2458,7 +2463,7 @@ function updateUserChoices(data) {
 /**
  * Get the next counter value for a specific user and itemKey
  */
-function getNextCounterForItem(sheet, email, itemKey) {
+function getNextCounterForItem(sheet, email, itemKey, option) {
   try {
     const dataRange = sheet.getDataRange();
     const values = dataRange.getValues();
@@ -2472,11 +2477,13 @@ function getNextCounterForItem(sheet, email, itemKey) {
     const emailColumnIndex = headers.indexOf("email");
     const itemKeyColumnIndex = headers.indexOf("itemKey");
     const counterColumnIndex = headers.indexOf("counter");
+    const optionColumnIndex = headers.indexOf("option");
 
     if (
       emailColumnIndex === -1 ||
       itemKeyColumnIndex === -1 ||
-      counterColumnIndex === -1
+      counterColumnIndex === -1 ||
+      optionColumnIndex === -1
     ) {
       throw new Error("Required columns not found in CHOICES sheet");
     }
@@ -2488,13 +2495,16 @@ function getNextCounterForItem(sheet, email, itemKey) {
       const row = values[i];
       const rowEmail = row[emailColumnIndex];
       const rowItemKey = row[itemKeyColumnIndex];
+      const rowOption = row[optionColumnIndex];
       const counter = parseInt(row[counterColumnIndex]) || 0;
 
       if (
         rowEmail &&
         rowEmail.toString().toLowerCase().trim() === email.toLowerCase() &&
         rowItemKey &&
-        rowItemKey.toString().trim() === itemKey.toString().trim()
+        rowItemKey.toString().trim() === itemKey.toString().trim() &&
+        rowOption &&
+        rowOption.toString().trim() === option.toString().trim()
       ) {
         if (counter > maxCounter) {
           maxCounter = counter;

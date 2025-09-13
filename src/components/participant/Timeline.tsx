@@ -92,7 +92,7 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const { email: userEmail, password: userPassword } = useContext(AuthContext);
   const { submissionResult, setSubmissionResult } = useTripContext();
-  const { onJoinRafting } = useRaftingCount();
+  // const { onJoinRafting } = useRaftingCount();
 
   const showConfirmationModal = useCallback(
     (
@@ -146,13 +146,13 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
           },
         }));
 
-        if (
-          choicesGroup === "bariloche-activity" &&
-          choiceId === "rafting" &&
-          selectedChoice === "rafting"
-        ) {
-          onJoinRafting();
-        }
+        // if (
+        //   choicesGroup === "bariloche-activity" &&
+        //   choiceId === "rafting" &&
+        //   selectedChoice === "rafting"
+        // ) {
+        //   onJoinRafting();
+        // }
         return;
       }
 
@@ -183,13 +183,13 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
             userChoices: updatedChoices,
           }));
 
-          if (
-            choicesGroup === "bariloche-activity" &&
-            choiceId === "rafting" &&
-            selectedChoice === "rafting"
-          ) {
-            onJoinRafting();
-          }
+          // if (
+          //   choicesGroup === "bariloche-activity" &&
+          //   choiceId === "rafting" &&
+          //   selectedChoice === "rafting"
+          // ) {
+          //   onJoinRafting();
+          // }
         }
       } catch (err) {
         console.error("Error saving choice:", err);
@@ -200,7 +200,7 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
       userPassword,
       submissionResult.userChoices,
       setSubmissionResult,
-      onJoinRafting,
+      // onJoinRafting,
     ]
   );
 
@@ -380,7 +380,7 @@ const SimpleTimelineItem: React.FC<SimpleTimelineItemProps> = ({ item }) => {
     </div>
   );
 };
-
+/*
 const useRaftingCount = () => {
   const { showError } = useNotificationContext();
   const [raftingCount, setRaftingCount] = useState<number | null>(null);
@@ -424,6 +424,7 @@ const useRaftingCount = () => {
 
   return { raftingCount, onJoinRafting };
 };
+*/
 
 const filterTimelineData = (
   timelineData: TimelineItem[],
