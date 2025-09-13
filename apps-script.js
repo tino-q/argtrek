@@ -85,11 +85,6 @@ function doGet(e) {
       return getTimelineData();
     }
 
-    // Check if this is a choices request
-    if (e.parameter.endpoint === "choices") {
-      return getUserChoices(e.parameter.email, e.parameter.password);
-    }
-
     // Check if this is a rafting registrations count request
     if (e.parameter.endpoint === "rafting_count") {
       return getRaftingRegistrationsCount();
@@ -117,13 +112,16 @@ function doGet(e) {
     // Look up luggage selections for this traveler
     const luggageDetails = getLuggageDetails(email.trim());
 
+    // Look up user choices for this traveler
+    const userChoices = getUserChoices(email.trim());
+
     const responseData = {
       rsvpData: validation.rsvpData,
       row: existingSubmission?.row || null,
       rowNumber: existingSubmission?.rowNumber || null,
       passport: passportDetails || null,
-      // Luggage state for skipping LuggageGate if already answered
       luggageSelection: luggageDetails || null,
+      userChoices: userChoices || {},
     };
 
     return ContentService.createTextOutput(
@@ -2281,14 +2279,8 @@ function getTimelineData() {
 /**
  * Get user choices from CHOICES sheet
  */
-function getUserChoices(email, password) {
+function getUserChoices(email) {
   try {
-    // Validate credentials first
-    const validation = validateCredentials(email, password);
-    if (!validation.success) {
-      return validation.response;
-    }
-
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
 

@@ -118,7 +118,6 @@ const TripProvider = ({ children }) => {
       "submissionResult",
       "timelineData",
       "raftingCount",
-      "userChoices",
       "voucher",
     ]);
     showSuccess(

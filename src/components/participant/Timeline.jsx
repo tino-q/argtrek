@@ -5,11 +5,7 @@ import { useNavigate } from "react-router-dom";
 import AuthContext from "../../context/AuthContext.jsx";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
-import {
-  setCachedData,
-  fetchWithCache,
-  CACHE_DURATIONS,
-} from "../../utils/cache.js";
+import { fetchWithCache, CACHE_DURATIONS } from "../../utils/cache.js";
 import { APPS_SCRIPT_URL, ADMIN_EMAILS } from "../../utils/config.js";
 
 import LuggageGate from "./LuggageGate.jsx";
@@ -251,10 +247,9 @@ const TimelineRow = ({
   onRecommendationClick,
   choicesIdentifier,
   showConfirmationModal,
-  activityChoices,
+  userChoices,
   savingChoices,
   raftingCount,
-  raftingMinRequired,
   isIncluded = true,
 }) => {
   if (!parameter1) {
@@ -273,7 +268,7 @@ const TimelineRow = ({
       return null;
     }
 
-    const choiceSelectedValue = activityChoices?.[choicesIdentifier];
+    const choiceSelectedValue = userChoices?.[choicesIdentifier];
     const choiceIsSaving = savingChoices?.has(choicesIdentifier);
 
     switch (choicesIdentifier) {
@@ -397,10 +392,7 @@ const TimelineRow = ({
     }
 
     function raftingPicker() {
-      const totalNeeded =
-        typeof raftingMinRequired === "number" && raftingMinRequired > 0
-          ? raftingMinRequired
-          : 40;
+      const totalNeeded = 40;
       const currentCount = typeof raftingCount === "number" ? raftingCount : 0;
       const pct = Math.max(
         0,
@@ -563,7 +555,6 @@ const Timeline = () => {
   const [error, setError] = useState(null);
   const [collapsedDays, setCollapsedDays] = useState(new Set());
   const [selectedRecommendation, setSelectedRecommendation] = useState(null);
-  const [activityChoices, setActivityChoices] = useState({});
   const [savingChoices, setSavingChoices] = useState(new Set());
   const [showAllItems, setShowAllItems] = useState(false);
   const [raftingCount, setRaftingCount] = useState(null);
@@ -576,7 +567,7 @@ const Timeline = () => {
     isLoading: false,
   });
   const { email: userEmail, password: userPassword } = useContext(AuthContext);
-  const { formData, submissionResult } = useTripContext();
+  const { submissionResult, setSubmissionResult } = useTripContext();
   const { showError } = useNotificationContext();
 
   // Passport presence from context (set at login or via PassportGate)
@@ -680,9 +671,13 @@ const Timeline = () => {
         console.log("Saving choice:", itemKey, choice);
         setSavingChoices((prev) => new Set(prev).add(itemKey));
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        setActivityChoices((prev) => ({
+
+        setSubmissionResult((prev) => ({
           ...prev,
-          [itemKey]: choice,
+          userChoices: {
+            ...prev.userChoices,
+            [itemKey]: choice,
+          },
         }));
         setSavingChoices((prev) => {
           const newSet = new Set(prev);
@@ -720,12 +715,13 @@ const Timeline = () => {
           console.log("Choice saved successfully:", itemKey, choice);
           // Only update state after successful save
           const updatedChoices = {
-            ...activityChoices,
+            ...submissionResult.userChoices,
             [itemKey]: choice,
           };
-          setActivityChoices(updatedChoices);
-
-          setCachedData("userChoices", updatedChoices);
+          setSubmissionResult((prev) => ({
+            ...prev,
+            userChoices: updatedChoices,
+          }));
 
           if (itemKey === "rafting" && choice === "yes") {
             setRaftingCount((prev) =>
@@ -744,7 +740,7 @@ const Timeline = () => {
         });
       }
     },
-    [userEmail, userPassword, activityChoices]
+    [userEmail, userPassword, submissionResult.userChoices, setSubmissionResult]
   );
 
   const confirmChoice = useCallback(async () => {
@@ -763,10 +759,6 @@ const Timeline = () => {
       console.error("Error confirming choice:", error);
     }
   }, [confirmationModal, closeConfirmationModal, handleChoiceSelection]);
-
-  const isChoiceSaving = (itemKey) => {
-    return savingChoices.has(itemKey);
-  };
 
   const getItemKey = (item, dayKey, itemIndex) => {
     return `${dayKey}-${itemIndex}-${item.CATEGORY}`;
@@ -820,31 +812,6 @@ const Timeline = () => {
       }
     };
 
-    const fetchUserChoices = async () => {
-      if (!userEmail || !userPassword) {
-        return;
-      }
-
-      try {
-        const choices = await fetchWithCache("userChoices", async () => {
-          const response = await fetch(
-            `${APPS_SCRIPT_URL}?endpoint=choices&email=${encodeURIComponent(userEmail)}&password=${encodeURIComponent(userPassword)}`
-          );
-          const data = await response.json();
-
-          if (!data.success) {
-            throw new Error(data.error || "Failed to fetch user choices");
-          }
-
-          return data.data || {};
-        });
-
-        setActivityChoices(choices);
-      } catch (err) {
-        console.error("Error fetching user choices:", err);
-      }
-    };
-
     const fetchRaftingCount = async () => {
       if (__DEV__) {
         setRaftingCount(10);
@@ -876,7 +843,6 @@ const Timeline = () => {
     };
 
     fetchTimelineData();
-    fetchUserChoices();
     fetchRaftingCount();
   }, [hasPassport, userEmail, userPassword, showError]);
 
@@ -952,15 +918,10 @@ const Timeline = () => {
   };
 
   const isDayCollapsed = (dayKey) => {
-    return false;
     return collapsedDays.has(dayKey);
   };
 
-  const renderItemByType = (item, dayKey, itemIndex) => {
-    const itemKey = getItemKey(item, dayKey, itemIndex);
-    const selectedChoice = activityChoices[itemKey];
-    const isSaving = isChoiceSaving(itemKey);
-
+  const renderItemByType = (item) => {
     // Handle special parameter formatting for different item types
     let parameter1 = item["PARAMETER_1"];
 
@@ -980,12 +941,8 @@ const Timeline = () => {
         recommendations={item.RECOMMENDATIONS}
         onRecommendationClick={handleRecommendationClick}
         choicesIdentifier={item.CHOICES?.trim().toLowerCase()}
-        itemKey={itemKey}
-        selectedChoice={selectedChoice}
         showConfirmationModal={showConfirmationModal}
-        isSaving={isSaving}
-        formData={formData}
-        activityChoices={activityChoices}
+        userChoices={submissionResult.userChoices}
         savingChoices={savingChoices}
         pricing={item["PRICING"]}
         raftingCount={raftingCount}
@@ -1075,7 +1032,7 @@ const Timeline = () => {
                       key={getItemKey(item, dayKey, itemIndex)}
                       className="timeline-item"
                     >
-                      {renderItemByType(item, dayKey, itemIndex)}
+                      {renderItemByType(item)}
                     </div>
                   ))}
                 </div>
