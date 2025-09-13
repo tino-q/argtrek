@@ -157,13 +157,13 @@
 }
 
 .optional-activity-label {
-  float: left;
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--primary, #007bff);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding-left: 0.25rem;
+  display: flex;
+  justify-content: right;
 }
 
 /* Mobile-first timeline row structure */
@@ -1119,9 +1119,12 @@
   }
 }
 
+.modal-header.right {
+  justify-content: right;
+}
+
 .modal-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 1rem;
 }

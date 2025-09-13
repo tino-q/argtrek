@@ -104,14 +104,17 @@ const LuggageGate = () => {
               <label key={flight.key} className="flight-row">
                 <input
                   type="checkbox"
+                  style={{ width: 15, height: 15 }}
                   checked={Boolean(luggageSelection[flight.key])}
                   // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop
                   onChange={() => toggleFlight(flight.key)}
                 />
-                <div className="flight-info">
-                  <div className="flight-label">{flight.label}</div>
-                  <div className="flight-price">${flight.price}</div>
+                {/* <div className="flight-info"> */}
+                <div className="flight-label">{flight.label}</div>
+                <div className="flight-price" style={{ marginLeft: "auto" }}>
+                  ${flight.price}
                 </div>
+                {/* </div> */}
               </label>
             ))}
           </div>

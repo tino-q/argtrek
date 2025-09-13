@@ -135,7 +135,7 @@ const RecommendationsModal = ({ recommendations, onClose }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={stopPropagation}>
-        <div className="modal-header">
+        <div className="modal-header right">
           <button className="modal-close" onClick={onClose}>
             ×
           </button>
@@ -169,11 +169,6 @@ const ConfirmationModal = ({
       <div className="modal-content" onClick={stopPropagation}>
         <div className="modal-header">
           <h3>{title}</h3>
-          {!isLoading && (
-            <button className="modal-close" onClick={onClose}>
-              ×
-            </button>
-          )}
         </div>
         <div className="modal-body">
           <p>{message}</p>
