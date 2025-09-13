@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
 import { useNotificationContext } from "../hooks/useNotificationContext";
+import { clearCachedData } from "../utils/cache";
 import { FORM_FIELDS } from "../utils/config";
 
 import { TripContext } from "./tripContext";
@@ -110,12 +111,16 @@ const TripProvider = ({ children }) => {
     setSubmissionResult(null);
     setFormData(getDefaultFormData());
     setUserRSVP(null);
-    localStorage.removeItem("userRSVP");
-    localStorage.removeItem("formData");
-    localStorage.removeItem("submissionResult");
-    localStorage.removeItem("raftingCount");
-    localStorage.removeItem("raftingCountTimestamp");
-    localStorage.removeItem("userChoices");
+    // Clear all cached data
+    clearCachedData([
+      "userRSVP",
+      "formData",
+      "submissionResult",
+      "timelineData",
+      "raftingCount",
+      "userChoices",
+      "voucher",
+    ]);
     showSuccess(
       "Logged out successfully. You can now login with different credentials."
     );

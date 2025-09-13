@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
+import { fetchWithCache } from "../../utils/cache";
 import { copyToClipboard } from "../../utils/clipboard";
 import {
   FORM_FIELDS,
@@ -51,37 +52,17 @@ const PaymentDetailsDisplay = ({
     if (isDownloading) {
       return;
     }
-    
+
     try {
       setIsDownloading(true);
-      
+
       if (!email || !password) {
         console.error("Missing email or password for voucher download");
         showError("Missing authentication credentials");
         return;
       }
 
-      // Generate cache key based on user email
-      const cacheKey = `voucher_${email.toLowerCase()}`;
-      
-      // Try to get cached file first
-      let cachedFileData = null;
-      try {
-        const cached = localStorage.getItem(cacheKey);
-        if (cached) {
-          cachedFileData = JSON.parse(cached);
-          console.log("Using cached voucher file");
-        }
-      } catch (cacheError) {
-        console.warn("Failed to read cached voucher:", cacheError);
-        // Clear invalid cache entry
-        localStorage.removeItem(cacheKey);
-      }
-
-      let result = cachedFileData;
-
-      // If no cache, fetch from server
-      if (!result) {
+      const result = await fetchWithCache("voucher", async () => {
         const response = await fetch(
           `${APPS_SCRIPT_URL}?endpoint=download_voucher&email=${encodeURIComponent(
             email
@@ -92,29 +73,19 @@ const PaymentDetailsDisplay = ({
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        result = await response.json();
+        const data = await response.json();
 
-        if (!result.success) {
-          console.error("Voucher download failed:", result.error);
-          showError(result.error);
-          return;
+        if (!data.success) {
+          throw new Error(data.error || "Voucher download failed");
         }
 
-        // Cache the successful result
-        try {
-          localStorage.setItem(cacheKey, JSON.stringify({
-            success: result.success,
-            fileName: result.fileName,
-            fileData: result.fileData,
-            mimeType: result.mimeType,
-            cachedAt: Date.now()
-          }));
-          console.log("Voucher cached successfully");
-        } catch (cacheError) {
-          console.warn("Failed to cache voucher:", cacheError);
-          // Continue with download even if caching fails
-        }
-      }
+        return {
+          success: data.success,
+          fileName: data.fileName,
+          fileData: data.fileData,
+          mimeType: data.mimeType,
+        };
+      });
 
       // Convert base64 to blob and trigger download
       const binaryString = atob(result.fileData);
@@ -408,11 +379,14 @@ const PaymentDetailsDisplay = ({
             >
               {isDownloading ? (
                 <>
-                  <i className="fas fa-spinner fa-spin" style={{ marginRight: '8px' }} />
+                  <i
+                    className="fas fa-spinner fa-spin"
+                    style={{ marginRight: "8px" }}
+                  />
                   Downloading...
                 </>
               ) : (
-                '📄 Download voucher'
+                "📄 Download voucher"
               )}
             </button>
             <button
