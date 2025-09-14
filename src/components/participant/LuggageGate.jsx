@@ -7,9 +7,9 @@ import "./LuggageGate.css";
 
 // Static flight definitions and pricing
 const FLIGHTS = [
-  { key: "AEP-BRC", label: "Buenos Aires → Bariloche", price: 10 },
-  { key: "BRC-MDZ", label: "Bariloche → Mendoza", price: 15 },
-  { key: "MDZ-AEP", label: "Mendoza → Buenos Aires", price: 20 },
+  { key: "AEP-BRC", label: "Buenos Aires → Bariloche", price: 25 },
+  { key: "BRC-MDZ", label: "Bariloche → Mendoza", price: 25 },
+  { key: "MDZ-AEP", label: "Mendoza → Buenos Aires", price: 25 },
 ];
 
 const LuggageGate = () => {
