@@ -23,6 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 
-src/components/display/clear-canyon-454114-p5-a911fe242f29.json
+clear-canyon-454114-p5-a911fe242f29.json
 src/components/display/cache.json
 src/components/display/output/*
+
+.env
+
+backend/.serverless

@@ -13,7 +13,7 @@ import AuthContext from "../../context/AuthContext.jsx";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
 import { fetchWithCache, CACHE_DURATIONS } from "../../utils/cache.js";
-import { APPS_SCRIPT_URL, ADMIN_EMAILS, CONTACTS } from "../../utils/config.js";
+import { BACKEND_URL, ADMIN_EMAILS, CONTACTS } from "../../utils/config.js";
 
 import LuggageGate from "./LuggageGate.jsx";
 import PassportGate from "./PassportGate.jsx";
@@ -157,17 +157,19 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       try {
-        const formData = new FormData();
-        formData.append("action", "update_choices");
-        formData.append("email", userEmail);
-        formData.append("password", userPassword);
-        formData.append("itemKey", choicesGroup);
-        formData.append("choice", selectedChoice);
-        formData.append("option", choiceId);
-
-        const response = await fetch(APPS_SCRIPT_URL, {
+        const response = await fetch(BACKEND_URL, {
           method: "POST",
-          body: formData,
+          body: JSON.stringify({
+            action: "update_choices",
+            email: userEmail,
+            password: userPassword,
+            itemKey: choicesGroup,
+            choice: selectedChoice,
+            option: choiceId,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
 
         const data = await response.json();
@@ -397,7 +399,7 @@ const useRaftingCount = () => {
           "raftingCount",
           async () => {
             const response = await fetch(
-              `${APPS_SCRIPT_URL}?endpoint=rafting_count`
+              `${BACKEND_URL}?endpoint=rafting_count`
             );
             const data = await response.json();
             if (data.success) {
@@ -893,9 +895,7 @@ const TimelineContent: React.FC = () => {
         const timelineData = await fetchWithCache(
           "timelineData",
           async () => {
-            const response = await fetch(
-              `${APPS_SCRIPT_URL}?endpoint=timeline`
-            );
+            const response = await fetch(`${BACKEND_URL}?endpoint=timeline`);
             const { success, data } = await response.json();
             if (!success) {
               throw new Error("Failed to fetch timeline data");

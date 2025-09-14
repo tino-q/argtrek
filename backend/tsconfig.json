@@ -1,0 +1,59 @@
+{
+  "compilerOptions": {
+    /* Language & Environment */
+    "target": "ES2021",
+    "lib": [
+      "ES2021",
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "types": [
+      "node"
+    ], /* ✅ adds Node.js globals */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true, /* ✅ ensures every file can be transpiled in isolation */
+    "verbatimModuleSyntax": true, /* ✅ keeps import/export syntax strict */
+    /* Type Checking (strictest settings) */
+    "strict": true, /* ✅ master switch */
+    "noImplicitAny": true, /* error on implicit any */
+    "strictNullChecks": true, /* null & undefined are distinct types */
+    "strictFunctionTypes": true, /* stricter checking of function type assignments */
+    "strictBindCallApply": true, /* catch bad usage of bind/call/apply */
+    "strictPropertyInitialization": true, /* require property initialization in classes */
+    "noImplicitThis": true, /* error on implicit this */
+    "useUnknownInCatchVariables": true, /* catch variables are unknown instead of any */
+    "alwaysStrict": true, /* emit "use strict" */
+    "noUncheckedIndexedAccess": true, /* treat indexed access as possibly undefined */
+    "exactOptionalPropertyTypes": true, /* optional props are strictly `T | undefined` */
+    /* Error Prevention */
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true, /* require `override` keyword */
+    "noPropertyAccessFromIndexSignature": true, /* safer index signatures */
+    "noImplicitReturns": true, /* require return in all code paths */
+    "noUnusedLocals": true, /* error on unused locals */
+    "noUnusedParameters": true, /* error on unused parameters */
+    "noImplicitUseStrict": false, /* allow Babel/ESLint to handle strict mode */
+    /* Output */
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true, /* map declarations back to source */
+    "sourceMap": true, /* useful for debugging compiled code */
+    /* Project */
+    "rootDir": "src",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

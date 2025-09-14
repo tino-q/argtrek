@@ -12,7 +12,13 @@ import globals from "globals";
 
 export default [
   {
-    ignores: ["dist/**", "node_modules/**", "apps-script.js", "vite.config.js", "eslint.config.js"],
+    ignores: [
+      "dist/**",
+      "node_modules/**",
+      "backend",
+      "vite.config.js",
+      "eslint.config.js",
+    ],
   },
   // JavaScript and JSX files
   {
@@ -189,14 +195,17 @@ export default [
     },
     rules: {
       // TypeScript specific rules
-      "@typescript-eslint/no-unused-vars": ["warn", {
-        argsIgnorePattern: "^_",
-        varsIgnorePattern: "^_",
-        ignoreRestSiblings: true,
-      }],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/prefer-optional-chain": "error",
-      
+
       // Disable conflicting rules
       "no-unused-vars": "off",
       "no-undef": "off", // TypeScript handles this

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useContext, useCallback } from "react";
 
 import AuthContext from "../../context/AuthContext.jsx";
 import { useTripContext } from "../../hooks/useTripContext";
-import { APPS_SCRIPT_URL } from "../../utils/config.js";
+import { BACKEND_URL } from "../../utils/config.js";
 import "./LuggageGate.css";
 
 // Static flight definitions and pricing
@@ -59,15 +59,17 @@ const LuggageGate = () => {
       try {
         setSubmitting(true);
 
-        const form = new FormData();
-        form.append("action", "submit_luggage");
-        form.append("email", email);
-        form.append("password", password);
-        form.append("luggageSelection", JSON.stringify(luggageSelection));
-
-        const res = await fetch(APPS_SCRIPT_URL, {
+        const res = await fetch(BACKEND_URL, {
           method: "POST",
-          body: form,
+          body: JSON.stringify({
+            action: "submit_luggage",
+            email,
+            password,
+            luggageSelection,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
         const data = await res.json();
 

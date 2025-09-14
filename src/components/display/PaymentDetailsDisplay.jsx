@@ -14,7 +14,7 @@ import {
   BANK_DETAILS,
   CRYPTO_WALLETS,
   NETWORK_INFO,
-  APPS_SCRIPT_URL,
+  BACKEND_URL,
 } from "../../utils/config";
 import { getTravelerName, getUSDToEURExchangeRate } from "../../utils/rsvpData";
 import CreditCardWarning from "../common/CreditCardWarning";
@@ -64,7 +64,7 @@ const PaymentDetailsDisplay = ({
 
       const result = await fetchWithCache("voucher", async () => {
         const response = await fetch(
-          `${APPS_SCRIPT_URL}?endpoint=download_voucher&email=${encodeURIComponent(
+          `${BACKEND_URL}?endpoint=download_voucher&email=${encodeURIComponent(
             email
           )}&password=${encodeURIComponent(password)}`
         );
@@ -401,7 +401,7 @@ const PaymentDetailsDisplay = ({
 
         {/* Bank Transfer Proof of Payment Upload */}
         {submissionResult?.rowNumber &&
-          formData[FORM_FIELDS.PAYMENT_METHOD] === "bank" && (
+          formData[FORM_FIELDS.PAYMENT_METHOD] === "credit" && (
             <div className="form-group center-upload">
               <ProofOfPaymentUpload
                 name={formData[FORM_FIELDS.FIRST_NAME] || ""}

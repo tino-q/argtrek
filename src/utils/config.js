@@ -3,7 +3,10 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbw2qgRZBxEAhDQ-eSkxcXHEi-s1gLrHdypwPTg8jbedScR_Y7h_zC82nxm4FWaCMPhn/exec";
+  "https://script.google.com/macros/s/AKfycbwuO-0jNmS7gxEofnA_p8Hrdqd7YTU0vg0DWoY4jDAqaLQNXxTj4t7G2NXqZwdfx0wu/exec";
+
+export const BACKEND_URL =
+  "https://at6nwfhebl.execute-api.us-east-1.amazonaws.com/dev/";
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {

@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
-import { APPS_SCRIPT_URL } from "../../utils/config";
+import { BACKEND_URL } from "../../utils/config";
 import { STEPS } from "../../utils/stepConfig";
 
 function cleanupUrlParameters() {
@@ -64,7 +64,7 @@ const EmailLogin = () => {
     async (email, password) => {
       try {
         const response = await fetch(
-          `${APPS_SCRIPT_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
+          `${BACKEND_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
           {
             method: "GET",
           }
@@ -88,6 +88,7 @@ const EmailLogin = () => {
             showError(result.error);
           }
         } else {
+          console.log("result", result);
           console.log("✅ USER LOGIN SUCCESS - Complete Response Payload:");
           console.log("===============================================");
           console.table(result.data);

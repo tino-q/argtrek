@@ -2,7 +2,7 @@ import { useState, useContext, useCallback } from "react";
 
 import AuthContext from "../../context/AuthContext.jsx";
 import { useTripContext } from "../../hooks/useTripContext";
-import { APPS_SCRIPT_URL } from "../../utils/config.js";
+import { BACKEND_URL } from "../../utils/config.js";
 import "./PassportGate.css";
 
 const PassportGate = () => {
@@ -57,19 +57,21 @@ const PassportGate = () => {
 
       setSubmitting(true);
       try {
-        const formData = new FormData();
-        formData.append("action", "submit_passport");
-        formData.append("email", email);
-        formData.append("password", password);
-        formData.append("passportName", fullName);
-        formData.append("passportNumber", passportNumber);
-        formData.append("expiryDate", expiryDate);
-        formData.append("birthDate", birthDate);
-        formData.append("aAdvantage", aAdvantage || "");
-
-        const res = await fetch(APPS_SCRIPT_URL, {
+        const res = await fetch(BACKEND_URL, {
           method: "POST",
-          body: formData,
+          body: JSON.stringify({
+            action: "submit_passport",
+            email,
+            password,
+            passportName: fullName,
+            passportNumber,
+            expiryDate,
+            birthDate,
+            aAdvantage: aAdvantage || "",
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
         });
         const data = await res.json();
 

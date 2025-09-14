@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { APPS_SCRIPT_URL } from "../utils/config";
+import { BACKEND_URL } from "../utils/config";
 
 /**
  * Custom hook for handling form submission to Google Apps Script
@@ -50,7 +50,7 @@ export const useFormSubmission = () => {
       });
 
       // Submit to Google Apps Script
-      const response = await fetch(APPS_SCRIPT_URL, {
+      const response = await fetch(BACKEND_URL, {
         method: "POST",
         body: formDataPayload,
       });
@@ -73,9 +73,8 @@ export const useFormSubmission = () => {
             autoClose: true,
           },
         };
-      } 
-        throw new Error(result.error || "Submission failed");
-      
+      }
+      throw new Error(result.error || "Submission failed");
     } catch (error) {
       console.error("Submission error:", error);
 
