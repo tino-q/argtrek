@@ -9,6 +9,9 @@
 /* global ContentService, SpreadsheetApp, Utilities, DriveApp, UrlFetchApp */
 
 const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbwuO-0jNmS7gxEofnA_p8Hrdqd7YTU0vg0DWoY4jDAqaLQNXxTj4t7G2NXqZwdfx0wu/exec";
+  const REDSYS_BASE_URL = "https://canales.redsys.es/admincanales-web/services";
+
   "https://script.google.com/macros/s/AKfycbw2qgRZBxEAhDQ-eSkxcXHEi-s1gLrHdypwPTg8jbedScR_Y7h_zC82nxm4FWaCMPhn/exec";
 const MG_KEY = "<REDACTED>";
 const REDSYS_USER = "<REDACTED>";
@@ -23,234 +26,6 @@ const RSVP_SHEET_NAME = "RSVP"; // Sheet containing RSVP data
 const TPV_PAYMENTS_SHEET_NAME = "TPV PAYMENTS"; // Sheet for REDSYS TPV payment callbacks
 const AUTO_EMAILS_SHEET_NAME = "AUTO_EMAILS"; // Unified sheet for tracking all automated emails with type column
 const PAYMENTLINKSDB_SHEET_NAME = "PAYMENTLINKSDB";
-const TIMELINE_SHEET_NAME = "TIMELINE"; // Sheet containing timeline data
-const CHOICES_SHEET_NAME = "CHOICES"; // Sheet for tracking user activity choices
-const PASSPORTS_SHEET_NAME = "PASSPORTS"; // Sheet for tracking traveler passport details
-const LUGGAGE_SHEET_NAME = "Luggage"; // Sheet for tracking checked luggage selections per flight
-
-/**
- * Validates user credentials by checking for presence of email and password,
- * and then verifying them against the RSVP sheet.
- * @param {string} email The user's email.
- * @param {string} password The user's password.
- * @returns {{success: boolean, response?: object, rsvpData?: object}} Validation result.
- */
-function validateCredentials(email, password) {
-  if (!email) {
-    return {
-      success: false,
-      response: ContentService.createTextOutput(
-        JSON.stringify({ success: false, error: "Email is required." })
-      ).setMimeType(ContentService.MimeType.JSON),
-    };
-  }
-
-  if (!password) {
-    return {
-      success: false,
-      response: ContentService.createTextOutput(
-        JSON.stringify({ success: false, error: "Password is required." })
-      ).setMimeType(ContentService.MimeType.JSON),
-    };
-  }
-
-  const rsvpResult = lookupRSVP(email.trim(), password.trim());
-
-  if (!rsvpResult.success) {
-    return {
-      success: false,
-      response: ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: rsvpResult.error,
-        })
-      ).setMimeType(ContentService.MimeType.JSON),
-    };
-  }
-
-  return {
-    success: true,
-    rsvpData: rsvpResult.data,
-  };
-}
-
-/**
- * Handle GET requests for RSVP lookup and timeline data
- */
-// eslint-disable-next-line no-unused-vars
-function doGet(e) {
-  try {
-    // Check if this is a timeline request
-    if (e.parameter.endpoint === "timeline") {
-      return getTimelineData();
-    }
-
-    // Check if this is a rafting registrations count request
-    if (e.parameter.endpoint === "rafting_count") {
-      return getRaftingRegistrationsCount();
-    }
-
-    // Check if this is a voucher download request
-    if (e.parameter.endpoint === "download_voucher") {
-      return downloadVoucher(e.parameter.email, e.parameter.password);
-    }
-
-    const email = e.parameter.email;
-    const password = e.parameter.password;
-
-    const validation = validateCredentials(email, password);
-    if (!validation.success) {
-      return validation.response;
-    }
-
-    // Check if there's an existing submission for this email
-    const existingSubmission = getExistingSubmission(email.trim());
-
-    // Look up passport details for this traveler
-    const passportDetails = getPassportDetails(email.trim());
-
-    // Look up luggage selections for this traveler
-    const luggageDetails = getLuggageDetails(email.trim());
-
-    // Look up user choices for this traveler
-    const userChoices = getUserChoices(email.trim());
-
-    const responseData = {
-      rsvpData: validation.rsvpData,
-      row: existingSubmission?.row || null,
-      rowNumber: existingSubmission?.rowNumber || null,
-      passport: passportDetails || null,
-      luggageSelection: luggageDetails || null,
-      userChoices: userChoices || {},
-    };
-
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: true,
-        data: responseData,
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    console.error("Error processing GET request:", error);
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: "Internal server error. Please contact Maddie for assistance.",
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * Get rafting registrations count across Trip Registrations and CHOICES sheets.
- * Logic:
- * - Build latest choice per email for itemKey 'rafting' from CHOICES (event-sourced using highest counter)
- * - Load Trip Registrations and read formData.rafting column
- * - Final inclusion per email:
- *   - If latest CHOICES for rafting exists: include if 'yes', exclude if 'no'
- *   - Else fall back to formData.rafting truthiness
- */
-function getRaftingRegistrationsCount() {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-
-    // --- Load CHOICES latest per email for rafting ---
-    const choicesSheet = spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
-    const latestChoiceByEmail = {};
-    if (choicesSheet && choicesSheet.getLastRow() >= 2) {
-      const values = choicesSheet.getDataRange().getValues();
-      const headers = values[0];
-      const emailIdx = headers.indexOf("email");
-      const itemKeyIdx = headers.indexOf("itemKey");
-      const choiceIdx = headers.indexOf("choice");
-      const counterIdx = headers.indexOf("counter");
-
-      if (
-        emailIdx !== -1 &&
-        itemKeyIdx !== -1 &&
-        choiceIdx !== -1 &&
-        counterIdx !== -1
-      ) {
-        // Track highest counter per email for rafting
-        const maxCounterByEmail = {};
-        for (let i = 1; i < values.length; i++) {
-          const row = values[i];
-          const email = (row[emailIdx] || "").toString().toLowerCase().trim();
-          const itemKey = (row[itemKeyIdx] || "").toString().trim();
-          if (!email || itemKey !== "rafting") continue;
-          const choiceVal = (row[choiceIdx] || "")
-            .toString()
-            .toLowerCase()
-            .trim();
-          const counterVal = parseInt(row[counterIdx]) || 0;
-          if (
-            maxCounterByEmail[email] === undefined ||
-            counterVal > maxCounterByEmail[email]
-          ) {
-            maxCounterByEmail[email] = counterVal;
-            latestChoiceByEmail[email] = choiceVal; // 'yes' or 'no'
-          }
-        }
-      }
-    }
-
-    // --- Load Trip Registrations formData.rafting ---
-    const regsSheet = spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
-    const formRaftingByEmail = {};
-    if (regsSheet && regsSheet.getLastRow() >= 2) {
-      const values = regsSheet.getDataRange().getValues();
-      const headers = values[0];
-      const emailIdx = headers.indexOf("rsvpData.email");
-      const raftingIdx = headers.indexOf("formData.rafting");
-      if (emailIdx !== -1 && raftingIdx !== -1) {
-        for (let i = 1; i < values.length; i++) {
-          const row = values[i];
-          const email = (row[emailIdx] || "").toString().toLowerCase().trim();
-          if (!email) continue;
-          const raftingVal = row[raftingIdx];
-          // Normalize truthy values: true boolean, 'true', 'yes', '1', 'x'
-          let isTrue = false;
-          if (typeof raftingVal === "boolean") {
-            isTrue = raftingVal;
-          } else if (typeof raftingVal === "string") {
-            const v = raftingVal.toLowerCase().trim();
-            isTrue = v === "true" || v === "yes" || v === "1" || v === "x";
-          } else if (typeof raftingVal === "number") {
-            isTrue = raftingVal === 1;
-          }
-          formRaftingByEmail[email] = Boolean(isTrue);
-        }
-      }
-    }
-
-    // --- Combine with precedence to CHOICES ---
-    const emailSet = new Set([
-      ...Object.keys(formRaftingByEmail),
-      ...Object.keys(latestChoiceByEmail),
-    ]);
-
-    let count = 0;
-    for (const email of emailSet) {
-      if (latestChoiceByEmail[email] !== undefined) {
-        if (latestChoiceByEmail[email] === "yes") count++;
-      } else if (formRaftingByEmail[email]) {
-        count++;
-      }
-    }
-
-    return ContentService.createTextOutput(
-      JSON.stringify({ success: true, count: count })
-    ).setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    console.error("Error getting rafting registrations count:", error);
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: "Failed to retrieve rafting registrations count",
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}
 
 /**
  * Main function to handle POST requests for form submissions and REDSYS TPV callbacks
@@ -282,22 +57,22 @@ function doPost(e) {
         ).setMimeType(ContentService.MimeType.JSON);
       }
       try {
-        var folder = DriveApp.getFolderById(
+        const folder = DriveApp.getFolderById(
           "11OIHpYcakL5G08Z2B10mJNHkKjl0ID78"
         );
-        var extension = data.fileName.split(".").pop();
-        var safeName = data.name.replace(/[^a-zA-Z0-9]/g, "");
-        var safeSurname = data.surname.replace(/[^a-zA-Z0-9]/g, "");
-        var fileName = `proof_${data.orderNumber}_${safeSurname}_${safeName}_${data.timestamp}_${data.installments_0}_${data.installments_1}.${extension}`;
-        var decoded = Utilities.base64Decode(data.fileData);
-        var blob = Utilities.newBlob(decoded, data.fileType, fileName);
-        var file = folder.createFile(blob);
+        const extension = data.fileName.split(".").pop();
+        const safeName = data.name.replace(/[^a-zA-Z0-9]/g, "");
+        const safeSurname = data.surname.replace(/[^a-zA-Z0-9]/g, "");
+        const fileName = `proof_${data.orderNumber}_${safeSurname}_${safeName}_${data.timestamp}_${data.installments_0}_${data.installments_1}.${extension}`;
+        const decoded = Utilities.base64Decode(data.fileData);
+        const blob = Utilities.newBlob(decoded, data.fileType, fileName);
+        const file = folder.createFile(blob);
         return ContentService.createTextOutput(
           JSON.stringify({
             success: true,
             fileId: file.getId(),
             fileUrl: file.getUrl(),
-            fileName: fileName,
+            fileName,
           })
         ).setMimeType(ContentService.MimeType.JSON);
       } catch (err) {
@@ -310,112 +85,21 @@ function doPost(e) {
       }
     }
 
-    // === Luggage submission handler ===
-    if (data.action === "submit_luggage") {
-      // Required: email, password, chosen (JSON object mapping flight codes to boolean)
-      const email = (data.email || "").trim();
-      const password = (data.password || "").trim();
-      const validation = validateCredentials(email, password);
-      if (!validation.success) {
-        return validation.response;
-      }
-
-      const result = saveLuggageSubmission({
-        email,
-        luggageSelection: JSON.parse(data.luggageSelection),
-      });
-
-      return ContentService.createTextOutput(
-        JSON.stringify(result)
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // === Passport submission handler ===
-    if (data.action === "submit_passport") {
-      // Required: email, password, passportNumber, expiryDate, birthDate
-      const email = (data.email || "").trim();
-      const password = (data.password || "").trim();
-      const validation = validateCredentials(email, password);
-      if (!validation.success) {
-        return validation.response;
-      }
-
-      const required = ["passportNumber", "expiryDate", "birthDate"];
-      for (const key of required) {
-        if (!data[key]) {
-          return ContentService.createTextOutput(
-            JSON.stringify({
-              success: false,
-              error: `Missing required field: ${key}`,
-            })
-          ).setMimeType(ContentService.MimeType.JSON);
-        }
-      }
-
-      const result = savePassportSubmission({
-        email,
-        passportName: (data.passportName || "").toString().trim(),
-        passportNumber: String(data.passportNumber).trim(),
-        expiryDate: String(data.expiryDate).trim(),
-        birthDate: String(data.birthDate).trim(),
-        aAdvantage: (data.aAdvantage || "").toString().trim(),
-      });
-
-      return ContentService.createTextOutput(
-        JSON.stringify(result)
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // Check if this is a choices update request
-    if (data.action === "update_choices") {
-      return updateUserChoices(data);
-    }
-
     // Check if this is a REDSYS TPV callback
     if (data.Ds_MerchantParameters) {
       return handleRedsysCallback(data);
     }
 
-    // Continue with existing form submission logic
-    const result = saveToSheet(data);
-
-    if (result.success) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: true,
-          message: "Registration saved successfully",
-          rowNumber: result.rowNumber,
-          paymentLinkUrl: result.paymentLinkUrl,
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    } else {
-      // Use the specific error message from saveToSheet instead of generic message
-      throw new Error(result.error || "Failed to save to sheet");
-    }
+    throw new Error("Invalid request");
   } catch (error) {
     console.error("Error processing request:", error);
     return ContentService.createTextOutput(
       JSON.stringify({
         success: false,
-        error: "Internal server error: " + error.message,
+        error: `Internal server error: ${error.message}`,
       })
     ).setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-/**
- * Handle OPTIONS requests for CORS
- * Used by Google Apps Script web app deployment
- */
-// eslint-disable-next-line no-unused-vars
-function doOptions() {
-  return ContentService.createTextOutput("")
-    .setMimeType(ContentService.MimeType.TEXT)
-    .setHeaders({
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    });
 }
 
 /**
@@ -462,16 +146,16 @@ function handleRedsysCallback(data) {
       return ContentService.createTextOutput("OK").setMimeType(
         ContentService.MimeType.TEXT
       );
-    } else {
-      throw new Error(result.error || "Failed to save TPV payment data");
     }
+
+    throw new Error(result.error || "Failed to save TPV payment data");
   } catch (error) {
     console.error("Error processing REDSYS callback:", error);
 
     // Still return HTTP 200 OK to avoid REDSYS retries
     // Log the error for manual review
     return ContentService.createTextOutput(
-      "ERROR: " + error.message
+      `ERROR: ${error.message}`
     ).setMimeType(ContentService.MimeType.TEXT);
   }
 }
@@ -529,132 +213,13 @@ function saveToTpvPaymentsSheet(paymentRecord) {
 
     return {
       success: true,
-      rowNumber: rowNumber,
+      rowNumber,
     };
   } catch (error) {
     console.error("Error saving TPV payment data:", error);
     return {
       success: false,
       error: error.message,
-    };
-  }
-}
-
-/**
- * Look up RSVP data by email and password
- */
-function lookupRSVP(email, password) {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = spreadsheet.getSheetByName(RSVP_SHEET_NAME);
-
-    if (!sheet) {
-      return {
-        success: false,
-        error:
-          "RSVP data sheet not found. Please contact Maddie for assistance.",
-      };
-    }
-
-    // Get all data from the sheet
-    const dataRange = sheet.getDataRange();
-    const values = dataRange.getValues();
-
-    if (values.length < 2) {
-      return {
-        success: false,
-        error: "No RSVP data available. Please contact Maddie for assistance.",
-      };
-    }
-
-    // Get headers (first row)
-    const headers = values[0];
-
-    // Find the email column using the actual column name
-    const emailColumnIndex = headers.indexOf("email");
-
-    if (emailColumnIndex === -1) {
-      console.error("Email column not found. Available headers:", headers);
-      return {
-        success: false,
-        error:
-          "Email column not found in RSVP data. Please contact Maddie for assistance.",
-      };
-    }
-
-    // Find the password column
-    const passwordColumnIndex = headers.indexOf("PASSWORD");
-
-    if (passwordColumnIndex === -1) {
-      console.error("Password column not found. Available headers:", headers);
-      return {
-        success: false,
-        error:
-          "Password column not found in RSVP data. Please contact Maddie for assistance.",
-      };
-    }
-
-    // Search for the email in the data rows (skip header row)
-    for (let i = 1; i < values.length; i++) {
-      const row = values[i];
-      const rowEmail = row[emailColumnIndex];
-
-      if (
-        rowEmail &&
-        rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
-      ) {
-        // Found the email! Now validate the password
-        const rowPassword = row[passwordColumnIndex];
-
-        if (!rowPassword || rowPassword.toString().trim() !== password) {
-          return {
-            success: false,
-            error:
-              "Invalid password. Please check your password or contact Maddie on WhatsApp for assistance.",
-          };
-        }
-
-        // Password matches! Create object with headers as keys
-        const rsvpData = {};
-
-        for (let j = 0; j < headers.length; j++) {
-          const header = headers[j];
-          const value = row[j];
-
-          // Don't include the password in the returned data for security
-          if (header === "PASSWORD") {
-            continue;
-          }
-
-          // Convert numeric values to numbers, handle boolean-like values
-          if (value === 1 || value === "1") {
-            rsvpData[header] = true;
-          } else if (value === 0 || value === "0" || value === "") {
-            rsvpData[header] = false;
-          } else {
-            rsvpData[header] = value;
-          }
-        }
-
-        return {
-          success: true,
-          data: rsvpData,
-        };
-      }
-    }
-
-    // Email not found
-    return {
-      success: false,
-      error:
-        "Email not found in our RSVP database. Please check your email address or contact Maddie on WhatsApp for assistance.",
-    };
-  } catch (error) {
-    console.error("Error in lookupRSVP:", error);
-    return {
-      success: false,
-      error:
-        "Unable to retrieve RSVP data. Please contact Maddie for assistance.",
     };
   }
 }
@@ -676,7 +241,7 @@ function getExistingSubmission(email) {
     const values = dataRange.getValues();
 
     // Get headers (first row)
-    const headers = values[0];
+    const [headers] = values;
 
     // Find the email column
     const emailColumnIndex = headers.indexOf("rsvpData.email");
@@ -718,319 +283,34 @@ function getExistingSubmission(email) {
 }
 
 /**
- * Ensure PASSPORTS sheet exists with correct headers. Return the sheet.
- */
-function ensurePassportsSheet() {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = spreadsheet.getSheetByName(PASSPORTS_SHEET_NAME);
-  if (!sheet) {
-    sheet = spreadsheet.insertSheet(PASSPORTS_SHEET_NAME);
-  }
-
-  // Headers we expect
-  const headers = [
-    "timestamp",
-    "email",
-    "passportName",
-    "passportNumber",
-    "expiryDate",
-    "birthDate",
-    "aAdvantage",
-  ];
-
-  if (sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    const headerRange = sheet.getRange(1, 1, 1, headers.length);
-    headerRange.setFontWeight("bold");
-    headerRange.setBackground("#f0f0f0");
-  } else {
-    // If it exists, ensure required headers are present (by name)
-    const existing = sheet
-      .getRange(1, 1, 1, sheet.getLastColumn())
-      .getValues()[0];
-    const existingSet = new Set(existing);
-
-    let appended = false;
-    headers.forEach((h) => {
-      if (!existingSet.has(h)) {
-        // Append new header at the end
-        const nextCol = sheet.getLastColumn() + 1;
-        sheet.getRange(1, nextCol).setValue(h);
-        appended = true;
-      }
-    });
-    if (appended) {
-      const headerRange = sheet.getRange(1, 1, 1, sheet.getLastColumn());
-      headerRange.setFontWeight("bold");
-      headerRange.setBackground("#f0f0f0");
-    }
-  }
-
-  return sheet;
-}
-
-/**
- * Get passport details for a given email (or null if not found)
- */
-function getPassportDetails(email) {
-  try {
-    const sheet = ensurePassportsSheet();
-    if (sheet.getLastRow() < 2) return null;
-
-    const data = sheet.getDataRange().getValues();
-    const headers = data[0];
-    const emailIdx = headers.indexOf("email");
-    if (emailIdx === -1) return null;
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      const rowEmail = row[emailIdx];
-      if (
-        rowEmail &&
-        rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
-      ) {
-        // Build object
-        const obj = {};
-        headers.forEach((h, j) => (obj[h] = row[j]));
-        return obj;
-      }
-    }
-    return null;
-  } catch (error) {
-    console.error("Error getting passport details:", error);
-    return null;
-  }
-}
-
-/**
- * Save passport submission. Users can only submit once.
- */
-function savePassportSubmission({
-  email,
-  passportName,
-  passportNumber,
-  expiryDate,
-  birthDate,
-  aAdvantage,
-}) {
-  try {
-    const sheet = ensurePassportsSheet();
-
-    // Check duplicates
-    const existing = getPassportDetails(email);
-    if (existing) {
-      return {
-        success: false,
-        error: "Passport information already submitted for this email.",
-      };
-    }
-
-    const timestamp = new Date().toISOString();
-    // Build an object and map to existing header order to avoid column mismatch
-    const rowObject = {
-      timestamp: timestamp,
-      email: email,
-      passportName: passportName || "",
-      passportNumber: passportNumber,
-      expiryDate: expiryDate,
-      birthDate: birthDate,
-      aAdvantage: aAdvantage || "",
-    };
-
-    const headers = sheet
-      .getRange(1, 1, 1, sheet.getLastColumn())
-      .getValues()[0];
-    const row = headers.map((h) =>
-      rowObject[h] !== undefined ? rowObject[h] : ""
-    );
-
-    sheet.appendRow(row);
-    const passport = {
-      timestamp: timestamp,
-      email: email,
-      passportName: passportName || "",
-      passportNumber: passportNumber,
-      expiryDate: expiryDate,
-      birthDate: birthDate,
-      aAdvantage: aAdvantage || "",
-    };
-    return {
-      success: true,
-      message: "Passport details saved successfully.",
-      passport: passport,
-    };
-  } catch (error) {
-    console.error("Error saving passport submission:", error);
-    return {
-      success: false,
-      error: error.message || "Failed to save passport details.",
-    };
-  }
-}
-
-/**
- * Ensure Luggage sheet exists with correct headers. Return the sheet.
- */
-function ensureLuggageSheet() {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = spreadsheet.getSheetByName(LUGGAGE_SHEET_NAME);
-  if (!sheet) {
-    sheet = spreadsheet.insertSheet(LUGGAGE_SHEET_NAME);
-  }
-
-  // Expected headers: email as PK, then one column per internal flight
-  const headers = ["timestamp", "email", "AEP-BRC", "BRC-MDZ", "MDZ-AEP"];
-
-  if (sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    const headerRange = sheet.getRange(1, 1, 1, headers.length);
-    headerRange.setFontWeight("bold");
-    headerRange.setBackground("#f0f0f0");
-  } else {
-    // Ensure required headers are present
-    const existing = sheet
-      .getRange(1, 1, 1, sheet.getLastColumn())
-      .getValues()[0];
-    const existingSet = new Set(existing);
-    let appended = false;
-    headers.forEach((h) => {
-      if (!existingSet.has(h)) {
-        const nextCol = sheet.getLastColumn() + 1;
-        sheet.getRange(1, nextCol).setValue(h);
-        appended = true;
-      }
-    });
-    if (appended) {
-      const headerRange = sheet.getRange(1, 1, 1, sheet.getLastColumn());
-      headerRange.setFontWeight("bold");
-      headerRange.setBackground("#f0f0f0");
-    }
-  }
-
-  return sheet;
-}
-
-/**
- * Get luggage selections for a given email (or null if not found)
- */
-function getLuggageDetails(email) {
-  try {
-    const sheet = ensureLuggageSheet();
-    if (sheet.getLastRow() < 2) return null;
-
-    const data = sheet.getDataRange().getValues();
-    const headers = data[0];
-    const emailIdx = headers.indexOf("email");
-    if (emailIdx === -1) return null;
-
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      const rowEmail = row[emailIdx];
-      if (
-        rowEmail &&
-        rowEmail.toString().toLowerCase().trim() === email.trim().toLowerCase()
-      ) {
-        const obj = {};
-        headers.forEach((h, j) => (obj[h] = row[j]));
-        obj["AEP-BRC"] = obj["AEP-BRC"] === "1" ? true : false;
-        obj["BRC-MDZ"] = obj["BRC-MDZ"] === "1" ? true : false;
-        obj["MDZ-AEP"] = obj["MDZ-AEP"] === "1" ? true : false;
-        return obj;
-      }
-    }
-    return null;
-  } catch (error) {
-    console.error("Error getting luggage details:", error);
-    return null;
-  }
-}
-
-/**
- * Save luggage submission. Overwrites existing row for the email if present.
- */
-function saveLuggageSubmission({ email, luggageSelection }) {
-  try {
-    const sheet = ensureLuggageSheet();
-    const headers = sheet
-      .getRange(1, 1, 1, sheet.getLastColumn())
-      .getValues()[0];
-
-    const timestamp = new Date().toISOString();
-    const rowObject = {
-      timestamp,
-      email,
-      "AEP-BRC": Boolean(luggageSelection?.["AEP-BRC"]) ? "1" : "0",
-      "BRC-MDZ": Boolean(luggageSelection?.["BRC-MDZ"]) ? "1" : "0",
-      "MDZ-AEP": Boolean(luggageSelection?.["MDZ-AEP"]) ? "1" : "0",
-    };
-
-    // Find existing row for email
-    const emailIdx = headers.indexOf("email");
-    let targetRow = -1;
-    if (emailIdx !== -1) {
-      const lastRow = sheet.getLastRow();
-      if (lastRow >= 2) {
-        const values = sheet
-          .getRange(2, 1, lastRow - 1, sheet.getLastColumn())
-          .getValues();
-        for (let i = 0; i < values.length; i++) {
-          const row = values[i];
-          const rowEmail = row[emailIdx];
-          if (
-            rowEmail &&
-            rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
-          ) {
-            targetRow = i + 2; // convert to sheet row number
-            break;
-          }
-        }
-      }
-    }
-
-    const row = headers.map((h) =>
-      rowObject[h] !== undefined ? rowObject[h] : ""
-    );
-
-    if (targetRow === -1) {
-      sheet.appendRow(row);
-    } else {
-      sheet.getRange(targetRow, 1, 1, headers.length).setValues([row]);
-    }
-
-    return {
-      success: true,
-      message: "Luggage selections saved successfully.",
-      luggage: rowObject,
-    };
-  } catch (error) {
-    console.error("Error saving luggage submission:", error);
-    return {
-      success: false,
-      error: error.message || "Failed to save luggage selections.",
-    };
-  }
-}
-
-/**
  * Helper function to get RSVP data for pricing calculations
  */
 function _getRsvpDataForEmail(email) {
-  if (!email) return null;
+  if (!email) {
+    return null;
+  }
 
   try {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = spreadsheet.getSheetByName(RSVP_SHEET_NAME);
 
-    if (!sheet) return null;
+    if (!sheet) {
+      return null;
+    }
 
     const dataRange = sheet.getDataRange();
     const values = dataRange.getValues();
 
-    if (values.length < 2) return null;
+    if (values.length < 2) {
+      return null;
+    }
 
-    const headers = values[0];
+    const [headers] = values;
     const emailColumnIndex = headers.indexOf("email");
 
-    if (emailColumnIndex === -1) return null;
+    if (emailColumnIndex === -1) {
+      return null;
+    }
 
     // Find the row with matching email
     for (let i = 1; i < values.length; i++) {
@@ -1058,359 +338,10 @@ function _getRsvpDataForEmail(email) {
 }
 
 /**
- * Check if email already exists in the trip registrations sheet
- */
-function emailExists(sheet, email) {
-  if (sheet.getLastRow() <= 1) {
-    // Only header row exists, no data yet
-    return false;
-  }
-
-  // find the index of the email column
-  const emailColumnIndex = sheet
-    .getRange(1, 1, 1, sheet.getLastColumn())
-    .getValues()[0]
-    .indexOf("rsvpData.email");
-
-  // If email column not found, return false (can't check duplicates)
-  if (emailColumnIndex === -1) {
-    console.log("Email column 'rsvpData.email' not found in sheet headers");
-    return false;
-  }
-
-  // Check if the email already exists
-  for (let i = 2; i <= sheet.getLastRow(); i++) {
-    // Start from row 2 (skip header)
-    const cellValue = sheet.getRange(i, emailColumnIndex + 1).getValue();
-    if (
-      cellValue &&
-      cellValue.toString().toLowerCase() === email.toLowerCase()
-    ) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * Save processed data to Google Sheet
- */
-function saveToSheet(data) {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
-
-    const HEADERS_IN_ORDER = [
-      "formData.email",
-      "formData.firstName",
-      "formData.lastName",
-      "formData.phoneNumber",
-      "formData.roommateName",
-      "formData.roommatePreference",
-      "formData.dietaryMessage",
-      "formData.dietaryRestrictions",
-
-      "formData.checkedLuggage",
-      "formData.privateRoomUpgrade",
-
-      "formData.cooking",
-      "formData.horseback",
-      "formData.rafting",
-      "formData.tango",
-
-      "formData.paymentSchedule",
-      "formData.paymentMethod",
-      "formData.cryptoCurrency",
-      "formData.cryptoNetwork",
-
-      "pricing.activitiesPrice",
-      "pricing.basePrice",
-      "pricing.installmentAmount",
-      "pricing.privateRoomUpgrade",
-      "pricing.processingFee",
-      "pricing.subtotal",
-      "pricing.total",
-
-      "rsvpData.22Nov_BSAS",
-      "rsvpData.23Nov_BSAS",
-      "rsvpData.23Nov_Dinner_Welcome",
-      "rsvpData.23Nov_Tour",
-      "rsvpData.24Nov_BARI",
-      "rsvpData.25Nov_BARI",
-      "rsvpData.26Nov_BARI",
-      "rsvpData.27Nov_MDZ",
-      "rsvpData.28Nov_MDZ",
-      "rsvpData.29Nov_BSAS",
-      "rsvpData.AEP-BRC",
-      "rsvpData.BRC-MDZ",
-      "rsvpData.MDZ-AEP",
-      "rsvpData.PACKPRICE",
-      "rsvpData.PRIVATEROOM",
-      "rsvpData.Timestamp",
-      // "rsvpData.VALIJA", // Removed - no longer pricing luggage
-      "rsvpData.comments",
-      "rsvpData.email",
-      "rsvpData.email2",
-      "rsvpData.name",
-      "rsvpData.option",
-      "rsvpData.party",
-      "rsvpData.plus1",
-
-      "pricing.totalEUR",
-      "pricing.installmentAmountEUR",
-      "paymentLink.url",
-    ];
-
-    // Use the hardcoded headers to ensure consistent ordering
-    const headers = HEADERS_IN_ORDER;
-
-    // Always rewrite the header row to ensure consistency
-    if (sheet.getLastRow() > 0) {
-      sheet.getRange(1, 1, 1, headers.length).clearContent();
-    }
-    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-
-    // Format header row
-    const headerRange = sheet.getRange(1, 1, 1, headers.length);
-    headerRange.setFontWeight("bold");
-    headerRange.setBackground("#f0f0f0");
-
-    // Check if email already exists (primary key constraint)
-    if (emailExists(sheet, data["rsvpData.email"])) {
-      return {
-        success: false,
-        error: `Email ${data["rsvpData.email"]} has already been registered for this trip.`,
-      };
-    }
-
-    // --- Payment Link Creation ---
-    let paymentLinkData = null;
-    let paymentLinkError = null;
-
-    if (data["formData.paymentMethod"] === "credit" && false) {
-      paymentLinkData = createPaymentLinkOrderForRow(
-        data,
-        sheet.getLastRow() + 1
-      );
-
-      // Log the attempt to the PAYMENTLINKSDB sheet
-      saveToPaymentLinksSheet({
-        timestamp: new Date().toISOString(),
-        email: data["formData.email"],
-        link: paymentLinkData ? paymentLinkData.urlPaygold : "",
-        jsonResponse: paymentLinkData ? JSON.stringify(paymentLinkData) : "",
-        status: paymentLinkData ? "success" : "failed",
-        error: paymentLinkError ? paymentLinkError.toString() : "",
-      });
-    }
-    // --- End Payment Link Creation ---
-
-    // Add row to sheet using the hardcoded header order
-    const finalValues = headers.map((header) => {
-      if (header === "paymentLink.url") {
-        return paymentLinkData ? paymentLinkData.urlPaygold : "";
-      }
-      return data[header] || "";
-    });
-
-    sheet.appendRow(finalValues);
-    const rowNumber = sheet.getLastRow();
-
-    return {
-      success: true,
-      rowNumber: rowNumber,
-      paymentLinkUrl: paymentLinkData ? paymentLinkData.urlPaygold : "",
-    };
-  } catch (error) {
-    console.error("Error saving to sheet:", error);
-    return {
-      success: false,
-      error: error.message,
-    };
-  }
-}
-
-/**
  * Helper to load all emails that have already received a welcome email
  */
 function getAllWelcomeEmailsSent() {
   return getAllSentEmails(AUTO_EMAILS_SHEET_NAME, "welcome");
-}
-
-/**
- * Manual trigger function to send password emails to all RSVP users
- * Run this function manually from the Apps Script editor when needed
- */
-// eslint-disable-next-line no-unused-vars
-function sendPasswordEmailsToAllRSVPs() {
-  try {
-    console.log("Starting to send password emails to all RSVP users...");
-
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = spreadsheet.getSheetByName(RSVP_SHEET_NAME);
-
-    if (!sheet) {
-      throw new Error("RSVP sheet not found");
-    }
-
-    // Get all data from the sheet
-    const dataRange = sheet.getDataRange();
-    const values = dataRange.getValues();
-
-    if (values.length < 2) {
-      console.log("No RSVP data found");
-      return;
-    }
-
-    // Get headers (first row)
-    const headers = values[0];
-
-    // Find column indices
-    const emailColumnIndex = headers.indexOf("email");
-    const passwordColumnIndex = headers.indexOf("PASSWORD");
-    const nameColumnIndex = headers.indexOf("name");
-
-    if (emailColumnIndex === -1) {
-      throw new Error("Email column not found in RSVP sheet");
-    }
-
-    if (passwordColumnIndex === -1) {
-      throw new Error("PASSWORD column not found in RSVP sheet");
-    }
-
-    let emailsSent = 0;
-    let emailsSkipped = 0;
-    let errors = 0;
-
-    // Load all sent welcome emails into memory ONCE
-    const sentWelcomeEmails = getAllWelcomeEmailsSent();
-
-    // Process each row (skip header row)
-    for (let i = 1; i < values.length; i++) {
-      const row = values[i];
-      const email = row[emailColumnIndex];
-      const password = row[passwordColumnIndex];
-      const name = row[nameColumnIndex] || "Traveler";
-
-      // Skip rows without email or password
-      if (!email || !password) {
-        console.log(`Skipping row ${i + 1}: missing email or password`);
-        continue;
-      }
-
-      try {
-        // Check if welcome email was already sent to this email (use in-memory set)
-        const alreadySent = sentWelcomeEmails.has(
-          email.toString().toLowerCase().trim()
-        );
-
-        if (alreadySent) {
-          emailsSkipped++;
-          console.log(`⏭️  Email already sent to: ${email}`);
-          continue;
-        }
-
-        // Send the email
-        const result = sendPasswordEmail(
-          email.toString().trim(),
-          password.toString().trim(),
-          name.toString().trim()
-        );
-
-        if (result.success) {
-          if (result.skipped) {
-            emailsSkipped++;
-            console.log(`⏭️  Email already sent to: ${email}`);
-          } else {
-            emailsSent++;
-            console.log(`✓ Email sent to: ${email}`);
-          }
-        } else {
-          errors++;
-          console.error(
-            `✗ Failed to send email to: ${email} - ${result.error}`
-          );
-        }
-
-        // Add a small delay to avoid hitting Gmail sending limits
-        Utilities.sleep(1000); // 1 second delay
-      } catch (emailError) {
-        errors++;
-        console.error(`✗ Error sending email to ${email}:`, emailError);
-      }
-    }
-
-    // Final summary
-    console.log(`\n=== EMAIL SENDING SUMMARY ===`);
-    console.log(`Total emails sent: ${emailsSent}`);
-    console.log(`Total emails skipped (already sent): ${emailsSkipped}`);
-    console.log(`Total errors: ${errors}`);
-    console.log(`Total processed: ${emailsSent + emailsSkipped + errors}`);
-
-    return {
-      success: true,
-      emailsSent: emailsSent,
-      emailsSkipped: emailsSkipped,
-      errors: errors,
-      message: `Completed: ${emailsSent} emails sent, ${emailsSkipped} skipped, ${errors} errors`,
-    };
-  } catch (error) {
-    console.error("Error in sendPasswordEmailsToAllRSVPs:", error);
-    throw error;
-  }
-}
-
-/**
- * Record welcome email sending in WELCOME EMAILS sheet
- */
-function recordWelcomeEmailSent(email, name, status, htmlBody) {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = spreadsheet.getSheetByName(AUTO_EMAILS_SHEET_NAME);
-
-    // Create WELCOME EMAILS sheet if it doesn't exist
-    if (!sheet) {
-      sheet = spreadsheet.insertSheet(AUTO_EMAILS_SHEET_NAME);
-      console.log("Created WELCOME EMAILS sheet");
-      // Add headers including htmlBody
-      const headers = ["timestamp", "email", "name", "status", "htmlBody"];
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    } else {
-      // If sheet exists but doesn't have htmlBody column, add it
-      const headers = sheet
-        .getRange(1, 1, 1, sheet.getLastColumn())
-        .getValues()[0];
-      if (!headers.includes("htmlBody")) {
-        sheet.insertColumnAfter(headers.length);
-        sheet.getRange(1, headers.length + 1).setValue("htmlBody");
-      }
-    }
-
-    // Prepare data row: date, email, name, status, htmlBody
-    const timestamp = new Date().toISOString();
-
-    // Append the new row
-    sheet.appendRow([timestamp, email, name, status, htmlBody]);
-
-    // Get the row number of the newly added row
-    const lastRow = sheet.getLastRow();
-
-    console.log(
-      `Welcome email record saved to row ${lastRow}: ${email} - ${status}`
-    );
-
-    return {
-      success: true,
-      rowNumber: lastRow,
-    };
-  } catch (error) {
-    console.error("Error recording welcome email:", error);
-    return {
-      success: false,
-      error: "Failed to record welcome email",
-    };
-  }
 }
 
 /**
@@ -1495,19 +426,8 @@ function sendPasswordEmail(email, password, name) {
     let errorMessage = null;
 
     try {
-      // Send the email using Gmail API
-      // MailApp.sendEmail({
-      //   to: email,
-      //   from: "sonsolesstays+argtrip@gmail.com",
-      //   bcc: "sonsolesstays+argtrip@gmail.com",
-      //   subject: subject,
-      //   htmlBody: htmlBody,
-      //   body: textBody,
-      // });
-
       const bcc = "sonsolesstays+argtrip@gmail.com";
       sendEmail(email, subject, htmlBody, [], bcc);
-
       console.log("Email sent successfully to", email);
       emailSent = true;
     } catch (emailError) {
@@ -1519,14 +439,7 @@ function sendPasswordEmail(email, password, name) {
     // Record the email sending attempt (for direct calls, batch calls handled in sendBatchEmails)
     const status = emailSent ? "sent" : "failed";
     const resultMessage = emailSent ? "" : errorMessage || "Unknown error";
-    recordEmailSent(
-      AUTO_EMAILS_SHEET_NAME,
-      email,
-      name,
-      status,
-      "welcome",
-      resultMessage
-    );
+    recordEmailSent(email, name, status, "welcome", resultMessage);
 
     return {
       success: emailSent,
@@ -1539,14 +452,7 @@ function sendPasswordEmail(email, password, name) {
     console.error(`Error sending email to ${email}:`, error);
 
     // Record the failed attempt (for direct calls, batch calls handled in sendBatchEmails)
-    recordEmailSent(
-      AUTO_EMAILS_SHEET_NAME,
-      email,
-      name,
-      "failed",
-      "welcome",
-      error.message
-    );
+    recordEmailSent(email, name, "failed", "welcome", error.message);
 
     return {
       success: false,
@@ -1566,9 +472,9 @@ function sendPasswordEmail(email, password, name) {
 function sendEmail(to, subject, htmlContent, attachments = [], bcc) {
   if (USE_GMAIL) {
     return sendGmailEmail(to, subject, htmlContent, attachments, bcc);
-  } else {
-    return sendMailGunEmail(to, subject, htmlContent, attachments, bcc);
   }
+
+  return sendMailGunEmail(to, subject, htmlContent, attachments, bcc);
 }
 
 /**
@@ -1578,7 +484,7 @@ function sendGmailEmail(to, subject, htmlContent, attachments = [], bcc) {
   try {
     const emailOptions = {
       to: Array.isArray(to) ? to.join(",") : to,
-      subject: subject,
+      subject,
       htmlBody: htmlContent,
       replyTo: "sonsolesstays+argtrip@gmail.com",
     };
@@ -1591,6 +497,7 @@ function sendGmailEmail(to, subject, htmlContent, attachments = [], bcc) {
       emailOptions.attachments = attachments;
     }
 
+    // eslint-disable-next-line no-undef
     MailApp.sendEmail(emailOptions);
     console.log(`Gmail email sent successfully to: ${emailOptions.to}`);
   } catch (error) {
@@ -1610,13 +517,15 @@ function sendGmailEmail(to, subject, htmlContent, attachments = [], bcc) {
  */
 function sendMailGunEmail(to, subject, htmlContent, attachments = [], bcc) {
   const MG_DOMAIN = "mailing.sonsolesstays.com";
-  if (!MG_KEY || !MG_DOMAIN) throw new Error("Missing Mailgun credentials");
+  if (!MG_KEY || !MG_DOMAIN) {
+    throw new Error("Missing Mailgun credentials");
+  }
 
   // Build the form payload
   const form = {
-    from: "Sonsoles Stays<no-reply@" + MG_DOMAIN + ">",
+    from: `Sonsoles Stays<no-reply@${MG_DOMAIN}>`,
     to: Array.isArray(to) ? to.join(",") : to,
-    subject: subject,
+    subject,
     html: htmlContent,
     "h:Reply-To": "sonsolestays@gmail.com",
   };
@@ -1628,7 +537,7 @@ function sendMailGunEmail(to, subject, htmlContent, attachments = [], bcc) {
   // Attachments, if provided
   if (attachments && attachments.length) {
     attachments.forEach((blob, i) => {
-      form["attachment[" + i + "]"] = blob;
+      form[`attachment[${i}]`] = blob;
     });
   }
 
@@ -1637,16 +546,16 @@ function sendMailGunEmail(to, subject, htmlContent, attachments = [], bcc) {
     method: "post",
     payload: form,
     headers: {
-      Authorization: "Basic " + Utilities.base64Encode("api:" + MG_KEY),
+      Authorization: `Basic ${Utilities.base64Encode(`api:${MG_KEY}`)}`,
     },
     muteHttpExceptions: true,
   };
-  const url = "https://api.mailgun.net/v3/" + MG_DOMAIN + "/messages";
+  const url = `https://api.mailgun.net/v3/${MG_DOMAIN}/messages`;
   const res = UrlFetchApp.fetch(url, options);
 
   if (res.getResponseCode() < 200 || res.getResponseCode() > 299) {
     console.error("Mailgun error:", res.getContentText());
-    throw new Error("Email send failed (" + res.getResponseCode() + ")");
+    throw new Error(`Email send failed (${res.getResponseCode()})`);
   }
   console.log(JSON.parse(res.getContentText()));
 }
@@ -1783,7 +692,7 @@ function getPaymentLinkInfo(email) {
       console.log(`Found ${expiredCount} expired links for ${email}.`);
     }
 
-    return { activeLink: activeLink, expiredCount: expiredCount };
+    return { activeLink, expiredCount };
   } catch (error) {
     console.error("Error in getPaymentLinkInfo:", error);
     return { activeLink: null, expiredCount: 0 };
@@ -1813,11 +722,6 @@ function createPaymentLinkOrderForRow(data, rowNumber, authToken, linkNumber) {
     return null;
   }
 }
-
-/**
- * Redsys API client for creating payment links.
- */
-const REDSYS_BASE_URL = "https://canales.redsys.es/admincanales-web/services";
 
 /**
  *
@@ -1850,7 +754,7 @@ function login() {
     }
 
     const data = JSON.parse(responseBody);
-    const token = data.token;
+    const { token } = data;
     console.log("token", token);
     if (!token) {
       throw new Error(
@@ -1962,27 +866,6 @@ function createPaymentLink(order, authToken) {
 }
 
 /**
- * Send WhatsApp group invite emails to all registered participants
- * This function reads all emails from the Trip Registrations sheet and sends invite emails
- * Uses WHATSAPP EMAILS sheet to track sent emails and prevent duplicates
- */
-// eslint-disable-next-line no-unused-vars
-function sendWhatsAppInviteEmails() {
-  const whatsappLink = "https://chat.whatsapp.com/IYh0cLoxU4V12Njmp8CcnE";
-
-  // Wrapper function that passes the WhatsApp link to the individual sender
-  const whatsappEmailSender = (email, name) => {
-    return sendWhatsAppInviteEmail(email, name, whatsappLink);
-  };
-
-  return sendBatchEmails(
-    "WhatsApp invite",
-    whatsappEmailSender,
-    3000 // 3 second delay
-  );
-}
-
-/**
  * Get all registered emails from Trip Registrations sheet
  */
 function getAllRegisteredEmails() {
@@ -2003,7 +886,7 @@ function getAllRegisteredEmails() {
     }
 
     // Get headers (first row)
-    const headers = values[0];
+    const [headers] = values;
 
     // Find column indices
     const emailColumnIndex = headers.indexOf("formData.email");
@@ -2123,403 +1006,6 @@ function sendWhatsAppInviteEmail(email, name, whatsappLink) {
 }
 
 /**
- * Manually-triggered function to generate Redsys payment links in batch for a predefined list of users.
- * This function logs into Redsys once, then for each email, it looks up the registration data,
- * and creates a payment link if one doesn't already exist.
- * Results are logged to the PAYMENTLINKSDB sheet.
- */
-function generatePaymentLinksBatch() {
-  const emailsToProcess = [];
-
-  let authToken;
-  try {
-    authToken = login();
-    if (!authToken) {
-      console.error("Failed to get auth token from Redsys. Aborting batch.");
-      return;
-    }
-    console.log(
-      "Successfully obtained Redsys auth token for batch processing."
-    );
-  } catch (e) {
-    console.error("Redsys login failed, cannot proceed with batch.", e);
-    return;
-  }
-
-  for (const email of emailsToProcess) {
-    try {
-      console.log(`Processing user: ${email}`);
-
-      const submission = getExistingSubmission(email);
-      if (!submission) {
-        console.error(
-          `Could not find trip registration for email: ${email}. Skipping.`
-        );
-        continue;
-      }
-
-      const paymentInfo = getPaymentLinkInfo(email);
-      if (paymentInfo.activeLink) {
-        console.log(
-          `Skipping ${email}: an active payment link already exists.`
-        );
-        continue;
-      }
-
-      let paymentLinkData = null;
-      let paymentLinkError = null;
-
-      try {
-        const flatData = {
-          "formData.firstName": submission.row["formData.firstName"],
-          "formData.lastName": submission.row["formData.lastName"],
-          "formData.email": submission.row["formData.email"],
-          "formData.paymentSchedule":
-            submission.row["formData.paymentSchedule"],
-          "pricing.installmentAmountEUR":
-            submission.row["pricing.installmentAmountEUR"],
-        };
-
-        const linkNumber = paymentInfo.expiredCount + 1;
-        paymentLinkData = createPaymentLinkOrderForRow(
-          flatData,
-          submission.rowNumber,
-          authToken,
-          linkNumber
-        );
-      } catch (e) {
-        paymentLinkError = e;
-      }
-
-      saveToPaymentLinksSheet({
-        timestamp: new Date().toISOString(),
-        email: email,
-        link: paymentLinkData ? paymentLinkData.urlPaygold : "",
-        jsonResponse: paymentLinkData ? JSON.stringify(paymentLinkData) : "",
-        status: paymentLinkData ? "success" : "failed",
-        error: paymentLinkError ? paymentLinkError.toString() : "",
-      });
-
-      console.log(
-        `Finished processing for ${email}. Status: ${
-          paymentLinkData ? "success" : "failed"
-        }`
-      );
-    } catch (loopError) {
-      console.error(
-        `An unexpected error occurred processing ${email}:`,
-        loopError
-      );
-    }
-
-    // Add a small delay to avoid overwhelming the API
-    Utilities.sleep(500); // 500ms delay
-  }
-
-  console.log("Batch payment link generation complete.");
-}
-
-/**
- * Get timeline data from TIMELINE sheet
- * Returns an array of objects where keys are headers and values are row data
- */
-function getTimelineData() {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = spreadsheet.getSheetByName(TIMELINE_SHEET_NAME);
-
-    if (!sheet) {
-      throw new Error("TIMELINE sheet not found");
-    }
-
-    // Get all data from the sheet
-    const dataRange = sheet.getDataRange();
-    const values = dataRange.getDisplayValues();
-
-    if (values.length === 0) {
-      throw new Error("No data found in TIMELINE sheet");
-    }
-
-    // Get headers from first row
-    const headers = values[0];
-
-    // Convert data rows to objects
-    const timelineData = [];
-    for (let i = 1; i < values.length; i++) {
-      const row = values[i];
-      const rowObject = {};
-
-      // Map each column value to its corresponding header
-      for (let j = 0; j < headers.length; j++) {
-        rowObject[headers[j]] = row[j] || null;
-      }
-
-      rowObject.id = i;
-
-      timelineData.push(rowObject);
-    }
-
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: true,
-        data: timelineData,
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    console.error("Error getting timeline data:", error);
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: "Failed to retrieve timeline data",
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * Get user choices from CHOICES sheet
- */
-function getUserChoices(email) {
-  try {
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
-
-    if (!sheet) {
-      // If sheet doesn't exist, return empty choices
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: true,
-          data: {},
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // Get all data from the sheet
-    const dataRange = sheet.getDataRange();
-    const values = dataRange.getValues();
-
-    if (values.length < 2) {
-      // Only header row exists, return empty choices
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: true,
-          data: {},
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // Get headers (first row)
-    const headers = values[0];
-
-    // Find the required columns
-    const emailColumnIndex = headers.indexOf("email");
-    const itemKeyColumnIndex = headers.indexOf("itemKey");
-    const choiceColumnIndex = headers.indexOf("choice");
-    const counterColumnIndex = headers.indexOf("counter");
-    const optionColumnIndex = headers.indexOf("option");
-
-    if (
-      emailColumnIndex === -1 ||
-      itemKeyColumnIndex === -1 ||
-      choiceColumnIndex === -1 ||
-      counterColumnIndex === -1 ||
-      optionColumnIndex === -1
-    ) {
-      throw new Error("Required columns not found in CHOICES sheet");
-    }
-
-    // Build choices object for this user, keeping only the latest choice for each itemKey
-    const userChoices = {};
-    const latestChoices = new Map(); // itemKey -> {choice, counter}
-
-    // Search for the user's choices in the data rows (skip header row)
-    for (let i = 1; i < values.length; i++) {
-      const row = values[i];
-      const rowEmail = row[emailColumnIndex];
-      const itemKey = row[itemKeyColumnIndex];
-      const option = row[optionColumnIndex];
-      const choice = row[choiceColumnIndex];
-      const counter = parseInt(row[counterColumnIndex]) || 0;
-
-      if (
-        rowEmail &&
-        rowEmail.toString().toLowerCase().trim() === email.toLowerCase() &&
-        itemKey &&
-        choice &&
-        option
-      ) {
-        // Check if this is the latest choice for this itemKey
-        const existing = latestChoices.get(`${itemKey}-${option}`);
-        if (!existing || counter > existing.counter) {
-          latestChoices.set(`${itemKey}-${option}`, { choice, counter });
-        }
-      }
-    }
-
-    // Convert latest choices to the expected format
-    for (const [itemKey, { choice }] of latestChoices) {
-      userChoices[itemKey] = choice;
-    }
-
-    return userChoices;
-  } catch (error) {
-    console.error("Error getting user choices:", error);
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: "Failed to retrieve user choices",
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * Update user choices in CHOICES sheet (event-sourced)
- */
-function updateUserChoices(data) {
-  try {
-    // Validate required fields
-    if (
-      !data.email ||
-      !data.password ||
-      !data.itemKey ||
-      !data.option ||
-      !data.choice
-    ) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: "Email, password, itemKey, and choice are required",
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // Validate credentials first
-    const validation = validateCredentials(data.email, data.password);
-    if (!validation.success) {
-      return validation.response;
-    }
-
-    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
-
-    // Create CHOICES sheet if it doesn't exist
-    if (!sheet) {
-      sheet = spreadsheet.insertSheet(CHOICES_SHEET_NAME);
-      console.log("Created CHOICES sheet");
-
-      // Add headers
-      const headers = ["timestamp", "email", "itemKey", "choice", "counter"];
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-
-      // Format header row
-      const headerRange = sheet.getRange(1, 1, 1, headers.length);
-      headerRange.setFontWeight("bold");
-      headerRange.setBackground("#f0f0f0");
-    }
-
-    // Get the next counter for this user and itemKey
-    const nextCounter = getNextCounterForItem(
-      sheet,
-      data.email,
-      data.itemKey,
-      data.option
-    );
-
-    // Add new choice event (always insert, never update)
-    const timestamp = new Date().toISOString();
-    const newRow = [
-      timestamp,
-      data.email,
-      data.itemKey,
-      data.option,
-      data.choice,
-      nextCounter,
-    ];
-    sheet.appendRow(newRow);
-
-    console.log(
-      `Added new choice event for ${data.email} - ${data.itemKey}: ${data.option} - ${data.choice} (counter: ${nextCounter})`
-    );
-
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: true,
-        message: "Choice updated successfully",
-        counter: nextCounter,
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    console.error("Error updating user choices:", error);
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: "Failed to update user choices: " + error.message,
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * Get the next counter value for a specific user and itemKey
- */
-function getNextCounterForItem(sheet, email, itemKey, option) {
-  try {
-    const dataRange = sheet.getDataRange();
-    const values = dataRange.getValues();
-
-    if (values.length < 2) {
-      // Only header row exists, start with counter 1
-      return 1;
-    }
-
-    const headers = values[0];
-    const emailColumnIndex = headers.indexOf("email");
-    const itemKeyColumnIndex = headers.indexOf("itemKey");
-    const counterColumnIndex = headers.indexOf("counter");
-    const optionColumnIndex = headers.indexOf("option");
-
-    if (
-      emailColumnIndex === -1 ||
-      itemKeyColumnIndex === -1 ||
-      counterColumnIndex === -1 ||
-      optionColumnIndex === -1
-    ) {
-      throw new Error("Required columns not found in CHOICES sheet");
-    }
-
-    let maxCounter = 0;
-
-    // Find the highest counter for this user and itemKey
-    for (let i = 1; i < values.length; i++) {
-      const row = values[i];
-      const rowEmail = row[emailColumnIndex];
-      const rowItemKey = row[itemKeyColumnIndex];
-      const rowOption = row[optionColumnIndex];
-      const counter = parseInt(row[counterColumnIndex]) || 0;
-
-      if (
-        rowEmail &&
-        rowEmail.toString().toLowerCase().trim() === email.toLowerCase() &&
-        rowItemKey &&
-        rowItemKey.toString().trim() === itemKey.toString().trim() &&
-        rowOption &&
-        rowOption.toString().trim() === option.toString().trim()
-      ) {
-        if (counter > maxCounter) {
-          maxCounter = counter;
-        }
-      }
-    }
-
-    return maxCounter + 1;
-  } catch (error) {
-    console.error("Error getting next counter:", error);
-    return 1; // Fallback to 1 if there's an error
-  }
-}
-
-/**
  * Generic batch email sender that can be used for any type of email campaign
  * @param {string} emailType - Description of email type for logging (e.g., "WhatsApp invite", "Terms & Conditions")
  * @param {function} emailSenderFunction - Function that sends individual emails
@@ -2566,8 +1052,7 @@ function sendBatchEmails(
 
     // Process each email
     for (const emailData of emails) {
-      const email = emailData.email;
-      const name = emailData.firstName;
+      const { email, firstName: name } = emailData;
 
       try {
         // Check if email was already sent
@@ -2616,14 +1101,7 @@ function sendBatchEmails(
         const resultMessage = result.success
           ? ""
           : result.error || "Unknown error";
-        recordEmailSent(
-          AUTO_EMAILS_SHEET_NAME,
-          email,
-          name,
-          status,
-          emailTypeFilter,
-          resultMessage
-        );
+        recordEmailSent(email, name, status, emailTypeFilter, resultMessage);
 
         if (result.success) {
           emailsSent++;
@@ -2647,7 +1125,6 @@ function sendBatchEmails(
         );
         // Record the exception as a failed attempt
         recordEmailSent(
-          AUTO_EMAILS_SHEET_NAME,
           email,
           name,
           "failed",
@@ -2666,9 +1143,9 @@ function sendBatchEmails(
 
     return {
       success: true,
-      emailsSent: emailsSent,
-      emailsSkipped: emailsSkipped,
-      errors: errors,
+      emailsSent,
+      emailsSkipped,
+      errors,
       message: `Completed: ${emailsSent} emails sent, ${emailsSkipped} skipped, ${errors} errors`,
     };
   } catch (error) {
@@ -2696,7 +1173,7 @@ function getAllSentEmails(sheetName, emailType = null) {
     }
 
     // Get headers to find column indices
-    const headers = values[0];
+    const [headers] = values;
     const emailColumnIndex = headers.indexOf("email");
     const statusColumnIndex = headers.indexOf("status");
     const typeColumnIndex = headers.indexOf("type");
@@ -2733,29 +1210,20 @@ function getAllSentEmails(sheetName, emailType = null) {
 
 /**
  * Generic function to record email sending in tracking sheet
- * @param {string} sheetName - Name of the tracking sheet
  * @param {string} email - Email address
  * @param {string} name - Recipient name
  * @param {string} status - Status: "sent" or "failed"
  * @param {string} type - Email type: "whatsapp", "welcome", "terms"
  * @param {string} result - Error message if failed, success message if sent
  */
-function recordEmailSent(
-  sheetName,
-  email,
-  name,
-  status,
-  type = "unknown",
-  result = ""
-) {
+function recordEmailSent(email, name, status, type = "unknown", result = "") {
   try {
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = spreadsheet.getSheetByName(sheetName);
+    let sheet = spreadsheet.getSheetByName(AUTO_EMAILS_SHEET_NAME);
 
     // Create tracking sheet if it doesn't exist
     if (!sheet) {
-      sheet = spreadsheet.insertSheet(sheetName);
-      console.log(`Created ${sheetName} sheet`);
+      sheet = spreadsheet.insertSheet(AUTO_EMAILS_SHEET_NAME);
       // Add headers
       const headers = [
         "timestamp",
@@ -2783,7 +1251,7 @@ function recordEmailSent(
     const lastRow = sheet.getLastRow();
 
     console.log(
-      `Email record saved to ${sheetName} row ${lastRow}: ${email} - ${status}`
+      `Email record saved to ${AUTO_EMAILS_SHEET_NAME} row ${lastRow}: ${email} - ${status}`
     );
 
     return {
@@ -2791,42 +1259,12 @@ function recordEmailSent(
       rowNumber: lastRow,
     };
   } catch (error) {
-    console.error(`Error recording email in ${sheetName}:`, error);
+    console.error(`Error recording email in ${AUTO_EMAILS_SHEET_NAME}:`, error);
     return {
       success: false,
-      error: `Failed to record email in ${sheetName}`,
+      error: `Failed to record email in ${AUTO_EMAILS_SHEET_NAME}`,
     };
   }
-}
-
-/**
- * Send Terms & Conditions emails to all registered participants
- * This function reads all emails from the Trip Registrations sheet and sends T&C emails
- * Uses TC EMAILS sheet to track sent emails and prevent duplicates
- */
-// eslint-disable-next-line no-unused-vars
-function sendTermsAndConditionsEmails() {
-  return sendBatchEmails(
-    "Terms & Conditions",
-    sendTermsAndConditionsEmail,
-    2000, // 2 second delay
-    {
-      sendToEmails: [
-        "dzhang6@stanford.edu",
-        "Bzakaria@stanford.edu",
-        "lmees@stanford.edu",
-        "Tkim1993@stanford.edu",
-        "lukasa@stanford.edu",
-        "zteiger@stanford.edu",
-      ],
-      excludeEmails: [
-        "Annie.se.park@gmail.com",
-        "Leonms@stanford.edu",
-        "Bradley.James.Rollins@gmail.com",
-        "lmassaro@stanford.edu",
-      ], // optional override of emails to send to for testing
-    }
-  );
 }
 
 /**
@@ -2862,8 +1300,8 @@ function getVoucherFile(email) {
     const file = files.next();
     return {
       success: true,
-      file: file,
-      rowId: rowId,
+      file,
+      rowId,
     };
   } catch (error) {
     return {
@@ -2984,46 +1422,266 @@ Maddie
 }
 
 /**
- * Download voucher PDF for a user based on their row ID
+ * Send Terms & Conditions emails to all registered participants
+ * This function reads all emails from the Trip Registrations sheet and sends T&C emails
+ * Uses TC EMAILS sheet to track sent emails and prevent duplicates
  */
-function downloadVoucher(email, password) {
+// eslint-disable-next-line no-unused-vars
+function sendTermsAndConditionsEmails() {
+  return sendBatchEmails(
+    "Terms & Conditions",
+    sendTermsAndConditionsEmail,
+    2000, // 2 second delay
+    {
+      sendToEmails: [
+        "dzhang6@stanford.edu",
+        "Bzakaria@stanford.edu",
+        "lmees@stanford.edu",
+        "Tkim1993@stanford.edu",
+        "lukasa@stanford.edu",
+        "zteiger@stanford.edu",
+      ],
+      excludeEmails: [
+        "Annie.se.park@gmail.com",
+        "Leonms@stanford.edu",
+        "Bradley.James.Rollins@gmail.com",
+        "lmassaro@stanford.edu",
+      ], // optional override of emails to send to for testing
+    }
+  );
+}
+
+/**
+ * Manually-triggered function to generate Redsys payment links in batch for a predefined list of users.
+ * This function logs into Redsys once, then for each email, it looks up the registration data,
+ * and creates a payment link if one doesn't already exist.
+ * Results are logged to the PAYMENTLINKSDB sheet.
+ */
+// eslint-disable-next-line no-unused-vars
+function generatePaymentLinksBatch() {
+  const emailsToProcess = [];
+
+  let authToken;
   try {
-    // Validate credentials first
-    const validation = validateCredentials(email, password);
-    if (!validation.success) {
-      return validation.response;
+    authToken = login();
+    if (!authToken) {
+      console.error("Failed to get auth token from Redsys. Aborting batch.");
+      return;
     }
-
-    // Get voucher file
-    const voucherResult = getVoucherFile(email);
-    if (!voucherResult.success) {
-      return ContentService.createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: voucherResult.error,
-        })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-
-    const blob = voucherResult.file.getBlob();
-    const fileName = `arg-trip-voucher-${voucherResult.rowId}.pdf`;
-
-    // Return the PDF as base64 for download
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: true,
-        fileName: fileName,
-        fileData: Utilities.base64Encode(blob.getBytes()),
-        mimeType: "application/pdf",
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    console.error("Error downloading voucher:", error);
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: "Failed to download voucher: " + error.message,
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
+    console.log(
+      "Successfully obtained Redsys auth token for batch processing."
+    );
+  } catch (e) {
+    console.error("Redsys login failed, cannot proceed with batch.", e);
+    return;
   }
+
+  for (const email of emailsToProcess) {
+    try {
+      console.log(`Processing user: ${email}`);
+
+      const submission = getExistingSubmission(email);
+      if (!submission) {
+        console.error(
+          `Could not find trip registration for email: ${email}. Skipping.`
+        );
+        continue;
+      }
+
+      const paymentInfo = getPaymentLinkInfo(email);
+      if (paymentInfo.activeLink) {
+        console.log(
+          `Skipping ${email}: an active payment link already exists.`
+        );
+        continue;
+      }
+
+      let paymentLinkData = null;
+      let paymentLinkError = null;
+
+      try {
+        const flatData = {
+          "formData.firstName": submission.row["formData.firstName"],
+          "formData.lastName": submission.row["formData.lastName"],
+          "formData.email": submission.row["formData.email"],
+          "formData.paymentSchedule":
+            submission.row["formData.paymentSchedule"],
+          "pricing.installmentAmountEUR":
+            submission.row["pricing.installmentAmountEUR"],
+        };
+
+        const linkNumber = paymentInfo.expiredCount + 1;
+        paymentLinkData = createPaymentLinkOrderForRow(
+          flatData,
+          submission.rowNumber,
+          authToken,
+          linkNumber
+        );
+      } catch (e) {
+        paymentLinkError = e;
+      }
+
+      saveToPaymentLinksSheet({
+        timestamp: new Date().toISOString(),
+        email,
+        link: paymentLinkData ? paymentLinkData.urlPaygold : "",
+        jsonResponse: paymentLinkData ? JSON.stringify(paymentLinkData) : "",
+        status: paymentLinkData ? "success" : "failed",
+        error: paymentLinkError ? paymentLinkError.toString() : "",
+      });
+
+      console.log(
+        `Finished processing for ${email}. Status: ${
+          paymentLinkData ? "success" : "failed"
+        }`
+      );
+    } catch (loopError) {
+      console.error(
+        `An unexpected error occurred processing ${email}:`,
+        loopError
+      );
+    }
+
+    // Add a small delay to avoid overwhelming the API
+    Utilities.sleep(500); // 500ms delay
+  }
+
+  console.log("Batch payment link generation complete.");
+}
+
+/**
+ * Send WhatsApp group invite emails to all registered participants
+ * This function reads all emails from the Trip Registrations sheet and sends invite emails
+ * Uses WHATSAPP EMAILS sheet to track sent emails and prevent duplicates
+ */
+// eslint-disable-next-line no-unused-vars
+function sendWhatsAppInviteEmails() {
+  const whatsappLink = "https://chat.whatsapp.com/IYh0cLoxU4V12Njmp8CcnE";
+
+  // Wrapper function that passes the WhatsApp link to the individual sender
+  const whatsappEmailSender = (email, name) => {
+    return sendWhatsAppInviteEmail(email, name, whatsappLink);
+  };
+
+  return sendBatchEmails(
+    "WhatsApp invite",
+    whatsappEmailSender,
+    3000 // 3 second delay
+  );
+}
+
+/**
+ * Manual trigger function to send password emails to all RSVP users
+ * Run this function manually from the Apps Script editor when needed
+ */
+// eslint-disable-next-line no-unused-vars
+function sendPasswordEmailsToAllRSVPs() {
+  console.log("Starting to send password emails to all RSVP users...");
+
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = spreadsheet.getSheetByName(RSVP_SHEET_NAME);
+
+  if (!sheet) {
+    throw new Error("RSVP sheet not found");
+  }
+
+  // Get all data from the sheet
+  const dataRange = sheet.getDataRange();
+  const values = dataRange.getValues();
+
+  if (values.length < 2) {
+    console.log("No RSVP data found");
+    return;
+  }
+
+  // Get headers (first row)
+  const [headers] = values;
+
+  // Find column indices
+  const emailColumnIndex = headers.indexOf("email");
+  const passwordColumnIndex = headers.indexOf("PASSWORD");
+  const nameColumnIndex = headers.indexOf("name");
+
+  if (emailColumnIndex === -1) {
+    throw new Error("Email column not found in RSVP sheet");
+  }
+
+  if (passwordColumnIndex === -1) {
+    throw new Error("PASSWORD column not found in RSVP sheet");
+  }
+
+  let emailsSent = 0;
+  let emailsSkipped = 0;
+  let errors = 0;
+
+  // Load all sent welcome emails into memory ONCE
+  const sentWelcomeEmails = getAllWelcomeEmailsSent();
+
+  // Process each row (skip header row)
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+    const email = row[emailColumnIndex];
+    const password = row[passwordColumnIndex];
+    const name = row[nameColumnIndex] || "Traveler";
+
+    // Skip rows without email or password
+    if (!email || !password) {
+      console.log(`Skipping row ${i + 1}: missing email or password`);
+      continue;
+    }
+
+    try {
+      // Check if welcome email was already sent to this email (use in-memory set)
+      const alreadySent = sentWelcomeEmails.has(
+        email.toString().toLowerCase().trim()
+      );
+
+      if (alreadySent) {
+        emailsSkipped++;
+        console.log(`⏭️  Email already sent to: ${email}`);
+        continue;
+      }
+
+      // Send the email
+      const result = sendPasswordEmail(
+        email.toString().trim(),
+        password.toString().trim(),
+        name.toString().trim()
+      );
+
+      if (result.success) {
+        if (result.skipped) {
+          emailsSkipped++;
+          console.log(`⏭️  Email already sent to: ${email}`);
+        } else {
+          emailsSent++;
+          console.log(`✓ Email sent to: ${email}`);
+        }
+      } else {
+        errors++;
+        console.error(`✗ Failed to send email to: ${email} - ${result.error}`);
+      }
+
+      // Add a small delay to avoid hitting Gmail sending limits
+      Utilities.sleep(1000); // 1 second delay
+    } catch (emailError) {
+      errors++;
+      console.error(`✗ Error sending email to ${email}:`, emailError);
+    }
+  }
+
+  // Final summary
+  console.log(`\n=== EMAIL SENDING SUMMARY ===`);
+  console.log(`Total emails sent: ${emailsSent}`);
+  console.log(`Total emails skipped (already sent): ${emailsSkipped}`);
+  console.log(`Total errors: ${errors}`);
+  console.log(`Total processed: ${emailsSent + emailsSkipped + errors}`);
+
+  return {
+    success: true,
+    emailsSent,
+    emailsSkipped,
+    errors,
+    message: `Completed: ${emailsSent} emails sent, ${emailsSkipped} skipped, ${errors} errors`,
+  };
 }

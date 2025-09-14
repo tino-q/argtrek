@@ -12,7 +12,7 @@ export default [
     ignores: [
       "dist/**",
       "node_modules/**",
-      "apps-script.js",
+      // "apps-script.js",
       "vite.config.js",
       "backend/**",
     ],

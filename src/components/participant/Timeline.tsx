@@ -811,7 +811,7 @@ const TimelineContent: React.FC = () => {
   const [timelineData, setTimelineData] = useState<TimelineItem[] | null>(null);
   const [loadingTimeline, setLoadingTimeline] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [_collapsedDays, setCollapsedDays] = useState<Set<string>>(new Set());
+  const [collapsedDays, setCollapsedDays] = useState<Set<string>>(new Set());
 
   const [showAllItems, setShowAllItems] = useState<boolean>(false);
   const { email: userEmail } = useContext(AuthContext);
@@ -917,9 +917,7 @@ const TimelineContent: React.FC = () => {
           const dayKeys = new Set<string>();
           timelineData.forEach((item: TimelineItem) => {
             const dayKey = item["DAY OF MONTH"];
-            if (dayKey !== "22") {
-              dayKeys.add(dayKey);
-            }
+            dayKeys.add(dayKey);
           });
           setCollapsedDays(dayKeys);
         } else {
@@ -976,9 +974,8 @@ const TimelineContent: React.FC = () => {
     }
   };
 
-  const isDayCollapsed = (_dayKey: string): boolean => {
-    return false;
-    // return collapsedDays.has(dayKey);
+  const isDayCollapsed = (dayKey: string): boolean => {
+    return collapsedDays.has(dayKey);
   };
 
   if (!hasPassport) {
