@@ -4,7 +4,8 @@ import process from "node:process";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { google } from "googleapis";
+import { sheets } from "@googleapis/sheets";
+import { GoogleAuth } from "google-auth-library";
 import { PDFDocument } from "pdf-lib";
 import puppeteer from "puppeteer";
 
@@ -21,16 +22,16 @@ async function getProcessedArray(__dirname, spreadsheetId) {
     "clear-canyon-454114-p5-a911fe242f29.json"
   );
 
-  const auth = new google.auth.GoogleAuth({
+  const auth = new GoogleAuth({
     keyFile,
     scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
   });
 
-  const sheets = google.sheets({ version: "v4", auth });
+  const sheetsApi = sheets({ version: "v4", auth });
 
   // Get headers (row 1)
   const headerRange = `${sheetName}!1:1`;
-  const headerRes = await sheets.spreadsheets.values.get({
+  const headerRes = await sheetsApi.spreadsheets.values.get({
     spreadsheetId,
     range: headerRange,
   });
@@ -38,7 +39,7 @@ async function getProcessedArray(__dirname, spreadsheetId) {
 
   // Get all data rows (starting from row 2) - using wider range to capture all columns
   const dataRange = `${sheetName}!A2:BE`;
-  const res = await sheets.spreadsheets.values.get({
+  const res = await sheetsApi.spreadsheets.values.get({
     spreadsheetId,
     range: dataRange,
   });

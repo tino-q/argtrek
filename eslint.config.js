@@ -1,7 +1,4 @@
 import js from "@eslint/js";
-
-import tseslint from "@typescript-eslint/eslint-plugin";
-import tsparser from "@typescript-eslint/parser";
 import importPlugin from "eslint-plugin-import";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import react from "eslint-plugin-react";
@@ -15,12 +12,11 @@ export default [
     ignores: [
       "dist/**",
       "node_modules/**",
-      "backend",
+      "apps-script.js",
       "vite.config.js",
-      "eslint.config.js",
+      "backend/**",
     ],
   },
-  // JavaScript and JSX files
   {
     files: ["**/*.{js,jsx}"],
     ...js.configs.recommended,
@@ -73,15 +69,13 @@ export default [
       "no-debugger": "warn",
 
       // Relaxed React rules - only the most important ones
-      "react/prop-types": "off", // Enable PropTypes validation
+      "react/prop-types": "off", // Already using PropTypes package
       "react/react-in-jsx-scope": "off", // Not needed in React 17+
       "react/jsx-uses-react": "off", // Not needed in React 17+
       "react/jsx-uses-vars": "error",
       "react/jsx-key": "warn",
-      "react/jsx-no-undef": "error", // Detect undefined components
       "react/no-unescaped-entities": "off",
       "react/display-name": "off",
-      "react/jsx-pascal-case": "error", // Enforce PascalCase for components
 
       // React Hooks rules (keep these strict as they prevent bugs)
       "react-hooks/rules-of-hooks": "error",
@@ -151,143 +145,6 @@ export default [
       "max-params": ["warn", 5],
 
       // React Performance - High Impact (warnings)
-      "react-perf/jsx-no-new-object-as-prop": "off",
-      "react-perf/jsx-no-new-array-as-prop": "off",
-      "react-perf/jsx-no-new-function-as-prop": "error",
-    },
-  },
-  // TypeScript and TSX files
-  {
-    files: ["**/*.{ts,tsx}"],
-    languageOptions: {
-      parser: tsparser,
-      parserOptions: {
-        ecmaVersion: "latest",
-        sourceType: "module",
-        ecmaFeatures: { jsx: true },
-        project: "./tsconfig.json",
-      },
-      globals: {
-        ...globals.browser,
-        ...globals.es2020,
-        __DEV__: "readonly",
-      },
-    },
-    plugins: {
-      "@typescript-eslint": tseslint,
-      react,
-      "react-hooks": reactHooks,
-      "react-perf": reactPerf,
-      "react-refresh": reactRefresh,
-      "jsx-a11y": jsxA11y,
-      import: importPlugin,
-    },
-    settings: {
-      react: {
-        version: "detect",
-      },
-      "import/resolver": {
-        typescript: true,
-        node: {
-          extensions: [".js", ".jsx", ".ts", ".tsx"],
-        },
-      },
-    },
-    rules: {
-      // TypeScript specific rules
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          ignoreRestSiblings: true,
-        },
-      ],
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/prefer-optional-chain": "error",
-
-      // Disable conflicting rules
-      "no-unused-vars": "off",
-      "no-undef": "off", // TypeScript handles this
-
-      // React rules for TypeScript
-      "react/prop-types": "off", // Not needed with TypeScript
-      "react/react-in-jsx-scope": "off",
-      "react/jsx-uses-react": "off",
-      "react/jsx-uses-vars": "error",
-      "react/jsx-key": "error",
-      "react/jsx-no-undef": "error",
-      "react/no-unescaped-entities": "off",
-      "react/display-name": "off",
-      "react/jsx-pascal-case": "error",
-
-      // React Hooks rules
-      "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "error",
-
-      // React Refresh
-      "react-refresh/only-export-components": [
-        "warn",
-        { allowConstantExport: true },
-      ],
-
-      // Accessibility rules
-      "jsx-a11y/alt-text": "warn",
-      "jsx-a11y/anchor-has-content": "warn",
-      "jsx-a11y/click-events-have-key-events": "off",
-      "jsx-a11y/no-static-element-interactions": "off",
-
-      // Import rules
-      "import/order": [
-        "error",
-        {
-          groups: [
-            "builtin",
-            "external",
-            "internal",
-            "parent",
-            "sibling",
-            "index",
-          ],
-          "newlines-between": "always",
-          alphabetize: { order: "asc", caseInsensitive: true },
-        },
-      ],
-      "import/no-unused-modules": "warn",
-      "import/no-duplicates": "error",
-      "import/no-unresolved": "off", // TypeScript handles this
-      "import/named": "off", // TypeScript handles this
-      "import/default": "off", // TypeScript handles this
-
-      // Performance & Security
-      "no-eval": "error",
-      "no-implied-eval": "error",
-      "no-new-func": "error",
-      "prefer-const": "error",
-      "no-var": "error",
-
-      // React Best Practices
-      "react/self-closing-comp": "error",
-      "react/no-array-index-key": "error",
-
-      // Code Quality & Consistency
-      "prefer-template": "error",
-      "object-shorthand": "error",
-      "prefer-destructuring": ["error", { object: true, array: true }],
-      "no-else-return": "error",
-      curly: "error",
-      eqeqeq: ["error", "always"],
-
-      // React Hooks Extended
-      "react/jsx-no-bind": ["error", { allowArrowFunctions: true }],
-      "react/no-unstable-nested-components": "error",
-
-      // Code Complexity
-      complexity: "off",
-      "max-lines-per-function": "off",
-      "max-params": ["warn", 5],
-
-      // React Performance
       "react-perf/jsx-no-new-object-as-prop": "off",
       "react-perf/jsx-no-new-array-as-prop": "off",
       "react-perf/jsx-no-new-function-as-prop": "error",
