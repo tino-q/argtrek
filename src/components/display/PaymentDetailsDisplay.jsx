@@ -401,20 +401,7 @@ const PaymentDetailsDisplay = ({
 
         {/* Bank Transfer Proof of Payment Upload */}
         {submissionResult?.rowNumber &&
-          formData[FORM_FIELDS.PAYMENT_METHOD] === "credit" && (
-            <div className="form-group center-upload">
-              <ProofOfPaymentUpload
-                name={formData[FORM_FIELDS.FIRST_NAME] || ""}
-                surname={formData[FORM_FIELDS.LAST_NAME] || ""}
-                orderNumber={submissionResult.rowNumber}
-                installments={pricing.installments}
-              />
-            </div>
-          )}
-
-        {/* Crypto Proof of Payment Upload */}
-        {submissionResult?.rowNumber &&
-          formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto" && (
+          ["bank", "crypto"].includes(formData[FORM_FIELDS.PAYMENT_METHOD]) && (
             <div className="form-group center-upload">
               <ProofOfPaymentUpload
                 name={formData[FORM_FIELDS.FIRST_NAME] || ""}
