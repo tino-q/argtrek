@@ -89,13 +89,13 @@ export async function doGet(e: {
   }
 
   // Check if there's an existing submission for this email
-  const existingSubmission = await getExistingSubmission(email.trim());
+  const existingSubmission = await findExistingSubmission(email.trim());
 
   // Look up passport details for this traveler
-  const passportDetails = await getPassportDetails(email.trim());
+  const passportDetails = await findPassportDetails(email.trim());
 
   // Look up luggage selections for this traveler
-  const luggageDetails = await getLuggageDetails(email.trim());
+  const luggageDetails = await findLuggageDetails(email.trim());
 
   // Look up user choices for this traveler
   const userChoices = await getUserChoices(email.trim());
@@ -106,7 +106,7 @@ export async function doGet(e: {
     rowNumber: existingSubmission?.rowNumber || null,
     passport: passportDetails || null,
     luggageSelection: luggageDetails || null,
-    userChoices: userChoices || {},
+    userChoices: userChoices,
   };
 
   return {
@@ -595,12 +595,14 @@ async function lookupRSVP(email: string, password: string) {
 /**
  * Get existing submission data for an email from Trip Registrations sheet
  */
-async function getExistingSubmission(email: string) {
+async function findExistingSubmission(email: string) {
   const spreadsheet = await getSpreadsheet();
   const sheet = await spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
 
   if (!sheet || (await sheet.getLastRow()) <= 1) {
-    return null;
+    throw new Error(
+      "Trip Registrations sheet not found. Please contact Maddie for assistance."
+    );
   }
 
   // Get all data from the sheet
@@ -655,7 +657,15 @@ async function getExistingSubmission(email: string) {
     }
   }
 
-  throw new Error(`email ${email} not found in Trip Registrations sheet`);
+  return null;
+}
+
+async function getExistingSubmission(email: string) {
+  const submission = await findExistingSubmission(email);
+  if (!submission) {
+    throw new Error(`email ${email} not found in Trip Registrations sheet`);
+  }
+  return submission;
 }
 
 /**
@@ -686,7 +696,7 @@ async function ensurePassportsSheet() {
 /**
  * Get passport details for a given email (or null if not found)
  */
-async function getPassportDetails(email: string) {
+async function findPassportDetails(email: string) {
   try {
     const sheet = await ensurePassportsSheet();
     if ((await sheet.getLastRow()) < 2) return null;
@@ -749,7 +759,7 @@ async function savePassportSubmission({
     const sheet = await ensurePassportsSheet();
 
     // Check duplicates
-    const existing = await getPassportDetails(email);
+    const existing = await findPassportDetails(email);
     if (existing) {
       return {
         success: false,
@@ -829,47 +839,44 @@ async function ensureLuggageSheet() {
 /**
  * Get luggage selections for a given email (or null if not found)
  */
-async function getLuggageDetails(email: string) {
-  try {
-    const sheet = await ensureLuggageSheet();
-    if ((await sheet.getLastRow()) < 2) return null;
+async function findLuggageDetails(email: string) {
+  const sheet = await ensureLuggageSheet();
+  if ((await sheet.getLastRow()) < 2) return null;
 
-    const data = await (await sheet.getDataRange()).getValues();
-    const headers = data[0];
+  const data = await (await sheet.getDataRange()).getValues();
+  const headers = data[0];
 
-    if (!headers) {
-      throw new Error(
-        "No headers found in LUGGAGE sheet. Please contact Maddie for assistance."
-      );
-    }
-
-    const emailIdx = headers.indexOf("email");
-    if (emailIdx === -1) return null;
-
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i];
-      if (!row) {
-        throw new Error("No row found");
-      }
-
-      const rowEmail = row[emailIdx];
-      if (
-        rowEmail &&
-        rowEmail.toString().toLowerCase().trim() === email.trim().toLowerCase()
-      ) {
-        const obj: Record<string, string | boolean> = {};
-        headers.forEach((h, j) => (obj[h] = row[j] || ""));
-        obj["AEP-BRC"] = obj["AEP-BRC"] === "1" ? true : false;
-        obj["BRC-MDZ"] = obj["BRC-MDZ"] === "1" ? true : false;
-        obj["MDZ-AEP"] = obj["MDZ-AEP"] === "1" ? true : false;
-        return obj;
-      }
-    }
-    return null;
-  } catch (error) {
-    console.error("Error getting luggage details:", error);
-    return null;
+  if (!headers) {
+    throw new Error(
+      "No headers found in LUGGAGE sheet. Please contact Maddie for assistance."
+    );
   }
+
+  const emailIdx = headers.indexOf("email");
+  if (emailIdx === -1) {
+    throw new Error("Email column 'email' not found in LUGGAGE sheet");
+  }
+
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (!row) {
+      throw new Error("No row found");
+    }
+
+    const rowEmail = row[emailIdx];
+    if (
+      rowEmail &&
+      rowEmail.toString().toLowerCase().trim() === email.trim().toLowerCase()
+    ) {
+      const obj: Record<string, string | boolean> = {};
+      headers.forEach((h, j) => (obj[h] = row[j] || ""));
+      obj["AEP-BRC"] = obj["AEP-BRC"] === "1" ? true : false;
+      obj["BRC-MDZ"] = obj["BRC-MDZ"] === "1" ? true : false;
+      obj["MDZ-AEP"] = obj["MDZ-AEP"] === "1" ? true : false;
+      return obj;
+    }
+  }
+  return null;
 }
 
 /**
@@ -1212,101 +1219,85 @@ async function getTimelineData() {
 /**
  * Get user choices from CHOICES sheet
  */
-async function getUserChoices(email: string) {
-  try {
-    const spreadsheet = await getSpreadsheet();
-    const sheet = await spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
+async function getUserChoices(email: string): Promise<Record<string, string>> {
+  const spreadsheet = await getSpreadsheet();
+  const sheet = await spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
 
-    if (!sheet) {
-      // If sheet doesn't exist, return empty choices
-      return {
-        success: true,
-        data: {},
-      };
+  if (!sheet) {
+    throw new Error("CHOICES sheet not found");
+  }
+
+  // Get all data from the sheet
+  const dataRange = await sheet.getDataRange();
+  const values = await dataRange.getValues();
+
+  if (values.length < 2) {
+    return {};
+  }
+
+  // Get headers (first row)
+  const headers = values[0];
+
+  if (!headers) {
+    throw new Error("No headers found in CHOICES sheet");
+  }
+
+  // Find the required columns
+  const emailColumnIndex = headers.indexOf("email");
+  const itemKeyColumnIndex = headers.indexOf("itemKey");
+  const choiceColumnIndex = headers.indexOf("choice");
+  const counterColumnIndex = headers.indexOf("counter");
+  const optionColumnIndex = headers.indexOf("option");
+
+  if (
+    emailColumnIndex === -1 ||
+    itemKeyColumnIndex === -1 ||
+    choiceColumnIndex === -1 ||
+    counterColumnIndex === -1 ||
+    optionColumnIndex === -1
+  ) {
+    throw new Error("Required columns not found in CHOICES sheet");
+  }
+
+  // Build choices object for this user, keeping only the latest choice for each itemKey
+  const userChoices: Record<string, string> = {};
+  const latestChoices = new Map(); // itemKey -> {choice, counter}
+
+  // Search for the user's choices in the data rows (skip header row)
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+
+    if (!row) {
+      throw new Error("No row found");
     }
 
-    // Get all data from the sheet
-    const dataRange = await sheet.getDataRange();
-    const values = await dataRange.getValues();
-
-    if (values.length < 2) {
-      // Only header row exists, return empty choices
-      return {
-        success: true,
-        data: {},
-      };
-    }
-
-    // Get headers (first row)
-    const headers = values[0];
-
-    if (!headers) {
-      throw new Error("No headers found in CHOICES sheet");
-    }
-
-    // Find the required columns
-    const emailColumnIndex = headers.indexOf("email");
-    const itemKeyColumnIndex = headers.indexOf("itemKey");
-    const choiceColumnIndex = headers.indexOf("choice");
-    const counterColumnIndex = headers.indexOf("counter");
-    const optionColumnIndex = headers.indexOf("option");
+    const rowEmail = row[emailColumnIndex];
+    const itemKey = row[itemKeyColumnIndex];
+    const option = row[optionColumnIndex];
+    const choice = row[choiceColumnIndex];
+    const counter = parseInt(row[counterColumnIndex] || "") || 0;
 
     if (
-      emailColumnIndex === -1 ||
-      itemKeyColumnIndex === -1 ||
-      choiceColumnIndex === -1 ||
-      counterColumnIndex === -1 ||
-      optionColumnIndex === -1
+      rowEmail &&
+      rowEmail.toString().toLowerCase().trim() === email.toLowerCase() &&
+      itemKey &&
+      choice &&
+      option
     ) {
-      throw new Error("Required columns not found in CHOICES sheet");
-    }
-
-    // Build choices object for this user, keeping only the latest choice for each itemKey
-    const userChoices: Record<string, string> = {};
-    const latestChoices = new Map(); // itemKey -> {choice, counter}
-
-    // Search for the user's choices in the data rows (skip header row)
-    for (let i = 1; i < values.length; i++) {
-      const row = values[i];
-
-      if (!row) {
-        throw new Error("No row found");
-      }
-
-      const rowEmail = row[emailColumnIndex];
-      const itemKey = row[itemKeyColumnIndex];
-      const option = row[optionColumnIndex];
-      const choice = row[choiceColumnIndex];
-      const counter = parseInt(row[counterColumnIndex] || "") || 0;
-
-      if (
-        rowEmail &&
-        rowEmail.toString().toLowerCase().trim() === email.toLowerCase() &&
-        itemKey &&
-        choice &&
-        option
-      ) {
-        // Check if this is the latest choice for this itemKey
-        const existing = latestChoices.get(`${itemKey}-${option}`);
-        if (!existing || counter > existing.counter) {
-          latestChoices.set(`${itemKey}-${option}`, { choice, counter });
-        }
+      // Check if this is the latest choice for this itemKey
+      const existing = latestChoices.get(`${itemKey}-${option}`);
+      if (!existing || counter > existing.counter) {
+        latestChoices.set(`${itemKey}-${option}`, { choice, counter });
       }
     }
-
-    // Convert latest choices to the expected format
-    for (const [itemKey, { choice }] of latestChoices) {
-      userChoices[itemKey] = choice;
-    }
-
-    return userChoices;
-  } catch (error) {
-    console.error("Error getting user choices:", error);
-    return {
-      success: false,
-      error: "Failed to retrieve user choices",
-    };
   }
+
+  // Convert latest choices to the expected format
+  for (const [itemKey, { choice }] of latestChoices) {
+    userChoices[itemKey] = choice;
+  }
+
+  return userChoices;
 }
 
 /**
