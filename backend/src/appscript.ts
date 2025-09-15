@@ -357,7 +357,9 @@ async function saveToTpvPaymentsSheet(
   },
   spreadsheet: SpreadsheetWrapper
 ) {
-  const sheet = await spreadsheet.getSheetByName(TPV_PAYMENTS_SHEET_NAME);
+  const sheet = await spreadsheet.getSheetByName(
+    TPV_PAYMENTS_SHEET_NAME as any
+  );
 
   // Define the headers (fixed structure)
   // const headers = [
@@ -825,7 +827,7 @@ async function saveTripRegistration(
  * Returns an array of objects where keys are headers and values are row data
  */
 async function getTimelineData(spreadsheet: SpreadsheetWrapper) {
-  const sheet = await spreadsheet.getSheetByName(TIMELINE_SHEET_NAME);
+  const sheet = await spreadsheet.getSheetByName(TIMELINE_SHEET_NAME as any);
   const rows = await sheet.getRows();
 
   if (rows.length === 0) {
