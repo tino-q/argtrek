@@ -1,6 +1,54 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script type="text/javascript">
+      (function () {
+        window.didomiConfig = {
+          app: {
+            essentialPurposes: [],
+          },
+        };
+
+        (function (e, i, o) {
+          var n = document.createElement("link");
+          n.rel = "preconnect";
+          n.as = "script";
+          var t = document.createElement("link");
+          t.rel = "dns-prefetch";
+          t.as = "script";
+          var r = document.createElement("script");
+          r.id = "spcloader";
+          r.type = "text/javascript";
+          r["async"] = true;
+          r.charset = "utf-8";
+          window.didomiConfig = window.didomiConfig || {};
+          window.didomiConfig.sdkPath =
+            window.didomiConfig.sdkPath ||
+            o ||
+            "https://sdk.staging.privacy-center.org/";
+          const d = window.didomiConfig.sdkPath;
+          var a = d + e + "/loader.js?target_type=notice&target=" + i;
+          if (window.didomiConfig && window.didomiConfig.user) {
+            var c = window.didomiConfig.user;
+            var s = c.country;
+            var f = c.region;
+            if (s) {
+              a = a + "&country=" + s;
+              if (f) {
+                a = a + "&region=" + f;
+              }
+            }
+          }
+          n.href = d;
+          t.href = d;
+          r.src = a;
+          var m = document.getElementsByTagName("script")[0];
+          m.parentNode.insertBefore(n, m);
+          m.parentNode.insertBefore(t, m);
+          m.parentNode.insertBefore(r, m);
+        })("3e9e9ea3-be4f-4599-a742-862971aebe95", "NKYMAVxj");
+      })();
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/src/assets/arg.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

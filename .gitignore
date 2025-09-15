@@ -24,6 +24,8 @@ dist-ssr
 *.sw?
 
 clear-canyon-454114-p5-a911fe242f29.json
+fluent-justice-472015-p1-256d7c9ae0ca.json
+
 src/components/display/cache.json
 src/components/display/output/*
 
