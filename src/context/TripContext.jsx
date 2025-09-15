@@ -89,11 +89,6 @@ const TripProvider = ({ children }) => {
     }));
   };
 
-  // Reset form data to defaults
-  const resetFormData = () => {
-    setFormData(getDefaultFormData());
-  };
-
   // Clear all trip data
   const clearTripData = () => {
     setUserRSVP(null);
@@ -107,7 +102,6 @@ const TripProvider = ({ children }) => {
   };
 
   const handleLogout = () => {
-    resetFormData();
     setSubmissionResult(null);
     setFormData(getDefaultFormData());
     setUserRSVP(null);
@@ -140,7 +134,6 @@ const TripProvider = ({ children }) => {
 
     // Helper functions
     updateFormData,
-    resetFormData,
     clearTripData,
     getDefaultFormData,
   };

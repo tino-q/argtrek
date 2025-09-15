@@ -97,16 +97,6 @@ const PaymentOptions = ({ formData, updateFormData, rsvpData }) => {
     }
   }, [formData, updateFormData]);
 
-  // Set default Argentine citizenship to false if not already set
-  React.useEffect(() => {
-    if (
-      formData[FORM_FIELDS.ARGENTINE_CITIZEN] === undefined ||
-      formData[FORM_FIELDS.ARGENTINE_CITIZEN] === null
-    ) {
-      updateFormData(FORM_FIELDS.ARGENTINE_CITIZEN, false);
-    }
-  }, [formData, updateFormData]);
-
   // Set default crypto currency to USDT when crypto is selected
   React.useEffect(() => {
     if (isCrypto && !formData[FORM_FIELDS.CRYPTO_CURRENCY]) {
