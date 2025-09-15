@@ -11,7 +11,6 @@ import { getStepConfig } from "../../utils/stepConfig";
 import Navigation from "./Navigation";
 import SafeSubmitButton from "./SafeSubmitButton";
 
-
 const StepNavigation = ({
   currentStep,
   onSubmit,
@@ -27,7 +26,7 @@ const StepNavigation = ({
 
   const handleBack = useCallback(() => {
     if (stepConfig.backStep) {
-      navigate(stepConfig.backStep);
+      navigate(`/${stepConfig.backStep}`);
     }
   }, [stepConfig.backStep, navigate]);
 
