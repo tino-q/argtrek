@@ -2,12 +2,15 @@ import { useState } from "react";
 
 import { BACKEND_URL } from "../utils/config";
 
+import useAuth from "./useAuth";
+
 /**
  * Custom hook for handling form submission to Google Apps Script
  * Simplified: Send raw form data, let backend handle all transformations
  */
 export const useFormSubmission = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { email, password } = useAuth();
 
   /**
    * Submit form data to Google Apps Script with minimal transformation
@@ -20,10 +23,11 @@ export const useFormSubmission = () => {
 
     try {
       // Create FormData with raw form inputs + essential RSVP context
-      const formDataPayload = new FormData();
 
       // Combine all data using spreading with prefixes
       const combinedData = {
+        email,
+        password,
         ...Object.fromEntries(
           Object.entries(formData).map(([key, value]) => [
             `formData.${key}`,
@@ -44,15 +48,13 @@ export const useFormSubmission = () => {
         ),
       };
 
-      // Add all combined data to FormData
-      Object.entries(combinedData).forEach(([key, value]) => {
-        formDataPayload.append(key, value);
-      });
-
       // Submit to Google Apps Script
       const response = await fetch(BACKEND_URL, {
         method: "POST",
-        body: formDataPayload,
+        body: JSON.stringify(combinedData),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {

@@ -112,6 +112,39 @@ const RSVPDisplay = ({
   const [validationErrors, setValidationErrors] = useState({});
   const [hasInitialized, setHasInitialized] = useState(false);
 
+  // Handle input change and real-time validation
+  const handleInputChange = useCallback(
+    (field, value) => {
+      updateFormData(field, value);
+
+      // Real-time validation - show error if field is empty
+      if (!value?.trim()) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          [field]: true,
+        }));
+      } else {
+        // Clear validation error for this field if it now has a value
+        setValidationErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
+      }
+    },
+    [updateFormData]
+  );
+
+  // Handle input blur for validation
+  const handleInputBlur = useCallback((field, value) => {
+    if (!value?.trim()) {
+      setValidationErrors((prev) => ({
+        ...prev,
+        [field]: true,
+      }));
+    }
+  }, []);
+
   // Validation function
   const validateRequiredFields = useCallback(() => {
     const errors = {};
@@ -170,33 +203,54 @@ const RSVPDisplay = ({
   }, [showHealthInsuranceDetails]);
 
   // Create handlers for form inputs
-  const handleFirstNameChange = useCallback((e) => {
-    handleInputChange(FORM_FIELDS.FIRST_NAME, e.target.value);
-  }, [handleInputChange]);
+  const handleFirstNameChange = useCallback(
+    (e) => {
+      handleInputChange(FORM_FIELDS.FIRST_NAME, e.target.value);
+    },
+    [handleInputChange]
+  );
 
-  const handleFirstNameBlur = useCallback((e) => {
-    handleInputBlur(FORM_FIELDS.FIRST_NAME, e.target.value);
-  }, [handleInputBlur]);
+  const handleFirstNameBlur = useCallback(
+    (e) => {
+      handleInputBlur(FORM_FIELDS.FIRST_NAME, e.target.value);
+    },
+    [handleInputBlur]
+  );
 
-  const handleLastNameChange = useCallback((e) => {
-    handleInputChange(FORM_FIELDS.LAST_NAME, e.target.value);
-  }, [handleInputChange]);
+  const handleLastNameChange = useCallback(
+    (e) => {
+      handleInputChange(FORM_FIELDS.LAST_NAME, e.target.value);
+    },
+    [handleInputChange]
+  );
 
-  const handleLastNameBlur = useCallback((e) => {
-    handleInputBlur(FORM_FIELDS.LAST_NAME, e.target.value);
-  }, [handleInputBlur]);
+  const handleLastNameBlur = useCallback(
+    (e) => {
+      handleInputBlur(FORM_FIELDS.LAST_NAME, e.target.value);
+    },
+    [handleInputBlur]
+  );
 
-  const handlePhoneChange = useCallback((e) => {
-    handleInputChange(FORM_FIELDS.PHONE_NUMBER, e.target.value);
-  }, [handleInputChange]);
+  const handlePhoneChange = useCallback(
+    (e) => {
+      handleInputChange(FORM_FIELDS.PHONE_NUMBER, e.target.value);
+    },
+    [handleInputChange]
+  );
 
-  const handlePhoneBlur = useCallback((e) => {
-    handleInputBlur(FORM_FIELDS.PHONE_NUMBER, e.target.value);
-  }, [handleInputBlur]);
+  const handlePhoneBlur = useCallback(
+    (e) => {
+      handleInputBlur(FORM_FIELDS.PHONE_NUMBER, e.target.value);
+    },
+    [handleInputBlur]
+  );
 
-  const handleTravelDocumentChange = useCallback((e) => {
-    updateFormData("travelDocumentConfirmed", e.target.checked);
-  }, [updateFormData]);
+  const handleTravelDocumentChange = useCallback(
+    (e) => {
+      updateFormData("travelDocumentConfirmed", e.target.checked);
+    },
+    [updateFormData]
+  );
 
   // Extract data using centralized utilities
   const personalInfo = getPersonalInfo(rsvpData, formData);
@@ -253,38 +307,6 @@ const RSVPDisplay = ({
       phoneInput.focus();
     }
   }, []); // Empty dependency array means this runs once when component mounts
-
-
-
-  // Handle input change and real-time validation
-  const handleInputChange = useCallback((field, value) => {
-    updateFormData(field, value);
-
-    // Real-time validation - show error if field is empty
-    if (!value?.trim()) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        [field]: true,
-      }));
-    } else {
-      // Clear validation error for this field if it now has a value
-      setValidationErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[field];
-        return newErrors;
-      });
-    }
-  }, [updateFormData]);
-
-  // Handle input blur for validation
-  const handleInputBlur = useCallback((field, value) => {
-    if (!value?.trim()) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        [field]: true,
-      }));
-    }
-  }, []);
 
   // Handle checked luggage selection
   const isLuggageSelected = Boolean(formData[FORM_FIELDS.CHECKED_LUGGAGE]);

@@ -59,7 +59,7 @@ export interface ConfirmationModalState {
   isOpen: boolean;
   choicesGroup: ChoiceGroup | null;
   choiceId: ChoiceId | null;
-  selectedChoice: ChoiceId | null | "no";
+  selectedChoice: "yes" | "no" | null;
   title: string;
   message: string;
   isLoading: boolean;
@@ -77,7 +77,7 @@ export interface GroupedTimelineData {
 
 export interface ChoiceOption {
   label: string;
-  value: ChoiceId | "no";
+  value: "yes" | "no";
 }
 
 // Component Props Interfaces

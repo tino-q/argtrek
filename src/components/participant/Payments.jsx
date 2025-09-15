@@ -46,10 +46,7 @@ const Payments = () => {
         />
 
         <div className="payment-actions">
-          <button
-            className="btn btn-secondary"
-            onClick={handleBackToHome}
-          >
+          <button className="btn btn-secondary" onClick={handleBackToHome}>
             <i className="fas fa-arrow-left" />
             Back to Home
           </button>

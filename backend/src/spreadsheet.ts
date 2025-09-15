@@ -2,9 +2,15 @@ import { drive_v3, drive } from "@googleapis/drive";
 import { sheets_v4, sheets } from "@googleapis/sheets";
 import { GoogleAuth } from "google-auth-library";
 
-import credentials from "./clear-canyon-454114-p5-a911fe242f29.json";
+import credentials1 from "./clear-canyon-454114-p5-a911fe242f29.json";
+import credentials2 from "./fluent-justice-472015-p1-256d7c9ae0ca.json";
+
+const allCreds = [credentials1, credentials2];
 
 function getGoogleAuth() {
+  // pick random credentials
+  const credentials = allCreds[Math.floor(Math.random() * allCreds.length)]!;
+
   return new GoogleAuth({
     credentials,
     scopes: [
@@ -14,7 +20,7 @@ function getGoogleAuth() {
   });
 }
 
-async function getGoogleSheetsApi(): Promise<sheets_v4.Sheets> {
+export async function getGoogleSheetsApi(): Promise<sheets_v4.Sheets> {
   return sheets({ version: "v4", auth: getGoogleAuth() });
 }
 
@@ -45,228 +51,50 @@ function extractSpreadsheetId(urlString: string): string {
   return match[1] || "";
 }
 
-class Range {
-  private sheets: sheets_v4.Sheets;
-  private spreadsheetId: string;
-  private sheetTitle: string;
-  private startRow: number;
-  private startColumn: number;
-  private numRows: number;
-  private numColumns: number;
-
-  constructor(
-    sheets: sheets_v4.Sheets,
-    spreadsheetId: string,
-    sheetTitle: string,
-    startRow: number,
-    startColumn: number,
-    numRows: number,
-    numColumns: number
-  ) {
-    this.sheets = sheets;
-    this.spreadsheetId = spreadsheetId;
-    this.sheetTitle = sheetTitle;
-    this.startRow = startRow;
-    this.startColumn = startColumn;
-    this.numRows = numRows;
-    this.numColumns = numColumns;
-  }
-
-  static columnToLetter(col: number): string {
-    let letter = "";
-    while (col > 0) {
-      const temp = (col - 1) % 26;
-      letter = String.fromCharCode(temp + 65) + letter;
-      col = Math.floor((col - 1) / 26);
-    }
-    return letter;
-  }
-
-  static toA1Notation(row: number, column: number): string {
-    const columnLetter = Range.columnToLetter(column);
-    return `${columnLetter}${row}`;
-  }
-
-  getA1Notation(): string {
-    const startCell = Range.toA1Notation(this.startRow, this.startColumn);
-    const endCell = Range.toA1Notation(
-      this.startRow + this.numRows - 1,
-      this.startColumn + this.numColumns - 1
-    );
-    return `${this.sheetTitle}!${startCell}:${endCell}`;
-  }
-
-  async setValues(values: string[][]): Promise<void> {
-    await this.sheets.spreadsheets.values.update({
-      spreadsheetId: this.spreadsheetId,
-      range: this.getA1Notation(),
-      valueInputOption: "RAW",
-      requestBody: {
-        values,
-      },
-    });
-  }
-
-  async getDisplayValues(): Promise<string[][]> {
-    const result = await this.sheets.spreadsheets.values.get({
-      spreadsheetId: this.spreadsheetId,
-      range: this.getA1Notation(),
-      valueRenderOption: "FORMATTED_VALUE",
-      majorDimension: "ROWS",
-    });
-
-    return (result.data.values as string[][]) ?? [];
-  }
-
-  async getValues(): Promise<string[][]> {
-    const result = await this.sheets.spreadsheets.values.get({
-      spreadsheetId: this.spreadsheetId,
-      range: this.getA1Notation(),
-    });
-
-    return (result.data.values as string[][]) ?? [];
-  }
-
-  async getValue(): Promise<string> {
-    const values = await this.getValues();
-    return (values[0] || [])[0] ?? "";
-  }
-}
-
 export class SheetWrapper {
   private sheets: sheets_v4.Sheets;
   private spreadsheetId: string;
   private sheet: sheets_v4.Schema$Sheet;
+  private _values: string[][] | undefined;
 
   constructor(
     sheets: sheets_v4.Sheets,
     spreadsheetId: string,
-    sheet: sheets_v4.Schema$Sheet
+    sheet: sheets_v4.Schema$Sheet,
+    values?: string[][]
   ) {
     this.sheets = sheets;
     this.spreadsheetId = spreadsheetId;
     this.sheet = sheet;
+    this._values = values;
   }
 
-  // get properties() {
-  //   return this.sheet.properties;
-  // }
-
-  // get data() {
-  //   return this.sheet.data;
-  // }
-
-  // get charts() {
-  //   return this.sheet.charts;
-  // }
-
-  // get bandedRanges() {
-  //   return this.sheet.bandedRanges;
-  // }
-
-  // get basicFilter() {
-  //   return this.sheet.basicFilter;
-  // }
-
-  // get columnGroups() {
-  //   return this.sheet.columnGroups;
-  // }
-
-  // get conditionalFormats() {
-  //   return this.sheet.conditionalFormats;
-  // }
-
-  // get developerMetadata() {
-  //   return this.sheet.developerMetadata;
-  // }
-
-  // get filterViews() {
-  //   return this.sheet.filterViews;
-  // }
-
-  // get merges() {
-  //   return this.sheet.merges;
-  // }
-
-  // get protectedRanges() {
-  //   return this.sheet.protectedRanges;
-  // }
-
-  // get rowGroups() {
-  //   return this.sheet.rowGroups;
-  // }
-
-  // get slicers() {
-  //   return this.sheet.slicers;
-  // }
-
-  getRange(
-    row: number,
-    column: number,
-    numRows: number = 1,
-    numColumns: number = 1
-  ): Range {
+  async getRows(): Promise<string[][]> {
     if (!this.sheet?.properties?.title) {
       throw new Error("Sheet title not found");
     }
 
-    return new Range(
-      this.sheets,
-      this.spreadsheetId,
-      this.sheet.properties.title,
-      row,
-      column,
-      numRows,
-      numColumns
-    );
-  }
-
-  async getLastColumn(row: number): Promise<number> {
-    if (!this.sheet?.properties?.title) {
-      throw new Error("Sheet title not found");
+    if (this._values) {
+      console.log(
+        "Returning cached values for sheet",
+        this.sheet.properties.title
+      );
+      return this._values;
     }
 
-    const sheetTitle = this.sheet.properties.title;
-
-    const result = await this.sheets.spreadsheets.values.get({
-      spreadsheetId: this.spreadsheetId,
-      range: `${sheetTitle}!${row}:${row}`,
-    });
-
-    const firstRow = result.data.values?.[0] ?? [];
-
-    // Count non-empty cells — you can also return .length to count all cells including empty ones
-    return firstRow.length;
-  }
-
-  async getLastRow(): Promise<number> {
-    if (!this.sheet?.properties?.title) {
-      throw new Error("Sheet title not found");
-    }
-
-    const result = await this.sheets.spreadsheets.values.get({
-      spreadsheetId: this.spreadsheetId,
-      range: `${this.sheet.properties.title}!A:A`,
-    });
-
-    return result.data.values?.length ?? 0;
-  }
-
-  async getDataRange(): Promise<Range> {
-    if (!this.sheet?.properties?.title) {
-      throw new Error("Sheet title not found");
-    }
-
+    console.log("Loading values for sheet", this.sheet.properties.title);
     const result = await this.sheets.spreadsheets.values.get({
       spreadsheetId: this.spreadsheetId,
       range: this.sheet.properties.title,
+      valueRenderOption: "FORMATTED_VALUE",
+      majorDimension: "ROWS",
     });
 
-    const values = (result.data.values as string[][]) ?? [];
-    const numRows = values.length;
-    const numColumns = values[0]?.length ?? 0;
+    this._values =
+      result.data.values?.map((row) => row.map((cell) => cell.toString())) ??
+      [];
 
-    return this.getRange(1, 1, numRows, numColumns);
+    return this._values;
   }
 
   async appendRow(values: (string | number)[]): Promise<void> {
@@ -286,31 +114,39 @@ export class SheetWrapper {
   }
 }
 
-class SpreadsheetWrapper {
+export class SpreadsheetWrapper {
   private sheets: sheets_v4.Sheets;
-  private spreadsheetId: string;
+  private _spreadsheetId: string;
   private _spreadsheet: sheets_v4.Schema$Spreadsheet | null = null;
+  private _cachedSheets: Record<
+    "RSVP" | "Trip Registrations" | "PASSPORTS" | "Luggage" | "CHOICES",
+    string[][]
+  > | null = null;
+
+  public get spreadsheetId(): string {
+    return this._spreadsheetId;
+  }
 
   private async getSpreadsheet(): Promise<sheets_v4.Schema$Spreadsheet> {
     if (!this._spreadsheet) {
+      console.log("Loading spreadsheet", this.spreadsheetId);
       this._spreadsheet = await loadSpreadsheet(
         this.sheets,
         this.spreadsheetId
       );
     }
+    console.log("Returning cached spreadsheet", this.spreadsheetId);
     return this._spreadsheet;
   }
 
   constructor(spreadsheetId: string, sheets: sheets_v4.Sheets) {
     this.sheets = sheets;
-    this.spreadsheetId = spreadsheetId;
+    this._spreadsheetId = spreadsheetId;
   }
 
-  // get data(): sheets_v4.Schema$Spreadsheet {
-  //   return this.spreadsheet;
-  // }
-
-  async findSheetByName(name: string): Promise<SheetWrapper | null> {
+  async findSheetByName(
+    name: "RSVP" | "Trip Registrations" | "PASSPORTS" | "Luggage" | "CHOICES"
+  ): Promise<SheetWrapper | null> {
     const sheet = (await this.getSpreadsheet()).sheets?.find(
       (sheet) => sheet.properties?.title === name
     );
@@ -319,10 +155,18 @@ class SpreadsheetWrapper {
       return null;
     }
 
+    const cache = this._cachedSheets?.[name];
+
+    if (cache) {
+      return new SheetWrapper(this.sheets, this.spreadsheetId, sheet, cache);
+    }
+
     return new SheetWrapper(this.sheets, this.spreadsheetId, sheet);
   }
 
-  async getSheetByName(name: string): Promise<SheetWrapper> {
+  async getSheetByName(
+    name: "RSVP" | "Trip Registrations" | "PASSPORTS" | "Luggage" | "CHOICES"
+  ): Promise<SheetWrapper> {
     const sheet = await this.findSheetByName(name);
 
     if (!sheet) {
@@ -332,38 +176,60 @@ class SpreadsheetWrapper {
     return sheet;
   }
 
-  async insertSheet(name: string): Promise<SheetWrapper> {
-    const existingSheet = await this.findSheetByName(name);
-    if (existingSheet) {
-      throw new Error(`Sheet with name "${name}" already exists`);
-    }
+  async cacheAllSheets(): Promise<void> {
+    const sheets = await getGoogleSheetsApi();
+    const spreadsheet = await getSpreadsheet();
 
-    await this.sheets.spreadsheets.batchUpdate({
-      spreadsheetId: this.spreadsheetId,
-      requestBody: {
-        requests: [
-          {
-            addSheet: {
-              properties: {
-                title: name,
-              },
-            },
-          },
-        ],
-      },
+    const sheetNames = [
+      "RSVP",
+      "Trip Registrations",
+      "PASSPORTS",
+      "Luggage",
+      "CHOICES",
+    ];
+
+    const ranges = sheetNames.map((name) => name);
+
+    // 3. Batch read all sheets
+    const response = await sheets.spreadsheets.values.batchGet({
+      spreadsheetId: spreadsheet.spreadsheetId,
+      ranges,
     });
 
-    this._spreadsheet = null;
-
-    return this.getSheetByName(name);
-  }
-
-  async getOrCreateSheet(name: string): Promise<SheetWrapper> {
-    const existingSheet = await this.findSheetByName(name);
-    if (existingSheet) {
-      return existingSheet;
+    if (!response.data.valueRanges) {
+      throw new Error("No value ranges found in batch get all sheets");
     }
-    return this.insertSheet(name);
+
+    // 4. Process results
+    this._cachedSheets = response.data.valueRanges?.reduce(
+      (
+        acc: Record<
+          "RSVP" | "Trip Registrations" | "PASSPORTS" | "Luggage" | "CHOICES",
+          string[][]
+        >,
+        sheet
+      ) => {
+        if (sheet.range?.includes("RSVP")) {
+          acc.RSVP = sheet.values ?? [];
+        } else if (sheet.range?.includes("Trip Registrations")) {
+          acc["Trip Registrations"] = sheet.values ?? [];
+        } else if (sheet.range?.includes("PASSPORTS")) {
+          acc.PASSPORTS = sheet.values ?? [];
+        } else if (sheet.range?.includes("Luggage")) {
+          acc.Luggage = sheet.values ?? [];
+        } else if (sheet.range?.includes("CHOICES")) {
+          acc.CHOICES = sheet.values ?? [];
+        }
+        return acc;
+      },
+      {
+        RSVP: [],
+        ["Trip Registrations"]: [],
+        PASSPORTS: [],
+        Luggage: [],
+        CHOICES: [],
+      }
+    );
   }
 }
 
@@ -373,13 +239,3 @@ export async function getSpreadsheet(): Promise<SpreadsheetWrapper> {
   const sheets = await getGoogleSheetsApi();
   return new SpreadsheetWrapper(spreadsheetId, sheets);
 }
-
-// async function test() {
-//   const spreadsheet = await getSpreadsheet();
-//   const sheet = await spreadsheet.getSheetByName("Trip Registrations");
-//   const range = await sheet.getRange(58, 2);
-//   const value = await range.getValue();
-//   console.log(value);
-// }
-
-// test().catch(console.error);

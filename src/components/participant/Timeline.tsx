@@ -70,7 +70,7 @@ const ConfirmationModalContext = createContext<{
   showConfirmationModal: (
     choicesGroup: ChoiceGroup,
     choiceId: ChoiceId,
-    selectedChoice: ChoiceId | "no"
+    selectedChoice: "yes" | "no"
   ) => void;
   closeConfirmationModal: () => void;
   confirmChoice: () => Promise<void>;
@@ -98,7 +98,7 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
     (
       choicesGroup: ChoiceGroup,
       choiceId: ChoiceId,
-      selectedChoice: ChoiceId | null | "no"
+      selectedChoice: "yes" | "no" | null
     ) => {
       setConfirmationModal({
         isOpen: true,
@@ -130,7 +130,7 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
     async (
       choicesGroup: ChoiceGroup,
       choiceId: ChoiceId,
-      selectedChoice: ChoiceId | "no"
+      selectedChoice: "yes" | "no"
     ) => {
       if (!userEmail || !userPassword) {
         console.error("Cannot save choice: User credentials not available");
@@ -149,7 +149,7 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
         // if (
         //   choicesGroup === "bariloche-activity" &&
         //   choiceId === "rafting" &&
-        //   selectedChoice === "rafting"
+        //   selectedChoice === "yes"
         // ) {
         //   onJoinRafting();
         // }
@@ -160,7 +160,7 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
         const response = await fetch(BACKEND_URL, {
           method: "POST",
           body: JSON.stringify({
-            action: "update_choices",
+            action: "set_choice",
             email: userEmail,
             password: userPassword,
             itemKey: choicesGroup,
@@ -188,7 +188,7 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
           // if (
           //   choicesGroup === "bariloche-activity" &&
           //   choiceId === "rafting" &&
-          //   selectedChoice === "rafting"
+          //   selectedChoice === "yes"
           // ) {
           //   onJoinRafting();
           // }
@@ -655,7 +655,7 @@ const PaidAddOnPicker: React.FC<{
         const joinedItem =
           submissionResult.userChoices?.[
             `${choicesGroup}-${paidItem.CHOICE_ID}`
-          ] === paidItem.CHOICE_ID;
+          ] === "yes";
 
         const deniedItem =
           submissionResult.userChoices?.[
@@ -684,7 +684,7 @@ const PaidAddOnPicker: React.FC<{
                     choicesGroup={choicesGroup}
                     choiceId={paidItem.CHOICE_ID!}
                     options={[
-                      { label: "Join!", value: paidItem.CHOICE_ID! },
+                      { label: "Join!", value: "yes" },
                       { label: "No, thanks", value: "no" },
                     ]}
                   />
@@ -827,6 +827,7 @@ const TimelineContent: React.FC = () => {
   }, [navigate]);
 
   const isAdmin = ADMIN_EMAILS.includes(userEmail);
+  ``;
 
   const personalTimelineData = useMemo((): TimelineItem[] | null => {
     if (!timelineData) {
@@ -936,6 +937,7 @@ const TimelineContent: React.FC = () => {
 
   // TODO: remove this after construction
   if (!ADMIN_EMAILS.includes(userEmail)) {
+    console.log("userEmail", userEmail);
     return <UnderConstruction navigateToHome={navigateToHome} />;
   }
 

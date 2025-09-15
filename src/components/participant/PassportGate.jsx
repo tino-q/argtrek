@@ -1,6 +1,7 @@
 import { useState, useContext, useCallback } from "react";
 
 import AuthContext from "../../context/AuthContext.jsx";
+import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
 import { BACKEND_URL } from "../../utils/config.js";
 import "./PassportGate.css";
@@ -8,6 +9,7 @@ import "./PassportGate.css";
 const PassportGate = () => {
   const { email, password } = useContext(AuthContext);
   const { setSubmissionResult, submissionResult } = useTripContext();
+  const { showSuccess, showError } = useNotificationContext();
 
   const initialFullName = (() => {
     const row = submissionResult?.row || null;
@@ -32,13 +34,11 @@ const PassportGate = () => {
   const [ackTerms, setAckTerms] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
 
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
       setError("");
-      setSuccessMsg("");
 
       if (!email || !password) {
         setError("Missing credentials. Please login again.");
@@ -88,10 +88,10 @@ const PassportGate = () => {
           }));
         }
 
-        setSuccessMsg("Passport details saved. Loading timeline...");
+        showSuccess("Passport details saved. Loading timeline...");
       } catch (err) {
         console.error("Error submitting passport:", err);
-        setError("Unexpected error. Please try again.");
+        showError("Unexpected error. Please try again.");
       } finally {
         setSubmitting(false);
       }
@@ -108,6 +108,8 @@ const PassportGate = () => {
       ackTravelInsurance,
       ackTerms,
       setSubmissionResult,
+      showSuccess,
+      showError,
     ]
   );
 
@@ -259,7 +261,6 @@ const PassportGate = () => {
               {error}
             </div>
           )}
-          {successMsg && <div className="form-success">{successMsg}</div>}
 
           <div className="form-actions">
             <button

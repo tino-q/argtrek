@@ -7,6 +7,7 @@ export const APPS_SCRIPT_URL =
 
 export const BACKEND_URL =
   "https://at6nwfhebl.execute-api.us-east-1.amazonaws.com/dev/";
+// export const BACKEND_URL = "http://localhost:3000/";
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {
@@ -35,6 +36,7 @@ export const ADMIN_EMAILS = [
   "tinqueija@gmail.com",
   "madibakla@gmail.com",
   "carocuestamarrero@gmail.com",
+  "mqueija@fi.uba.ar",
 ];
 
 // Luggage Configuration
