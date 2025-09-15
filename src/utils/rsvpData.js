@@ -43,6 +43,69 @@ export const RSVP_FIELDS = {
   USD_TO_EUR_EXCHANGE_RATE: "USD_TO_EUR_EXCHANGE_RATE",
 };
 
+const aepBrc = {
+  code: "JA3047",
+  airline: "JetSMART Argentina",
+  route: "Buenos Aires - Bariloche",
+  departure: {
+    airport: "AEP",
+    city: "Buenos Aires",
+    name: "Jorge Newbery Airfield",
+    time: "11:15",
+  },
+  arrival: {
+    airport: "BRC",
+    city: "Bariloche",
+    name: "Bariloche Airport",
+    time: "13:45",
+  },
+  date: "Nov 24",
+  duration: "2h 30m",
+  aircraft: "Airbus A320",
+};
+
+const mdzAep = {
+  code: "JA3073",
+  airline: "JetSMART Argentina",
+  route: "Mendoza - Buenos Aires",
+  departure: {
+    airport: "MDZ",
+    city: "Mendoza",
+    name: "Governor Francisco Gabrielli International Airport",
+    time: "13:00",
+  },
+  arrival: {
+    airport: "AEP",
+    city: "Buenos Aires",
+    name: "Jorge Newbery Airfield",
+    time: "15:00",
+  },
+  date: "Nov 29",
+  duration: "2h 00m",
+  aircraft: "Airbus A320",
+};
+
+const brcMdz = {
+  code: "JA3725",
+  airline: "JetSMART Argentina",
+  route: "Bariloche - Mendoza",
+  departure: {
+    airport: "BRC",
+    city: "Bariloche",
+    name: "Bariloche Airport",
+    time: "10:15",
+  },
+  arrival: {
+    airport: "MDZ",
+    city: "Mendoza",
+    name: "Governor Francisco Gabrielli International Airport",
+    time: "12:15",
+  },
+  date: "Nov 27",
+  duration: "2h 00m",
+  aircraft: "Airbus A320",
+};
+
 /**
  * Helper function to format field names to date strings
  * @param {string[]} fields - Array of field names (e.g. ["22Nov", "23Nov"])
@@ -364,72 +427,15 @@ export const getIncludedFlights = (rsvpData) => {
   const flights = [];
 
   if (rsvpData[RSVP_FIELDS.FLIGHT_AEP_BRC]) {
-    flights.push({
-      code: "JA3047",
-      airline: "JetSMART Argentina",
-      route: "Buenos Aires - Bariloche",
-      departure: {
-        airport: "AEP",
-        city: "Buenos Aires",
-        name: "Jorge Newbery Airfield",
-        time: "11:15",
-      },
-      arrival: {
-        airport: "BRC",
-        city: "Bariloche",
-        name: "Bariloche Airport",
-        time: "13:45",
-      },
-      date: "Nov 24",
-      duration: "2h 30m",
-      aircraft: "Airbus A320",
-    });
+    flights.push(aepBrc);
   }
 
   if (rsvpData[RSVP_FIELDS.FLIGHT_BRC_MDZ]) {
-    flights.push({
-      code: "JA3725",
-      airline: "JetSMART Argentina",
-      route: "Bariloche - Mendoza",
-      departure: {
-        airport: "BRC",
-        city: "Bariloche",
-        name: "Bariloche Airport",
-        time: "10:15",
-      },
-      arrival: {
-        airport: "MDZ",
-        city: "Mendoza",
-        name: "Governor Francisco Gabrielli International Airport",
-        time: "12:15",
-      },
-      date: "Nov 27",
-      duration: "2h 00m",
-      aircraft: "Airbus A320",
-    });
+    flights.push(brcMdz);
   }
 
   if (rsvpData[RSVP_FIELDS.FLIGHT_MDZ_AEP]) {
-    flights.push({
-      code: "JA3073",
-      airline: "JetSMART Argentina",
-      route: "Mendoza - Buenos Aires",
-      departure: {
-        airport: "MDZ",
-        city: "Mendoza",
-        name: "Governor Francisco Gabrielli International Airport",
-        time: "13:00",
-      },
-      arrival: {
-        airport: "AEP",
-        city: "Buenos Aires",
-        name: "Jorge Newbery Airfield",
-        time: "15:00",
-      },
-      date: "Nov 29",
-      duration: "2h 00m",
-      aircraft: "Airbus A320",
-    });
+    flights.push(mdzAep);
   }
 
   return flights;
@@ -446,72 +452,15 @@ export const getExcludedFlights = (rsvpData) => {
   const flights = [];
 
   if (rsvpData[RSVP_FIELDS.FLIGHT_AEP_BRC] === false) {
-    flights.push({
-      code: "JA3047",
-      airline: "JetSMART Argentina",
-      route: "Buenos Aires - Bariloche",
-      departure: {
-        airport: "AEP",
-        city: "Buenos Aires",
-        name: "Jorge Newbery Airfield",
-        time: "11:15",
-      },
-      arrival: {
-        airport: "BRC",
-        city: "Bariloche",
-        name: "Bariloche Airport",
-        time: "13:45",
-      },
-      date: "Nov 24",
-      duration: "2h 30m",
-      aircraft: "Airbus A320",
-    });
+    flights.push(aepBrc);
   }
 
   if (rsvpData[RSVP_FIELDS.FLIGHT_BRC_MDZ] === false) {
-    flights.push({
-      code: "JA3725",
-      airline: "JetSMART Argentina",
-      route: "Bariloche - Mendoza",
-      departure: {
-        airport: "BRC",
-        city: "Bariloche",
-        name: "Bariloche Airport",
-        time: "10:15",
-      },
-      arrival: {
-        airport: "MDZ",
-        city: "Mendoza",
-        name: "Governor Francisco Gabrielli International Airport",
-        time: "12:15",
-      },
-      date: "Nov 27",
-      duration: "2h 00m",
-      aircraft: "Airbus A320",
-    });
+    flights.push(brcMdz);
   }
 
   if (rsvpData[RSVP_FIELDS.FLIGHT_MDZ_AEP] === false) {
-    flights.push({
-      code: "JA3073",
-      airline: "JetSMART Argentina",
-      route: "Mendoza - Buenos Aires",
-      departure: {
-        airport: "MDZ",
-        city: "Mendoza",
-        name: "Governor Francisco Gabrielli International Airport",
-        time: "13:00",
-      },
-      arrival: {
-        airport: "AEP",
-        city: "Buenos Aires",
-        name: "Jorge Newbery Airfield",
-        time: "15:00",
-      },
-      date: "Nov 29",
-      duration: "2h 00m",
-      aircraft: "Airbus A320",
-    });
+    flights.push(mdzAep);
   }
 
   return flights;

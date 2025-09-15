@@ -62,7 +62,7 @@ const ServiceCard = ({ service, index, isIncluded }) => (
                     <span className="flight-segment">{cities.origin}</span>
                   </div>
 
-                  <div className="flight-date ">
+                  {/* <div className="flight-date ">
                     <span>
                       ({service.departure.airport}) {service.departure.time}
                     </span>
@@ -71,13 +71,11 @@ const ServiceCard = ({ service, index, isIncluded }) => (
                       {cities.destination} ({service.arrival.airport}){" "}
                       {service.arrival.time}
                     </span>
-                  </div>
+                  </div> */}
                 </div>
               );
             })()}
-            <div className="flight-date">
-              {service.date} - {service.code}
-            </div>
+            <div className="flight-date">{service.date}</div>
             <div className="flight-date">{service.airline}</div>
           </div>
         </>
