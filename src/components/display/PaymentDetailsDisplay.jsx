@@ -11,7 +11,6 @@ import { copyToClipboard } from "../../utils/clipboard";
 import {
   FORM_FIELDS,
   EMAIL_CONFIG,
-  BANK_DETAILS,
   CRYPTO_WALLETS,
   NETWORK_INFO,
   BACKEND_URL,
@@ -118,10 +117,10 @@ const PaymentDetailsDisplay = ({
     navigate("/terms");
   }, [navigate]);
 
-  const handleBankDetailsClick = useCallback(
-    (detail) => (e) => handleCopyClick(detail.value, e),
-    [handleCopyClick]
-  );
+  // const handleBankDetailsClick = useCallback(
+  //   (detail) => (e) => handleCopyClick(detail.value, e),
+  //   [handleCopyClick]
+  // );
 
   const handleCryptoWalletClick = useCallback(
     (e) => {
