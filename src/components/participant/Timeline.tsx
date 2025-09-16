@@ -12,7 +12,10 @@ import { useNavigate } from "react-router-dom";
 import AuthContext from "../../context/AuthContext.jsx";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
-import { fetchWithCache, CACHE_DURATIONS } from "../../utils/cache.js";
+import {
+  fetchWithLocalStorageCache,
+  CACHE_DURATIONS,
+} from "../../utils/cache.js";
 import { BACKEND_URL, ADMIN_EMAILS, CONTACTS } from "../../utils/config.js";
 
 import LuggageGate from "./LuggageGate.jsx";
@@ -79,23 +82,15 @@ const RaftingQueueProvider: React.FC<{
   useEffect(() => {
     const fetchRaftingQueue = async () => {
       try {
-        const raftingQueue = await fetchWithCache(
-          "raftingQueue",
-          async () => {
-            const response = await fetch(
-              `${BACKEND_URL}?endpoint=rafting_count&email=${userEmail}&password=${userPassword}`
-            );
-            const data = await response.json();
-            if (data.success && Array.isArray(data.raftingQueue)) {
-              return data.raftingQueue;
-            }
-            throw new Error("Failed to load rafting count");
-          },
-          CACHE_DURATIONS.FIVE_MINUTES,
-          true
+        const response = await fetch(
+          `${BACKEND_URL}?endpoint=rafting_count&email=${userEmail}&password=${userPassword}`
         );
-
-        setRaftingQueue(raftingQueue);
+        const data = await response.json();
+        if (data.success && Array.isArray(data.raftingQueue)) {
+          setRaftingQueue(data.raftingQueue);
+          return;
+        }
+        throw new Error("Failed to load rafting count");
       } catch (err) {
         console.error("Error fetching rafting count:", err);
         setRaftingQueue([]);
@@ -969,7 +964,7 @@ const TimelineContent: React.FC = () => {
 
     const fetchTimelineData = async () => {
       try {
-        const timelineData = await fetchWithCache(
+        const timelineData = await fetchWithLocalStorageCache(
           "timelineData",
           async () => {
             const response = await fetch(`${BACKEND_URL}?endpoint=timeline`);

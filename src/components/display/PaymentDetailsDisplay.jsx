@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
-import { fetchWithCache } from "../../utils/cache";
+import { fetchWithLocalStorageCache } from "../../utils/cache";
 import { copyToClipboard } from "../../utils/clipboard";
 import {
   FORM_FIELDS,
@@ -61,7 +61,7 @@ const PaymentDetailsDisplay = ({
         return;
       }
 
-      const result = await fetchWithCache("voucher", async () => {
+      const result = await fetchWithLocalStorageCache("voucher", async () => {
         const response = await fetch(
           `${BACKEND_URL}?endpoint=download_voucher&email=${encodeURIComponent(
             email

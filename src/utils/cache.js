@@ -109,7 +109,7 @@ export const clearCachedData = (keys) => {
  * @param {number} maxAgeMs - Maximum age in milliseconds (use Number.MAX_SAFE_INTEGER for constant cache)
  * @returns {Promise<any>} - Cached or fresh data
  */
-export const fetchWithCache = async (
+export const fetchWithLocalStorageCache = async (
   cacheKey,
   fetchFn,
   maxAgeMs = CACHE_DURATIONS.CONSTANT,

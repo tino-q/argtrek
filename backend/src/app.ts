@@ -1,6 +1,6 @@
 import express, { type Request, type Response } from "express";
 import { doGet, doPost } from "./appscript";
-import { getSpreadsheet } from "./spreadsheet";
+import { buildSpreadsheetWrapper } from "./spreadsheet";
 
 const app = express();
 
@@ -43,13 +43,13 @@ app.get("/", async (req: Request, res: Response) => {
         password: req.query["password"] as string,
       },
     },
-    await getSpreadsheet()
+    await buildSpreadsheetWrapper()
   );
   return res.json(response);
 });
 
 app.post("/", async (req: Request, res: Response) => {
-  const spreadsheet = await getSpreadsheet();
+  const spreadsheet = await buildSpreadsheetWrapper();
   const response = await doPost(req.body, spreadsheet);
   return res.json(response);
 });

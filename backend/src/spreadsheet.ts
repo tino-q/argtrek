@@ -1,6 +1,7 @@
 import { drive_v3, drive } from "@googleapis/drive";
 import { sheets_v4, sheets } from "@googleapis/sheets";
 import { GoogleAuth } from "google-auth-library";
+import { getItem, setItem, deleteItem } from "./ddb";
 
 import credentials1 from "./clear-canyon-454114-p5-a911fe242f29.json";
 import credentials2 from "./fluent-justice-472015-p1-256d7c9ae0ca.json";
@@ -28,21 +29,6 @@ export async function getGoogleDriveApi(): Promise<drive_v3.Drive> {
   return drive({ version: "v3", auth: getGoogleAuth() });
 }
 
-async function loadSpreadsheet(
-  sheets: sheets_v4.Sheets,
-  spreadsheetId: string
-): Promise<sheets_v4.Schema$Spreadsheet> {
-  const response = await sheets.spreadsheets.get({
-    spreadsheetId,
-  });
-
-  if (!response.data) {
-    throw new Error("Failed to fetch spreadsheet data");
-  }
-
-  return response.data;
-}
-
 function extractSpreadsheetId(urlString: string): string {
   const match = urlString.match(/\/spreadsheets\/d\/([^/]+)/);
   if (!match) {
@@ -51,60 +37,89 @@ function extractSpreadsheetId(urlString: string): string {
   return match[1] || "";
 }
 
-export class SheetWrapper {
+export class SpreadsheetWrapper {
   private sheets: sheets_v4.Sheets;
-  private spreadsheetId: string;
-  private sheet: sheets_v4.Schema$Sheet;
-  private _values: string[][] | undefined;
+  private _spreadsheetId: string;
+  private _sheetToValues: Record<string, string[][] | undefined> = {};
 
-  constructor(
-    sheets: sheets_v4.Sheets,
-    spreadsheetId: string,
-    sheet: sheets_v4.Schema$Sheet,
-    values?: string[][]
-  ) {
-    this.sheets = sheets;
-    this.spreadsheetId = spreadsheetId;
-    this.sheet = sheet;
-    this._values = values;
+  public get spreadsheetId(): string {
+    return this._spreadsheetId;
   }
 
-  async getRows(): Promise<string[][]> {
-    if (!this.sheet?.properties?.title) {
-      throw new Error("Sheet title not found");
+  constructor(spreadsheetId: string, sheets: sheets_v4.Sheets) {
+    this.sheets = sheets;
+    this._spreadsheetId = spreadsheetId;
+  }
+
+  private getCacheKey(name: string): string {
+    return `sheet_${this.spreadsheetId}_${name}`;
+  }
+
+  private async getRows(sheetName: string): Promise<string[][]> {
+    // check in-memory cache
+    if (this._sheetToValues[sheetName]) {
+      return this._sheetToValues[sheetName];
     }
 
-    if (this._values) {
-      console.log(
-        "Returning cached values for sheet",
-        this.sheet.properties.title
-      );
-      return this._values;
+    // check ddb cache
+    const cacheKey = this.getCacheKey(sheetName);
+    const cachedData = await getItem(cacheKey);
+
+    if (cachedData) {
+      console.log("Returning DynamoDB cached values for sheet: ", sheetName);
+      // set in-memory cache
+      this._sheetToValues[sheetName] = JSON.parse(cachedData) as string[][];
+      return this._sheetToValues[sheetName];
     }
 
-    console.log("Loading values for sheet", this.sheet.properties.title);
+    console.log("Returning spreadsheet values for sheet: ", sheetName);
+
+    // get rows from spreadsheet
     const result = await this.sheets.spreadsheets.values.get({
       spreadsheetId: this.spreadsheetId,
-      range: this.sheet.properties.title,
+      range: sheetName,
       valueRenderOption: "FORMATTED_VALUE",
       majorDimension: "ROWS",
     });
 
-    this._values =
+    const rows =
       result.data.values?.map((row) => row.map((cell) => cell.toString())) ??
       [];
 
-    return this._values;
+    // set in-memory cache
+    this._sheetToValues[sheetName] = rows;
+
+    // set ddb cache
+    await setItem(cacheKey, JSON.stringify(rows));
+
+    return rows;
   }
 
-  async appendRow(values: (string | number)[]): Promise<void> {
-    if (!this.sheet?.properties?.title) {
-      throw new Error("Sheet title not found");
+  async getRowsWithHeaders(
+    sheetName: string
+  ): Promise<{ headers: string[]; rows: string[][] }> {
+    const rows = await this.getRows(sheetName);
+    const headers = rows[0];
+    if (!headers) {
+      throw new Error("No headers found in sheet: " + sheetName);
     }
+    return { headers, rows: rows.slice(1) };
+  }
 
+  async appendRow(
+    sheetName: string,
+    values: (string | number)[]
+  ): Promise<void> {
+    // clear ddb cache
+    await deleteItem(this.getCacheKey(sheetName));
+
+    // clear in-memory cache
+    this._sheetToValues[sheetName] = undefined;
+
+    // append row
     await this.sheets.spreadsheets.values.append({
       spreadsheetId: this.spreadsheetId,
-      range: this.sheet.properties.title,
+      range: sheetName,
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: {
@@ -114,126 +129,7 @@ export class SheetWrapper {
   }
 }
 
-export class SpreadsheetWrapper {
-  private sheets: sheets_v4.Sheets;
-  private _spreadsheetId: string;
-  private _spreadsheet: sheets_v4.Schema$Spreadsheet | null = null;
-  private _cachedSheets: Record<
-    "RSVP" | "Trip Registrations" | "PASSPORTS" | "Luggage" | "CHOICES",
-    string[][]
-  > | null = null;
-
-  public get spreadsheetId(): string {
-    return this._spreadsheetId;
-  }
-
-  private async getSpreadsheet(): Promise<sheets_v4.Schema$Spreadsheet> {
-    if (!this._spreadsheet) {
-      console.log("Loading spreadsheet", this.spreadsheetId);
-      this._spreadsheet = await loadSpreadsheet(
-        this.sheets,
-        this.spreadsheetId
-      );
-    }
-    console.log("Returning cached spreadsheet", this.spreadsheetId);
-    return this._spreadsheet;
-  }
-
-  constructor(spreadsheetId: string, sheets: sheets_v4.Sheets) {
-    this.sheets = sheets;
-    this._spreadsheetId = spreadsheetId;
-  }
-
-  async findSheetByName(
-    name: "RSVP" | "Trip Registrations" | "PASSPORTS" | "Luggage" | "CHOICES"
-  ): Promise<SheetWrapper | null> {
-    const sheet = (await this.getSpreadsheet()).sheets?.find(
-      (sheet) => sheet.properties?.title === name
-    );
-
-    if (!sheet) {
-      return null;
-    }
-
-    const cache = this._cachedSheets?.[name];
-
-    if (cache) {
-      return new SheetWrapper(this.sheets, this.spreadsheetId, sheet, cache);
-    }
-
-    return new SheetWrapper(this.sheets, this.spreadsheetId, sheet);
-  }
-
-  async getSheetByName(
-    name: "RSVP" | "Trip Registrations" | "PASSPORTS" | "Luggage" | "CHOICES"
-  ): Promise<SheetWrapper> {
-    const sheet = await this.findSheetByName(name);
-
-    if (!sheet) {
-      throw new Error(`Sheet with name "${name}" not found`);
-    }
-
-    return sheet;
-  }
-
-  async cacheAllSheets(): Promise<void> {
-    const sheets = await getGoogleSheetsApi();
-    const spreadsheet = await getSpreadsheet();
-
-    const sheetNames = [
-      "RSVP",
-      "Trip Registrations",
-      "PASSPORTS",
-      "Luggage",
-      "CHOICES",
-    ];
-
-    const ranges = sheetNames.map((name) => name);
-
-    // 3. Batch read all sheets
-    const response = await sheets.spreadsheets.values.batchGet({
-      spreadsheetId: spreadsheet.spreadsheetId,
-      ranges,
-    });
-
-    if (!response.data.valueRanges) {
-      throw new Error("No value ranges found in batch get all sheets");
-    }
-
-    // 4. Process results
-    this._cachedSheets = response.data.valueRanges?.reduce(
-      (
-        acc: Record<
-          "RSVP" | "Trip Registrations" | "PASSPORTS" | "Luggage" | "CHOICES",
-          string[][]
-        >,
-        sheet
-      ) => {
-        if (sheet.range?.includes("RSVP")) {
-          acc.RSVP = sheet.values ?? [];
-        } else if (sheet.range?.includes("Trip Registrations")) {
-          acc["Trip Registrations"] = sheet.values ?? [];
-        } else if (sheet.range?.includes("PASSPORTS")) {
-          acc.PASSPORTS = sheet.values ?? [];
-        } else if (sheet.range?.includes("Luggage")) {
-          acc.Luggage = sheet.values ?? [];
-        } else if (sheet.range?.includes("CHOICES")) {
-          acc.CHOICES = sheet.values ?? [];
-        }
-        return acc;
-      },
-      {
-        RSVP: [],
-        ["Trip Registrations"]: [],
-        PASSPORTS: [],
-        Luggage: [],
-        CHOICES: [],
-      }
-    );
-  }
-}
-
-export async function getSpreadsheet(): Promise<SpreadsheetWrapper> {
+export async function buildSpreadsheetWrapper(): Promise<SpreadsheetWrapper> {
   const sheetUrl = `https://docs.google.com/spreadsheets/d/10NVZzsGNeVwkJDNk5SiOaCbo-ZtjDInvX-I_PpwoQwE/edit?gid=0#gid=0`;
   const spreadsheetId = extractSpreadsheetId(sheetUrl);
   const sheets = await getGoogleSheetsApi();

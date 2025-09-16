@@ -5,6 +5,7 @@ import {
   DynamoDBClient,
   GetItemCommand,
   PutItemCommand,
+  DeleteItemCommand,
 } from "@aws-sdk/client-dynamodb";
 
 config({ path: ".env" });
@@ -26,7 +27,7 @@ export const getItem = async (key: string) => {
   return response.Item?.["value"]?.S;
 };
 
-export const setItem = async (key: string, value: string, ttlHours = 4) => {
+export const setItem = async (key: string, value: string, ttlHours = 1) => {
   const ttlTimestamp = Math.floor(Date.now() / 1000) + ttlHours * 3600;
   const command = new PutItemCommand({
     TableName: "ArgTripCache",
@@ -35,6 +36,14 @@ export const setItem = async (key: string, value: string, ttlHours = 4) => {
       value: { S: value },
       ttl: { N: ttlTimestamp.toString() },
     },
+  });
+  await ddb.send(command);
+};
+
+export const deleteItem = async (key: string) => {
+  const command = new DeleteItemCommand({
+    TableName: "ArgTripCache",
+    Key: { key: { S: key } },
   });
   await ddb.send(command);
 };

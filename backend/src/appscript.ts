@@ -1,10 +1,6 @@
 import { drive_v3 } from "@googleapis/drive";
 
-import {
-  getGoogleDriveApi,
-  getSpreadsheet,
-  SpreadsheetWrapper,
-} from "./spreadsheet";
+import { getGoogleDriveApi, SpreadsheetWrapper } from "./spreadsheet";
 
 /**
  * Google Apps Script for Argentina Trip Form
@@ -80,7 +76,7 @@ export async function doGet(
     );
   }
 
-  await spreadsheet.cacheAllSheets();
+  // await spreadsheet.cacheAllSheets();
 
   const responseData = await getEmailSubmissionData(
     e.parameter.email,
@@ -143,19 +139,13 @@ export async function getRaftingRegistrations(
   await validateCredentials(email, password, spreadsheet);
 
   // --- Load Trip Registrations formData.rafting ---
-  const regsSheet = await spreadsheet.getSheetByName(
+  const { rows: regsRows, headers } = await spreadsheet.getRowsWithHeaders(
     TRIP_REGISTRATIONS_SHEET_NAME
   );
-  const regsRows = await regsSheet.getRows();
-  const headers = regsRows[0];
-  if (!headers) {
-    throw new Error("Headers not found in Trip Registrations sheet");
-  }
   const emailIdx = headers.indexOf("rsvpData.email");
   const raftingIdx = headers.indexOf("formData.rafting");
 
   const raftingEmailsInOrder = regsRows
-    .slice(1)
     .filter(
       (row) => row[raftingIdx]?.toString().toLowerCase().trim() === "true"
     )
@@ -163,18 +153,14 @@ export async function getRaftingRegistrations(
     .filter(Boolean);
 
   // --- Load CHOICES latest per email for rafting ---
-  const choicesSheet = await spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
-  const choicesRows = await choicesSheet.getRows();
-  const choicesHeaders = choicesRows[0];
-  if (!choicesHeaders) {
-    throw new Error("Headers not found in CHOICES sheet");
-  }
+  const { rows: choicesRows, headers: choicesHeaders } =
+    await spreadsheet.getRowsWithHeaders(CHOICES_SHEET_NAME);
 
   const choicesEmailIdx = choicesHeaders.indexOf("email");
   const choiceIdx = choicesHeaders.indexOf("choice");
   const optionIdx = choicesHeaders.indexOf("option");
 
-  for (const row of choicesRows.slice(1)) {
+  for (const row of choicesRows) {
     const option = row[optionIdx]?.trim();
     const choice = row[choiceIdx]?.toLowerCase().trim();
     if (option === "rafting" && choice === "yes") {
@@ -306,8 +292,7 @@ export async function doPost(
   const emailSubmissionData = await getEmailSubmissionData(
     email,
     password,
-    // create a new spreadsheet to clear the cache
-    await getSpreadsheet()
+    spreadsheet
   );
 
   return {
@@ -370,10 +355,6 @@ async function saveToTpvPaymentsSheet(
   },
   spreadsheet: SpreadsheetWrapper
 ) {
-  const sheet = await spreadsheet.getSheetByName(
-    TPV_PAYMENTS_SHEET_NAME as any
-  );
-
   // Define the headers (fixed structure)
   // const headers = [
   //   "timestamp",
@@ -393,7 +374,7 @@ async function saveToTpvPaymentsSheet(
   ];
 
   // Add the payment record
-  await sheet.appendRow(values);
+  await spreadsheet.appendRow(TPV_PAYMENTS_SHEET_NAME, values);
 }
 
 /**
@@ -404,22 +385,13 @@ async function lookupRSVP(
   password: string,
   spreadsheet: SpreadsheetWrapper
 ) {
-  const sheet = await spreadsheet.getSheetByName(RSVP_SHEET_NAME);
-
-  const values = await sheet.getRows();
-
-  const headers = values[0];
-
-  if (!headers) {
-    throw new Error(
-      "No headers found in RSVP data. Please contact Maddie for assistance."
-    );
-  }
+  const { headers, rows } =
+    await spreadsheet.getRowsWithHeaders(RSVP_SHEET_NAME);
 
   const emailColumnIndex = headers.indexOf("email");
   const passwordColumnIndex = headers.indexOf("PASSWORD");
 
-  for (const row of values.slice(1)) {
+  for (const row of rows) {
     const rowEmail = row[emailColumnIndex];
 
     if (
@@ -473,14 +445,9 @@ async function findExistingSubmission(
   email: string,
   spreadsheet: SpreadsheetWrapper
 ) {
-  const sheet = await spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
-  const rows = await sheet.getRows();
-  const headers = rows[0];
-  if (!headers) {
-    throw new Error(
-      "No headers found in Trip Registrations sheet. Please contact Maddie for assistance."
-    );
-  }
+  const { headers, rows } = await spreadsheet.getRowsWithHeaders(
+    TRIP_REGISTRATIONS_SHEET_NAME
+  );
 
   // Find the email column
   const emailColumnIndex = headers.indexOf("rsvpData.email");
@@ -494,7 +461,7 @@ async function findExistingSubmission(
   // Search for the email in the data rows (skip header row)
   let rowNumber = 2;
 
-  for (const row of rows.slice(1)) {
+  for (const row of rows) {
     const rowEmail = row[emailColumnIndex];
 
     if (
@@ -541,19 +508,12 @@ async function findPassportDetails(
   email: string,
   spreadsheet: SpreadsheetWrapper
 ) {
-  const sheet = await spreadsheet.getSheetByName(PASSPORTS_SHEET_NAME);
-  const data = await sheet.getRows();
-  const headers = data[0];
-
-  if (!headers) {
-    throw new Error(
-      "No headers found in PASSPORTS sheet. Please contact Maddie for assistance."
-    );
-  }
+  const { headers, rows } =
+    await spreadsheet.getRowsWithHeaders(PASSPORTS_SHEET_NAME);
 
   const emailIdx = headers.indexOf("email");
   if (emailIdx === -1) return null;
-  for (const row of data.slice(1)) {
+  for (const row of rows) {
     const rowEmail = row[emailIdx];
     if (
       rowEmail &&
@@ -594,18 +554,11 @@ async function savePassportSubmission(
       `Missing required field: passportNumber, expiryDate, birthDate`
     );
   }
-  const sheet = await spreadsheet.getSheetByName(PASSPORTS_SHEET_NAME);
-  const rows = await sheet.getRows();
-  const headers = rows[0];
-
-  if (!headers) {
-    throw new Error(
-      "No headers found in PASSPORTS sheet. Please contact Maddie for assistance."
-    );
-  }
+  const { headers, rows } =
+    await spreadsheet.getRowsWithHeaders(PASSPORTS_SHEET_NAME);
 
   const emailIdx = headers.indexOf("email");
-  for (const row of rows.slice(1)) {
+  for (const row of rows) {
     const rowEmail = row[emailIdx];
     if (
       rowEmail &&
@@ -627,7 +580,10 @@ async function savePassportSubmission(
     aAdvantage: aAdvantage || "",
   };
 
-  await sheet.appendRow(headers.map((header) => rowObject[header] || ""));
+  await spreadsheet.appendRow(
+    PASSPORTS_SHEET_NAME,
+    headers.map((header) => rowObject[header] || "")
+  );
 
   return rowObject;
 }
@@ -639,22 +595,15 @@ async function findLuggageDetails(
   email: string,
   spreadsheet: SpreadsheetWrapper
 ) {
-  const sheet = await spreadsheet.getSheetByName(LUGGAGE_SHEET_NAME);
-  const rows = await sheet.getRows();
-  const headers = rows[0];
-
-  if (!headers) {
-    throw new Error(
-      "No headers found in LUGGAGE sheet. Please contact Maddie for assistance."
-    );
-  }
+  const { rows, headers } =
+    await spreadsheet.getRowsWithHeaders(LUGGAGE_SHEET_NAME);
 
   const emailIdx = headers.indexOf("email");
   if (emailIdx === -1) {
     throw new Error("Email column 'email' not found in LUGGAGE sheet");
   }
 
-  for (const row of rows.slice(1)) {
+  for (const row of rows) {
     const rowEmail = row[emailIdx];
     if (
       rowEmail &&
@@ -679,18 +628,11 @@ async function saveLuggageSubmission(
   luggageSelection: Record<string, boolean>,
   spreadsheet: SpreadsheetWrapper
 ) {
-  const sheet = await spreadsheet.getSheetByName(LUGGAGE_SHEET_NAME);
-  const rows = await sheet.getRows();
-  const headers = rows[0];
-
-  if (!headers) {
-    throw new Error(
-      "No headers found in LUGGAGE sheet. Please contact Maddie for assistance."
-    );
-  }
+  const { headers, rows } =
+    await spreadsheet.getRowsWithHeaders(LUGGAGE_SHEET_NAME);
 
   const emailIdx = headers.indexOf("email");
-  for (const row of rows.slice(1)) {
+  for (const row of rows) {
     const rowEmail = row[emailIdx];
     if (
       rowEmail &&
@@ -710,22 +652,19 @@ async function saveLuggageSubmission(
     "MDZ-AEP": luggageSelection?.["MDZ-AEP"] ? "1" : "0",
   };
 
-  await sheet.appendRow(headers.map((header) => rowObject[header] || ""));
+  await spreadsheet.appendRow(
+    LUGGAGE_SHEET_NAME,
+    headers.map((header) => rowObject[header] || "")
+  );
 }
 
 /**
  * Check if email already exists in the trip registrations sheet
  */
 async function emailExists(email: string, spreadsheet: SpreadsheetWrapper) {
-  const sheet = await spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
-  const rows: string[][] = await sheet.getRows();
-  const headers = rows[0];
-
-  if (!headers) {
-    throw new Error(
-      "No headers found in Trip Registrations sheet. Please contact Maddie for assistance."
-    );
-  }
+  const { headers, rows } = await spreadsheet.getRowsWithHeaders(
+    TRIP_REGISTRATIONS_SHEET_NAME
+  );
 
   // find the index of the email column
   const emailColumnIndex = headers.indexOf("rsvpData.email");
@@ -738,7 +677,7 @@ async function emailExists(email: string, spreadsheet: SpreadsheetWrapper) {
   }
 
   // Check if the email already exists
-  for (const row of rows.slice(1)) {
+  for (const row of rows) {
     // Start from row 2 (skip header)
     const rowEmail = row[emailColumnIndex];
     if (rowEmail && rowEmail.toLowerCase() === email.toLowerCase()) {
@@ -756,8 +695,6 @@ async function saveTripRegistration(
   data: Record<string, string>,
   spreadsheet: SpreadsheetWrapper
 ) {
-  const sheet = await spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
-
   const HEADERS_IN_ORDER = [
     "formData.email",
     "formData.firstName",
@@ -832,7 +769,8 @@ async function saveTripRegistration(
     );
   }
 
-  await sheet.appendRow(
+  await spreadsheet.appendRow(
+    TRIP_REGISTRATIONS_SHEET_NAME,
     HEADERS_IN_ORDER.map((header) => {
       if (
         typeof data[header] === "number" ||
@@ -850,24 +788,13 @@ async function saveTripRegistration(
  * Returns an array of objects where keys are headers and values are row data
  */
 async function getTimelineData(spreadsheet: SpreadsheetWrapper) {
-  const sheet = await spreadsheet.getSheetByName(TIMELINE_SHEET_NAME as any);
-  const rows = await sheet.getRows();
-
-  if (rows.length === 0) {
-    throw new Error("No data found in TIMELINE sheet");
-  }
-
-  // Get headers from first row
-  const headers = rows[0];
-
-  if (!headers) {
-    throw new Error("No headers found in TIMELINE sheet");
-  }
+  const { rows, headers } =
+    await spreadsheet.getRowsWithHeaders(TIMELINE_SHEET_NAME);
 
   // Convert data rows to objects
   const timelineData = [];
   let i = 1;
-  for (const row of rows.slice(1)) {
+  for (const row of rows) {
     const rowObject: Record<string, string | number | null> = {};
 
     // Map each column value to its corresponding header
@@ -899,13 +826,8 @@ async function getUserChoices(
   email: string,
   spreadsheet: SpreadsheetWrapper
 ): Promise<Record<string, string>> {
-  const sheet = await spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
-  const rows = await sheet.getRows();
-  const headers = rows[0];
-
-  if (!headers) {
-    throw new Error("No headers found in CHOICES sheet");
-  }
+  const { headers, rows } =
+    await spreadsheet.getRowsWithHeaders(CHOICES_SHEET_NAME);
 
   // Find the required columns
   const emailColumnIndex = headers.indexOf("email");
@@ -927,7 +849,7 @@ async function getUserChoices(
   const latestChoices = new Map(); // itemKey -> {choice, counter}
 
   // Search for the user's choices in the data rows (skip header row)
-  for (const row of rows.slice(1)) {
+  for (const row of rows) {
     const rowEmail = row[emailColumnIndex];
     const itemKey = row[itemKeyColumnIndex];
     const option = row[optionColumnIndex];
@@ -980,13 +902,8 @@ async function setUserChoice(
     throw new Error("Email, password, itemKey, and choice are required");
   }
 
-  const sheet = await spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
-  const rows = await sheet.getRows();
-  const headers = rows[0];
-
-  if (!headers) {
-    throw new Error("No headers found in CHOICES sheet");
-  }
+  const { headers, rows } =
+    await spreadsheet.getRowsWithHeaders(CHOICES_SHEET_NAME);
 
   if (
     rows.find((row) => {
@@ -1012,7 +929,10 @@ async function setUserChoice(
     choice: data.choice.toLowerCase().trim(),
   };
 
-  await sheet.appendRow(headers.map((header) => rowObject[header] || ""));
+  await spreadsheet.appendRow(
+    CHOICES_SHEET_NAME,
+    headers.map((header) => rowObject[header] || "")
+  );
 }
 
 async function getVoucherFile(
