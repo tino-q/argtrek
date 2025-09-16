@@ -161,7 +161,6 @@ const EmailLogin = () => {
     const passwordParam = urlParams.get("password");
 
     if (emailParam && passwordParam) {
-      handleLogout();
       // Magic link detected - auto-fill credentials
       setEmail(emailParam);
       setPassword(passwordParam);
