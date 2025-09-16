@@ -61,10 +61,14 @@ export async function doGet(
 
   // Check if this is a rafting registrations count request
   if (e.parameter.endpoint === "rafting_count") {
-    const count = await getRaftingRegistrationsCount(spreadsheet);
+    const raftingQueue = await getRaftingRegistrations(
+      spreadsheet,
+      e.parameter.email,
+      e.parameter.password
+    );
     return {
       success: true,
-      count,
+      raftingQueue,
     };
   }
 
@@ -131,30 +135,12 @@ async function getEmailSubmissionData(
  *   - If latest CHOICES for rafting exists: include if 'yes', exclude if 'no'
  *   - Else fall back to formData.rafting truthiness
  */
-export async function getRaftingRegistrationsCount(
-  spreadsheet: SpreadsheetWrapper
+export async function getRaftingRegistrations(
+  spreadsheet: SpreadsheetWrapper,
+  email: string,
+  password: string
 ) {
-  // --- Load CHOICES latest per email for rafting ---
-  const choicesSheet = await spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
-  const choicesRows = await choicesSheet.getRows();
-  const choicesHeaders = choicesRows[0];
-  if (!choicesHeaders) {
-    throw new Error("Headers not found in CHOICES sheet");
-  }
-
-  const choicesEmailIdx = choicesHeaders.indexOf("email");
-  const choiceIdx = choicesHeaders.indexOf("choice");
-  const optionIdx = choicesHeaders.indexOf("option");
-
-  const raftingEmailsChoices = choicesRows
-    .slice(1)
-    .filter((row) => {
-      const option = row[optionIdx]?.trim();
-      const choice = row[choiceIdx]?.toLowerCase().trim();
-      return option === "rafting" && choice === "yes";
-    })
-    .map((row) => row[choicesEmailIdx]?.toLowerCase().trim())
-    .filter(Boolean);
+  await validateCredentials(email, password, spreadsheet);
 
   // --- Load Trip Registrations formData.rafting ---
   const regsSheet = await spreadsheet.getSheetByName(
@@ -168,7 +154,7 @@ export async function getRaftingRegistrationsCount(
   const emailIdx = headers.indexOf("rsvpData.email");
   const raftingIdx = headers.indexOf("formData.rafting");
 
-  const formRaftingEmails = regsRows
+  const raftingEmailsInOrder = regsRows
     .slice(1)
     .filter(
       (row) => row[raftingIdx]?.toString().toLowerCase().trim() === "true"
@@ -176,10 +162,37 @@ export async function getRaftingRegistrationsCount(
     .map((row) => row[emailIdx]?.toString().toLowerCase().trim())
     .filter(Boolean);
 
-  // --- Combine with precedence to CHOICES ---
-  const emailSet = new Set([...formRaftingEmails, ...raftingEmailsChoices]);
+  // --- Load CHOICES latest per email for rafting ---
+  const choicesSheet = await spreadsheet.getSheetByName(CHOICES_SHEET_NAME);
+  const choicesRows = await choicesSheet.getRows();
+  const choicesHeaders = choicesRows[0];
+  if (!choicesHeaders) {
+    throw new Error("Headers not found in CHOICES sheet");
+  }
 
-  return emailSet.size;
+  const choicesEmailIdx = choicesHeaders.indexOf("email");
+  const choiceIdx = choicesHeaders.indexOf("choice");
+  const optionIdx = choicesHeaders.indexOf("option");
+
+  for (const row of choicesRows.slice(1)) {
+    const option = row[optionIdx]?.trim();
+    const choice = row[choiceIdx]?.toLowerCase().trim();
+    if (option === "rafting" && choice === "yes") {
+      const email = row[choicesEmailIdx]?.toLowerCase().trim();
+      if (email) {
+        raftingEmailsInOrder.push(email);
+      }
+    }
+  }
+
+  return raftingEmailsInOrder.map((e) => {
+    // keep the requester email in order so they know their position in rafting queue
+    if (e?.trim().toLowerCase() === email.trim().toLowerCase()) {
+      return e;
+    }
+    // hide other emails for security
+    return true;
+  });
 }
 
 type AuthenticatedRequest = {

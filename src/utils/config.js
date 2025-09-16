@@ -5,9 +5,14 @@
 export const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwuO-0jNmS7gxEofnA_p8Hrdqd7YTU0vg0DWoY4jDAqaLQNXxTj4t7G2NXqZwdfx0wu/exec";
 
-export const BACKEND_URL =
+export const LAMBDA_URL =
   "https://at6nwfhebl.execute-api.us-east-1.amazonaws.com/dev/";
-// export const BACKEND_URL = "http://localhost:3000/";
+
+export const LOCAL_URL = "http://localhost:3000/";
+
+export const BACKEND_URL = LAMBDA_URL;
+
+// export const BACKEND_URL = LOCAL_URL;
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {

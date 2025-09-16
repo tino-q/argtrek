@@ -65,6 +65,64 @@ const useSelectedRecommendation = () => {
   return context;
 };
 
+const RaftingQueueContext = createContext<{
+  raftingQueue: string[] | null;
+  onJoinRafting: () => void;
+} | null>(null);
+
+const RaftingQueueProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  const [raftingQueue, setRaftingQueue] = useState<string[] | null>(null);
+  const { email: userEmail, password: userPassword } = useContext(AuthContext);
+
+  useEffect(() => {
+    const fetchRaftingQueue = async () => {
+      try {
+        const raftingQueue = await fetchWithCache(
+          "raftingQueue",
+          async () => {
+            const response = await fetch(
+              `${BACKEND_URL}?endpoint=rafting_count&email=${userEmail}&password=${userPassword}`
+            );
+            const data = await response.json();
+            if (data.success && Array.isArray(data.raftingQueue)) {
+              return [true, true, true, true, ...data.raftingQueue];
+            }
+            throw new Error("Failed to load rafting count");
+          },
+          CACHE_DURATIONS.FIVE_MINUTES,
+          true
+        );
+
+        setRaftingQueue(raftingQueue);
+      } catch (err) {
+        console.error("Error fetching rafting count:", err);
+        setRaftingQueue([]);
+      }
+    };
+    fetchRaftingQueue();
+  }, []);
+
+  const onJoinRafting = useCallback(() => {
+    setRaftingQueue((prev) => (prev || []).concat([userEmail]));
+  }, []);
+
+  return (
+    <RaftingQueueContext.Provider value={{ raftingQueue, onJoinRafting }}>
+      {children}
+    </RaftingQueueContext.Provider>
+  );
+};
+
+const useRaftingQueue = () => {
+  const context = useContext(RaftingQueueContext);
+  if (!context) {
+    throw new Error("useRaftingQueue must be used within RaftingQueueProvider");
+  }
+  return context;
+};
+
 const ConfirmationModalContext = createContext<{
   confirmationModal: ConfirmationModalState;
   showConfirmationModal: (
@@ -92,7 +150,7 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const { email: userEmail, password: userPassword } = useContext(AuthContext);
   const { submissionResult, setSubmissionResult } = useTripContext();
-  // const { onJoinRafting } = useRaftingCount();
+  const { onJoinRafting } = useRaftingQueue();
 
   const showConfirmationModal = useCallback(
     (
@@ -146,13 +204,13 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
           },
         }));
 
-        // if (
-        //   choicesGroup === "bariloche-activity" &&
-        //   choiceId === "rafting" &&
-        //   selectedChoice === "yes"
-        // ) {
-        //   onJoinRafting();
-        // }
+        if (
+          choicesGroup === "bariloche-activity" &&
+          choiceId === "rafting" &&
+          selectedChoice === "yes"
+        ) {
+          onJoinRafting();
+        }
         return;
       }
 
@@ -185,13 +243,13 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
             userChoices: updatedChoices,
           }));
 
-          // if (
-          //   choicesGroup === "bariloche-activity" &&
-          //   choiceId === "rafting" &&
-          //   selectedChoice === "yes"
-          // ) {
-          //   onJoinRafting();
-          // }
+          if (
+            choicesGroup === "bariloche-activity" &&
+            choiceId === "rafting" &&
+            selectedChoice === "yes"
+          ) {
+            onJoinRafting();
+          }
         }
       } catch (err) {
         console.error("Error saving choice:", err);
@@ -327,6 +385,68 @@ function UnderConstruction({
   );
 }
 
+function RaftingProgressBar() {
+  const { raftingQueue } = useRaftingQueue();
+  const { email } = useContext(AuthContext);
+
+  if (!raftingQueue) {
+    return null;
+  }
+
+  const emailQueueIndex = raftingQueue
+    .map((e) => e.toString().toLowerCase().trim())
+    .indexOf(email.toLowerCase().trim());
+
+  if (emailQueueIndex !== -1 && emailQueueIndex < 20) {
+    return (
+      <>
+        <div className="timeline-parameter parameter-detail">
+          You're registered!
+        </div>
+      </>
+    );
+  }
+
+  const maxParticipants = 20;
+  const raftingCount = raftingQueue.length;
+  const pct = Math.max(
+    0,
+    Math.min(100, Math.round((raftingCount / maxParticipants) * 100))
+  );
+  const isOverCapacity = raftingCount > maxParticipants;
+  const isComplete = raftingCount === maxParticipants;
+  let raftingMessage;
+
+  if ((isOverCapacity || isComplete) && emailQueueIndex !== -1) {
+    raftingMessage = `You're registered, yet we need ${30 - raftingCount} more participants to guarantee your spot.`;
+  } else {
+    if (isOverCapacity) {
+      raftingMessage = `${raftingCount - maxParticipants} over capacity! Need ${30 - raftingCount} more participants to guarantee spots. First come, first serve!`;
+    } else if (isComplete) {
+      raftingMessage = `Need 10 more participants to guarantee spots. First come, first serve!`;
+    } else {
+      raftingMessage = `${maxParticipants - raftingCount} guaranteed spots left!`;
+    }
+  }
+
+  return (
+    <div className="timeline-progress">
+      <div className="progress-header">
+        {raftingCount}/{maxParticipants} registered
+      </div>
+      <div className="progress-bar-container">
+        <div className="progress-bar">
+          <div
+            className={`progress-fill ${isOverCapacity || isComplete ? "over-capacity" : ""}`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
+      <div className="progress-note">{raftingMessage}</div>
+    </div>
+  );
+}
+
 const SimpleTimelineItem: React.FC<SimpleTimelineItemProps> = ({ item }) => {
   const [part1, ...rest] = parseParameter1(item);
   const pin = item["PIN"];
@@ -382,51 +502,6 @@ const SimpleTimelineItem: React.FC<SimpleTimelineItemProps> = ({ item }) => {
     </div>
   );
 };
-/*
-const useRaftingCount = () => {
-  const { showError } = useNotificationContext();
-  const [raftingCount, setRaftingCount] = useState<number | null>(null);
-
-  useEffect(() => {
-    const fetchRaftingCount = async () => {
-      if (__DEV__) {
-        setRaftingCount(10);
-        return;
-      }
-
-      try {
-        const count = await fetchWithCache(
-          "raftingCount",
-          async () => {
-            const response = await fetch(
-              `${BACKEND_URL}?endpoint=rafting_count`
-            );
-            const data = await response.json();
-            if (data.success) {
-              return typeof data.count === "number" ? data.count : 0;
-            }
-            throw new Error("Failed to load rafting count");
-          },
-          CACHE_DURATIONS.FIVE_MINUTES
-        );
-
-        setRaftingCount(count);
-      } catch (err) {
-        console.error("Error fetching rafting count:", err);
-        setRaftingCount(0);
-        showError("Failed to load rafting count");
-      }
-    };
-    fetchRaftingCount();
-  }, [showError]);
-
-  const onJoinRafting = useCallback(() => {
-    setRaftingCount((prev) => (typeof prev === "number" ? prev + 1 : prev));
-  }, []);
-
-  return { raftingCount, onJoinRafting };
-};
-*/
 
 const filterTimelineData = (
   timelineData: TimelineItem[],
@@ -629,11 +704,11 @@ const PaidAddOnPicker: React.FC<{
   let includedItems = items.filter((item) => item.PRICING === "included");
   let paidItems = items.filter((item) => item.PRICING !== "included");
 
-  let switchCase = false;
+  let allOptionalActivities = false;
   if (paidItems.length === 0) {
     paidItems = includedItems;
     includedItems = [];
-    switchCase = true;
+    allOptionalActivities = true;
   }
 
   const choseAnyPaidItem = Boolean(
@@ -667,16 +742,17 @@ const PaidAddOnPicker: React.FC<{
             <div className="optional-activity-label">
               {joinedItem
                 ? "Current Selection"
-                : !switchCase
+                : !allOptionalActivities
                   ? "Paid Add-On"
                   : "Optional Add-On"}
             </div>
             <SimpleTimelineItem item={paidItem} />
-            {!switchCase && (
+            {!allOptionalActivities && (
               <div className="activity-price-row">
                 <div className="activity-price">${paidItem.PRICING}</div>
               </div>
             )}
+            {paidItem.CHOICE_ID === "rafting" && <RaftingProgressBar />}
             <div className="timeline-choices">
               <div className="choice-row">
                 {!joinedItem && !deniedItem && !choseAnyPaidItem && (
@@ -814,7 +890,7 @@ const TimelineContent: React.FC = () => {
   const [collapsedDays, setCollapsedDays] = useState<Set<string>>(new Set());
 
   const [showAllItems, setShowAllItems] = useState<boolean>(false);
-  const { email: userEmail } = useContext(AuthContext);
+  const { email: userEmail, password: userPassword } = useContext(AuthContext);
   const { submissionResult } = useTripContext();
   const { showError } = useNotificationContext();
 
@@ -1066,11 +1142,13 @@ const TimelineContent: React.FC = () => {
 
 const Timeline: React.FC = () => {
   return (
-    <SelectedRecommendationProvider>
-      <ConfirmationModalProvider>
-        <TimelineContent />
-      </ConfirmationModalProvider>
-    </SelectedRecommendationProvider>
+    <RaftingQueueProvider>
+      <SelectedRecommendationProvider>
+        <ConfirmationModalProvider>
+          <TimelineContent />
+        </ConfirmationModalProvider>
+      </SelectedRecommendationProvider>
+    </RaftingQueueProvider>
   );
 };
 

@@ -343,6 +343,7 @@
   font-weight: 600;
   font-size: 0.9rem;
   color: #1f2937;
+  text-align: right;
 }
 
 .progress-bar-container {
@@ -367,10 +368,15 @@
   width: 0;
   transition: width 0.3s ease;
 }
+
+.timeline-progress .progress-fill.over-capacity {
+  background: #ef4444; /* red */
+}
 .timeline-progress .progress-note {
   font-size: 0.7rem;
   color: #6b7280;
   margin-top: 6px;
+  text-align: right;
 }
 
 .parameter-main {
