@@ -87,7 +87,7 @@ const RaftingQueueProvider: React.FC<{
             );
             const data = await response.json();
             if (data.success && Array.isArray(data.raftingQueue)) {
-              return [true, true, true, true, ...data.raftingQueue];
+              return data.raftingQueue;
             }
             throw new Error("Failed to load rafting count");
           },
