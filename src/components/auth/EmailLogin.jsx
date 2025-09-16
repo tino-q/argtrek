@@ -5,6 +5,7 @@ import useAuth from "../../hooks/useAuth";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
 import { BACKEND_URL } from "../../utils/config";
+import { IS_LOCAL } from "../../utils/env";
 import { STEPS } from "../../utils/stepConfig";
 
 function cleanupUrlParameters() {
@@ -177,7 +178,7 @@ const EmailLogin = () => {
       return () => clearTimeout(autoSubmit);
     }
 
-    if (__DEV__) {
+    if (IS_LOCAL) {
       setEmail("tinqueija@gmail.com");
       setPassword("dima");
     }

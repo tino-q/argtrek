@@ -10,9 +10,9 @@ export const LAMBDA_URL =
 
 export const LOCAL_URL = "http://localhost:3000/";
 
-export const BACKEND_URL = LAMBDA_URL;
+import { IS_LOCAL } from "./env";
 
-// export const BACKEND_URL = LOCAL_URL;
+export const BACKEND_URL = IS_LOCAL ? LOCAL_URL : LAMBDA_URL;
 
 // Action Types for Apps Script
 export const ACTION_TYPES = {

@@ -35,7 +35,7 @@ import type {
   ChoiceId,
 } from "./Timeline.types";
 
-const { __DEV__ } = globalThis as unknown as { __DEV__: boolean };
+import { IS_LOCAL } from '../../utils/env';
 
 const SelectedRecommendationContext = createContext<{
   selectedRecommendation: string | null;
@@ -190,7 +190,7 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      if (__DEV__) {
+      if (IS_LOCAL) {
         setSubmissionResult((prev: SubmissionResult) => ({
           ...prev,
           userChoices: {

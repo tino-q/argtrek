@@ -36,7 +36,7 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.es2020,
-        __DEV__: "readonly", // Development mode flag
+        IS_LOCAL: "readonly", // Development mode flag
       },
       parserOptions: {
         ecmaVersion: "latest",

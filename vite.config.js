@@ -10,6 +10,6 @@ export default defineConfig({
   },
   define: {
     // Define environment variables that will be available at build time
-    __DEV__: JSON.stringify(false),
+    IS_LOCAL: JSON.stringify(process.env.IS_LOCAL === 'true'),
   },
 });

@@ -10,14 +10,19 @@ import {
 
 config({ path: ".env" });
 
-const ddb = new DynamoDBClient({
-  region: "us-east-1",
-  credentials: {
-    accessKeyId: process.env["AWS_ACCESS_KEY_ID"] as string,
-    secretAccessKey: process.env["AWS_SECRET_ACCESS_KEY"] as string,
-  },
-});
+const isLambda = !!process.env["AWS_LAMBDA_FUNCTION_NAME"];
 
+const ddb = new DynamoDBClient(
+  isLambda
+    ? { region: "us-east-1" } // ✅ use role
+    : {
+        region: "us-east-1",
+        credentials: {
+          accessKeyId: process.env["AWS_ACCESS_KEY_ID"]!,
+          secretAccessKey: process.env["AWS_SECRET_ACCESS_KEY"]!,
+        },
+      }
+);
 export const getItem = async (key: string) => {
   const command = new GetItemCommand({
     TableName: "ArgTripCache",
