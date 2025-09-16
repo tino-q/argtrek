@@ -606,6 +606,34 @@ const RSVPDisplay = ({
                         <h4>TERMS & CONDITIONS</h4>
                         <ul>
                           <li>
+                            I'm Maddie, Nati's friend since high school. I’m
+                            based in Alicante, Spain, where I manage vacation
+                            rentals. I’m super thrilled to be coordinating this
+                            trip! I used to do this when I lived in Argentina.
+                            Together with my partner Martin, we created the trip
+                            registration app. It’s homemade, but we hope it
+                            makes the trip's communication smoother for
+                            everyone! Important: I am acting as a group
+                            coordinator, not as a travel agency. My role is to
+                            centralize logistics, secure group rates, and book
+                            activities and hotels on behalf of each passenger.
+                            All services are provided directly by third-party
+                            companies, not by me personally. In the unlikely
+                            event of a trip disruption, such as a flight delay,
+                            any extra costs for new flights or hotel nights are
+                            the traveler's responsibility — I’ll still be there
+                            to guide and support.
+                          </li>
+
+                          <li>
+                            Argentine participants will book the flights, not
+                            me. Flight details will still be shared here in the
+                            app. If you prefer to book your flights
+                            independently, you can let me know, and I’ll deduct
+                            the corresponding amount from your next payment.
+                          </li>
+
+                          <li>
                             Quotation is based on RSVP submissions. This
                             proposal is subject to availability and may change
                             until the group reservation is confirmed with a
