@@ -193,7 +193,7 @@ const PaymentDetailsDisplay = ({
                 </div>
               </div>
               <br />
-              <h4>Bank Transfer Details</h4>
+              {/* <h4>Bank Transfer Details</h4>
               {BANK_DETAILS.map((detail) => (
                 <div key={detail.label} className="detail-row">
                   <span className="label">{detail.label}:</span>
@@ -218,7 +218,7 @@ const PaymentDetailsDisplay = ({
                     </button>
                   </div>
                 </div>
-              ))}
+              ))} */}
             </div>
           )}
 

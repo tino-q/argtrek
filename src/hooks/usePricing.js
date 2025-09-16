@@ -50,7 +50,7 @@ export const usePricing = (rsvpData, formData) => {
       const activityFields = [
         FORM_FIELDS.RAFTING,
         FORM_FIELDS.HORSEBACK,
-        FORM_FIELDS.COOKING,
+        // FORM_FIELDS.COOKING,
         FORM_FIELDS.TANGO,
       ];
 

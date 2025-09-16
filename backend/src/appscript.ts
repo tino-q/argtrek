@@ -819,7 +819,17 @@ async function saveTripRegistration(
     );
   }
 
-  await sheet.appendRow(HEADERS_IN_ORDER.map((header) => data[header] || ""));
+  await sheet.appendRow(
+    HEADERS_IN_ORDER.map((header) => {
+      if (
+        typeof data[header] === "number" ||
+        typeof data[header] === "boolean"
+      ) {
+        return data[header];
+      }
+      return data[header] || "";
+    })
+  );
 }
 
 /**
