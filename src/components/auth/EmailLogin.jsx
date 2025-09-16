@@ -161,6 +161,7 @@ const EmailLogin = () => {
     const passwordParam = urlParams.get("password");
 
     if (emailParam && passwordParam) {
+      handleLogout();
       // Magic link detected - auto-fill credentials
       setEmail(emailParam);
       setPassword(passwordParam);
@@ -181,7 +182,14 @@ const EmailLogin = () => {
       setEmail("tinqueija@gmail.com");
       setPassword("dima");
     }
-  }, [handleEmailLogin, isLoading, setEmail, setIsLoading, setPassword]);
+  }, [
+    handleEmailLogin,
+    isLoading,
+    setEmail,
+    setIsLoading,
+    setPassword,
+    handleLogout,
+  ]);
 
   const handleEmailChange = useCallback(
     (e) => setEmail(e.target.value),
