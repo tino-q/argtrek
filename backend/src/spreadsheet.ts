@@ -117,7 +117,7 @@ export class SpreadsheetWrapper {
     // Warning check: log if some headers are missing from data object
     const missingHeaders = headers.filter((header) => !(header in data));
     if (missingHeaders.length > 0) {
-      discordLog(
+      await discordLog(
         `AppendRow Warning: [${sheetName}] There are some headers that are not present in the data object: ${missingHeaders.join(", ")}. `
       );
     }
@@ -125,7 +125,7 @@ export class SpreadsheetWrapper {
     // Error check: ensure data object doesn't contain keys that aren't headers
     const extraKeys = Object.keys(data).filter((key) => !headers.includes(key));
     if (extraKeys.length > 0) {
-      discordLog(
+      await discordLog(
         `AppendRow Warning: [${sheetName}] Data object contains keys that are not present as headers: ${extraKeys.join(", ")}`
       );
     }
@@ -150,7 +150,7 @@ export class SpreadsheetWrapper {
       },
     });
 
-    discordLog(`Appended row to sheet: ${sheetName}`);
+    await discordLog(`Appended row to sheet: ${sheetName}`);
 
     // clear ddb cache
     await deleteItem(this.getCacheKey(sheetName));
