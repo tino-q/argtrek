@@ -21,8 +21,10 @@ function coolErrorHandler(error: any, message: string): void {
   console.error(message, error);
 }
 
-function internalError(code: string, message: string): void {
-  console.error(`[${code}]: ${message}`);
+function internalError(code: string, message: string): Error {
+  const errorMessage = `[${code}]: ${message}`;
+  console.error(errorMessage);
+  return new Error(errorMessage);
 }
 
 function sendErrorToTinqueAsEmail(error: any): void {
@@ -33,6 +35,16 @@ async function botLogin(): Promise<void> {
   try {
     if (client === undefined) {
       client = new Client({ intents: [GatewayIntentBits.Guilds] });
+      
+      // Add error handlers to prevent unhandled promise rejections
+      client.on('error', (error) => {
+        console.error('Discord client error:', error);
+      });
+      
+      client.on('warn', (warning) => {
+        console.warn('Discord client warning:', warning);
+      });
+      
       await client.login(DISCORD_TOKEN);
     }
   } catch (error) {
@@ -77,7 +89,7 @@ async function doFetch(
   id: string
 ): Promise<User | Channel | Guild | GuildMember | null | undefined> {
   try {
-    const cached = await service.cache.get(id);
+    const cached = service.cache.get(id);
     if (cached) {
       return cached as any;
     }
