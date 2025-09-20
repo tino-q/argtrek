@@ -19,8 +19,6 @@ export const useFormSubmission = () => {
   const submitForm = async (formData, rsvpData, pricing) => {
     setIsSubmitting(true);
 
-    console.log({ rsvpData });
-
     try {
       // Create FormData with raw form inputs + essential RSVP context
 
@@ -64,7 +62,6 @@ export const useFormSubmission = () => {
       const result = await response.json();
 
       if (result.success) {
-        console.log("Form submitted successfully:", result);
         return {
           success: true,
           data: result,

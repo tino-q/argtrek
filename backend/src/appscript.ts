@@ -355,26 +355,8 @@ async function saveToTpvPaymentsSheet(
   },
   spreadsheet: SpreadsheetWrapper
 ) {
-  // Define the headers (fixed structure)
-  // const headers = [
-  //   "timestamp",
-  //   "decoded_json",
-  //   "raw_ds_merchant_parameters",
-  //   "ds_signature_version",
-  //   "ds_signature",
-  // ];
-
-  // Prepare the values in the same order as headers
-  const values = [
-    paymentRecord.timestamp,
-    paymentRecord.decoded_json,
-    paymentRecord.raw_ds_merchant_parameters,
-    paymentRecord.ds_signature_version,
-    paymentRecord.ds_signature,
-  ];
-
   // Add the payment record
-  await spreadsheet.appendRow(TPV_PAYMENTS_SHEET_NAME, values);
+  await spreadsheet.appendRow(TPV_PAYMENTS_SHEET_NAME, paymentRecord);
 }
 
 /**
@@ -580,10 +562,7 @@ async function savePassportSubmission(
     aAdvantage: aAdvantage || "",
   };
 
-  await spreadsheet.appendRow(
-    PASSPORTS_SHEET_NAME,
-    headers.map((header) => rowObject[header] || "")
-  );
+  await spreadsheet.appendRow(PASSPORTS_SHEET_NAME, rowObject);
 
   return rowObject;
 }
@@ -652,10 +631,7 @@ async function saveLuggageSubmission(
     "MDZ-AEP": luggageSelection?.["MDZ-AEP"] ? "1" : "0",
   };
 
-  await spreadsheet.appendRow(
-    LUGGAGE_SHEET_NAME,
-    headers.map((header) => rowObject[header] || "")
-  );
+  await spreadsheet.appendRow(LUGGAGE_SHEET_NAME, rowObject);
 }
 
 /**
@@ -695,67 +671,6 @@ async function saveTripRegistration(
   data: Record<string, string>,
   spreadsheet: SpreadsheetWrapper
 ) {
-  const HEADERS_IN_ORDER = [
-    "formData.email",
-    "formData.firstName",
-    "formData.lastName",
-    "formData.phoneNumber",
-    "formData.roommateName",
-    "formData.roommatePreference",
-    "formData.dietaryMessage",
-    "formData.dietaryRestrictions",
-
-    "formData.checkedLuggage",
-    "formData.privateRoomUpgrade",
-
-    "formData.cooking",
-    "formData.horseback",
-    "formData.rafting",
-    "formData.tango",
-
-    "formData.paymentSchedule",
-    "formData.paymentMethod",
-    "formData.cryptoCurrency",
-    "formData.cryptoNetwork",
-
-    "pricing.activitiesPrice",
-    "pricing.basePrice",
-    "pricing.installmentAmount",
-    "pricing.privateRoomUpgrade",
-    "pricing.processingFee",
-    "pricing.subtotal",
-    "pricing.total",
-
-    "rsvpData.22Nov_BSAS",
-    "rsvpData.23Nov_BSAS",
-    "rsvpData.23Nov_Dinner_Welcome",
-    "rsvpData.23Nov_Tour",
-    "rsvpData.24Nov_BARI",
-    "rsvpData.25Nov_BARI",
-    "rsvpData.26Nov_BARI",
-    "rsvpData.27Nov_MDZ",
-    "rsvpData.28Nov_MDZ",
-    "rsvpData.29Nov_BSAS",
-    "rsvpData.AEP-BRC",
-    "rsvpData.BRC-MDZ",
-    "rsvpData.MDZ-AEP",
-    "rsvpData.PACKPRICE",
-    "rsvpData.PRIVATEROOM",
-    "rsvpData.Timestamp",
-    // "rsvpData.VALIJA", // Removed - no longer pricing luggage
-    "rsvpData.comments",
-    "rsvpData.email",
-    "rsvpData.email2",
-    "rsvpData.name",
-    "rsvpData.option",
-    "rsvpData.party",
-    "rsvpData.plus1",
-
-    "pricing.totalEUR",
-    "pricing.installmentAmountEUR",
-    "paymentLink.url",
-  ];
-
   const email = data["rsvpData.email"];
 
   if (!email) {
@@ -769,18 +684,7 @@ async function saveTripRegistration(
     );
   }
 
-  await spreadsheet.appendRow(
-    TRIP_REGISTRATIONS_SHEET_NAME,
-    HEADERS_IN_ORDER.map((header) => {
-      if (
-        typeof data[header] === "number" ||
-        typeof data[header] === "boolean"
-      ) {
-        return data[header];
-      }
-      return data[header] || "";
-    })
-  );
+  await spreadsheet.appendRow(TRIP_REGISTRATIONS_SHEET_NAME, data);
 }
 
 /**
@@ -929,10 +833,7 @@ async function setUserChoice(
     choice: data.choice.toLowerCase().trim(),
   };
 
-  await spreadsheet.appendRow(
-    CHOICES_SHEET_NAME,
-    headers.map((header) => rowObject[header] || "")
-  );
+  await spreadsheet.appendRow(CHOICES_SHEET_NAME, rowObject);
 }
 
 async function getVoucherFile(
@@ -942,7 +843,6 @@ async function getVoucherFile(
   file: drive_v3.Schema$File;
   rowId: number;
 }> {
-  console.log("getting voucher file");
   const existingSubmission = await getExistingSubmission(
     email.trim(),
     spreadsheet
@@ -962,8 +862,6 @@ async function getVoucherFile(
     q: `'${folderId}' in parents and name='${fileName}' and trashed=false`,
     fields: "files(id, name, mimeType)",
   });
-
-  console.log("got files list");
 
   const file = res.data.files?.[0];
   if (!file) {
@@ -986,8 +884,6 @@ async function downloadVoucher(
   // Get voucher file
   const voucherResult = await getVoucherFile(email, spreadsheet);
 
-  console.log("got voucher result");
-
   const drive = await getGoogleDriveApi();
 
   // Get file content (binary)
@@ -998,8 +894,6 @@ async function downloadVoucher(
     },
     { responseType: "arraybuffer" }
   );
-
-  console.log("got file content");
 
   const fileBuffer = Buffer.from(res.data as ArrayBuffer);
   const base64Data = fileBuffer.toString("base64");

@@ -35,7 +35,7 @@ import type {
   ChoiceId,
 } from "./Timeline.types";
 
-import { IS_LOCAL } from '../../utils/env';
+import { IS_LOCAL } from "../../utils/env";
 
 const SelectedRecommendationContext = createContext<{
   selectedRecommendation: string | null;
@@ -1008,7 +1008,6 @@ const TimelineContent: React.FC = () => {
 
   // TODO: remove this after construction
   if (!ADMIN_EMAILS.includes(userEmail)) {
-    console.log("userEmail", userEmail);
     return <UnderConstruction navigateToHome={navigateToHome} />;
   }
 

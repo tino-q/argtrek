@@ -115,10 +115,6 @@ export const getRandomActivityImages = (activityId, count = 3) => {
   const images = getActivityImageSources(activityId);
   const shuffled = [...images].sort(() => 0.5 - Math.random());
   const selected = shuffled.slice(0, count);
-
-  console.log(
-    `🎲 Selected ${selected.length} random images from ${activityId} collection`
-  );
   return selected;
 };
 

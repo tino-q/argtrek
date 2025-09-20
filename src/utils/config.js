@@ -8,7 +8,7 @@ export const APPS_SCRIPT_URL =
 export const LAMBDA_URL =
   "https://at6nwfhebl.execute-api.us-east-1.amazonaws.com/dev/";
 
-export const LOCAL_URL = "http://localhost:3000/";
+export const LOCAL_URL = "http://localhost:3001/";
 
 import { IS_LOCAL } from "./env";
 

@@ -145,7 +145,6 @@ async function processAllDataRows() {
   });
 
   for (const row of processedArray) {
-    console.log(row.ID.toString());
     if (row.ID.toString() !== "35") {
       // continue;
     }

@@ -207,7 +207,6 @@ function generateFirstPageHTML(
   const buenosAiresArrivalHotel =
     rsvpData["22Nov_BSAS"] || rsvpData["23Nov_BSAS"];
 
-  console.log({ buenosAiresArrivalHotel });
   const bariHotel =
     rsvpData["24Nov_BARI"] || rsvpData["25Nov_BARI"] || rsvpData["26Nov_BARI"];
   const mendozaHotel = rsvpData["27Nov_MDZ"] || rsvpData["28Nov_MDZ"];

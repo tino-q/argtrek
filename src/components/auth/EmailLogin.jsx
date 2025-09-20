@@ -89,16 +89,8 @@ const EmailLogin = () => {
             showError(result.error);
           }
         } else {
-          console.log("result", result);
-          console.log("✅ USER LOGIN SUCCESS - Complete Response Payload:");
-          console.log("===============================================");
-          console.table(result.data);
-          console.log("Raw JSON Data:", JSON.stringify(result.data, null, 2));
-          console.log("===============================================");
-
           if (result.data.row) {
             // User has already submitted - load their existing data and show home
-            console.log("🔄 EXISTING SUBMISSION FOUND - Loading previous data");
 
             const keys = Object.keys(result.data.row);
             const formDataKeys = keys.filter((key) =>

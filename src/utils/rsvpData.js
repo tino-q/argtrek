@@ -300,8 +300,6 @@ export const getIncludedAccommodations = (rsvpData) => {
  * Get all excluded accommodations with their nights
  */
 export const getExcludedAccommodations = (rsvpData) => {
-  console.log("🔍 getExcludedAccommodations called with:", rsvpData);
-
   if (!rsvpData) {
     return [];
   }
@@ -314,10 +312,6 @@ export const getExcludedAccommodations = (rsvpData) => {
   const buenosAiresArrivalExcluded = buenosAiresArrivalFields.filter(
     (field) => rsvpData[field] === false
   );
-  console.log(
-    "🏨 Buenos Aires arrival excluded nights:",
-    buenosAiresArrivalExcluded
-  );
 
   if (buenosAiresArrivalExcluded.length > 0) {
     const baArrivalAccommodation = {
@@ -327,10 +321,6 @@ export const getExcludedAccommodations = (rsvpData) => {
       address: "",
       nights: formatFieldsToNights(buenosAiresArrivalExcluded),
     };
-    console.log(
-      "✅ Adding Buenos Aires arrival accommodation:",
-      baArrivalAccommodation
-    );
     accommodations.push(baArrivalAccommodation);
   }
 
@@ -340,19 +330,10 @@ export const getExcludedAccommodations = (rsvpData) => {
     RSVP_FIELDS.NOV_25,
     RSVP_FIELDS.NOV_26,
   ];
-  console.log("🏔️ Bariloche fields to check:", barilocheFields);
-  console.log(
-    "🏔️ Bariloche values:",
-    barilocheFields.map((field) => ({
-      field,
-      value: rsvpData[field],
-    }))
-  );
 
   const barilocheExcluded = barilocheFields.filter(
     (field) => rsvpData[field] === false
   );
-  console.log("🏔️ Bariloche excluded nights:", barilocheExcluded);
 
   if (barilocheExcluded.length > 0) {
     const barilocheAccommodation = {
@@ -361,25 +342,15 @@ export const getExcludedAccommodations = (rsvpData) => {
       address: "",
       nights: formatFieldsToNights(barilocheExcluded),
     };
-    console.log("✅ Adding Bariloche accommodation:", barilocheAccommodation);
     accommodations.push(barilocheAccommodation);
   }
 
   // Mendoza (Nov 27-28)
   const mendozaFields = [RSVP_FIELDS.NOV_27, RSVP_FIELDS.NOV_28];
-  console.log("🍷 Mendoza fields to check:", mendozaFields);
-  console.log(
-    "🍷 Mendoza values:",
-    mendozaFields.map((field) => ({
-      field,
-      value: rsvpData[field],
-    }))
-  );
 
   const mendozaExcluded = mendozaFields.filter(
     (field) => rsvpData[field] === false
   );
-  console.log("🍷 Mendoza excluded nights:", mendozaExcluded);
 
   if (mendozaExcluded.length > 0) {
     const mendozaAccommodation = {
@@ -388,14 +359,10 @@ export const getExcludedAccommodations = (rsvpData) => {
       address: "",
       nights: formatFieldsToNights(mendozaExcluded),
     };
-    console.log("✅ Adding Mendoza accommodation:", mendozaAccommodation);
     accommodations.push(mendozaAccommodation);
   }
 
   // Buenos Aires - Departure (Nov 29)
-  console.log("🏨 Buenos Aires departure field to check:", RSVP_FIELDS.NOV_29);
-  console.log("🏨 Buenos Aires departure value:", rsvpData[RSVP_FIELDS.NOV_29]);
-
   if (rsvpData[RSVP_FIELDS.NOV_29] === false) {
     const baDepartureAccommodation = {
       location: "Buenos Aires",
@@ -404,15 +371,9 @@ export const getExcludedAccommodations = (rsvpData) => {
       address: "",
       nights: ["Nov 29"],
     };
-    console.log(
-      "✅ Adding Buenos Aires departure accommodation:",
-      baDepartureAccommodation
-    );
     accommodations.push(baDepartureAccommodation);
   }
 
-  console.log("📊 Final excluded accommodations array:", accommodations);
-  console.log("📊 Total excluded accommodations:", accommodations.length);
   return accommodations;
 };
 

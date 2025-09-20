@@ -23,8 +23,6 @@ const FormFlow = () => {
   // Trip context
   const { userRSVP, formData } = useTripContext();
 
-  console.log("🚀 FORM DATA:", formData);
-
   // Notification context
   const { showSuccess, showError } = useNotificationContext();
 
@@ -130,12 +128,6 @@ const FormFlow = () => {
         email: getEmail(userRSVP),
       };
 
-      console.log("🚀 SUBMITTING FORM DATA:");
-      console.log("========================");
-      console.table(submissionData);
-      console.log("Raw form data:", JSON.stringify(submissionData, null, 2));
-      console.log("========================");
-
       const result = await submitForm(submissionData, userRSVP, pricing);
 
       if (result.success) {
@@ -152,7 +144,16 @@ const FormFlow = () => {
       console.error("Form submission error:", error);
       showError("An unexpected error occurred. Please try again.");
     }
-  }, [formData, showError, submitForm, userRSVP, pricing, setSubmissionResult, navigate, showSuccess]);
+  }, [
+    formData,
+    showError,
+    submitForm,
+    userRSVP,
+    pricing,
+    setSubmissionResult,
+    navigate,
+    showSuccess,
+  ]);
 
   // Handle logout
 

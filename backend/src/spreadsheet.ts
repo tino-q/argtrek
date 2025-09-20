@@ -5,6 +5,7 @@ import { getItem, setItem, deleteItem } from "./ddb";
 
 import credentials1 from "./clear-canyon-454114-p5-a911fe242f29.json";
 import credentials2 from "./fluent-justice-472015-p1-256d7c9ae0ca.json";
+import { discordLog } from "./shared/services/discord/discord.logger";
 
 const allCreds = [credentials1, credentials2];
 
@@ -66,13 +67,13 @@ export class SpreadsheetWrapper {
     const cachedData = await getItem(cacheKey);
 
     if (cachedData) {
-      console.log("Returning DynamoDB cached values for sheet: ", sheetName);
+      console.log("DDB cache hit for sheet: " + sheetName);
       // set in-memory cache
       this._sheetToValues[sheetName] = JSON.parse(cachedData) as string[][];
       return this._sheetToValues[sheetName];
     }
 
-    console.log("Returning spreadsheet values for sheet: ", sheetName);
+    console.log("DDB cache miss for sheet: " + sheetName);
 
     // get rows from spreadsheet
     const result = await this.sheets.spreadsheets.values.get({
@@ -108,13 +109,35 @@ export class SpreadsheetWrapper {
 
   async appendRow(
     sheetName: string,
-    values: (string | number)[]
+    data: Record<string, string | number | boolean>
   ): Promise<void> {
-    // clear ddb cache
-    await deleteItem(this.getCacheKey(sheetName));
+    // Get headers from the sheet (uses caching)
+    const { headers } = await this.getRowsWithHeaders(sheetName);
 
-    // clear in-memory cache
-    this._sheetToValues[sheetName] = undefined;
+    // Warning check: log if some headers are missing from data object
+    const missingHeaders = headers.filter((header) => !(header in data));
+    if (missingHeaders.length > 0) {
+      discordLog(
+        `AppendRow Warning: [${sheetName}] There are some headers that are not present in the data object: ${missingHeaders.join(", ")}. `
+      );
+    }
+
+    // Error check: ensure data object doesn't contain keys that aren't headers
+    const extraKeys = Object.keys(data).filter((key) => !headers.includes(key));
+    if (extraKeys.length > 0) {
+      discordLog(
+        `AppendRow Warning: [${sheetName}] Data object contains keys that are not present as headers: ${extraKeys.join(", ")}`
+      );
+    }
+
+    // Map headers to values, preserving the column order
+    const values = headers.map((header) => {
+      const value = data[header];
+      if (typeof value === "number" || typeof value === "boolean") {
+        return value;
+      }
+      return value || "";
+    });
 
     // append row
     await this.sheets.spreadsheets.values.append({
@@ -126,6 +149,14 @@ export class SpreadsheetWrapper {
         values: [values],
       },
     });
+
+    discordLog(`Appended row to sheet: ${sheetName}`);
+
+    // clear ddb cache
+    await deleteItem(this.getCacheKey(sheetName));
+
+    // clear in-memory cache
+    this._sheetToValues[sheetName] = undefined;
   }
 }
 

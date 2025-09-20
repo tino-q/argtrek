@@ -459,16 +459,6 @@ const RSVPDisplay = ({
     true
   );
 
-  console.log({
-    accommodations: excludedServices.accommodations,
-    flights: excludedServices.flights,
-    createChronologicalServicesValue: createChronologicalServices(
-      excludedServices.accommodations,
-      excludedServices.flights,
-      false
-    ),
-  });
-
   const excludedProcessedServices = createChronologicalServices(
     excludedServices.accommodations,
     excludedServices.flights,

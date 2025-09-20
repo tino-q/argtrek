@@ -1,6 +1,7 @@
 import express, { type Request, type Response } from "express";
 import { doGet, doPost } from "./appscript";
 import { buildSpreadsheetWrapper } from "./spreadsheet";
+import { discordErrorLog } from "./shared/services/discord/discord.logger";
 
 const app = express();
 
@@ -35,23 +36,37 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", async (req: Request, res: Response) => {
-  const response = await doGet(
-    {
-      parameter: {
-        endpoint: req.query["endpoint"] as string,
-        email: req.query["email"] as string,
-        password: req.query["password"] as string,
+  try {
+    const response = await doGet(
+      {
+        parameter: {
+          endpoint: req.query["endpoint"] as string,
+          email: req.query["email"] as string,
+          password: req.query["password"] as string,
+        },
       },
-    },
-    await buildSpreadsheetWrapper()
-  );
-  return res.json(response);
+      await buildSpreadsheetWrapper()
+    );
+    return res.json(response);
+  } catch (error) {
+    await discordErrorLog("[GET /] Error", error);
+    const message =
+      error instanceof Error ? error.message : "Internal Server Error";
+    return res.status(500).json({ success: false, error: message });
+  }
 });
 
 app.post("/", async (req: Request, res: Response) => {
-  const spreadsheet = await buildSpreadsheetWrapper();
-  const response = await doPost(req.body, spreadsheet);
-  return res.json(response);
+  try {
+    const spreadsheet = await buildSpreadsheetWrapper();
+    const response = await doPost(req.body, spreadsheet);
+    return res.json(response);
+  } catch (error) {
+    await discordErrorLog("[POST /] Error", error);
+    const message =
+      error instanceof Error ? error.message : "Internal Server Error";
+    return res.status(500).json({ success: false, error: message });
+  }
 });
 
 export { app };

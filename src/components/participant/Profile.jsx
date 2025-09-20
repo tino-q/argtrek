@@ -10,8 +10,6 @@ const Profile = () => {
   const navigate = useNavigate();
   const { userRSVP, formData, submissionResult } = useTripContext();
 
-  console.log("🚀 SUBMISSION RESULT:", submissionResult);
-
   useEffect(() => {
     if (!userRSVP) {
       navigate("/login");
