@@ -10,9 +10,9 @@
 
 const APPS_SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbwuO-0jNmS7gxEofnA_p8Hrdqd7YTU0vg0DWoY4jDAqaLQNXxTj4t7G2NXqZwdfx0wu/exec";
-  const REDSYS_BASE_URL = "https://canales.redsys.es/admincanales-web/services";
 
-  "https://script.google.com/macros/s/AKfycbw2qgRZBxEAhDQ-eSkxcXHEi-s1gLrHdypwPTg8jbedScR_Y7h_zC82nxm4FWaCMPhn/exec";
+const REDSYS_BASE_URL = "https://canales.redsys.es/admincanales-web/services";
+
 const MG_KEY = "<REDACTED>";
 const REDSYS_USER = "<REDACTED>";
 const REDSYS_PASS = "<REDACTED>"; // Note: \u0021 is '!'
