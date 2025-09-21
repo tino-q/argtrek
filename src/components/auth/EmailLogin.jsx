@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
-import { BACKEND_URL } from "../../utils/config";
+import { loginUser } from "../../utils/api";
 import { IS_LOCAL } from "../../utils/env";
 import { STEPS } from "../../utils/stepConfig";
 
@@ -64,13 +64,7 @@ const EmailLogin = () => {
   const handleEmailLogin = useCallback(
     async (email, password) => {
       try {
-        const response = await fetch(
-          `${BACKEND_URL}?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
-          {
-            method: "GET",
-          }
-        );
-        const result = await response.json();
+        const result = await loginUser(email, password);
 
         if (result.error) {
           if (

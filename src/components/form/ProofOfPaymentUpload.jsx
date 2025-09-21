@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 
-import { APPS_SCRIPT_URL } from "../../utils/config";
+import { uploadProofOfPayment } from "../../utils/api";
 
 const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
 const MAX_SIZE_MB = 10;
@@ -38,38 +38,20 @@ const ProofOfPaymentUpload = ({ name, surname, orderNumber, installments }) => {
     setMessage("");
     setError("");
     try {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const [, base64] = event.target.result.split(",");
-        const timestamp = Date.now();
-        const formData = new FormData();
-        formData.append("action", "upload_proof_of_payment");
-        formData.append("fileData", base64);
-        formData.append("fileName", file.name);
-        formData.append("fileType", file.type);
-        formData.append("name", name);
-        formData.append("surname", surname);
-        formData.append("orderNumber", orderNumber);
-        formData.append("timestamp", timestamp);
-        formData.append("installments_0", installments[0]);
-        formData.append("installments_1", installments[1]);
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          body: formData,
-        });
-        const result = await res.json();
-        if (result.success) {
-          setMessage("Upload successful!");
-          setFile(null);
-          fileInputRef.current.value = "";
-        } else {
-          setError(result.error || "Upload failed.");
-        }
-        setUploading(false);
-      };
-      reader.readAsDataURL(file);
-    } catch {
-      setError("Upload failed.");
+      await uploadProofOfPayment({
+        file,
+        name,
+        surname,
+        orderNumber,
+        installments,
+      });
+      
+      setMessage("Upload successful!");
+      setFile(null);
+      fileInputRef.current.value = "";
+    } catch (err) {
+      setError(`Upload failed: ${err.message}`);
+    } finally {
       setUploading(false);
     }
   }, [file, name, surname, orderNumber, installments]);

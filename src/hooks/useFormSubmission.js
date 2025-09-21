@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { BACKEND_URL } from "../utils/config";
+import { submitForm } from "../utils/api";
 
 import useAuth from "./useAuth";
 
@@ -16,7 +16,7 @@ export const useFormSubmission = () => {
    * Submit form data to Google Apps Script with minimal transformation
    * Backend will handle all calculations and processing
    */
-  const submitForm = async (formData, rsvpData, pricing) => {
+  const doSubmitForm = async (formData, rsvpData, pricing) => {
     setIsSubmitting(true);
 
     try {
@@ -47,19 +47,7 @@ export const useFormSubmission = () => {
       };
 
       // Submit to Google Apps Script
-      const response = await fetch(BACKEND_URL, {
-        method: "POST",
-        body: JSON.stringify(combinedData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await submitForm(combinedData);
 
       if (result.success) {
         return {
@@ -126,7 +114,7 @@ export const useFormSubmission = () => {
   };
 
   return {
-    submitForm,
+    submitForm: doSubmitForm,
     isSubmitting,
   };
 };

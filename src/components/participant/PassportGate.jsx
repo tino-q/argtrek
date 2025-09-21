@@ -3,7 +3,7 @@ import { useState, useContext, useCallback } from "react";
 import AuthContext from "../../context/AuthContext.jsx";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
-import { BACKEND_URL } from "../../utils/config.js";
+import { submitPassport } from "../../utils/api.js";
 import "./PassportGate.css";
 
 const PassportGate = () => {
@@ -57,23 +57,15 @@ const PassportGate = () => {
 
       setSubmitting(true);
       try {
-        const res = await fetch(BACKEND_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "submit_passport",
-            email,
-            password,
-            passportName: fullName,
-            passportNumber,
-            expiryDate,
-            birthDate,
-            aAdvantage: aAdvantage || "",
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
+        const data = await submitPassport({
+          email,
+          password,
+          passportName: fullName,
+          passportNumber,
+          expiryDate,
+          birthDate,
+          aAdvantage: aAdvantage || "",
         });
-        const data = await res.json();
 
         if (!data.success) {
           setError(data.error || "Failed to save passport details.");

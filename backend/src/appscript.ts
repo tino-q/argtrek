@@ -28,7 +28,8 @@ const LUGGAGE_SHEET_NAME = "Luggage"; // Sheet for tracking checked luggage sele
 async function validateCredentials(
   email: string,
   password: string,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ) {
   if (!email) {
     throw new Error("Email is required.");
@@ -38,7 +39,7 @@ async function validateCredentials(
     throw new Error("Password is required.");
   }
 
-  return lookupRSVP(email.trim(), password.trim(), spreadsheet);
+  return lookupRSVP(email.trim(), password.trim(), spreadsheet, refresh);
 }
 
 /**
@@ -46,13 +47,20 @@ async function validateCredentials(
  */
 export async function doGet(
   e: {
-    parameter: { endpoint: string; email: string; password: string };
+    parameter: {
+      endpoint: string;
+      email: string;
+      password: string;
+      refresh?: string;
+    };
   },
   spreadsheet: SpreadsheetWrapper
 ) {
+  const refresh = e.parameter.refresh === "1";
+
   // Check if this is a timeline request
   if (e.parameter.endpoint === "timeline") {
-    return getTimelineData(spreadsheet);
+    return getTimelineData(spreadsheet, refresh);
   }
 
   // Check if this is a rafting registrations count request
@@ -60,7 +68,8 @@ export async function doGet(
     const raftingQueue = await getRaftingRegistrations(
       spreadsheet,
       e.parameter.email,
-      e.parameter.password
+      e.parameter.password,
+      refresh
     );
     return {
       success: true,
@@ -72,7 +81,8 @@ export async function doGet(
     return downloadVoucher(
       e.parameter.email,
       e.parameter.password,
-      spreadsheet
+      spreadsheet,
+      refresh
     );
   }
 
@@ -81,7 +91,8 @@ export async function doGet(
   const responseData = await getEmailSubmissionData(
     e.parameter.email,
     e.parameter.password,
-    spreadsheet
+    spreadsheet,
+    refresh
   );
 
   return {
@@ -93,24 +104,39 @@ export async function doGet(
 async function getEmailSubmissionData(
   email: string,
   password: string,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ) {
-  const rsvpData = await validateCredentials(email, password, spreadsheet);
+  const rsvpData = await validateCredentials(
+    email,
+    password,
+    spreadsheet,
+    refresh
+  );
 
   // Check if there's an existing submission for this email
   const existingSubmission = await findExistingSubmission(
     email.trim(),
-    spreadsheet
+    spreadsheet,
+    refresh
   );
 
   // Look up passport details for this traveler
-  const passportDetails = await findPassportDetails(email.trim(), spreadsheet);
+  const passportDetails = await findPassportDetails(
+    email.trim(),
+    spreadsheet,
+    refresh
+  );
 
   // Look up luggage selections for this traveler
-  const luggageDetails = await findLuggageDetails(email.trim(), spreadsheet);
+  const luggageDetails = await findLuggageDetails(
+    email.trim(),
+    spreadsheet,
+    refresh
+  );
 
   // Look up user choices for this traveler
-  const userChoices = await getUserChoices(email.trim(), spreadsheet);
+  const userChoices = await getUserChoices(email.trim(), spreadsheet, refresh);
 
   return {
     rsvpData,
@@ -134,13 +160,15 @@ async function getEmailSubmissionData(
 export async function getRaftingRegistrations(
   spreadsheet: SpreadsheetWrapper,
   email: string,
-  password: string
+  password: string,
+  refresh: boolean
 ) {
-  await validateCredentials(email, password, spreadsheet);
+  await validateCredentials(email, password, spreadsheet, refresh);
 
   // --- Load Trip Registrations formData.rafting ---
   const { rows: regsRows, headers } = await spreadsheet.getRowsWithHeaders(
-    TRIP_REGISTRATIONS_SHEET_NAME
+    TRIP_REGISTRATIONS_SHEET_NAME,
+    refresh
   );
   const emailIdx = headers.indexOf("rsvpData.email");
   const raftingIdx = headers.indexOf("formData.rafting");
@@ -154,7 +182,7 @@ export async function getRaftingRegistrations(
 
   // --- Load CHOICES latest per email for rafting ---
   const { rows: choicesRows, headers: choicesHeaders } =
-    await spreadsheet.getRowsWithHeaders(CHOICES_SHEET_NAME);
+    await spreadsheet.getRowsWithHeaders(CHOICES_SHEET_NAME, refresh);
 
   const choicesEmailIdx = choicesHeaders.indexOf("email");
   const choiceIdx = choicesHeaders.indexOf("choice");
@@ -219,7 +247,8 @@ type RedsysCallback = {
  */
 export async function doPost(
   data: PassportSubmission | LuggageSubmission | ChoiceUpdate | RedsysCallback,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ) {
   // Check if this is a REDSYS TPV callback
   if ((data as RedsysCallback).Ds_MerchantParameters) {
@@ -232,7 +261,7 @@ export async function doPost(
 
   const email = ((data as AuthenticatedRequest).email || "").trim();
   const password = ((data as AuthenticatedRequest).password || "").trim();
-  await validateCredentials(email, password, spreadsheet);
+  await validateCredentials(email, password, spreadsheet, refresh);
 
   // === Luggage submission handler ===
   if (data.action === "submit_luggage") {
@@ -286,13 +315,15 @@ export async function doPost(
   // Continue with existing form submission logic
   await saveTripRegistration(
     data as unknown as Record<string, string>,
-    spreadsheet
+    spreadsheet,
+    refresh
   );
 
   const emailSubmissionData = await getEmailSubmissionData(
     email,
     password,
-    spreadsheet
+    spreadsheet,
+    refresh
   );
 
   return {
@@ -365,10 +396,13 @@ async function saveToTpvPaymentsSheet(
 async function lookupRSVP(
   email: string,
   password: string,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ) {
-  const { headers, rows } =
-    await spreadsheet.getRowsWithHeaders(RSVP_SHEET_NAME);
+  const { headers, rows } = await spreadsheet.getRowsWithHeaders(
+    RSVP_SHEET_NAME,
+    refresh
+  );
 
   const emailColumnIndex = headers.indexOf("email");
   const passwordColumnIndex = headers.indexOf("PASSWORD");
@@ -425,10 +459,12 @@ async function lookupRSVP(
  */
 async function findExistingSubmission(
   email: string,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ) {
   const { headers, rows } = await spreadsheet.getRowsWithHeaders(
-    TRIP_REGISTRATIONS_SHEET_NAME
+    TRIP_REGISTRATIONS_SHEET_NAME,
+    refresh
   );
 
   // Find the email column
@@ -474,9 +510,10 @@ async function findExistingSubmission(
 
 async function getExistingSubmission(
   email: string,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ) {
-  const submission = await findExistingSubmission(email, spreadsheet);
+  const submission = await findExistingSubmission(email, spreadsheet, refresh);
   if (!submission) {
     throw new Error(`email ${email} not found in Trip Registrations sheet`);
   }
@@ -488,10 +525,13 @@ async function getExistingSubmission(
  */
 async function findPassportDetails(
   email: string,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ) {
-  const { headers, rows } =
-    await spreadsheet.getRowsWithHeaders(PASSPORTS_SHEET_NAME);
+  const { headers, rows } = await spreadsheet.getRowsWithHeaders(
+    PASSPORTS_SHEET_NAME,
+    refresh
+  );
 
   const emailIdx = headers.indexOf("email");
   if (emailIdx === -1) return null;
@@ -572,10 +612,13 @@ async function savePassportSubmission(
  */
 async function findLuggageDetails(
   email: string,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ) {
-  const { rows, headers } =
-    await spreadsheet.getRowsWithHeaders(LUGGAGE_SHEET_NAME);
+  const { rows, headers } = await spreadsheet.getRowsWithHeaders(
+    LUGGAGE_SHEET_NAME,
+    refresh
+  );
 
   const emailIdx = headers.indexOf("email");
   if (emailIdx === -1) {
@@ -637,9 +680,14 @@ async function saveLuggageSubmission(
 /**
  * Check if email already exists in the trip registrations sheet
  */
-async function emailExists(email: string, spreadsheet: SpreadsheetWrapper) {
+async function emailExists(
+  email: string,
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
+) {
   const { headers, rows } = await spreadsheet.getRowsWithHeaders(
-    TRIP_REGISTRATIONS_SHEET_NAME
+    TRIP_REGISTRATIONS_SHEET_NAME,
+    refresh
   );
 
   // find the index of the email column
@@ -669,7 +717,8 @@ async function emailExists(email: string, spreadsheet: SpreadsheetWrapper) {
  */
 async function saveTripRegistration(
   data: Record<string, string>,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ) {
   const email = data["rsvpData.email"];
 
@@ -678,7 +727,7 @@ async function saveTripRegistration(
   }
 
   // Check if email already exists (primary key constraint)
-  if (await emailExists(email, spreadsheet)) {
+  if (await emailExists(email, spreadsheet, refresh)) {
     throw new Error(
       `Email ${data["rsvpData.email"]} has already been registered for this trip.`
     );
@@ -691,9 +740,14 @@ async function saveTripRegistration(
  * Get timeline data from TIMELINE sheet
  * Returns an array of objects where keys are headers and values are row data
  */
-async function getTimelineData(spreadsheet: SpreadsheetWrapper) {
-  const { rows, headers } =
-    await spreadsheet.getRowsWithHeaders(TIMELINE_SHEET_NAME);
+async function getTimelineData(
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
+) {
+  const { rows, headers } = await spreadsheet.getRowsWithHeaders(
+    TIMELINE_SHEET_NAME,
+    refresh
+  );
 
   // Convert data rows to objects
   const timelineData = [];
@@ -728,10 +782,13 @@ async function getTimelineData(spreadsheet: SpreadsheetWrapper) {
  */
 async function getUserChoices(
   email: string,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ): Promise<Record<string, string>> {
-  const { headers, rows } =
-    await spreadsheet.getRowsWithHeaders(CHOICES_SHEET_NAME);
+  const { headers, rows } = await spreadsheet.getRowsWithHeaders(
+    CHOICES_SHEET_NAME,
+    refresh
+  );
 
   // Find the required columns
   const emailColumnIndex = headers.indexOf("email");
@@ -838,14 +895,16 @@ async function setUserChoice(
 
 async function getVoucherFile(
   email: string,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ): Promise<{
   file: drive_v3.Schema$File;
   rowId: number;
 }> {
   const existingSubmission = await getExistingSubmission(
     email.trim(),
-    spreadsheet
+    spreadsheet,
+    refresh
   );
 
   if (!existingSubmission || !existingSubmission.rowNumber) {
@@ -877,12 +936,13 @@ async function getVoucherFile(
 async function downloadVoucher(
   email: string,
   password: string,
-  spreadsheet: SpreadsheetWrapper
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
 ) {
-  await validateCredentials(email, password, spreadsheet);
+  await validateCredentials(email, password, spreadsheet, refresh);
 
   // Get voucher file
-  const voucherResult = await getVoucherFile(email, spreadsheet);
+  const voucherResult = await getVoucherFile(email, spreadsheet, refresh);
 
   const drive = await getGoogleDriveApi();
 

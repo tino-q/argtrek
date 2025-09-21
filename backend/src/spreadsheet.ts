@@ -56,14 +56,25 @@ export class SpreadsheetWrapper {
     return `sheet_${this.spreadsheetId}_${name}`;
   }
 
-  private async getRows(sheetName: string): Promise<string[][]> {
+  private async getRows(
+    sheetName: string,
+    refresh: boolean
+  ): Promise<string[][]> {
+    const cacheKey = this.getCacheKey(sheetName);
+
+    // clear both caches if refresh requested
+    if (refresh) {
+      console.log("DDB cache refresh requested for sheet: " + sheetName);
+      await deleteItem(cacheKey);
+      this._sheetToValues[sheetName] = undefined;
+    }
+
     // check in-memory cache
     if (this._sheetToValues[sheetName]) {
       return this._sheetToValues[sheetName];
     }
 
     // check ddb cache
-    const cacheKey = this.getCacheKey(sheetName);
     const cachedData = await getItem(cacheKey);
 
     if (cachedData) {
@@ -97,9 +108,10 @@ export class SpreadsheetWrapper {
   }
 
   async getRowsWithHeaders(
-    sheetName: string
+    sheetName: string,
+    refresh: boolean = false
   ): Promise<{ headers: string[]; rows: string[][] }> {
-    const rows = await this.getRows(sheetName);
+    const rows = await this.getRows(sheetName, refresh);
     const headers = rows[0];
     if (!headers) {
       throw new Error("No headers found in sheet: " + sheetName);

@@ -12,11 +12,8 @@ import { useNavigate } from "react-router-dom";
 import AuthContext from "../../context/AuthContext.jsx";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
-import {
-  fetchWithLocalStorageCache,
-  CACHE_DURATIONS,
-} from "../../utils/cache.js";
-import { BACKEND_URL, ADMIN_EMAILS, CONTACTS } from "../../utils/config.js";
+import { ADMIN_EMAILS, CONTACTS } from "../../utils/config.js";
+import { getTimelineData as apiGetTimelineData, getRaftingCount, setUserChoice } from "../../utils/api.js";
 
 import LuggageGate from "./LuggageGate.jsx";
 import PassportGate from "./PassportGate.jsx";
@@ -82,10 +79,7 @@ const RaftingQueueProvider: React.FC<{
   useEffect(() => {
     const fetchRaftingQueue = async () => {
       try {
-        const response = await fetch(
-          `${BACKEND_URL}?endpoint=rafting_count&email=${userEmail}&password=${userPassword}`
-        );
-        const data = await response.json();
+        const data = await getRaftingCount(userEmail, userPassword);
         if (data.success && Array.isArray(data.raftingQueue)) {
           setRaftingQueue(data.raftingQueue);
           return;
@@ -210,22 +204,14 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       try {
-        const response = await fetch(BACKEND_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "set_choice",
-            email: userEmail,
-            password: userPassword,
-            itemKey: choicesGroup,
-            choice: selectedChoice,
-            option: choiceId,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
+        const data = await setUserChoice({
+          email: userEmail,
+          password: userPassword,
+          itemKey: choicesGroup,
+          choice: selectedChoice,
+          option: choiceId,
         });
 
-        const data = await response.json();
         if (!data.success) {
           console.error("Failed to save choice:", data.error);
         } else {
@@ -964,19 +950,7 @@ const TimelineContent: React.FC = () => {
 
     const fetchTimelineData = async () => {
       try {
-        const timelineData = await fetchWithLocalStorageCache(
-          "timelineData",
-          async () => {
-            const response = await fetch(`${BACKEND_URL}?endpoint=timeline`);
-            const { success, data } = await response.json();
-            if (!success) {
-              throw new Error("Failed to fetch timeline data");
-            }
-            return data;
-          },
-          CACHE_DURATIONS.ONE_HOUR,
-          new URLSearchParams(window.location.search).get("refresh") === "1"
-        );
+        const timelineData = await apiGetTimelineData();
 
         if (timelineData) {
           setTimelineData(

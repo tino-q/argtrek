@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useContext, useCallback } from "react";
 
 import AuthContext from "../../context/AuthContext.jsx";
 import { useTripContext } from "../../hooks/useTripContext";
-import { BACKEND_URL } from "../../utils/config.js";
+import { submitLuggage } from "../../utils/api.js";
 import "./LuggageGate.css";
 
 // Static flight definitions and pricing
@@ -59,19 +59,11 @@ const LuggageGate = () => {
       try {
         setSubmitting(true);
 
-        const res = await fetch(BACKEND_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "submit_luggage",
-            email,
-            password,
-            luggageSelection,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
+        const data = await submitLuggage({
+          email,
+          password,
+          luggageSelection,
         });
-        const data = await res.json();
 
         if (!data.success) {
           throw new Error(data.error || "Failed to save luggage selections");

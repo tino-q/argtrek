@@ -6,14 +6,13 @@ import { useNavigate } from "react-router-dom";
 
 import useAuth from "../../hooks/useAuth";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
-import { fetchWithLocalStorageCache } from "../../utils/cache";
+import { downloadVoucher } from "../../utils/api";
 import { copyToClipboard } from "../../utils/clipboard";
 import {
   FORM_FIELDS,
   EMAIL_CONFIG,
   CRYPTO_WALLETS,
   NETWORK_INFO,
-  BACKEND_URL,
 } from "../../utils/config";
 import { getTravelerName, getUSDToEURExchangeRate } from "../../utils/rsvpData";
 import CreditCardWarning from "../common/CreditCardWarning";
@@ -61,30 +60,7 @@ const PaymentDetailsDisplay = ({
         return;
       }
 
-      const result = await fetchWithLocalStorageCache("voucher", async () => {
-        const response = await fetch(
-          `${BACKEND_URL}?endpoint=download_voucher&email=${encodeURIComponent(
-            email
-          )}&password=${encodeURIComponent(password)}`
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (!data.success) {
-          throw new Error(data.error || "Voucher download failed");
-        }
-
-        return {
-          success: data.success,
-          fileName: data.fileName,
-          fileData: data.fileData,
-          mimeType: data.mimeType,
-        };
-      });
+      const result = await downloadVoucher(email, password);
 
       // Convert base64 to blob and trigger download
       const binaryString = atob(result.fileData);

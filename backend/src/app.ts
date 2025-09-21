@@ -43,6 +43,7 @@ app.get("/", async (req: Request, res: Response) => {
           endpoint: req.query["endpoint"] as string,
           email: req.query["email"] as string,
           password: req.query["password"] as string,
+          refresh: req.query["refresh"] as string,
         },
       },
       await buildSpreadsheetWrapper()
@@ -59,7 +60,8 @@ app.get("/", async (req: Request, res: Response) => {
 app.post("/", async (req: Request, res: Response) => {
   try {
     const spreadsheet = await buildSpreadsheetWrapper();
-    const response = await doPost(req.body, spreadsheet);
+    const refresh = req.query["refresh"] === "1";
+    const response = await doPost(req.body, spreadsheet, refresh);
     return res.json(response);
   } catch (error) {
     await discordErrorLog("[POST /] Error", error);
