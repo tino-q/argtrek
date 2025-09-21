@@ -3,7 +3,7 @@
 
 // Apps Script Configuration
 export const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwuO-0jNmS7gxEofnA_p8Hrdqd7YTU0vg0DWoY4jDAqaLQNXxTj4t7G2NXqZwdfx0wu/exec";
+  "https://script.google.com/macros/s/AKfycbwQvIluMcWzmOFQmEvTGh82dO7CmRfaxH7uc4GKp6xkx2us3jN8qvCLgHJgU12jAADE/exec";
 
 export const LAMBDA_URL =
   "https://at6nwfhebl.execute-api.us-east-1.amazonaws.com/dev/";
