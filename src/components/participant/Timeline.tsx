@@ -724,7 +724,7 @@ const PaidAddOnPicker: React.FC<{
               {joinedItem
                 ? "Current Selection"
                 : !allOptionalActivities
-                  ? "Paid Add-On"
+                  ? "Optional Paid Add-On"
                   : "Optional Add-On"}
             </div>
             <SimpleTimelineItem item={paidItem} />
