@@ -13,7 +13,11 @@ import AuthContext from "../../context/AuthContext.jsx";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
 import { ADMIN_EMAILS, CONTACTS } from "../../utils/config.js";
-import { getTimelineData as apiGetTimelineData, getRaftingCount, setUserChoice } from "../../utils/api.js";
+import {
+  getTimelineData,
+  getRaftingCount,
+  setUserChoice,
+} from "../../utils/api.js";
 
 import LuggageGate from "./LuggageGate.jsx";
 import PassportGate from "./PassportGate.jsx";
@@ -950,7 +954,7 @@ const TimelineContent: React.FC = () => {
 
     const fetchTimelineData = async () => {
       try {
-        const timelineData = await apiGetTimelineData();
+        const timelineData = await getTimelineData();
 
         if (timelineData) {
           setTimelineData(
