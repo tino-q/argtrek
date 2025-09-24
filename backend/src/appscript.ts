@@ -1,6 +1,7 @@
 import { drive_v3 } from "@googleapis/drive";
 
 import { getGoogleDriveApi, SpreadsheetWrapper } from "./spreadsheet";
+import { discordLog } from "./shared/services/discord/discord.logger";
 
 /**
  * Google Apps Script for Argentina Trip Form
@@ -235,6 +236,17 @@ type ChoiceUpdate = AuthenticatedRequest & {
   choice: string;
 };
 
+type ErrorReport = {
+  endpoint: "error-report";
+  errorMessage: string;
+  errorStack: string;
+  url: string;
+  userAgent: string;
+  timestamp: string;
+  userId: string;
+  context: string;
+};
+
 type RedsysCallback = {
   action: undefined;
   Ds_SignatureVersion: string;
@@ -242,17 +254,52 @@ type RedsysCallback = {
   Ds_Signature: string;
 };
 
+// Type guard functions
+function isErrorReport(data: any): data is ErrorReport {
+  return data.endpoint === "error-report";
+}
+
+function isRedsysCallback(data: any): data is RedsysCallback {
+  return data.Ds_MerchantParameters !== undefined;
+}
+
+function isLuggageSubmission(data: any): data is LuggageSubmission {
+  return data.action === "submit_luggage";
+}
+
+function isPassportSubmission(data: any): data is PassportSubmission {
+  return data.action === "submit_passport";
+}
+
+function isChoiceUpdate(data: any): data is ChoiceUpdate {
+  return data.action === "set_choice";
+}
+
 /**
  * Main function to handle POST requests for form submissions and REDSYS TPV callbacks
  */
 export async function doPost(
-  data: PassportSubmission | LuggageSubmission | ChoiceUpdate | RedsysCallback,
+  data:
+    | PassportSubmission
+    | LuggageSubmission
+    | ChoiceUpdate
+    | ErrorReport
+    | RedsysCallback,
   spreadsheet: SpreadsheetWrapper,
   refresh: boolean
 ) {
+  // Check if this is an error report
+  if (isErrorReport(data)) {
+    await handleErrorReport(data);
+    return {
+      success: true,
+      message: "Error reported successfully",
+    };
+  }
+
   // Check if this is a REDSYS TPV callback
-  if ((data as RedsysCallback).Ds_MerchantParameters) {
-    await handleRedsysCallback(data as RedsysCallback, spreadsheet);
+  if (isRedsysCallback(data)) {
+    await handleRedsysCallback(data, spreadsheet);
     return {
       success: true,
       message: "OK",
@@ -264,7 +311,7 @@ export async function doPost(
   await validateCredentials(email, password, spreadsheet, refresh);
 
   // === Luggage submission handler ===
-  if (data.action === "submit_luggage") {
+  if (isLuggageSubmission(data)) {
     await saveLuggageSubmission(email, data.luggageSelection, spreadsheet);
     return {
       success: true,
@@ -273,7 +320,7 @@ export async function doPost(
   }
 
   // === Passport submission handler ===
-  if (data.action === "submit_passport") {
+  if (isPassportSubmission(data)) {
     const passport = await savePassportSubmission(
       {
         email,
@@ -294,7 +341,7 @@ export async function doPost(
   }
 
   // Check if this is a choices update request
-  if (data.action === "set_choice") {
+  if (isChoiceUpdate(data)) {
     await setUserChoice(
       {
         email: data.email,
@@ -331,6 +378,25 @@ export async function doPost(
     message: "Registration saved successfully",
     ...emailSubmissionData,
   };
+}
+
+/**
+ * Handle frontend error reports
+ */
+async function handleErrorReport(data: ErrorReport) {
+  const discordMessage = `🚨 **Frontend Error Report** 🚨
+    **Time:** ${data.timestamp}
+    **User:** ${data.userId}
+    **Page:** ${data.url}
+    **Context:** ${data.context}
+    **Error:** ${data.errorMessage}
+    **Stack:**
+    \`\`\`
+    ${data.errorStack}
+    \`\`\`
+    **Browser:** ${data.userAgent}`;
+
+  await discordLog(discordMessage);
 }
 
 /**

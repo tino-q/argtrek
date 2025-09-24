@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import "./styles/main.css";
 import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { setupGlobalErrorHandlers } from "./utils/errorReporting.js";
 
 // One-time localStorage reset for backward compatibility
 (function resetLocalStorageOnce() {
@@ -28,6 +29,9 @@ import { AuthProvider } from "./context/AuthContext.jsx";
     return; // Prevent further execution
   }
 })();
+
+// Setup global error handlers
+setupGlobalErrorHandlers();
 
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
