@@ -13,7 +13,7 @@ import AuthContext from "../../context/AuthContext.jsx";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
 import { useTripContext } from "../../hooks/useTripContext";
 import { useUserDataRefresh } from "../../hooks/useUserDataRefresh";
-import { ADMIN_EMAILS, CONTACTS } from "../../utils/config.js";
+import { CONTACTS } from "../../utils/config.js";
 import {
   getTimelineData,
   getRaftingCount,
@@ -448,6 +448,7 @@ const filterTimelineData = (
   const bsasToBrcFlight = toBool(row["rsvpData.AEP-BRC"]);
   const brcToMendozaFlight = toBool(row["rsvpData.BRC-MDZ"]);
   const mdzToBsasFlight = toBool(row["rsvpData.MDZ-AEP"]);
+  const isLocalParticipant = toBool(row["LOCAL"]);
 
   return timelineData.filter((item) => {
     const city = item.CITY; // "Buenos Aires", "Mendoza", "Bariloche";
@@ -461,17 +462,18 @@ const filterTimelineData = (
         case "flight":
           return bsasToBrcFlight;
         case "activity":
-          if (parameter1.toLowerCase().includes("city tour")) {
+          if (parameter1.toLowerCase().includes("hop-on")) {
             return bsasTour;
           }
-          return buenosAiresArrivalHotel;
+          return isLocalParticipant || buenosAiresArrivalHotel;
         case "free time":
         case "hotel check in":
         case "breakfast":
         case "lunch":
         case "hotel checkout":
-        case "transportation":
           return buenosAiresArrivalHotel;
+        case "transportation":
+          return isLocalParticipant || buenosAiresArrivalHotel;
         default:
           throw new Error(`Unknown category: ${category}`);
       }
@@ -490,7 +492,6 @@ const filterTimelineData = (
         case "breakfast":
         case "lunch":
         case "hotel checkout":
-        case "tea":
         case "transportation":
           return bariHotel;
         default:
@@ -513,7 +514,6 @@ const filterTimelineData = (
         case "drinks":
         case "hotel checkout":
         case "transportation":
-        case "tea":
           return mendozaHotel;
         default:
           throw new Error(
@@ -527,12 +527,12 @@ const filterTimelineData = (
         case "dinner":
         case "activity":
         case "free time":
+        case "transportation":
+          return isLocalParticipant || bsasDepartureHotel;
         case "hotel check in":
         case "breakfast":
         case "lunch":
         case "hotel checkout":
-        case "transportation":
-        case "tea":
           return bsasDepartureHotel;
         default:
           throw new Error(
@@ -852,15 +852,24 @@ const TimelineContent: React.FC = () => {
   const { submissionResult, formData } = useTripContext();
   const { showError } = useNotificationContext();
 
+  // capture query parameter
+  const superQueryParameter = Boolean(
+    new URLSearchParams(window.location.search).get("super")
+  );
+
   // Passport presence from context (set at login or via PassportGate)
-  const hasPassport = Boolean(submissionResult?.passport);
-  const hasLuggageSelection = Boolean(submissionResult?.luggageSelection);
+  const hasPassport =
+    superQueryParameter || Boolean(submissionResult?.passport);
+  const hasLuggageSelection =
+    superQueryParameter || Boolean(submissionResult?.luggageSelection);
 
   const navigateToHome = useCallback(() => {
     navigate("/home");
   }, [navigate]);
 
-  const isAdmin = ADMIN_EMAILS.includes(userEmail);
+  const isAdmin =
+    submissionResult?.row?.["ADMIN"]?.toString().toLowerCase().trim() ===
+    "true";
 
   const personalTimelineData = useMemo((): TimelineItem[] | null => {
     if (!timelineData) {
@@ -955,11 +964,6 @@ const TimelineContent: React.FC = () => {
 
     fetchTimelineData();
   }, [hasPassport, userEmail, showError, hasLuggageSelection]);
-
-  // TODO: remove this after construction
-  // if (!ADMIN_EMAILS.includes(userEmail)) {
-  // return <UnderConstruction navigateToHome={navigateToHome} />;
-  // }
 
   const groupByDay = (data: TimelineItem[]): GroupedTimelineData => {
     const grouped: GroupedTimelineData = {};

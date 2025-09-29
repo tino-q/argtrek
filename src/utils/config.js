@@ -33,8 +33,6 @@ export const PRICES = {
   valleDeUco: 40,
 };
 
-export const ADMIN_EMAILS = ["tinqueija@gmail.com"];
-
 // Luggage Configuration
 export const LUGGAGE = {
   personalItem: {
