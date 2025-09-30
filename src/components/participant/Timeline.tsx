@@ -140,6 +140,7 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
       message: "",
       isLoading: false,
     });
+  const isSubmittingRef = React.useRef(false);
 
   const { email: userEmail, password: userPassword } = useContext(AuthContext);
   const { onJoinRafting } = useRaftingQueue();
@@ -229,14 +230,22 @@ const ConfirmationModalProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    setConfirmationModal((prev) => ({ ...prev, isLoading: true }));
+    // Guard against double submission
+    if (isSubmittingRef.current) {
+      return;
+    }
 
     try {
+      isSubmittingRef.current = true;
+      setConfirmationModal((prev) => ({ ...prev, isLoading: true }));
+
       await handleChoiceSelection(choicesGroup, choiceId, selectedChoice);
       closeConfirmationModal();
     } catch (error) {
       setConfirmationModal((prev) => ({ ...prev, isLoading: false }));
       console.error("Error confirming choice:", error);
+    } finally {
+      isSubmittingRef.current = false;
     }
   }, [confirmationModal, closeConfirmationModal, handleChoiceSelection]);
 

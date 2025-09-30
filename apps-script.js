@@ -1793,3 +1793,87 @@ function sendPasswordEmailsToAllRSVPs() {
     message: `Completed: ${emailsSent} emails sent, ${emailsSkipped} skipped, ${errors} errors`,
   };
 }
+
+/**
+ * Send second payment reminder emails to all registered participants
+ */
+// eslint-disable-next-line no-unused-vars
+function sendSecondPaymentReminderEmails() {
+  return sendBatchEmails(
+    "secondPaymentReminder",
+    sendSecondPaymentReminderEmail,
+    2000, // 2 second delay
+    {
+      sendToEmails: ["tinqueija@gmail.com"],
+    }
+  );
+}
+
+/**
+ * Send individual second payment reminder email
+ */
+function sendSecondPaymentReminderEmail(email, name) {
+  try {
+    console.log(`Sending second payment reminder email to: ${email}`);
+
+    // Get RSVP data to retrieve password for magic link
+    const rsvpData = _getRsvpDataForEmail(email);
+    const password = rsvpData ? rsvpData.PASSWORD : null;
+
+    if (!password) {
+      throw new Error("No password found for email");
+    }
+
+    const subject = "⏰ Second Payment Reminder — October 2nd";
+
+    const htmlBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+        <h2 style="color: #2c3e50;">Hello ${name}! ✨</h2>
+
+        <p>As you know, we had postponed the second payment date. The new deadline for the trip's second payment is <strong>Thursday, October 2nd</strong>.</p>
+
+        <p>You can find all the payment information directly in the app.</p>
+
+        <p style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
+          <strong>⚠️ Important:</strong> To view the payment details, you'll first need to accept or decline the optional activities in your itinerary (marked with a red alert icon on the days where confirmation is pending).
+        </p>
+
+        <p>Once that's done, the updated payment information will be visible.</p>
+
+        <p>As always, please don't hesitate to contact me if I can help. If you run into any issues with the app, no stress — just reply to this email or send me a message and I'll take care of it. 🙂</p>
+
+        <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+          <a href="https://argtrip.sonsolesstays.com?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}"
+             style="display: inline-block; background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; margin: 10px 0;">
+            👉 Click here to access the app
+          </a>
+        </div>
+
+        <p style="color: #666; font-size: 14px;">
+          Warm regards,<br>
+          Maddie
+        </p>
+      </div>
+    `;
+
+    const bcc = "sonsolesstays+argtrip@gmail.com";
+    const emailSent = sendEmail(email, subject, htmlBody, [], bcc);
+
+    return {
+      success: emailSent,
+      message: emailSent
+        ? `Second payment reminder email sent successfully to ${email}`
+        : `Failed to send second payment reminder email to ${email}`,
+      error: emailSent ? null : "Email sending failed",
+    };
+  } catch (error) {
+    console.error(
+      `Error sending second payment reminder email to ${email}:`,
+      error
+    );
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+}

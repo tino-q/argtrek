@@ -1,4 +1,9 @@
-import { useState, useContext, useCallback } from "react";
+import {
+  useState,
+  useContext,
+  useCallback,
+  useRef,
+} from "react";
 
 import AuthContext from "../../context/AuthContext.jsx";
 import { useNotificationContext } from "../../hooks/useNotificationContext";
@@ -34,11 +39,17 @@ const PassportGate = () => {
   const [ackTerms, setAckTerms] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const isSubmittingRef = useRef(false);
 
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
       setError("");
+
+      // Guard against double submission
+      if (isSubmittingRef.current) {
+        return;
+      }
 
       if (!email || !password) {
         setError("Missing credentials. Please login again.");
@@ -55,8 +66,10 @@ const PassportGate = () => {
         return;
       }
 
-      setSubmitting(true);
       try {
+        isSubmittingRef.current = true;
+        setSubmitting(true);
+
         const data = await submitPassport({
           email,
           password,
@@ -85,6 +98,7 @@ const PassportGate = () => {
         console.error("Error submitting passport:", err);
         showError("Unexpected error. Please try again.");
       } finally {
+        isSubmittingRef.current = false;
         setSubmitting(false);
       }
     },
