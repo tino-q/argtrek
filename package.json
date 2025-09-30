@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "IS_LOCAL=true vite",
-    "dev:all": "concurrently \"npm run dev\" \"npm run dev --prefix backend\"",
+    "dev:front": "IS_LOCAL=true vite",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev": "concurrently \"npm run dev:front\" \"npm run dev:backend\"",
     "build": "npm run lint && vite build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

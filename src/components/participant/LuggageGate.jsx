@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useState, useContext, useCallback } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useContext,
+  useCallback,
+  useRef,
+} from "react";
 
 import AuthContext from "../../context/AuthContext.jsx";
 import { useTripContext } from "../../hooks/useTripContext";
@@ -30,6 +37,7 @@ const LuggageGate = () => {
   const [luggageSelection, setLuggageSelection] = useState({});
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const isSubmittingRef = useRef(false);
 
   // Initialize defaults: if user preselected interest, check all available
   useEffect(() => {
@@ -55,12 +63,18 @@ const LuggageGate = () => {
       e.preventDefault();
       setError("");
 
+      // Guard against double submission
+      if (isSubmittingRef.current) {
+        return;
+      }
+
       if (!email || !password) {
         setError("Missing credentials. Please login again.");
         return;
       }
 
       try {
+        isSubmittingRef.current = true;
         setSubmitting(true);
 
         const data = await submitLuggage({
@@ -83,6 +97,7 @@ const LuggageGate = () => {
         console.error("Error saving luggage choice:", err);
         setError("Unexpected error. Please try again.");
       } finally {
+        isSubmittingRef.current = false;
         setSubmitting(false);
       }
     },
