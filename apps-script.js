@@ -9,7 +9,7 @@
 /* global ContentService, SpreadsheetApp, Utilities, DriveApp, UrlFetchApp */
 
 const APPS_SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbwQvIluMcWzmOFQmEvTGh82dO7CmRfaxH7uc4GKp6xkx2us3jN8qvCLgHJgU12jAADE/exec";
+  "https://script.google.com/macros/s/AKfycbx7yq8UhY2pVk4vMEJW6BfYqoD9GWAo1I2ntx3pDodSk2j4DWE0ZDakirCGKyppv4S9/exec";
 
 const REDSYS_BASE_URL = "https://canales.redsys.es/admincanales-web/services";
 
@@ -2069,8 +2069,8 @@ function sendSecondPaymentDueTodayEmails() {
     sendSecondPaymentDueTodayEmail,
     2000, // 2 second delay
     {
-      sendToEmails: [],
-      excludeEmails: [],
+      sendToEmails: ["tinqueija@gmail.com"],
+      excludeEmails: ["wconte@stanford.edu", "crinehart247@gmail.com"],
     }
   );
 }
@@ -2104,6 +2104,7 @@ function generate2ndPaymentLinksBatch() {
   const lastNameColumnIndex = headers.indexOf("formData.lastName");
   const paymentMethodColumnIndex = headers.indexOf("formData.paymentMethod");
   const balanceColumnIndex = headers.indexOf("pricing.balance");
+  const secondPaymentDoneColumnIndex = headers.indexOf("PAYMENT_2");
 
   if (
     emailColumnIndex === -1 ||
@@ -2124,6 +2125,14 @@ function generate2ndPaymentLinksBatch() {
     const lastName = row[lastNameColumnIndex];
     const paymentMethod = row[paymentMethodColumnIndex];
     const balance = parseFloat(row[balanceColumnIndex]) || 0;
+    const secondPaymentDone =
+      row[secondPaymentDoneColumnIndex]?.toString().toLowerCase().trim() ===
+      "true";
+
+    if (secondPaymentDone) {
+      console.log(`Skipping ${email}: second payment already done`);
+      continue;
+    }
 
     // Skip if not credit payment method
     if (
@@ -2143,10 +2152,6 @@ function generate2ndPaymentLinksBatch() {
     // Check if user has completed all choices
     if (!hasCompletedAllChoices(email)) {
       // console.log(`Skipping ${email}: has not completed all choices`);
-      continue;
-    }
-
-    if (email.trim().toLowerCase() !== "tinqueija@gmail.com") {
       continue;
     }
 
@@ -2173,7 +2178,7 @@ function generate2ndPaymentLinksBatch() {
     const totalEurRounded = Math.round(totalEur * 100) / 100;
 
     console.log(
-      `Amount USD: ${amountUsd}, Amount EUR: ${amountEur}, Processing Fee: ${processingFee}, Total EUR: ${totalEur}`
+      `Amount USD: ${amountUsd}, Amount EUR: ${amountEurRounded}, Processing Fee: ${processingFeeRounded}, Total EUR: ${totalEurRounded}`
     );
 
     // Lazy initialization: get auth token only when we need to create the first payment link

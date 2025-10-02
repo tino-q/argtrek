@@ -70,15 +70,18 @@ const PricingSummary = ({ pricing }) => {
     ["pricing.luggageBRCMDZ", "Luggage: Bariloche → Mendoza"],
     ["pricing.luggageMDZAEP", "Luggage: Mendoza → Buenos Aires"],
     ["pricing.35pctPfee", "1st Payment Processing Fee"],
+    ["ajustemanual", "Manual adjustment done by Maddie"],
   ].map(([pkey, name]) => ({
     name,
     p: row[pkey],
     price: Number(row[pkey]),
   }));
 
-  const pricingItems = pricingItemsPreFilter.filter(({ price }) => price > 0);
+  const pricingItems = pricingItemsPreFilter.filter(
+    ({ price }) => price > 0 || price < 0
+  );
   const isCredit = formData[FORM_FIELDS.PAYMENT_METHOD] === "credit";
-  const firstInstallmentPayed = Number(row["pricing.installmentAmount"]);
+  const usdFirstInstallment = Number(row["pricing.installmentAmount"] || 0);
 
   const pricingItemsTotal = pricingItems.reduce(
     (acc, addon) => acc + addon.price,
@@ -86,13 +89,13 @@ const PricingSummary = ({ pricing }) => {
   );
 
   const pendingBalance =
-    pricingItemsTotal - (payment1Done ? firstInstallmentPayed : 0);
+    pricingItemsTotal - (payment1Done ? usdFirstInstallment : 0);
 
   const isFullPayment = row["formData.paymentSchedule"] === "full";
 
   // Credit payment calculation variables
   const firstPaymentRate = Number(row["pricing.fpRate"]);
-  const usdInstallment = Number(row["pricing.installmentAmount"]);
+
   // const rawInstallmentEur = Number(row["pricing.rawInstallmentEur"]);
   // const fppfee = Number(row["pricing.fppfee"]);
   const installmentAmountEur = Number(
@@ -235,65 +238,70 @@ const PricingSummary = ({ pricing }) => {
           <span>{formatCurrency(pricing.subtotal)}</span>
         </div> */}
 
-        <div className="summary-row subtotal">
-          <span>
-            {`1st Payment ${payment1Done ? "" : " (Not Completed)"}`}
-            {isCredit && (
-              <span
-                className="tooltip-container"
-                onMouseEnter={handleTooltipEnter}
-                onMouseLeave={handleTooltipLeave}
-                style={{ position: "relative", marginLeft: "8px" }}
-              >
-                <i
-                  className="fas fa-question-circle"
-                  style={{ cursor: "help", color: "#666" }}
-                />
-                {showTooltip && (
-                  <div
-                    className="tooltip"
-                    style={{
-                      position: "absolute",
-                      bottom: "100%",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      backgroundColor: "#333",
-                      color: "white",
-                      padding: "8px 12px",
-                      borderRadius: "4px",
-                      fontSize: "12px",
-                      whiteSpace: "nowrap",
-                      zIndex: 1000,
-                      marginBottom: "5px",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                    }}
-                  >
-                    <div style={{ textAlign: "left" }}>
-                      <div>
-                        {formatCurrency(usdInstallment)} * {firstPaymentRate} ={" "}
-                        {formatCurrency(installmentAmountEur, "€")}
-                      </div>
-                    </div>
+        {usdFirstInstallment ? (
+          <div className="summary-row subtotal">
+            <span>
+              {`1st Payment ${payment1Done ? "" : " (Not Completed)"}`}
+              {isCredit && (
+                <span
+                  className="tooltip-container"
+                  onMouseEnter={handleTooltipEnter}
+                  onMouseLeave={handleTooltipLeave}
+                  style={{ position: "relative", marginLeft: "8px" }}
+                >
+                  <i
+                    className="fas fa-question-circle"
+                    style={{ cursor: "help", color: "#666" }}
+                  />
+                  {showTooltip && (
                     <div
+                      className="tooltip"
                       style={{
                         position: "absolute",
-                        top: "100%",
+                        bottom: "100%",
                         left: "50%",
                         transform: "translateX(-50%)",
-                        width: 0,
-                        height: 0,
-                        borderLeft: "5px solid transparent",
-                        borderRight: "5px solid transparent",
-                        borderTop: "5px solid #333",
+                        backgroundColor: "#333",
+                        color: "white",
+                        padding: "8px 12px",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                        whiteSpace: "nowrap",
+                        zIndex: 1000,
+                        marginBottom: "5px",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                       }}
-                    />
-                  </div>
-                )}
-              </span>
-            )}
-          </span>
-          <span>{formatCurrency(firstInstallmentPayed)}</span>
-        </div>
+                    >
+                      <div style={{ textAlign: "left" }}>
+                        <div>
+                          {formatCurrency(usdFirstInstallment)} *{" "}
+                          {firstPaymentRate} ={" "}
+                          {formatCurrency(installmentAmountEur, "€")}
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                          width: 0,
+                          height: 0,
+                          borderLeft: "5px solid transparent",
+                          borderRight: "5px solid transparent",
+                          borderTop: "5px solid #333",
+                        }}
+                      />
+                    </div>
+                  )}
+                </span>
+              )}
+            </span>
+            <span>{formatCurrency(usdFirstInstallment)}</span>
+          </div>
+        ) : (
+          <div />
+        )}
 
         <div className="summary-row subtotal">
           <span>Pending Balance</span>
