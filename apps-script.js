@@ -26,6 +26,12 @@ const RSVP_SHEET_NAME = "RSVP"; // Sheet containing RSVP data
 const TPV_PAYMENTS_SHEET_NAME = "TPV PAYMENTS"; // Sheet for REDSYS TPV payment callbacks
 const AUTO_EMAILS_SHEET_NAME = "AUTO_EMAILS"; // Unified sheet for tracking all automated emails with type column
 const PAYMENTLINKSDB_SHEET_NAME = "PAYMENTLINKSDB";
+const PAYMENTLINKSDB_2_SHEET_NAME = "PAYMENTLINKSDB_2";
+const COMPLETED_CHOICES_SHEET_NAME = "COMPLETED CHOICES";
+
+// Hardcoded exchange rate for second payment links
+const EXCHANGE_RATE_USD_TO_EUR = 0.85;
+const PROCESSING_FEE_PERCENTAGE = 0.0285; // 2.85%
 
 /**
  * Main function to handle POST requests for form submissions and REDSYS TPV callbacks
@@ -602,6 +608,200 @@ function saveToPaymentLinksSheet(logData) {
   } catch (error) {
     console.error("Error saving to PAYMENTLINKSDB sheet:", error);
     return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Save second payment link creation attempt data to the PAYMENTLINKSDB_2 sheet
+ */
+function saveToPaymentLinksSheet2(logData) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = spreadsheet.getSheetByName(PAYMENTLINKSDB_2_SHEET_NAME);
+
+    // Create the sheet if it doesn't exist
+    if (!sheet) {
+      sheet = spreadsheet.insertSheet(PAYMENTLINKSDB_2_SHEET_NAME);
+      const headers = [
+        "timestamp",
+        "email",
+        "link",
+        "jsonResponse",
+        "status",
+        "amount usd",
+        "exchange rate",
+        "amount eur",
+        "processing fee",
+        "total eur",
+      ];
+      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+      sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+    }
+
+    // Prepare the values in the same order as headers
+    const values = [
+      logData.timestamp,
+      logData.email,
+      logData.link,
+      logData.jsonResponse,
+      logData.status,
+      logData.amountUsd,
+      logData.exchangeRate,
+      logData.amountEur,
+      logData.processingFee,
+      logData.totalEur,
+    ];
+
+    // Add the payment record
+    sheet.appendRow(values);
+    return { success: true };
+  } catch (error) {
+    console.error("Error saving to PAYMENTLINKSDB_2 sheet:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Check if a user has completed all choices by looking in COMPLETED CHOICES sheet
+ * @param {string} email The email to check
+ * @returns {boolean} True if user has completed all choices, false otherwise
+ */
+function hasCompletedAllChoices(email) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(COMPLETED_CHOICES_SHEET_NAME);
+
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return false;
+    }
+
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    const [headers] = values;
+
+    const emailColumnIndex = headers.indexOf("Email");
+
+    if (emailColumnIndex === -1) {
+      console.error("Email column not found in COMPLETED CHOICES sheet");
+      return false;
+    }
+
+    // Check if email exists in the completed choices sheet
+    for (let i = 1; i < values.length; i++) {
+      const row = values[i];
+      const rowEmail = row[emailColumnIndex];
+
+      if (
+        rowEmail &&
+        rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
+      ) {
+        return true;
+      }
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error checking completed choices:", error);
+    return false;
+  }
+}
+
+/**
+ * Retrieves second payment link information for a given email from PAYMENTLINKSDB_2.
+ * It checks for a valid, non-expired payment link and also counts how many expired links exist for that email.
+ *
+ * @param {string} email The email to look up.
+ * @returns {{activeLink: object|null, expiredCount: number}} An object containing the active link (if any) and the count of expired links.
+ */
+function getPaymentLinkInfo2(email) {
+  try {
+    const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = spreadsheet.getSheetByName(PAYMENTLINKSDB_2_SHEET_NAME);
+
+    if (!sheet || sheet.getLastRow() <= 1) {
+      return { activeLink: null, expiredCount: 0 };
+    }
+
+    const dataRange = sheet.getDataRange();
+    const values = dataRange.getValues();
+    const headers = values.shift(); // Get and remove header row
+
+    const emailColumnIndex = headers.indexOf("email");
+    const statusColumnIndex = headers.indexOf("status");
+    const jsonResponseColumnIndex = headers.indexOf("jsonResponse");
+    const timestampColumnIndex = headers.indexOf("timestamp");
+
+    if (
+      emailColumnIndex === -1 ||
+      statusColumnIndex === -1 ||
+      jsonResponseColumnIndex === -1 ||
+      timestampColumnIndex === -1
+    ) {
+      console.error(
+        "PAYMENTLINKSDB_2 sheet is missing required columns (email, status, jsonResponse, timestamp)."
+      );
+      return { activeLink: null, expiredCount: 0 };
+    }
+
+    let expiredCount = 0;
+    let activeLink = null;
+    let activeLinkTimestamp = null;
+
+    // Iterate over all payment link records
+    for (const row of values) {
+      const rowEmail = row[emailColumnIndex];
+      const rowStatus = row[statusColumnIndex];
+
+      if (
+        rowEmail &&
+        rowEmail.toString().toLowerCase().trim() === email.toLowerCase() &&
+        rowStatus === "success"
+      ) {
+        const timestampStr = row[timestampColumnIndex];
+        if (timestampStr) {
+          const linkTimestamp = new Date(timestampStr);
+          const now = new Date();
+          const hoursDifference = (now - linkTimestamp) / (1000 * 60 * 60);
+
+          if (hoursDifference > 24) {
+            expiredCount++;
+          } else {
+            // This is an active link. We want to store only the latest one.
+            if (!activeLinkTimestamp || linkTimestamp > activeLinkTimestamp) {
+              const jsonResponse = row[jsonResponseColumnIndex];
+              if (jsonResponse) {
+                try {
+                  activeLink = JSON.parse(jsonResponse);
+                  activeLinkTimestamp = linkTimestamp;
+                } catch (e) {
+                  /* ignore parse errors */
+                  console.error(
+                    `Failed to parse existing second payment link JSON for ${email}:`,
+                    e
+                  );
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (activeLink) {
+      console.log(
+        `Found active second payment link for ${email}, created at ${activeLinkTimestamp.toISOString()}.`
+      );
+    }
+    if (expiredCount > 0) {
+      console.log(
+        `Found ${expiredCount} expired second payment links for ${email}.`
+      );
+    }
+
+    return { activeLink, expiredCount };
+  } catch (error) {
+    console.error("Error in getPaymentLinkInfo2:", error);
+    return { activeLink: null, expiredCount: 0 };
   }
 }
 
@@ -1795,26 +1995,11 @@ function sendPasswordEmailsToAllRSVPs() {
 }
 
 /**
- * Send second payment reminder emails to all registered participants
+ * Send individual second payment due today email
  */
-// eslint-disable-next-line no-unused-vars
-function sendSecondPaymentReminderEmails() {
-  return sendBatchEmails(
-    "secondPaymentReminder",
-    sendSecondPaymentReminderEmail,
-    2000, // 2 second delay
-    {
-      sendToEmails: ["tinqueija@gmail.com"],
-    }
-  );
-}
-
-/**
- * Send individual second payment reminder email
- */
-function sendSecondPaymentReminderEmail(email, name) {
+function sendSecondPaymentDueTodayEmail(email, name) {
   try {
-    console.log(`Sending second payment reminder email to: ${email}`);
+    console.log(`Sending second payment due today email to: ${email}`);
 
     // Get RSVP data to retrieve password for magic link
     const rsvpData = _getRsvpDataForEmail(email);
@@ -1824,23 +2009,19 @@ function sendSecondPaymentReminderEmail(email, name) {
       throw new Error("No password found for email");
     }
 
-    const subject = "⏰ Second Payment Reminder — October 2nd";
+    const subject = "Payment Due Today";
 
     const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
-        <h2 style="color: #2c3e50;">Hello ${name}! ✨</h2>
+        <h2 style="color: #2c3e50;">Hola ${name}! ✨</h2>
 
-        <p>As you know, we had postponed the second payment date. The new deadline for the trip's second payment is <strong>Thursday, October 2nd</strong>.</p>
+        <p><strong>Reminder:</strong> the second payment is due today, Thursday, October 2nd.</p>
 
-        <p>You can find all the payment information directly in the app.</p>
+        <p>To receive the payment link or view the bank transfer details, please make sure to accept or decline all optional activities in your itinerary. (Days with pending activities are marked with a red icon.)</p>
 
-        <p style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0;">
-          <strong>⚠️ Important:</strong> To view the payment details, you'll first need to accept or decline the optional activities in your itinerary (marked with a red alert icon on the days where confirmation is pending).
-        </p>
+        <p>👉 Even if you don't plan to join, it's important to press decline so your itinerary is complete and the payment info becomes visible.</p>
 
-        <p>Once that's done, the updated payment information will be visible.</p>
-
-        <p>As always, please don't hesitate to contact me if I can help. If you run into any issues with the app, no stress — just reply to this email or send me a message and I'll take care of it. 🙂</p>
+        <p>If you have any trouble accessing the details or need help with the process, please don't hesitate to reach out — I'll be happy to assist.</p>
 
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
           <a href="https://argtrip.sonsolesstays.com?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}"
@@ -1862,13 +2043,13 @@ function sendSecondPaymentReminderEmail(email, name) {
     return {
       success: emailSent,
       message: emailSent
-        ? `Second payment reminder email sent successfully to ${email}`
-        : `Failed to send second payment reminder email to ${email}`,
+        ? `Second payment due today email sent successfully to ${email}`
+        : `Failed to send second payment due today email to ${email}`,
       error: emailSent ? null : "Email sending failed",
     };
   } catch (error) {
     console.error(
-      `Error sending second payment reminder email to ${email}:`,
+      `Error sending second payment due today email to ${email}:`,
       error
     );
     return {
@@ -1876,4 +2057,187 @@ function sendSecondPaymentReminderEmail(email, name) {
       error: error.message,
     };
   }
+}
+
+/**
+ * Send second payment due today emails to all registered participants
+ */
+// eslint-disable-next-line no-unused-vars
+function sendSecondPaymentDueTodayEmails() {
+  return sendBatchEmails(
+    "secondPaymentDueToday",
+    sendSecondPaymentDueTodayEmail,
+    2000, // 2 second delay
+    {
+      sendToEmails: [],
+      excludeEmails: [],
+    }
+  );
+}
+
+/**
+ * Manually-triggered function to generate Redsys payment links in batch for second installment.
+ * This function processes credit users who have completed all choices and have a pricing.balance > 0.
+ * It calculates EUR amounts using hardcoded exchange rate and processing fee.
+ * Results are logged to the PAYMENTLINKSDB_2 sheet.
+ */
+// eslint-disable-next-line no-unused-vars
+function generate2ndPaymentLinksBatch() {
+  let authToken = null;
+
+  // Get all trip registrations
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = spreadsheet.getSheetByName(TRIP_REGISTRATIONS_SHEET_NAME);
+
+  if (!sheet || sheet.getLastRow() <= 1) {
+    console.error("Trip Registrations sheet is empty or not found");
+    return;
+  }
+
+  const dataRange = sheet.getDataRange();
+  const values = dataRange.getValues();
+  const [headers] = values;
+
+  // Find required column indices
+  const emailColumnIndex = headers.indexOf("formData.email");
+  const firstNameColumnIndex = headers.indexOf("formData.firstName");
+  const lastNameColumnIndex = headers.indexOf("formData.lastName");
+  const paymentMethodColumnIndex = headers.indexOf("formData.paymentMethod");
+  const balanceColumnIndex = headers.indexOf("pricing.balance");
+
+  if (
+    emailColumnIndex === -1 ||
+    firstNameColumnIndex === -1 ||
+    lastNameColumnIndex === -1 ||
+    paymentMethodColumnIndex === -1 ||
+    balanceColumnIndex === -1
+  ) {
+    console.error("Required columns not found in Trip Registrations sheet");
+    return;
+  }
+
+  // Process each row
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+    const email = row[emailColumnIndex];
+    const firstName = row[firstNameColumnIndex];
+    const lastName = row[lastNameColumnIndex];
+    const paymentMethod = row[paymentMethodColumnIndex];
+    const balance = parseFloat(row[balanceColumnIndex]) || 0;
+
+    // Skip if not credit payment method
+    if (
+      !paymentMethod ||
+      paymentMethod.toString().toLowerCase().trim() !== "credit"
+    ) {
+      // console.log(`Skipping ${email}: payment method is not credit`);
+      continue;
+    }
+
+    // Skip if balance is 0 or negative
+    if (balance <= 0) {
+      // console.log(`Skipping ${email}: balance is ${balance}`);
+      continue;
+    }
+
+    // Check if user has completed all choices
+    if (!hasCompletedAllChoices(email)) {
+      // console.log(`Skipping ${email}: has not completed all choices`);
+      continue;
+    }
+
+    if (email.trim().toLowerCase() !== "tinqueija@gmail.com") {
+      continue;
+    }
+
+    console.log(`Processing user: ${email}`);
+
+    // Check if there's already an active payment link for this user
+    const paymentInfo = getPaymentLinkInfo2(email);
+    if (paymentInfo.activeLink) {
+      console.log(
+        `Skipping ${email}: an active second payment link already exists.`
+      );
+      continue;
+    }
+
+    // Calculate EUR amounts
+    const amountUsd = balance;
+    const amountEur = amountUsd * EXCHANGE_RATE_USD_TO_EUR;
+    const processingFee = amountEur * PROCESSING_FEE_PERCENTAGE;
+    const totalEur = amountEur + processingFee;
+
+    // Round to 2 decimal places
+    const amountEurRounded = Math.round(amountEur * 100) / 100;
+    const processingFeeRounded = Math.round(processingFee * 100) / 100;
+    const totalEurRounded = Math.round(totalEur * 100) / 100;
+
+    console.log(
+      `Amount USD: ${amountUsd}, Amount EUR: ${amountEur}, Processing Fee: ${processingFee}, Total EUR: ${totalEur}`
+    );
+
+    // Lazy initialization: get auth token only when we need to create the first payment link
+    if (!authToken) {
+      try {
+        authToken = login();
+        if (!authToken) {
+          console.error(
+            "Failed to get auth token from Redsys. Aborting batch."
+          );
+          return;
+        }
+        console.log(
+          "Successfully obtained Redsys auth token for batch processing."
+        );
+      } catch (e) {
+        console.error("Redsys login failed, cannot proceed with batch.", e);
+        return;
+      }
+    }
+
+    let paymentLinkData = null;
+
+    try {
+      const linkNumber = paymentInfo.expiredCount + 1;
+      const orderId = `ARG_2ND_${i + 1}_${linkNumber}`;
+      const order = {
+        id: orderId,
+        user: {
+          name: `${firstName} ${lastName}`,
+          email,
+        },
+        total: totalEurRounded.toFixed(2),
+        subject: "Argentina Trip Payment - Final payment",
+      };
+
+      paymentLinkData = createPaymentLink(order, authToken);
+    } catch (e) {
+      console.error(`Error creating payment link for ${email}:`, e);
+    }
+
+    // Save to PAYMENTLINKSDB_2 sheet
+    saveToPaymentLinksSheet2({
+      timestamp: new Date().toISOString(),
+      email,
+      link: paymentLinkData ? paymentLinkData.urlPaygold : "",
+      jsonResponse: paymentLinkData ? JSON.stringify(paymentLinkData) : "",
+      status: paymentLinkData ? "success" : "failed",
+      amountUsd: amountUsd.toFixed(2),
+      exchangeRate: EXCHANGE_RATE_USD_TO_EUR,
+      amountEur: amountEurRounded.toFixed(2),
+      processingFee: processingFeeRounded.toFixed(2),
+      totalEur: totalEurRounded.toFixed(2),
+    });
+
+    console.log(
+      `Finished processing for ${email}. Status: ${
+        paymentLinkData ? "success" : "failed"
+      }`
+    );
+
+    // Add a small delay to avoid overwhelming the API
+    Utilities.sleep(500); // 500ms delay
+  }
+
+  console.log("Batch second payment link generation complete.");
 }
