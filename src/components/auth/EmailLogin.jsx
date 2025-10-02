@@ -19,6 +19,7 @@ const EmailLogin = () => {
   const { handleLogout } = useTripContext();
   const { refreshUserData } = useUserDataRefresh();
   const hasLoggedOut = useRef(false);
+  const hasAttemptedAutoLogin = useRef(false);
   const location = useLocation();
   const previousLocation = useRef(location.pathname);
 
@@ -69,7 +70,7 @@ const EmailLogin = () => {
     const emailParam = urlParams.get("email");
     const passwordParam = urlParams.get("password");
 
-    if (emailParam && passwordParam) {
+    if (emailParam && passwordParam && !hasAttemptedAutoLogin.current) {
       // Magic link detected - auto-fill credentials
       setEmail(emailParam);
       setPassword(passwordParam);
@@ -77,6 +78,7 @@ const EmailLogin = () => {
       // Auto-submit after a brief delay to allow state to update
       const autoSubmit = setTimeout(async () => {
         if (!isLoading) {
+          hasAttemptedAutoLogin.current = true;
           setIsLoading(true);
           await handleEmailLogin(emailParam.trim(), passwordParam.trim());
           setIsLoading(false);

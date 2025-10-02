@@ -515,7 +515,7 @@ async function lookupRSVP(
       const rowPassword = row[passwordColumnIndex];
 
       if (!rowPassword || rowPassword.toString().trim() !== password) {
-        throw new Error("Invalid password");
+        throw new Error("Invalid email or password");
       }
 
       // Password matches! Create object with headers as keys
@@ -544,7 +544,7 @@ async function lookupRSVP(
     }
   }
 
-  throw new Error(`Email ${email} not found in RSVP sheet`);
+  throw new Error("Invalid email or password");
 }
 
 /**
