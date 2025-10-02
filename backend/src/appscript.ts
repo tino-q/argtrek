@@ -1171,47 +1171,25 @@ async function updateCompletedChoicesSheet(
     }
   }
 
-  // Try to get the sheet, create if it doesn't exist
-  try {
-    const sheets = await getGoogleSheetsApi();
-    const sheetsMetadata = await sheets.spreadsheets.get({
+  const sheets = await getGoogleSheetsApi();
+  const sheetsMetadata = await sheets.spreadsheets.get({
+    spreadsheetId: spreadsheet.spreadsheetId,
+  });
+
+  const existingSheet = sheetsMetadata.data.sheets?.find(
+    (s: any) => s.properties?.title === COMPLETED_CHOICES_SHEET_NAME
+  );
+
+  if (existingSheet) {
+    // Clear existing data
+    await sheets.spreadsheets.values.clear({
       spreadsheetId: spreadsheet.spreadsheetId,
+      range: `${COMPLETED_CHOICES_SHEET_NAME}!A:A`,
     });
-
-    const existingSheet = sheetsMetadata.data.sheets?.find(
-      (s: any) => s.properties?.title === COMPLETED_CHOICES_SHEET_NAME
-    );
-
-    if (existingSheet) {
-      // Clear existing data
-      await sheets.spreadsheets.values.clear({
-        spreadsheetId: spreadsheet.spreadsheetId,
-        range: `${COMPLETED_CHOICES_SHEET_NAME}!A:A`,
-      });
-    } else {
-      // Create new sheet
-      await sheets.spreadsheets.batchUpdate({
-        spreadsheetId: spreadsheet.spreadsheetId,
-        requestBody: {
-          requests: [
-            {
-              addSheet: {
-                properties: {
-                  title: COMPLETED_CHOICES_SHEET_NAME,
-                },
-              },
-            },
-          ],
-        },
-      });
-    }
-  } catch (error) {
-    console.error("Error managing sheet:", error);
-    throw new Error(`Failed to manage sheet: ${error}`);
+  } else {
+    throw new Error(`Sheet ${COMPLETED_CHOICES_SHEET_NAME} not found`);
   }
 
-  // Write emails to sheet
-  const sheets = await getGoogleSheetsApi();
   const values = [["Email"], ...completedEmails.map((e: string) => [e])];
 
   await sheets.spreadsheets.values.update({
