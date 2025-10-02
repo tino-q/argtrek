@@ -5,7 +5,10 @@ import {
   getGoogleSheetsApi,
   SpreadsheetWrapper,
 } from "./spreadsheet";
-import { discordLog } from "./shared/services/discord/discord.logger";
+import {
+  discordLog,
+  discordErrorLog,
+} from "./shared/services/discord/discord.logger";
 import { clearAllCache } from "./ddb";
 
 /**
@@ -1019,6 +1022,20 @@ async function setUserChoice(
 
   // Clear Trip Registrations cache since choices data affects pricing calculations
   await spreadsheet.clearTripRegistrationCache();
+
+  // Check if user completed all choices and add them to COMPLETED CHOICES sheet if they did
+  try {
+    await addUserToCompletedChoicesIfComplete(spreadsheet, data.email, false);
+  } catch (error) {
+    console.error("Error updating completed choices sheet:", error);
+    // Don't throw - we don't want to fail the choice save if this update fails
+
+    // Notify error via Discord (already has internal try-catch, safe to call)
+    await discordErrorLog(
+      `Error updating COMPLETED CHOICES sheet after choice save for ${data.email}`,
+      error
+    );
+  }
 }
 
 async function getVoucherFile(
@@ -1092,21 +1109,123 @@ async function downloadVoucher(
 }
 
 /**
- * Update the COMPLETED CHOICES sheet with emails of users who have completed all choices (admin only)
+ * Check if a specific user has completed all choices and add them to COMPLETED CHOICES sheet if they have
+ * This is optimized to only check and update one user instead of rebuilding the entire sheet
  */
-async function updateCompletedChoicesSheet(
+async function addUserToCompletedChoicesIfComplete(
   spreadsheet: SpreadsheetWrapper,
   email: string,
   refresh: boolean
 ) {
-  // Check admin access
-  if (email.trim().toLowerCase() !== "tinqueija@gmail.com") {
-    throw new Error(
-      "Unauthorized: Only tinqueija@gmail.com can access this endpoint"
-    );
+  const COMPLETED_CHOICES_SHEET_NAME = "COMPLETED CHOICES";
+  const normalizedEmail = email.toLowerCase().trim();
+
+  // Get user's registration data
+  const { rows: regsRows, headers } = await spreadsheet.getRowsWithHeaders(
+    TRIP_REGISTRATIONS_SHEET_NAME,
+    refresh
+  );
+
+  const emailIdx = headers.indexOf("rsvpData.email");
+  const raftingIdx = headers.indexOf("formData.rafting");
+  const tangoIdx = headers.indexOf("formData.tango");
+
+  if (emailIdx === -1) {
+    throw new Error("Email column not found in Trip Registrations");
   }
 
+  // Find user's registration
+  const userReg = regsRows.find(
+    (row) => row[emailIdx]?.toString().toLowerCase().trim() === normalizedEmail
+  );
+
+  if (!userReg) {
+    console.log(`User ${email} not found in Trip Registrations`);
+    return;
+  }
+
+  // Get user's choices
+  const userChoices = await getUserChoices(email, spreadsheet, refresh);
+
+  const formData = {
+    rafting: userReg[raftingIdx]?.toString() || "false",
+    tango: userReg[tangoIdx]?.toString() || "false",
+  };
+
+  // Check if user has answered all choices
+  const hasCompleted = hasAnsweredAllChoices(userChoices, formData);
+
+  if (!hasCompleted) {
+    console.log(`User ${email} has not completed all choices`);
+    return;
+  }
+
+  // Check if user is already in COMPLETED CHOICES sheet
+  const { rows: completedRows, headers: completedHeaders } =
+    await spreadsheet.getRowsWithHeaders(COMPLETED_CHOICES_SHEET_NAME, true);
+
+  const completedEmailIdx = completedHeaders.indexOf("Email") !== -1
+    ? completedHeaders.indexOf("Email")
+    : completedHeaders.indexOf("email");
+
+  if (completedEmailIdx === -1) {
+    throw new Error("Email column not found in COMPLETED CHOICES sheet");
+  }
+
+  const alreadyExists = completedRows.some(
+    (row) =>
+      row[completedEmailIdx]?.toString().toLowerCase().trim() ===
+      normalizedEmail
+  );
+
+  if (alreadyExists) {
+    console.log(`User ${email} already in COMPLETED CHOICES sheet`);
+    return;
+  }
+
+  // Add user to COMPLETED CHOICES sheet
+  const sheets = await getGoogleSheetsApi();
+  await sheets.spreadsheets.values.append({
+    spreadsheetId: spreadsheet.spreadsheetId,
+    range: `${COMPLETED_CHOICES_SHEET_NAME}!A:A`,
+    valueInputOption: "RAW",
+    requestBody: {
+      values: [[normalizedEmail]],
+    },
+  });
+
+  console.log(`Added ${email} to COMPLETED CHOICES sheet`);
+}
+
+/**
+ * Internal function to update the COMPLETED CHOICES sheet
+ * This iterates over all trip registrations, skipping those already present,
+ * and appends any users who have completed choices
+ */
+async function updateCompletedChoicesSheetInternal(
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
+) {
   const COMPLETED_CHOICES_SHEET_NAME = "COMPLETED CHOICES";
+
+  // Get existing completed choices to skip those already in the sheet
+  const { rows: completedRows, headers: completedHeaders } =
+    await spreadsheet.getRowsWithHeaders(COMPLETED_CHOICES_SHEET_NAME, true);
+
+  const completedEmailIdx = completedHeaders.indexOf("Email") !== -1
+    ? completedHeaders.indexOf("Email")
+    : completedHeaders.indexOf("email");
+
+  if (completedEmailIdx === -1) {
+    throw new Error("Email column not found in COMPLETED CHOICES sheet");
+  }
+
+  // Build set of emails already in completed choices
+  const alreadyCompletedEmails = new Set(
+    completedRows.map((row) =>
+      row[completedEmailIdx]?.toString().toLowerCase().trim()
+    )
+  );
 
   // Get all trip registrations
   const { rows: regsRows, headers } = await spreadsheet.getRowsWithHeaders(
@@ -1122,90 +1241,75 @@ async function updateCompletedChoicesSheet(
     throw new Error("Email column not found in Trip Registrations");
   }
 
-  // Get all user choices
-  const { rows: choicesRows, headers: choicesHeaders } =
-    await spreadsheet.getRowsWithHeaders(CHOICES_SHEET_NAME, refresh);
+  let addedCount = 0;
 
-  const choicesEmailIdx = choicesHeaders.indexOf("email");
-  const itemKeyIdx = choicesHeaders.indexOf("itemKey");
-  const optionIdx = choicesHeaders.indexOf("option");
-  const choiceIdx = choicesHeaders.indexOf("choice");
-
-  // Build a map of email -> userChoices
-  const userChoicesMap = new Map<string, Record<string, string>>();
-
-  for (const row of choicesRows) {
-    const rowEmail = row[choicesEmailIdx]?.toString().toLowerCase().trim();
-    const itemKey = row[itemKeyIdx]?.toString().toLowerCase().trim();
-    const option = row[optionIdx]?.toString().toLowerCase().trim();
-    const choice = row[choiceIdx]?.toString().toLowerCase().trim();
-
-    if (rowEmail && itemKey && option && choice) {
-      if (!userChoicesMap.has(rowEmail)) {
-        userChoicesMap.set(rowEmail, {});
-      }
-      const userChoices = userChoicesMap.get(rowEmail)!;
-      userChoices[`${itemKey}-${option}`] = choice;
-    }
-  }
-
-  // Process each registration to find completed emails
-  const completedEmails: string[] = [];
-
+  // Check each registration to see if they've completed all choices
   for (const row of regsRows) {
     const userEmail = row[emailIdx]?.toString().toLowerCase().trim();
 
     if (!userEmail) continue;
 
-    const userChoices = userChoicesMap.get(userEmail) || {};
-    const formData = {
-      rafting: row[raftingIdx]?.toString() || "false",
-      tango: row[tangoIdx]?.toString() || "false",
-    };
+    // Skip if already in completed choices
+    if (alreadyCompletedEmails.has(userEmail)) {
+      continue;
+    }
 
-    // Check if all choices are answered using the same logic as frontend
-    const hasAnswered = hasAnsweredAllChoices(userChoices, formData);
+    try {
+      // Get user's choices
+      const userChoices = await getUserChoices(userEmail, spreadsheet, refresh);
 
-    if (hasAnswered) {
-      completedEmails.push(userEmail);
+      const formData = {
+        rafting: row[raftingIdx]?.toString() || "false",
+        tango: row[tangoIdx]?.toString() || "false",
+      };
+
+      // Check if user has answered all choices
+      const hasCompleted = hasAnsweredAllChoices(userChoices, formData);
+
+      if (hasCompleted) {
+        // Append to COMPLETED CHOICES sheet
+        const sheets = await getGoogleSheetsApi();
+        await sheets.spreadsheets.values.append({
+          spreadsheetId: spreadsheet.spreadsheetId,
+          range: `${COMPLETED_CHOICES_SHEET_NAME}!A:A`,
+          valueInputOption: "RAW",
+          requestBody: {
+            values: [[userEmail]],
+          },
+        });
+        addedCount++;
+        console.log(`Added ${userEmail} to COMPLETED CHOICES sheet`);
+      }
+    } catch (error) {
+      console.error(`Error processing ${userEmail}:`, error);
+      // Continue with other users
     }
   }
 
-  const sheets = await getGoogleSheetsApi();
-  const sheetsMetadata = await sheets.spreadsheets.get({
-    spreadsheetId: spreadsheet.spreadsheetId,
-  });
-
-  const existingSheet = sheetsMetadata.data.sheets?.find(
-    (s: any) => s.properties?.title === COMPLETED_CHOICES_SHEET_NAME
-  );
-
-  if (existingSheet) {
-    // Clear existing data
-    await sheets.spreadsheets.values.clear({
-      spreadsheetId: spreadsheet.spreadsheetId,
-      range: `${COMPLETED_CHOICES_SHEET_NAME}!A:A`,
-    });
-  } else {
-    throw new Error(`Sheet ${COMPLETED_CHOICES_SHEET_NAME} not found`);
-  }
-
-  const values = [["Email"], ...completedEmails.map((e: string) => [e])];
-
-  await sheets.spreadsheets.values.update({
-    spreadsheetId: spreadsheet.spreadsheetId,
-    range: `${COMPLETED_CHOICES_SHEET_NAME}!A1`,
-    valueInputOption: "RAW",
-    requestBody: {
-      values,
-    },
-  });
-
   return {
     success: true,
-    count: completedEmails.length,
-    message: `Successfully updated ${COMPLETED_CHOICES_SHEET_NAME} with ${completedEmails.length} emails`,
+    count: addedCount,
+    message: `Successfully added ${addedCount} new emails to ${COMPLETED_CHOICES_SHEET_NAME}`,
   };
+}
+
+/**
+ * Update the COMPLETED CHOICES sheet with emails of users who have completed all choices (admin only)
+ * This is the public API with authentication
+ */
+async function updateCompletedChoicesSheet(
+  spreadsheet: SpreadsheetWrapper,
+  email: string,
+  refresh: boolean
+) {
+  // Check admin access
+  if (email.trim().toLowerCase() !== "tinqueija@gmail.com") {
+    throw new Error(
+      "Unauthorized: Only tinqueija@gmail.com can access this endpoint"
+    );
+  }
+
+  return await updateCompletedChoicesSheetInternal(spreadsheet, refresh);
 }
 
 /**

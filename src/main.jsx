@@ -22,7 +22,7 @@ import { setupGlobalErrorHandlers } from "./utils/errorReporting.js";
 
     // If user was logged in, redirect to magic link for seamless re-authentication
     if (authEmail && authPassword) {
-      window.location.href = `/login?email=${encodeURIComponent(authEmail)}&password=${encodeURIComponent(authPassword)}`;
+      window.location.href = `/login`;
     } else {
       window.location.reload();
     }

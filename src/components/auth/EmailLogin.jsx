@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { useTripContext } from "../../hooks/useTripContext";
 import { useUserDataRefresh } from "../../hooks/useUserDataRefresh";
+import { IS_LOCAL } from "../../utils/env";
 
 const EmailLogin = () => {
   const {
@@ -118,6 +119,12 @@ const EmailLogin = () => {
     },
     [email, password, handleEmailLogin, setIsLoading]
   );
+
+  useEffect(() => {
+    if (IS_LOCAL) {
+      setEmail("tinqueija@gmail.com");
+    }
+  }, [setEmail, setPassword]);
 
   return (
     <div className="container">
