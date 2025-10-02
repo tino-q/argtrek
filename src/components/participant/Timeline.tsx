@@ -857,7 +857,7 @@ const TimelineContent: React.FC = () => {
   const [collapsedDays, setCollapsedDays] = useState<Set<string>>(new Set());
 
   const [showAllItems, setShowAllItems] = useState<boolean>(false);
-  const { email: userEmail } = useContext(AuthContext);
+  const { email: userEmail, password: userPassword } = useContext(AuthContext);
   const { submissionResult, formData } = useTripContext();
   const { showError } = useNotificationContext();
 
@@ -944,7 +944,7 @@ const TimelineContent: React.FC = () => {
 
     const fetchTimelineData = async () => {
       try {
-        const timelineData = await getTimelineData();
+        const timelineData = await getTimelineData(userEmail, userPassword);
 
         if (timelineData) {
           setTimelineData(

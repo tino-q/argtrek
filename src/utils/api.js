@@ -61,14 +61,18 @@ export async function loginUser(email, password) {
 
 /**
  * Get timeline data (with caching)
+ * @param {string} email - User email
+ * @param {string} password - User password
  * @returns {Promise<array>} Timeline data array
  */
-export async function getTimelineData() {
+export async function getTimelineData(email, password) {
   const refreshParam = getRefreshParam();
   return fetchWithLocalStorageCache(
     "timelineData",
     async () => {
-      const url = buildUrl("endpoint=timeline");
+      const url = buildUrl(
+        `endpoint=timeline&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+      );
       const response = await apiRequest(url);
       if (!response.success) {
         throw new Error("Failed to fetch timeline data");
@@ -271,4 +275,11 @@ export async function clearAllCache(email, password) {
     // reload the page
     window.location.reload();
   });
+}
+
+export async function updateCompletedChoicesSheet(email, password) {
+  const url = buildUrl(
+    `endpoint=update_completed_choices&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+  );
+  return apiRequest(url);
 }

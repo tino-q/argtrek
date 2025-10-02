@@ -1,6 +1,10 @@
 import { drive_v3 } from "@googleapis/drive";
 
-import { getGoogleDriveApi, SpreadsheetWrapper } from "./spreadsheet";
+import {
+  getGoogleDriveApi,
+  getGoogleSheetsApi,
+  SpreadsheetWrapper,
+} from "./spreadsheet";
 import { discordLog } from "./shared/services/discord/discord.logger";
 import { clearAllCache } from "./ddb";
 
@@ -60,6 +64,13 @@ export async function doGet(
 ) {
   const refresh = e.parameter.refresh === "1";
 
+  const rsvpData = await validateCredentials(
+    e.parameter.email,
+    e.parameter.password,
+    spreadsheet,
+    refresh
+  );
+
   // Check if this is a timeline request
   if (e.parameter.endpoint === "timeline") {
     return getTimelineData(spreadsheet, refresh);
@@ -70,7 +81,6 @@ export async function doGet(
     const raftingQueue = await getRaftingRegistrations(
       spreadsheet,
       e.parameter.email,
-      e.parameter.password,
       refresh
     );
     return {
@@ -79,22 +89,22 @@ export async function doGet(
     };
   }
 
+  // Check if this is an update completed choices sheet request (admin only)
+  if (e.parameter.endpoint === "update_completed_choices") {
+    return updateCompletedChoicesSheet(spreadsheet, e.parameter.email, refresh);
+  }
+
   if (e.parameter.endpoint === "download_voucher") {
-    return downloadVoucher(
-      e.parameter.email,
-      e.parameter.password,
-      spreadsheet,
-      refresh
-    );
+    return downloadVoucher(e.parameter.email, spreadsheet, refresh);
   }
 
   // await spreadsheet.cacheAllSheets();
 
   const responseData = await getEmailSubmissionData(
     e.parameter.email,
-    e.parameter.password,
     spreadsheet,
-    refresh
+    refresh,
+    rsvpData
   );
 
   return {
@@ -105,17 +115,10 @@ export async function doGet(
 
 async function getEmailSubmissionData(
   email: string,
-  password: string,
   spreadsheet: SpreadsheetWrapper,
-  refresh: boolean
+  refresh: boolean,
+  rsvpData: Record<string, string | number | boolean>
 ) {
-  const rsvpData = await validateCredentials(
-    email,
-    password,
-    spreadsheet,
-    refresh
-  );
-
   // Check if there's an existing submission for this email
   const existingSubmission = await findExistingSubmission(
     email.trim(),
@@ -162,11 +165,8 @@ async function getEmailSubmissionData(
 export async function getRaftingRegistrations(
   spreadsheet: SpreadsheetWrapper,
   email: string,
-  password: string,
   refresh: boolean
 ) {
-  await validateCredentials(email, password, spreadsheet, refresh);
-
   // --- Load Trip Registrations formData.rafting ---
   const { rows: regsRows, headers } = await spreadsheet.getRowsWithHeaders(
     TRIP_REGISTRATIONS_SHEET_NAME,
@@ -317,7 +317,12 @@ export async function doPost(
 
   const email = ((data as AuthenticatedRequest).email || "").trim();
   const password = ((data as AuthenticatedRequest).password || "").trim();
-  await validateCredentials(email, password, spreadsheet, refresh);
+  const rsvpData = await validateCredentials(
+    email,
+    password,
+    spreadsheet,
+    refresh
+  );
 
   if (isClearAllCache(data)) {
     if (email !== "tinqueija@gmail.com") {
@@ -391,9 +396,9 @@ export async function doPost(
 
   const emailSubmissionData = await getEmailSubmissionData(
     email,
-    password,
     spreadsheet,
-    refresh
+    refresh,
+    rsvpData
   );
 
   return {
@@ -507,11 +512,7 @@ async function lookupRSVP(
       const rowPassword = row[passwordColumnIndex];
 
       if (!rowPassword || rowPassword.toString().trim() !== password) {
-        return {
-          success: false,
-          error:
-            "Invalid password. Please check your password or contact Maddie on WhatsApp for assistance.",
-        };
+        throw new Error("Invalid password");
       }
 
       // Password matches! Create object with headers as keys
@@ -1062,12 +1063,9 @@ async function getVoucherFile(
 
 async function downloadVoucher(
   email: string,
-  password: string,
   spreadsheet: SpreadsheetWrapper,
   refresh: boolean
 ) {
-  await validateCredentials(email, password, spreadsheet, refresh);
-
   // Get voucher file
   const voucherResult = await getVoucherFile(email, spreadsheet, refresh);
 
@@ -1091,6 +1089,202 @@ async function downloadVoucher(
     fileData: base64Data,
     mimeType: "application/pdf",
   };
+}
+
+/**
+ * Update the COMPLETED CHOICES sheet with emails of users who have completed all choices (admin only)
+ */
+async function updateCompletedChoicesSheet(
+  spreadsheet: SpreadsheetWrapper,
+  email: string,
+  refresh: boolean
+) {
+  // Check admin access
+  if (email.trim().toLowerCase() !== "tinqueija@gmail.com") {
+    throw new Error(
+      "Unauthorized: Only tinqueija@gmail.com can access this endpoint"
+    );
+  }
+
+  const COMPLETED_CHOICES_SHEET_NAME = "COMPLETED CHOICES";
+
+  // Get all trip registrations
+  const { rows: regsRows, headers } = await spreadsheet.getRowsWithHeaders(
+    TRIP_REGISTRATIONS_SHEET_NAME,
+    refresh
+  );
+
+  const emailIdx = headers.indexOf("rsvpData.email");
+  const raftingIdx = headers.indexOf("formData.rafting");
+  const tangoIdx = headers.indexOf("formData.tango");
+
+  if (emailIdx === -1) {
+    throw new Error("Email column not found in Trip Registrations");
+  }
+
+  // Get all user choices
+  const { rows: choicesRows, headers: choicesHeaders } =
+    await spreadsheet.getRowsWithHeaders(CHOICES_SHEET_NAME, refresh);
+
+  const choicesEmailIdx = choicesHeaders.indexOf("email");
+  const itemKeyIdx = choicesHeaders.indexOf("itemKey");
+  const optionIdx = choicesHeaders.indexOf("option");
+  const choiceIdx = choicesHeaders.indexOf("choice");
+
+  // Build a map of email -> userChoices
+  const userChoicesMap = new Map<string, Record<string, string>>();
+
+  for (const row of choicesRows) {
+    const rowEmail = row[choicesEmailIdx]?.toString().toLowerCase().trim();
+    const itemKey = row[itemKeyIdx]?.toString().toLowerCase().trim();
+    const option = row[optionIdx]?.toString().toLowerCase().trim();
+    const choice = row[choiceIdx]?.toString().toLowerCase().trim();
+
+    if (rowEmail && itemKey && option && choice) {
+      if (!userChoicesMap.has(rowEmail)) {
+        userChoicesMap.set(rowEmail, {});
+      }
+      const userChoices = userChoicesMap.get(rowEmail)!;
+      userChoices[`${itemKey}-${option}`] = choice;
+    }
+  }
+
+  // Process each registration to find completed emails
+  const completedEmails: string[] = [];
+
+  for (const row of regsRows) {
+    const userEmail = row[emailIdx]?.toString().toLowerCase().trim();
+
+    if (!userEmail) continue;
+
+    const userChoices = userChoicesMap.get(userEmail) || {};
+    const formData = {
+      rafting: row[raftingIdx]?.toString() || "false",
+      tango: row[tangoIdx]?.toString() || "false",
+    };
+
+    // Check if all choices are answered using the same logic as frontend
+    const hasAnswered = hasAnsweredAllChoices(userChoices, formData);
+
+    if (hasAnswered) {
+      completedEmails.push(userEmail);
+    }
+  }
+
+  // Try to get the sheet, create if it doesn't exist
+  try {
+    const sheets = await getGoogleSheetsApi();
+    const sheetsMetadata = await sheets.spreadsheets.get({
+      spreadsheetId: spreadsheet.spreadsheetId,
+    });
+
+    const existingSheet = sheetsMetadata.data.sheets?.find(
+      (s: any) => s.properties?.title === COMPLETED_CHOICES_SHEET_NAME
+    );
+
+    if (existingSheet) {
+      // Clear existing data
+      await sheets.spreadsheets.values.clear({
+        spreadsheetId: spreadsheet.spreadsheetId,
+        range: `${COMPLETED_CHOICES_SHEET_NAME}!A:A`,
+      });
+    } else {
+      // Create new sheet
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: spreadsheet.spreadsheetId,
+        requestBody: {
+          requests: [
+            {
+              addSheet: {
+                properties: {
+                  title: COMPLETED_CHOICES_SHEET_NAME,
+                },
+              },
+            },
+          ],
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Error managing sheet:", error);
+    throw new Error(`Failed to manage sheet: ${error}`);
+  }
+
+  // Write emails to sheet
+  const sheets = await getGoogleSheetsApi();
+  const values = [["Email"], ...completedEmails.map((e: string) => [e])];
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: spreadsheet.spreadsheetId,
+    range: `${COMPLETED_CHOICES_SHEET_NAME}!A1`,
+    valueInputOption: "RAW",
+    requestBody: {
+      values,
+    },
+  });
+
+  return {
+    success: true,
+    count: completedEmails.length,
+    message: `Successfully updated ${COMPLETED_CHOICES_SHEET_NAME} with ${completedEmails.length} emails`,
+  };
+}
+
+/**
+ * Helper functions for checking if user has answered all choices
+ * Ported from frontend src/utils/choiceAnswers.js
+ */
+const CHOICE_KEYS = {
+  tango: "tango-night-tango",
+  barilocheCircuito: "bariloche-activity-circuitochico",
+  barilocheRafting: "bariloche-activity-rafting",
+  valleDeUcoHorse: "valle-de-uco-activity-horse",
+  valleDeUcoWalking: "valle-de-uco-activity-walking",
+};
+
+function hasAnsweredTango(
+  userChoices: Record<string, string>,
+  formData: { tango: string }
+): boolean {
+  const checkedOutTango =
+    formData.tango.toString().trim().toLowerCase() === "true";
+  return checkedOutTango || Boolean(userChoices[CHOICE_KEYS.tango]);
+}
+
+function hasAnsweredBariloche(
+  userChoices: Record<string, string>,
+  formData: { rafting: string }
+): boolean {
+  const checkedOutRafting =
+    formData.rafting.toString().trim().toLowerCase() === "true";
+
+  return (
+    checkedOutRafting ||
+    userChoices[CHOICE_KEYS.barilocheCircuito] === "yes" ||
+    userChoices[CHOICE_KEYS.barilocheRafting] === "yes" ||
+    (userChoices[CHOICE_KEYS.barilocheCircuito] === "no" &&
+      userChoices[CHOICE_KEYS.barilocheRafting] === "no")
+  );
+}
+
+function hasAnsweredValleDeUco(userChoices: Record<string, string>): boolean {
+  return (
+    userChoices[CHOICE_KEYS.valleDeUcoHorse] === "yes" ||
+    userChoices[CHOICE_KEYS.valleDeUcoWalking] === "yes" ||
+    (userChoices[CHOICE_KEYS.valleDeUcoHorse] === "no" &&
+      userChoices[CHOICE_KEYS.valleDeUcoWalking] === "no")
+  );
+}
+
+function hasAnsweredAllChoices(
+  userChoices: Record<string, string>,
+  formData: { tango: string; rafting: string }
+): boolean {
+  return (
+    hasAnsweredTango(userChoices, formData) &&
+    hasAnsweredBariloche(userChoices, formData) &&
+    hasAnsweredValleDeUco(userChoices)
+  );
 }
 
 // --- Payment Link Creation ---

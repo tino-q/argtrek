@@ -4,7 +4,6 @@ import { useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { useTripContext } from "../../hooks/useTripContext";
 import { useUserDataRefresh } from "../../hooks/useUserDataRefresh";
-import { IS_LOCAL } from "../../utils/env";
 
 const EmailLogin = () => {
   const {
@@ -120,10 +119,6 @@ const EmailLogin = () => {
     [email, password, handleEmailLogin, setIsLoading]
   );
 
-  const handleDevAutoLogin = useCallback(async () => {
-    await handleEmailLogin("tinqueija@gmail.com", "dima");
-  }, [handleEmailLogin]);
-
   return (
     <div className="container">
       <div className="trip-form">
@@ -179,10 +174,6 @@ const EmailLogin = () => {
                 )}
               </button>
             </div>
-
-            {IS_LOCAL && (
-              <button onClick={handleDevAutoLogin}>Dev Auto Login</button>
-            )}
           </form>
         </section>
       </div>

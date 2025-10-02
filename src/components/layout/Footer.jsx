@@ -1,13 +1,24 @@
 import { useCallback } from "react";
 
 import useAuth from "../../hooks/useAuth";
-import { clearAllCache } from "../../utils/api";
+import { useTripContext } from "../../hooks/useTripContext";
+import { clearAllCache, updateCompletedChoicesSheet } from "../../utils/api";
 import { CONTACTS } from "../../utils/config";
 
 const Footer = () => {
   const { email, password } = useAuth();
+  const { submissionResult } = useTripContext();
   const onClearCache = useCallback(() => {
     clearAllCache(email, password);
+  }, [email, password]);
+
+  const onUpdateChoices = useCallback(async () => {
+    try {
+      await updateCompletedChoicesSheet(email, password);
+      alert("Completed choices sheet updated successfully!");
+    } catch (error) {
+      alert(`Error updating choices sheet: ${error.message}`);
+    }
   }, [email, password]);
   return (
     <div className="container">
@@ -31,12 +42,19 @@ const Footer = () => {
             </p>
           </div>
 
-          {email === "tinqueija@gmail.com" && (
-            <div className="footer-item">
-              <p>
-                <button onClick={onClearCache}>Clear Cache</button>
-              </p>
-            </div>
+          {email === "tinqueija@gmail.com" && submissionResult && (
+            <>
+              <div className="footer-item">
+                <p>
+                  <button onClick={onClearCache}>Clear Cache</button>
+                </p>
+              </div>
+              <div className="footer-item">
+                <p>
+                  <button onClick={onUpdateChoices}>Update Choices</button>
+                </p>
+              </div>
+            </>
           )}
 
           {/* Credits Section */}
