@@ -208,6 +208,20 @@ const PaymentDetailsDisplay = ({
                 </div>
               </div>
               <br />
+              {!isRevolutBank && (
+                <div className="important-notes" style={{ backgroundColor: '#fff3cd', borderColor: '#ffc107' }}>
+                  <h4>⚠️ Important: ACH vs Wire Transfer</h4>
+                  <ul>
+                    <li>
+                      <strong>Strongly Recommended:</strong> Use ACH transfer to avoid additional fees
+                    </li>
+                    <li>
+                      <strong>Wire Transfer Fee:</strong> If you must use a wire transfer, you must add an additional <strong>$15 USD</strong> to cover our incoming wire fee
+                    </li>
+                  </ul>
+                </div>
+              )}
+              <br />
               <h4>Bank Transfer Details</h4>
               {(isRevolutBank
                 ? REVOLUT_BANK_DETAILS
