@@ -787,16 +787,16 @@ function getPaymentLinkInfo2(email) {
       }
     }
 
-    if (activeLink) {
-      console.log(
-        `Found active second payment link for ${email}, created at ${activeLinkTimestamp.toISOString()}.`
-      );
-    }
-    if (expiredCount > 0) {
-      console.log(
-        `Found ${expiredCount} expired second payment links for ${email}.`
-      );
-    }
+    // if (activeLink) {
+    //   console.log(
+    //     `Found active second payment link for ${email}, created at ${activeLinkTimestamp.toISOString()}.`
+    //   );
+    // }
+    // if (expiredCount > 0) {
+    //   console.log(
+    //     `Found ${expiredCount} expired second payment links for ${email}.`
+    //   );
+    // }
 
     return { activeLink, expiredCount };
   } catch (error) {
@@ -958,7 +958,6 @@ function login() {
 
     const data = JSON.parse(responseBody);
     const { token } = data;
-    console.log("token", token);
     if (!token) {
       throw new Error(
         `Login response did not include a token. Response: ${responseBody}`
@@ -2130,7 +2129,7 @@ function generate2ndPaymentLinksBatch() {
       "true";
 
     if (secondPaymentDone) {
-      console.log(`Skipping ${email}: second payment already done`);
+      // console.log(`Skipping ${email}: second payment already done`);
       continue;
     }
 
@@ -2155,14 +2154,12 @@ function generate2ndPaymentLinksBatch() {
       continue;
     }
 
-    console.log(`Processing user: ${email}`);
-
     // Check if there's already an active payment link for this user
     const paymentInfo = getPaymentLinkInfo2(email);
     if (paymentInfo.activeLink) {
-      console.log(
-        `Skipping ${email}: an active second payment link already exists.`
-      );
+      // console.log(
+      //   `Skipping ${email}: an active second payment link already exists.`
+      // );
       continue;
     }
 
@@ -2178,8 +2175,10 @@ function generate2ndPaymentLinksBatch() {
     const totalEurRounded = Math.round(totalEur * 100) / 100;
 
     console.log(
-      `Amount USD: ${amountUsd}, Amount EUR: ${amountEurRounded}, Processing Fee: ${processingFeeRounded}, Total EUR: ${totalEurRounded}`
+      `email: ${email} Amount USD: ${amountUsd}, Amount EUR: ${amountEurRounded}, Processing Fee: ${processingFeeRounded}, Total EUR: ${totalEurRounded}`
     );
+
+    continue;
 
     // Lazy initialization: get auth token only when we need to create the first payment link
     if (!authToken) {
