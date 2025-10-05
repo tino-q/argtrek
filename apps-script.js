@@ -1996,7 +1996,7 @@ function sendPasswordEmailsToAllRSVPs() {
 /**
  * Send individual second payment due today email
  */
-function sendSecondPaymentDueTodayEmail(email, name) {
+function sendsecondPaymentDueEmail(email, name) {
   try {
     console.log(`Sending second payment due today email to: ${email}`);
 
@@ -2008,13 +2008,27 @@ function sendSecondPaymentDueTodayEmail(email, name) {
       throw new Error("No password found for email");
     }
 
-    const subject = "Payment Due Today";
+    // Check Trip Registrations sheet for PAYMENT_2 status
+    const tripRegistration = getExistingSubmission(email);
+    if (
+      tripRegistration &&
+      tripRegistration.row.PAYMENT_2.toString().toLowerCase().trim() === "true"
+    ) {
+      console.log(`Skipping ${email} - PAYMENT_2 already completed`);
+      return {
+        success: true,
+        message: `Skipped ${email} - payment already completed`,
+        skipped: true,
+      };
+    }
+
+    const subject = "Payment Due Yesterday";
 
     const htmlBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
         <h2 style="color: #2c3e50;">Hola ${name}! ✨</h2>
 
-        <p><strong>Reminder:</strong> the second payment is due today, Thursday, October 2nd.</p>
+        <p><strong>Reminder:</strong> the second payment was due yesterday, Thursday, October 2nd.</p>
 
         <p>To receive the payment link or view the bank transfer details, please make sure to accept or decline all optional activities in your itinerary. (Days with pending activities are marked with a red icon.)</p>
 
@@ -2062,16 +2076,16 @@ function sendSecondPaymentDueTodayEmail(email, name) {
  * Send second payment due today emails to all registered participants
  */
 // eslint-disable-next-line no-unused-vars
-function sendSecondPaymentDueTodayEmails() {
+function sendsecondPaymentDueEmails() {
   return sendBatchEmails(
-    "secondPaymentDueToday",
-    sendSecondPaymentDueTodayEmail,
-    2000, // 2 second delay
-    {
-      sendToEmails: ["tinqueija@gmail.com"],
-      excludeEmails: ["wconte@stanford.edu", "crinehart247@gmail.com"],
-    }
+    "secondPaymentDue",
+    sendsecondPaymentDueEmail,
+    2000 // 2 second delay
   );
+}
+
+function generate2ndPaymentLinksBatchDryRun() {
+  return generate2ndPaymentLinksBatch({ dryRun: true });
 }
 
 /**
@@ -2081,7 +2095,7 @@ function sendSecondPaymentDueTodayEmails() {
  * Results are logged to the PAYMENTLINKSDB_2 sheet.
  */
 // eslint-disable-next-line no-unused-vars
-function generate2ndPaymentLinksBatch() {
+function generate2ndPaymentLinksBatch({ dryRun = false } = {}) {
   let authToken = null;
 
   // Get all trip registrations
@@ -2114,6 +2128,10 @@ function generate2ndPaymentLinksBatch() {
   ) {
     console.error("Required columns not found in Trip Registrations sheet");
     return;
+  }
+
+  if (dryRun) {
+    console.log("Dry run mode enabled");
   }
 
   // Process each row
@@ -2178,7 +2196,9 @@ function generate2ndPaymentLinksBatch() {
       `email: ${email} Amount USD: ${amountUsd}, Amount EUR: ${amountEurRounded}, Processing Fee: ${processingFeeRounded}, Total EUR: ${totalEurRounded}`
     );
 
-    continue;
+    if (dryRun) {
+      continue;
+    }
 
     // Lazy initialization: get auth token only when we need to create the first payment link
     if (!authToken) {
