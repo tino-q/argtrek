@@ -8,7 +8,7 @@ import { setupGlobalErrorHandlers } from "./utils/errorReporting.js";
 
 // One-time localStorage reset for backward compatibility
 (function resetLocalStorageOnce() {
-  const resetKey = "reset2";
+  const resetKey = "reset3";
   const hasReset = localStorage.getItem(resetKey);
 
   if (!hasReset) {
