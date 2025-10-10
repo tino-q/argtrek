@@ -82,6 +82,9 @@ const PricingSummary = ({ pricing }) => {
   );
   const isCredit = formData[FORM_FIELDS.PAYMENT_METHOD] === "credit";
   const usdFirstInstallment = Number(row["pricing.installmentAmount"] || 0);
+  const usdSecondInstallment = Number(row["pricing.inst_2"] || 0);
+  const usdThirdInstallment = Number(row["pricing.inst_3"] || 0);
+  const usdFourthInstallment = Number(row["pricing.inst_4"] || 0);
 
   const pricingItemsTotal = pricingItems.reduce(
     (acc, addon) => acc + addon.price,
@@ -89,7 +92,11 @@ const PricingSummary = ({ pricing }) => {
   );
 
   const pendingBalance =
-    pricingItemsTotal - (payment1Done ? usdFirstInstallment : 0);
+    pricingItemsTotal -
+    (payment1Done ? usdFirstInstallment : 0) -
+    usdSecondInstallment -
+    usdThirdInstallment -
+    usdFourthInstallment;
 
   const isFullPayment = row["formData.paymentSchedule"] === "full";
 
@@ -298,6 +305,33 @@ const PricingSummary = ({ pricing }) => {
               )}
             </span>
             <span>{formatCurrency(usdFirstInstallment)}</span>
+          </div>
+        ) : (
+          <div />
+        )}
+
+        {usdSecondInstallment ? (
+          <div className="summary-row subtotal">
+            <span>2nd Payment</span>
+            <span>{formatCurrency(usdSecondInstallment)}</span>
+          </div>
+        ) : (
+          <div />
+        )}
+
+        {usdThirdInstallment ? (
+          <div className="summary-row subtotal">
+            <span>3rd Payment</span>
+            <span>{formatCurrency(usdThirdInstallment)}</span>
+          </div>
+        ) : (
+          <div />
+        )}
+
+        {usdFourthInstallment ? (
+          <div className="summary-row subtotal">
+            <span>4th Payment</span>
+            <span>{formatCurrency(usdFourthInstallment)}</span>
           </div>
         ) : (
           <div />
