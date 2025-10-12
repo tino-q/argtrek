@@ -6,13 +6,13 @@ export const CHOICE_KEYS = {
   barilocheCircuito: "bariloche-activity-circuitochico",
   barilocheRafting: "bariloche-activity-rafting",
   valleDeUcoHorse: "valle-de-uco-activity-horse",
-  valleDeUcoWalking: "valle-de-uco-activity-walking"
+  valleDeUcoWalking: "valle-de-uco-activity-walking",
 };
 
 export const ACTIVITY_DATES = {
-  tango: 23,        // Sunday 23rd
-  bariloche: 26,    // Wednesday 26th
-  mendoza: 28       // Friday 28th (Valle de Uco)
+  tango: 23, // Sunday 23rd
+  bariloche: 26, // Wednesday 26th
+  mendoza: 28, // Friday 28th (Valle de Uco)
 };
 
 /**
@@ -22,7 +22,9 @@ export const ACTIVITY_DATES = {
  * @returns {boolean} - True if answered, false if pending
  */
 export const hasAnsweredTango = (userChoices, formData) => {
-  const checkedOutTango = formData.tango.toString().trim().toLowerCase() === "true";
+  const checkedOutTango =
+    formData.tango.toString().trim().toLowerCase() === "true";
+  debugger;
   return checkedOutTango || Boolean(userChoices[CHOICE_KEYS.tango]);
 };
 
@@ -33,14 +35,17 @@ export const hasAnsweredTango = (userChoices, formData) => {
  * @returns {boolean} - True if answered, false if pending
  */
 export const hasAnsweredBariloche = (userChoices, formData) => {
-  const checkedOutRafting = formData.rafting.toString().trim().toLowerCase() === "true";
+  const checkedOutRafting =
+    formData.rafting.toString().trim().toLowerCase() === "true";
 
   // yes to any, or no to both
-  return checkedOutRafting ||
+  return (
+    checkedOutRafting ||
     userChoices[CHOICE_KEYS.barilocheCircuito] === "yes" ||
     userChoices[CHOICE_KEYS.barilocheRafting] === "yes" ||
     (userChoices[CHOICE_KEYS.barilocheCircuito] === "no" &&
-     userChoices[CHOICE_KEYS.barilocheRafting] === "no");
+      userChoices[CHOICE_KEYS.barilocheRafting] === "no")
+  );
 };
 
 /**
@@ -50,10 +55,12 @@ export const hasAnsweredBariloche = (userChoices, formData) => {
  */
 export const hasAnsweredValleDeUco = (userChoices) => {
   // yes to any, or no to both
-  return userChoices[CHOICE_KEYS.valleDeUcoHorse] === "yes" ||
+  return (
+    userChoices[CHOICE_KEYS.valleDeUcoHorse] === "yes" ||
     userChoices[CHOICE_KEYS.valleDeUcoWalking] === "yes" ||
     (userChoices[CHOICE_KEYS.valleDeUcoHorse] === "no" &&
-     userChoices[CHOICE_KEYS.valleDeUcoWalking] === "no");
+      userChoices[CHOICE_KEYS.valleDeUcoWalking] === "no")
+  );
 };
 
 /**
@@ -63,9 +70,11 @@ export const hasAnsweredValleDeUco = (userChoices) => {
  * @returns {boolean} - True if all answered, false if any pending
  */
 export const hasAnsweredAllChoices = (userChoices, formData) => {
-  return hasAnsweredTango(userChoices, formData) &&
+  return (
+    hasAnsweredTango(userChoices, formData) &&
     hasAnsweredBariloche(userChoices, formData) &&
-    hasAnsweredValleDeUco(userChoices);
+    hasAnsweredValleDeUco(userChoices)
+  );
 };
 
 /**
@@ -78,17 +87,20 @@ export const getPendingChoicesByDay = (userChoices, formData) => {
   const pendingByDay = {};
 
   if (!hasAnsweredTango(userChoices, formData)) {
-    pendingByDay[ACTIVITY_DATES.tango] = pendingByDay[ACTIVITY_DATES.tango] || [];
+    pendingByDay[ACTIVITY_DATES.tango] =
+      pendingByDay[ACTIVITY_DATES.tango] || [];
     pendingByDay[ACTIVITY_DATES.tango].push("tango");
   }
 
   if (!hasAnsweredBariloche(userChoices, formData)) {
-    pendingByDay[ACTIVITY_DATES.bariloche] = pendingByDay[ACTIVITY_DATES.bariloche] || [];
+    pendingByDay[ACTIVITY_DATES.bariloche] =
+      pendingByDay[ACTIVITY_DATES.bariloche] || [];
     pendingByDay[ACTIVITY_DATES.bariloche].push("bariloche");
   }
 
   if (!hasAnsweredValleDeUco(userChoices)) {
-    pendingByDay[ACTIVITY_DATES.mendoza] = pendingByDay[ACTIVITY_DATES.mendoza] || [];
+    pendingByDay[ACTIVITY_DATES.mendoza] =
+      pendingByDay[ACTIVITY_DATES.mendoza] || [];
     pendingByDay[ACTIVITY_DATES.mendoza].push("valleDeUco");
   }
 
@@ -104,5 +116,7 @@ export const getPendingChoicesByDay = (userChoices, formData) => {
  */
 export const dayHasPendingChoices = (dayOfMonth, userChoices, formData) => {
   const pendingByDay = getPendingChoicesByDay(userChoices, formData);
-  return Boolean(pendingByDay[dayOfMonth] && pendingByDay[dayOfMonth].length > 0);
+  return Boolean(
+    pendingByDay[dayOfMonth] && pendingByDay[dayOfMonth].length > 0
+  );
 };

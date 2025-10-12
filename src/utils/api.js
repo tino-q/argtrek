@@ -181,6 +181,24 @@ export async function submitLuggage(luggageData) {
 }
 
 /**
+ * Submit billing address
+ * @param {object} billingAddressData - Billing address data
+ * @returns {Promise<object>} Submission response
+ */
+export async function submitBillingAddress(billingAddressData) {
+  return apiRequest(BACKEND_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      action: "submit_billing_address",
+      ...billingAddressData,
+    }),
+  });
+}
+
+/**
  * Set user choice
  * @param {object} choiceData - Choice data
  * @returns {Promise<object>} Submission response

@@ -26,6 +26,7 @@ const TIMELINE_SHEET_NAME = "TIMELINE"; // Sheet containing timeline data
 const CHOICES_SHEET_NAME = "CHOICES"; // Sheet for tracking user activity choices
 const PASSPORTS_SHEET_NAME = "PASSPORTS"; // Sheet for tracking traveler passport details
 const LUGGAGE_SHEET_NAME = "Luggage"; // Sheet for tracking checked luggage selections per flight
+const BILLING_ADDRESSES_SHEET_NAME = "Billing Addresses"; // Sheet for tracking billing addresses
 
 /**
  * Validates user credentials by checking for presence of email and password,
@@ -146,6 +147,13 @@ async function getEmailSubmissionData(
   // Look up user choices for this traveler
   const userChoices = await getUserChoices(email.trim(), spreadsheet, refresh);
 
+  // Look up billing address for this traveler
+  const billingAddress = await findBillingAddress(
+    email.trim(),
+    spreadsheet,
+    refresh
+  );
+
   return {
     rsvpData,
     row: existingSubmission?.row || null,
@@ -153,6 +161,7 @@ async function getEmailSubmissionData(
     passport: passportDetails || null,
     luggageSelection: luggageDetails || null,
     userChoices: userChoices,
+    billingAddress: billingAddress || null,
   };
 }
 
@@ -244,6 +253,16 @@ type ClearAllCache = AuthenticatedRequest & {
   action: "clear_all_cache";
 };
 
+type BillingAddressSubmission = AuthenticatedRequest & {
+  action: "submit_billing_address";
+  fullName: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+};
+
 type ErrorReport = {
   endpoint: "error-report";
   errorMessage: string;
@@ -287,6 +306,12 @@ function isClearAllCache(data: any): data is ClearAllCache {
   return data.action === "clear_all_cache";
 }
 
+function isBillingAddressSubmission(
+  data: any
+): data is BillingAddressSubmission {
+  return data.action === "submit_billing_address";
+}
+
 /**
  * Main function to handle POST requests for form submissions and REDSYS TPV callbacks
  */
@@ -295,6 +320,7 @@ export async function doPost(
     | PassportSubmission
     | LuggageSubmission
     | ChoiceUpdate
+    | BillingAddressSubmission
     | ErrorReport
     | RedsysCallback,
   spreadsheet: SpreadsheetWrapper,
@@ -368,6 +394,28 @@ export async function doPost(
       success: true,
       message: "Passport details saved successfully",
       passport,
+    };
+  }
+
+  // === Billing address submission handler ===
+  if (isBillingAddressSubmission(data)) {
+    const billingAddress = await saveBillingAddressSubmission(
+      {
+        email,
+        fullName: data.fullName.trim(),
+        address: data.address.trim(),
+        city: data.city.trim(),
+        state: data.state.trim(),
+        zipCode: data.zipCode.trim(),
+        country: data.country.trim(),
+      },
+      spreadsheet
+    );
+
+    return {
+      success: true,
+      message: "Billing address saved successfully",
+      billingAddress,
     };
   }
 
@@ -577,7 +625,7 @@ async function findExistingSubmission(
 
     if (
       rowEmail &&
-      rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
+      rowEmail.toString().toLowerCase().trim() === email.toLowerCase().trim()
     ) {
       // Found the email! Reconstruct the data objects
       const rawData: Record<string, string> = {};
@@ -736,6 +784,97 @@ async function findLuggageDetails(
     }
   }
   return null;
+}
+
+/**
+ * Get billing address for a given email (or null if not found)
+ */
+async function findBillingAddress(
+  email: string,
+  spreadsheet: SpreadsheetWrapper,
+  refresh: boolean
+) {
+  const { headers, rows } = await spreadsheet.getRowsWithHeaders(
+    BILLING_ADDRESSES_SHEET_NAME,
+    refresh
+  );
+
+  const emailIdx = headers.indexOf("email");
+  if (emailIdx === -1) return null;
+  for (const row of rows) {
+    const rowEmail = row[emailIdx];
+    if (
+      rowEmail &&
+      rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
+    ) {
+      // Build object
+      const obj: Record<string, string> = {};
+      headers.forEach((h, j) => (obj[h] = row[j] || ""));
+      return obj;
+    }
+  }
+  return null;
+}
+
+/**
+ * Save billing address submission. Users can only submit once.
+ */
+async function saveBillingAddressSubmission(
+  {
+    email,
+    fullName,
+    address,
+    city,
+    state,
+    zipCode,
+    country,
+  }: {
+    email: string;
+    fullName: string;
+    address: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  },
+  spreadsheet: SpreadsheetWrapper
+) {
+  if (!fullName || !address || !city || !zipCode || !country) {
+    throw new Error(
+      `Missing required field: fullName, address, city, zipCode, country`
+    );
+  }
+  const { headers, rows } = await spreadsheet.getRowsWithHeaders(
+    BILLING_ADDRESSES_SHEET_NAME
+  );
+
+  const emailIdx = headers.indexOf("email");
+  for (const row of rows) {
+    const rowEmail = row[emailIdx];
+    if (
+      rowEmail &&
+      rowEmail.toString().toLowerCase().trim() === email.toLowerCase()
+    ) {
+      throw new Error(
+        `Email ${email} already exists in BILLING ADDRESSES sheet. Please contact Maddie for assistance.`
+      );
+    }
+  }
+
+  const rowObject: Record<string, string> = {
+    timestamp: new Date().toISOString(),
+    email: email,
+    fullName: fullName,
+    address: address,
+    city: city,
+    state: state || "",
+    zipCode: zipCode,
+    country: country,
+  };
+
+  await spreadsheet.appendRow(BILLING_ADDRESSES_SHEET_NAME, rowObject);
+
+  return rowObject;
 }
 
 /**
@@ -1164,9 +1303,10 @@ async function addUserToCompletedChoicesIfComplete(
   const { rows: completedRows, headers: completedHeaders } =
     await spreadsheet.getRowsWithHeaders(COMPLETED_CHOICES_SHEET_NAME, true);
 
-  const completedEmailIdx = completedHeaders.indexOf("Email") !== -1
-    ? completedHeaders.indexOf("Email")
-    : completedHeaders.indexOf("email");
+  const completedEmailIdx =
+    completedHeaders.indexOf("Email") !== -1
+      ? completedHeaders.indexOf("Email")
+      : completedHeaders.indexOf("email");
 
   if (completedEmailIdx === -1) {
     throw new Error("Email column not found in COMPLETED CHOICES sheet");
@@ -1212,9 +1352,10 @@ async function updateCompletedChoicesSheetInternal(
   const { rows: completedRows, headers: completedHeaders } =
     await spreadsheet.getRowsWithHeaders(COMPLETED_CHOICES_SHEET_NAME, true);
 
-  const completedEmailIdx = completedHeaders.indexOf("Email") !== -1
-    ? completedHeaders.indexOf("Email")
-    : completedHeaders.indexOf("email");
+  const completedEmailIdx =
+    completedHeaders.indexOf("Email") !== -1
+      ? completedHeaders.indexOf("Email")
+      : completedHeaders.indexOf("email");
 
   if (completedEmailIdx === -1) {
     throw new Error("Email column not found in COMPLETED CHOICES sheet");

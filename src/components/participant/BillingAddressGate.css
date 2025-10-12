@@ -1,0 +1,115 @@
+/* Billing Address Gate Styles - aligned with app patterns */
+
+.billing-address-gate {
+  background: var(--white-95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px var(--shadow-dark);
+  overflow: hidden;
+  padding-top: clamp(16px, 3vw, 28px);
+  padding-bottom: clamp(16px, 3vw, 28px);
+  margin-bottom: 2rem;
+}
+
+.billing-address-gate h2 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.billing-address-gate p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0 0 1.25rem 0;
+}
+
+/* Align title and subtitle with form fields */
+.billing-address-gate > h2,
+.billing-address-gate > p {
+  padding-left: clamp(12px, 4vw, 20px);
+  padding-right: clamp(12px, 4vw, 20px);
+}
+
+.billing-address-form {
+  padding-left: clamp(12px, 4vw, 20px);
+  padding-right: clamp(12px, 4vw, 20px);
+}
+
+.billing-address-form .form-row {
+  margin-bottom: 18px;
+}
+
+.billing-address-form .form-row label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.billing-address-form .field-note {
+  display: block;
+  margin-top: 4px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* Ensure inputs match global input styling */
+.billing-address-form input[type="text"] {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid var(--border-light);
+  border-radius: 10px;
+  font-size: 1rem;
+  background-color: white;
+  color: var(--text-primary);
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+}
+
+.billing-address-form input[type="text"]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-primary);
+}
+
+.billing-address-form input[type="text"]:hover {
+  border-color: var(--primary-light);
+}
+
+.billing-address-form input[type="text"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--bg-light);
+}
+
+.billing-address-form .form-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .billing-address-gate h2 {
+    font-size: 1.4rem;
+  }
+
+  .billing-address-gate p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .billing-address-gate h2 {
+    font-size: 1.3rem;
+  }
+
+  .billing-address-form .form-row {
+    margin-bottom: 16px;
+  }
+}

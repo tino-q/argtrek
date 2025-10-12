@@ -21,6 +21,7 @@ import {
 } from "../../utils/api.js";
 import { dayHasPendingChoices } from "../../utils/choiceAnswers.js";
 
+import BillingAddressGate from "./BillingAddressGate.jsx";
 import LuggageGate from "./LuggageGate.jsx";
 import PassportGate from "./PassportGate.jsx";
 import "./Timeline.css";
@@ -871,6 +872,8 @@ const TimelineContent: React.FC = () => {
     superQueryParameter || Boolean(submissionResult?.passport);
   const hasLuggageSelection =
     superQueryParameter || Boolean(submissionResult?.luggageSelection);
+  const hasBillingAddress =
+    superQueryParameter || Boolean(submissionResult?.billingAddress);
 
   const navigateToHome = useCallback(() => {
     navigate("/home");
@@ -934,6 +937,10 @@ const TimelineContent: React.FC = () => {
   );
 
   useEffect(() => {
+    if (!hasBillingAddress) {
+      return;
+    }
+
     if (!hasLuggageSelection) {
       return;
     }
@@ -972,7 +979,13 @@ const TimelineContent: React.FC = () => {
     };
 
     fetchTimelineData();
-  }, [hasPassport, userEmail, showError, hasLuggageSelection]);
+  }, [
+    hasPassport,
+    userEmail,
+    showError,
+    hasLuggageSelection,
+    hasBillingAddress,
+  ]);
 
   const groupByDay = (data: TimelineItem[]): GroupedTimelineData => {
     const grouped: GroupedTimelineData = {};
@@ -1015,6 +1028,10 @@ const TimelineContent: React.FC = () => {
 
   if (!hasPassport) {
     return <PassportGate />;
+  }
+
+  if (!hasBillingAddress) {
+    return <BillingAddressGate />;
   }
 
   if (!hasLuggageSelection) {
