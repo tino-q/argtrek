@@ -167,10 +167,9 @@ const PaymentDetailsDisplay = ({
 
         <PricingSummary pricing={pricing} />
 
-        <div className="payment-section">
+        {/* <div className="payment-section">
           <h3>💳 Payment Information</h3>
 
-          {/* Bank Transfer Details */}
           {formData[FORM_FIELDS.PAYMENT_METHOD] === "bank" && (
             <div className="payment-content">
               <div className="important-notes">
@@ -209,14 +208,20 @@ const PaymentDetailsDisplay = ({
               </div>
               <br />
               {!isRevolutBank && (
-                <div className="important-notes" style={{ backgroundColor: '#fff3cd', borderColor: '#ffc107' }}>
+                <div
+                  className="important-notes"
+                  style={{ backgroundColor: "#fff3cd", borderColor: "#ffc107" }}
+                >
                   <h4>⚠️ Important: ACH vs Wire Transfer</h4>
                   <ul>
                     <li>
-                      <strong>Strongly Recommended:</strong> Use ACH transfer to avoid additional fees
+                      <strong>Strongly Recommended:</strong> Use ACH transfer to
+                      avoid additional fees
                     </li>
                     <li>
-                      <strong>Wire Transfer Fee:</strong> If you must use a wire transfer, you must add an additional <strong>$15 USD</strong> to cover our incoming wire fee
+                      <strong>Wire Transfer Fee:</strong> If you must use a wire
+                      transfer, you must add an additional{" "}
+                      <strong>$15 USD</strong> to cover our incoming wire fee
                     </li>
                   </ul>
                 </div>
@@ -254,7 +259,6 @@ const PaymentDetailsDisplay = ({
             </div>
           )}
 
-          {/* Crypto Payment Details */}
           {formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto" &&
             formData[FORM_FIELDS.CRYPTO_CURRENCY] &&
             formData[FORM_FIELDS.CRYPTO_NETWORK] && (
@@ -330,7 +334,6 @@ const PaymentDetailsDisplay = ({
               </div>
             )}
 
-          {/* Credit Card Payment Details */}
           {formData[FORM_FIELDS.PAYMENT_METHOD] === "credit" && (
             <div className="payment-content">
               <h4>Credit Card Payment</h4>
@@ -399,7 +402,7 @@ const PaymentDetailsDisplay = ({
               )}
             </div>
           )}
-        </div>
+        </div> */}
 
         <div className="print-section">
           <div className="action-buttons">
