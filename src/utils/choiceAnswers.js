@@ -24,7 +24,6 @@ export const ACTIVITY_DATES = {
 export const hasAnsweredTango = (userChoices, formData) => {
   const checkedOutTango =
     formData.tango.toString().trim().toLowerCase() === "true";
-  debugger;
   return checkedOutTango || Boolean(userChoices[CHOICE_KEYS.tango]);
 };
 

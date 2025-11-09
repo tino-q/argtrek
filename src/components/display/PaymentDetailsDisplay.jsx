@@ -167,242 +167,257 @@ const PaymentDetailsDisplay = ({
 
         <PricingSummary pricing={pricing} />
 
-        {/* <div className="payment-section">
-          <h3>💳 Payment Information</h3>
+        {false ? (
+          <div className="payment-section">
+            <h3>💳 Payment Information</h3>
 
-          {formData[FORM_FIELDS.PAYMENT_METHOD] === "bank" && (
-            <div className="payment-content">
-              <div className="important-notes">
-                <h4>Important Instructions</h4>
-                <ul>
-                  <li>
-                    Feel free to group transfers with other travelers to save on
-                    fees, just make sure to reference all the travelers in the
-                    transfer receipt
-                  </li>
-                  <li>Include your full name in the transfer reference</li>
-                  <li>
-                    Configure the transfer to cover all fees on your end,
-                    otherwise any unaccounted fees will be deducted from your
-                    payment
-                  </li>
-                  <li>
-                    Send transfer confirmation to{" "}
-                    <a href={`mailto:${EMAIL_CONFIG.MADDIE}`}>
-                      {EMAIL_CONFIG.MADDIE}
-                    </a>
-                  </li>
-                </ul>
-
-                <div className="revolut-note">
-                  <strong>💡 Tip:</strong> Use{" "}
-                  <a
-                    href="https://revolut.com/referral/?referral-code=mbaklayan!JUN2-25-VR-ES-AE&geo-redirect"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Revolut
-                  </a>{" "}
-                  for free international transfers
-                </div>
-              </div>
-              <br />
-              {!isRevolutBank && (
-                <div
-                  className="important-notes"
-                  style={{ backgroundColor: "#fff3cd", borderColor: "#ffc107" }}
-                >
-                  <h4>⚠️ Important: ACH vs Wire Transfer</h4>
-                  <ul>
-                    <li>
-                      <strong>Strongly Recommended:</strong> Use ACH transfer to
-                      avoid additional fees
-                    </li>
-                    <li>
-                      <strong>Wire Transfer Fee:</strong> If you must use a wire
-                      transfer, you must add an additional{" "}
-                      <strong>$15 USD</strong> to cover our incoming wire fee
-                    </li>
-                  </ul>
-                </div>
-              )}
-              <br />
-              <h4>Bank Transfer Details</h4>
-              {(isRevolutBank
-                ? REVOLUT_BANK_DETAILS
-                : FACEBANK_BANK_DETAILS
-              ).map((detail) => (
-                <div key={detail.label} className="detail-row">
-                  <span className="label">{detail.label}:</span>
-                  <div className="value-container">
-                    <span
-                      className="value"
-                      data-type={
-                        detail.label.toLowerCase().includes("iban")
-                          ? "iban"
-                          : undefined
-                      }
-                    >
-                      {detail.value}
-                    </span>
-                    <button
-                      type="button"
-                      className="copy-btn"
-                      onClick={handleBankDetailsClick(detail)}
-                      title="Copy to clipboard"
-                    >
-                      <i className="fas fa-copy" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto" &&
-            formData[FORM_FIELDS.CRYPTO_CURRENCY] &&
-            formData[FORM_FIELDS.CRYPTO_NETWORK] && (
+            {formData[FORM_FIELDS.PAYMENT_METHOD] === "bank" && (
               <div className="payment-content">
-                <h4>Cryptocurrency Payment Details</h4>
-                <div className="crypto-details">
-                  <div className="detail-row">
-                    <span className="label">Network:</span>
-                    <span
-                      className="value"
-                      style={{
-                        color:
-                          NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]
-                            ?.color,
-                      }}
-                    >
-                      {NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.name}
-                    </span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="label">Currency:</span>
-                    <span className="value">
-                      {formData[FORM_FIELDS.CRYPTO_CURRENCY]}
-                    </span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="label">Wallet Address:</span>
-                    <div className="value-container">
-                      <span className="value crypto-address">
-                        {(() => {
-                          const networkKey =
-                            formData[FORM_FIELDS.CRYPTO_NETWORK] === "ARB"
-                              ? "ETH"
-                              : formData[FORM_FIELDS.CRYPTO_NETWORK];
-                          return CRYPTO_WALLETS[networkKey];
-                        })()}
-                      </span>
-                      <button
-                        type="button"
-                        className="copy-btn"
-                        onClick={handleCryptoWalletClick}
-                        title="Copy wallet address"
-                      >
-                        <i className="fas fa-copy" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
                 <div className="important-notes">
                   <h4>Important Instructions</h4>
                   <ul>
                     <li>
-                      Ensure you're sending on the correct network (
-                      {NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]?.name}
-                      )
+                      Feel free to group transfers with other travelers to save
+                      on fees, just make sure to reference all the travelers in
+                      the transfer receipt
+                    </li>
+                    <li>Include your full name in the transfer reference</li>
+                    <li>
+                      Configure the transfer to cover all fees on your end,
+                      otherwise any unaccounted fees will be deducted from your
+                      payment
                     </li>
                     <li>
-                      Only send {formData[FORM_FIELDS.CRYPTO_CURRENCY]} to this
-                      address
-                    </li>
-                    <li>
-                      Include your full name in the transaction memo if possible
-                    </li>
-                    <li>
-                      Send transaction hash and confirmation to{" "}
+                      Send transfer confirmation to{" "}
                       <a href={`mailto:${EMAIL_CONFIG.MADDIE}`}>
                         {EMAIL_CONFIG.MADDIE}
                       </a>
                     </li>
                   </ul>
-                </div>
-              </div>
-            )}
 
-          {formData[FORM_FIELDS.PAYMENT_METHOD] === "credit" && (
-            <div className="payment-content">
-              <h4>Credit Card Payment</h4>
-              {submissionResult?.paymentLinkUrl ? (
-                <div className="payment-link-section">
-                  <p>
-                    Your secure payment link is ready! Click the button below to
-                    complete your payment.
-                  </p>
-                  <a
-                    href={submissionResult.paymentLinkUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="payment-link-button"
-                  >
-                    Proceed to Payment
-                  </a>
+                  <div className="revolut-note">
+                    <strong>💡 Tip:</strong> Use{" "}
+                    <a
+                      href="https://revolut.com/referral/?referral-code=mbaklayan!JUN2-25-VR-ES-AE&geo-redirect"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Revolut
+                    </a>{" "}
+                    for free international transfers
+                  </div>
                 </div>
-              ) : (
-                <>
-                  <p className="payment-timeline">
-                    Your secure payment link will be sent to your email address
-                    within <strong>24 hours</strong> once Maddie processes your
-                    registration.
-                  </p>
-                  <div className="important-notes">
-                    <h4>What to Expect</h4>
+                <br />
+                {!isRevolutBank && (
+                  <div
+                    className="important-notes"
+                    style={{
+                      backgroundColor: "#fff3cd",
+                      borderColor: "#ffc107",
+                    }}
+                  >
+                    <h4>⚠️ Important: ACH vs Wire Transfer</h4>
                     <ul>
                       <li>
-                        <strong>Timeline:</strong> Payment links distributed
-                        ASAP
+                        <strong>Strongly Recommended:</strong> Use ACH transfer
+                        to avoid additional fees
                       </li>
                       <li>
-                        <strong>Email Delivery:</strong> Check spam/junk folder
-                        if not received
-                      </li>
-                      <li>
-                        <strong>Link Validity:</strong> Payment link active for
-                        24 hours
-                      </li>
-                      <li>
-                        <strong>Support:</strong> Contact Maddie for assistance
-                        <ul>
-                          <li>
-                            <a
-                              href="https://wa.me/5491169729783"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              WhatsApp
-                            </a>
-                          </li>
-                          <li>
-                            Email: <strong>{EMAIL_CONFIG.MADDIE}</strong>
-                          </li>
-                        </ul>
+                        <strong>Wire Transfer Fee:</strong> If you must use a
+                        wire transfer, you must add an additional{" "}
+                        <strong>$15 USD</strong> to cover our incoming wire fee
                       </li>
                     </ul>
                   </div>
-                  <br />
-                  <CreditCardWarning
-                    paymentSchedule={formData[FORM_FIELDS.PAYMENT_SCHEDULE]}
-                    exchangeRate={getUSDToEURExchangeRate(rsvpData)}
-                  />
-                </>
+                )}
+                <br />
+                <h4>Bank Transfer Details</h4>
+                {(isRevolutBank
+                  ? REVOLUT_BANK_DETAILS
+                  : FACEBANK_BANK_DETAILS
+                ).map((detail) => (
+                  <div key={detail.label} className="detail-row">
+                    <span className="label">{detail.label}:</span>
+                    <div className="value-container">
+                      <span
+                        className="value"
+                        data-type={
+                          detail.label.toLowerCase().includes("iban")
+                            ? "iban"
+                            : undefined
+                        }
+                      >
+                        {detail.value}
+                      </span>
+                      <button
+                        type="button"
+                        className="copy-btn"
+                        onClick={handleBankDetailsClick(detail)}
+                        title="Copy to clipboard"
+                      >
+                        <i className="fas fa-copy" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {formData[FORM_FIELDS.PAYMENT_METHOD] === "crypto" &&
+              formData[FORM_FIELDS.CRYPTO_CURRENCY] &&
+              formData[FORM_FIELDS.CRYPTO_NETWORK] && (
+                <div className="payment-content">
+                  <h4>Cryptocurrency Payment Details</h4>
+                  <div className="crypto-details">
+                    <div className="detail-row">
+                      <span className="label">Network:</span>
+                      <span
+                        className="value"
+                        style={{
+                          color:
+                            NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]
+                              ?.color,
+                        }}
+                      >
+                        {
+                          NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]
+                            ?.name
+                        }
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">Currency:</span>
+                      <span className="value">
+                        {formData[FORM_FIELDS.CRYPTO_CURRENCY]}
+                      </span>
+                    </div>
+                    <div className="detail-row">
+                      <span className="label">Wallet Address:</span>
+                      <div className="value-container">
+                        <span className="value crypto-address">
+                          {(() => {
+                            const networkKey =
+                              formData[FORM_FIELDS.CRYPTO_NETWORK] === "ARB"
+                                ? "ETH"
+                                : formData[FORM_FIELDS.CRYPTO_NETWORK];
+                            return CRYPTO_WALLETS[networkKey];
+                          })()}
+                        </span>
+                        <button
+                          type="button"
+                          className="copy-btn"
+                          onClick={handleCryptoWalletClick}
+                          title="Copy wallet address"
+                        >
+                          <i className="fas fa-copy" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="important-notes">
+                    <h4>Important Instructions</h4>
+                    <ul>
+                      <li>
+                        Ensure you're sending on the correct network (
+                        {
+                          NETWORK_INFO[formData[FORM_FIELDS.CRYPTO_NETWORK]]
+                            ?.name
+                        }
+                        )
+                      </li>
+                      <li>
+                        Only send {formData[FORM_FIELDS.CRYPTO_CURRENCY]} to
+                        this address
+                      </li>
+                      <li>
+                        Include your full name in the transaction memo if
+                        possible
+                      </li>
+                      <li>
+                        Send transaction hash and confirmation to{" "}
+                        <a href={`mailto:${EMAIL_CONFIG.MADDIE}`}>
+                          {EMAIL_CONFIG.MADDIE}
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               )}
-            </div>
-          )}
-        </div> */}
+
+            {formData[FORM_FIELDS.PAYMENT_METHOD] === "credit" && (
+              <div className="payment-content">
+                <h4>Credit Card Payment</h4>
+                {submissionResult?.paymentLinkUrl ? (
+                  <div className="payment-link-section">
+                    <p>
+                      Your secure payment link is ready! Click the button below
+                      to complete your payment.
+                    </p>
+                    <a
+                      href={submissionResult.paymentLinkUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="payment-link-button"
+                    >
+                      Proceed to Payment
+                    </a>
+                  </div>
+                ) : (
+                  <>
+                    <p className="payment-timeline">
+                      Your secure payment link will be sent to your email
+                      address within <strong>24 hours</strong> once Maddie
+                      processes your registration.
+                    </p>
+                    <div className="important-notes">
+                      <h4>What to Expect</h4>
+                      <ul>
+                        <li>
+                          <strong>Timeline:</strong> Payment links distributed
+                          ASAP
+                        </li>
+                        <li>
+                          <strong>Email Delivery:</strong> Check spam/junk
+                          folder if not received
+                        </li>
+                        <li>
+                          <strong>Link Validity:</strong> Payment link active
+                          for 24 hours
+                        </li>
+                        <li>
+                          <strong>Support:</strong> Contact Maddie for
+                          assistance
+                          <ul>
+                            <li>
+                              <a
+                                href="https://wa.me/5491169729783"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                WhatsApp
+                              </a>
+                            </li>
+                            <li>
+                              Email: <strong>{EMAIL_CONFIG.MADDIE}</strong>
+                            </li>
+                          </ul>
+                        </li>
+                      </ul>
+                    </div>
+                    <br />
+                    <CreditCardWarning
+                      paymentSchedule={formData[FORM_FIELDS.PAYMENT_SCHEDULE]}
+                      exchangeRate={getUSDToEURExchangeRate(rsvpData)}
+                    />
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div />
+        )}
 
         <div className="print-section">
           <div className="action-buttons">
