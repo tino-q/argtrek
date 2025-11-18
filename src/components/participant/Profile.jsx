@@ -21,6 +21,22 @@ const Profile = () => {
     navigate("/home");
   }, [navigate]);
 
+  const roommate = submissionResult?.row?.ROOMMATE;
+  const singleRoommate = !roommate?.includes("/");
+  const roommateBsas1 = submissionResult?.row?.ROOMMATE_BSAS1;
+  const roommateBari = submissionResult?.row?.ROOMMATE_BARI;
+  const roommateMdz = submissionResult?.row?.ROOMMATE_MDZ;
+  const roommateBsas2 = submissionResult?.row?.ROOMMATE_BSAS2;
+
+  const accomodations = singleRoommate
+    ? [["Roommate", roommate]]
+    : [
+        ["Roommate - Buenos Aires Arrival", roommateBsas1],
+        ["Roommate - Bariloche", roommateBari],
+        ["Roommate - Mendoza", roommateMdz],
+        ["Roommate - Buenos Aires Departure", roommateBsas2],
+      ].filter(([, value]) => value);
+
   const renderPersonalInfo = () => (
     <div className="profile-section">
       <h3>Personal Information</h3>
@@ -53,16 +69,12 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="profile-field">
-          <label>Accommodation</label>
-          <div className="profile-value">
-            {formData[FORM_FIELDS.PRIVATE_ROOM_UPGRADE]
-              .toString()
-              .toLowerCase() === "true"
-              ? "Private Room Upgrade"
-              : `Roommate: ${submissionResult.row.ROOMMATE}`}
+        {accomodations.map(([key, value]) => (
+          <div key={key} className="profile-field">
+            <label>{key}</label>
+            <div className="profile-value">{value}</div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );
