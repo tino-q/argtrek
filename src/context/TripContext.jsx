@@ -110,7 +110,6 @@ const TripProvider = ({ children }) => {
       "userRSVP",
       "formData",
       "submissionResult",
-      "timelineData",
       "raftingCount",
       "voucher",
     ]);

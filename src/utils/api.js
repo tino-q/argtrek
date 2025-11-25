@@ -60,28 +60,20 @@ export async function loginUser(email, password) {
 }
 
 /**
- * Get timeline data (with caching)
+ * Get timeline data
  * @param {string} email - User email
  * @param {string} password - User password
  * @returns {Promise<array>} Timeline data array
  */
 export async function getTimelineData(email, password) {
-  const refreshParam = getRefreshParam();
-  return fetchWithLocalStorageCache(
-    "timelineData",
-    async () => {
-      const url = buildUrl(
-        `endpoint=timeline&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
-      );
-      const response = await apiRequest(url);
-      if (!response.success) {
-        throw new Error("Failed to fetch timeline data");
-      }
-      return response.data;
-    },
-    CACHE_DURATIONS.ONE_HOUR,
-    refreshParam
+  const url = buildUrl(
+    `endpoint=timeline&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
   );
+  const response = await apiRequest(url);
+  if (!response.success) {
+    throw new Error("Failed to fetch timeline data");
+  }
+  return response.data;
 }
 
 /**
