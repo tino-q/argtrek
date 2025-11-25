@@ -1095,7 +1095,11 @@ const TimelineContent: React.FC = () => {
         </div>
 
         <div className="timeline-content">
-          {Object.entries(groupedData).map(([dayKey, dayData]) => {
+          {(() => {
+            const currentDayOfMonth = new Date().getDate();
+            return Object.entries(groupedData)
+              .filter(([dayKey]) => parseInt(dayKey) >= currentDayOfMonth)
+              .map(([dayKey, dayData]) => {
             const dayNumber = parseInt(dayKey);
             const hasPendingChoices = dayHasPendingChoices(
               dayNumber,
@@ -1129,7 +1133,8 @@ const TimelineContent: React.FC = () => {
                 {!isDayCollapsed(dayKey) && <DayItem dayData={dayData} />}
               </div>
             );
-          })}
+          });
+          })()}
         </div>
         <RecommendationsModal />
       </div>
