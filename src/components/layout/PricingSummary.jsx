@@ -81,10 +81,18 @@ const PricingSummary = ({ pricing }) => {
     ({ price }) => price > 0 || price < 0
   );
   const isCredit = formData[FORM_FIELDS.PAYMENT_METHOD] === "credit";
-  const usdFirstInstallment = Number(row["pricing.installmentAmount"] || 0);
-  const usdSecondInstallment = Number(row["pricing.inst_2"] || 0);
-  const usdThirdInstallment = Number(row["pricing.inst_3"] || 0);
-  const usdFourthInstallment = Number(row["pricing.inst_4"] || 0);
+  const usdFirstInstallment = Number(
+    row["pricing.installmentAmount"]?.toString().trim().replace(",", ".") || 0
+  );
+  const usdSecondInstallment = Number(
+    row["pricing.inst_2"]?.toString().trim().replace(",", ".") || 0
+  );
+  const usdThirdInstallment = Number(
+    row["pricing.inst_3"]?.toString().trim().replace(",", ".") || 0
+  );
+  const usdFourthInstallment = Number(
+    row["pricing.inst_4"]?.toString().trim().replace(",", ".") || 0
+  );
 
   const pricingItemsTotal = pricingItems.reduce(
     (acc, addon) => acc + addon.price,
