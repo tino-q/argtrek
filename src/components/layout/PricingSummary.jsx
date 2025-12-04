@@ -74,7 +74,7 @@ const PricingSummary = ({ pricing }) => {
   ].map(([pkey, name]) => ({
     name,
     p: row[pkey],
-    price: Number(row[pkey]),
+    price: Number(row[pkey]?.replace(",", ".")),
   }));
 
   const pricingItems = pricingItemsPreFilter.filter(
